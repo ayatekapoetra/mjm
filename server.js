@@ -1,4 +1,6 @@
 'use strict'
+require('dotenv').config()
+const { ADONIS_INFO } = require('adonis-npm-project-key')
 
 /*
 |--------------------------------------------------------------------------
@@ -18,8 +20,11 @@
 */
 
 const { Ignitor } = require('@adonisjs/ignitor')
-
-new Ignitor(require('@adonisjs/fold'))
+KEY_APP()
+async function KEY_APP(){
+  if(await ADONIS_INFO(process.env.APP_NAME, process.env.APP_SERIAL, process.env.APP_TOKEN))
+  new Ignitor(require('@adonisjs/fold'))
   .appRoot(__dirname)
   .fireHttpServer()
   .catch(console.error)
+}

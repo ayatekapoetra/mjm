@@ -1,20 +1,176 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Hello Adonis</title>
-  {{ style('style') }}
-</head>
-<body>
-  <section>
-    <div class="logo"></div>
-    <div class="title"></div>
-    <div class="subtitle">
-      <p>AdonisJs simplicity will make you feel confident about your code</p>
-      <p>
-        Don't know where to start? Read the <a href="https://adonisjs.com/docs">documentation</a>.
-      </p>
+
+@layout('_layouts.main')
+@section('content')
+{{ script('https://code.highcharts.com/highcharts') }}
+
+    <div class="container-fluid">
+        <div class="row bg-title">
+            <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                <h4 class="page-title">Welcome {{auth.user.nama_lengkap}}</h4> 
+            </div>
+            <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 text-right">
+                <input type="number" id="bisnis_unit" class="hidden">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 col-sm-6 col-xs-12" id="select-bisnis">
+                <div class="panel">
+                    <div class="p-20">
+                        <div class="row">
+                            <div class="col-xs-8">
+                                <h2 class="m-t-0 font-medium">Pilih Bisnis Unit</h2>
+                                <h4 class="m-b-0">pada list dibawah ini...</h4>
+                            </div>
+                        </div>
+                    </div>
+                    {{ csrfField() }}
+                    @each(item in bisnis)
+                    <div class="panel-footer {{item.id === item.bisnis_id ? 'bg-inverse' : 'bg-extralight'}}">
+                        <ul class="earning-box">
+                            <li>
+                                <a href="#" class="list-unit-bisnis" data-id="{{item.id}}">
+                                    <div class="er-row">
+                                        <div class="er-pic"><img src="{{ assetsUrl('/plugins/images/company-icon.png') }}" alt="varun" width="60" class="img-circle"></div>
+                                        <div class="er-text">
+                                            <h3> {{item.name}} </h3>
+                                            <span class="text-muted">{{item.alamat}}</span>
+                                            <p>
+                                                <small>{{item.id === item.bisnis_id ? 'working here...' : ''}}</small>
+                                            </p>
+                                        </div>
+                                        <div class="er-count ">{{item.initial}}</div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    @endeach
+                </div>
+            </div>
+            <div class="col-lg-6 col-sm-6 col-xs-12">
+                <div class="news-slide m-b-30 dashboard-slide">
+                    <div class="vcarousel slide">
+                        <!-- Carousel items -->
+                        <div class="carousel-inner" style="max-height: 400px;">
+                            <div class="active item">
+                                <div class="overlaybg"><img src="../plugins/images/slide11.jpg" alt="slide1" style="object-fit: cover" /></div>
+                                <div class="news-content">
+                                    <span class="label label-danger label-rounded">P5M</span>
+                                    <h3>P5M oleh pak Roni, materi penyampaian internal memo terbaru</h3> 
+                                    <a href="#">Read More</a>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="overlaybg"><img src="../plugins/images/slide22.jpg" alt="slide2" style="object-fit: cover"/></div>
+                                <div class="news-content">
+                                    <span class="label label-primary label-rounded">P2H</span>
+                                    <h3>Aktifitas P2H oleh pengawas</h3> 
+                                    <a href="#">Read More</a>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="overlaybg"><img src="../plugins/images/slide33.jpg" alt="slide3" style="object-fit: cover"/></div>
+                                <div class="news-content">
+                                    <span class="label label-success label-rounded">Support</span>
+                                    <h3>Maintenance Jalan di simpang 3 oleh unit</h3> 
+                                    <a href="#">Read More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-sm-12 col-xs-12">
+                <div class="row">
+
+                    <div class="col-lg-6 col-sm-6 col-xs-12">
+                        <div class="white-box">
+                            <h3 class="box-title">NEW SITE</h3>
+                            <ul class="list-inline two-part">
+                                <li><i class="icon-people text-info"></i></li>
+                                <li class="text-right"><span class="counter">2</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-xs-12">
+                        <div class="white-box">
+                            <h3 class="box-title">TOT FLEET</h3>
+                            <ul class="list-inline two-part">
+                                <li><i class="icon-folder text-purple"></i></li>
+                                <li class="text-right"><span class="counter">7</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-xs-12">
+                        <div class="white-box">
+                            <h3 class="box-title">BCM Target</h3>
+                            <ul class="list-inline two-part">
+                                <li><i class="icon-folder-alt text-danger"></i></li>
+                                <li class="text-right"><span class="">30K</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-xs-12">
+                        <div class="white-box">
+                            <h3 class="box-title">BCM Actual</h3>
+                            <ul class="list-inline two-part">
+                                <li><i class="ti-wallet text-success"></i></li>
+                                <li class="text-right"><span class="">32K</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
-  </section>
-</body>
-</html>
+    <!--
+    <script>
+        OneSignal.push(function() {
+            /* These examples are all valid */
+            OneSignal.getUserId(function(userId) {
+                console.log("OneSignal User ID:", userId);
+                // (Output) OneSignal User ID: 270a35cd-4dda-4b3f-b04e-41d7463a2316    
+            });
+        });
+    </script>
+-->
+    <script>
+        $(function() {
+            $('[data-plugin="knob"]').knob();
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            "use strict";
+
+            $('.vcarousel').carousel({
+                interval: 3000
+            })
+
+            $('a.list-unit-bisnis').on('click', function(e){
+                e.preventDefault()
+                var bisnis_id = $(this).data('id')
+                $.ajax({
+                    async: true,
+                    headers: {'x-csrf-token': $('[name=_csrf]').val()},
+                    url: '/workspace?bisnis_id='+bisnis_id,
+                    method: 'POST',
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    success: function(result){
+                        console.log(result)
+                        window.location.reload()
+                    },
+                    error: function(err){
+                        console.log(err.response)
+                        const { message } = err.responseJSON
+                        swal("Opps,,,!", message, "warning")
+                    }
+                })
+            })
+    })
+    </script>
+@endsection

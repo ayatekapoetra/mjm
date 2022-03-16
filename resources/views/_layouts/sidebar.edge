@@ -1,0 +1,82 @@
+<div class="navbar-default sidebar" role="navigation">
+    <div class="sidebar-nav slimscrollsidebar">
+        <div class="sidebar-head">
+            <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3> </div>
+        <ul class="nav" id="side-menu">
+            <li class="bg-inverse"> 
+                <a href="/" class="waves-effect">
+                    <i class="mdi mdi-av-timer fa-fw text-white" data-icon="v"></i> 
+                    <span class="hide-menu"> 
+                        Dashboard
+                    </span>
+                </a>
+            </li>
+            @each(item in menu)
+            <li> 
+                <a href="{{item.uri}}" class="waves-effect">
+                    <i class="mdi {{item.icon}}" data-icon="v"></i> 
+                    <span class="hide-menu"> 
+                        {{item.name}} 
+                        <span class="fa arrow"></span> 
+                    </span>
+                </a>
+                <ul class="nav nav-second-level">
+                    @each(list in item.submenu)
+                        <li> 
+                            <a href="{{ route(list.uri, {bisnis_id: list.bisnis_id}) }}" class="item-submenu" data-bisnis="{{list.bisnis_id}}">
+                                <i class="{{list.icon}}"> &nbsp;</i>
+                                <span class="hide-menu">{{list.name}}</span>
+                            </a>
+                        </li>
+                    @endeach
+                </ul>
+            </li>
+            @endeach
+            
+            <li><a href="{{ route('auth.logout') }}" class="waves-effect"><i class="mdi mdi-logout fa-fw"></i> <span class="hide-menu">Log out</span></a></li>
+            <li class="devider"></li>
+            <li>
+                <a href="documentation.html" class="waves-effect" style="display: flex;justify-content: flex-start;align-items: center;">
+                    <i class="mdi mdi-help-circle text-info"></i> 
+                    <span class="hide-menu text-info" style="padding-left:10px">Documentation</span>
+                </a>
+                <ul class="nav nav-second-level">
+                    <li> 
+                        <a href="{{ route('doc.webapps') }}">
+                            <i class="ti-desktop text-white"> &nbsp;</i>
+                            <span class="hide-menu text-white">Web Apps</span>
+                        </a>
+                    </li>
+                    <li> 
+                        <a href="{{ route('doc.mobileapps') }}">
+                            <i class="ti-mobile text-white"> &nbsp;</i>
+                            <span class="hide-menu text-white">Mobile Apps</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+<script>
+    // $(function(){
+    //     console.log('Sidebar...');
+    //     var id = $('body').find('input[name="userid"]').val()
+    //     console.log('Sidebar...', id);
+    //     $.ajax({
+    //         async: true,
+    //         url: '/ajax/options/menu?id='+id,
+    //         method: 'GET',
+    //         dataType: 'html',
+    //         processData: false,
+    //         contentType: false,
+    //         success: function(result){
+    //             console.log('result ::', result);
+    //             $('body').find('ul#side-menu').html(result)
+    //         },
+    //         error: function(err){
+    //             console.log(JSON.stringify(err))
+    //         }
+    //     })
+    // })
+</script>

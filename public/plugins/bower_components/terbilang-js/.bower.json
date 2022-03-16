@@ -1,0 +1,30 @@
+{
+  "name": "terbilang-js",
+  "homepage": "https://github.com/BosNaufal/terbilang-js",
+  "authors": [
+    "BosNaufal"
+  ],
+  "description": "Simple Javascript Number Converter which is converting number into indonesian words.",
+  "main": "terbilang.js",
+  "keywords": [
+    "terbilang"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "dcee7b45de",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "dcee7b45de98deb66aebf9be8d707082708ffa7f"
+  },
+  "_source": "https://github.com/BosNaufal/terbilang-js.git",
+  "_target": "*",
+  "_originalSource": "terbilang-js",
+  "_direct": true
+}
