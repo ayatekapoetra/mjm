@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * Highcharts variwide module
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Series/Variwide/VariwidePoint.js', [_modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (SeriesRegistry, U) {
@@ -285,8 +294,12 @@
                     relZ = this.relZ,
                     i = axis.reversed ? relZ.length - index : index,
                     goRight = axis.reversed ? -1 : 1,
-                    minPx = axis.toPixels(axis.reversed ? (axis.dataMax || 0) + axis.pointRange : (axis.dataMin || 0)),
-                    maxPx = axis.toPixels(axis.reversed ? (axis.dataMin || 0) : (axis.dataMax || 0) + axis.pointRange),
+                    minPx = axis.toPixels(axis.reversed ?
+                        (axis.dataMax || 0) + axis.pointRange :
+                        (axis.dataMin || 0)),
+                    maxPx = axis.toPixels(axis.reversed ?
+                        (axis.dataMin || 0) :
+                        (axis.dataMax || 0) + axis.pointRange),
                     len = Math.abs(maxPx - minPx),
                     totalZ = this.totalZ,
                     left = this.chart.inverted ?

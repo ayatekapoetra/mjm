@@ -1,0 +1,45 @@
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-users') }}
+{{ script('ajax/opt-menu') }}
+{{ script('ajax/opt-submenu') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Pilih User</label>
+                            <select name="user_id" class="form-control selectUsers" data-values="" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">Pilih Menu</label>
+                            <select name="menu_id" class="form-control selectMenu" data-values="1" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="control-label">Pilih Submenu</label>
+                            <select name="submenu_id" class="form-control selectSubmenu" data-values="" required></select>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

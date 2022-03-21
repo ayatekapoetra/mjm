@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Advanced Highcharts Stock tools
  *
@@ -8,7 +8,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -23,10 +22,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Extensions/FullScreen.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Renderer/HTML/AST.js'], _modules['Core/Utilities.js']], function (Chart, H, AST, U) {
@@ -138,7 +147,8 @@
                 }
                 // Unbind event as it's necessary only before exiting from fullscreen.
                 if (fullscreen.unbindFullscreenEvent) {
-                    fullscreen.unbindFullscreenEvent = fullscreen.unbindFullscreenEvent();
+                    fullscreen.unbindFullscreenEvent = fullscreen
+                        .unbindFullscreenEvent();
                 }
                 chart.setSize(fullscreen.origWidth, fullscreen.origHeight, false);
                 fullscreen.origWidth = void 0;
@@ -213,7 +223,6 @@
              * @since 8.0.1
              *
              * @requires modules/full-screen
-             * @return {void}
              */
             Fullscreen.prototype.setButtonText = function () {
                 var chart = this.chart,
@@ -229,11 +238,14 @@
                     lang.exitFullscreen &&
                     lang.viewFullscreen &&
                     menuItems &&
-                    exportDivElements &&
-                    exportDivElements.length) {
-                    AST.setElementHTML(exportDivElements[menuItems.indexOf('viewFullscreen')], !this.isOpen ?
-                        (exportingOptions.menuItemDefinitions.viewFullscreen.text ||
-                            lang.viewFullscreen) : lang.exitFullscreen);
+                    exportDivElements) {
+                    var exportDivElement = exportDivElements[menuItems.indexOf('viewFullscreen')];
+                    if (exportDivElement) {
+                        AST.setElementHTML(exportDivElement, !this.isOpen ?
+                            (exportingOptions.menuItemDefinitions.viewFullscreen
+                                .text ||
+                                lang.viewFullscreen) : lang.exitFullscreen);
+                    }
                 }
             };
             /**

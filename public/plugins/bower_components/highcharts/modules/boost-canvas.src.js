@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * Boost module
  *
@@ -8,7 +8,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -23,13 +22,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Extensions/BoostCanvas.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Color/Palette.js'], _modules['Core/Series/Series.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (Chart, Color, H, palette, Series, SeriesRegistry, U) {
+    _registerModule(_modules, 'Extensions/BoostCanvas.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Series/Series.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (Chart, Color, H, Series, SeriesRegistry, U) {
         /* *
          *
          *  License: www.highcharts.com/license
@@ -230,7 +239,7 @@
                             series.pointArrayMap.join(',') === 'low,high'), isStacked = !!options.stacking, cropStart = series.cropStart || 0, loadingOptions = chart.options.loading, requireSorting = series.requireSorting, wasNull, connectNulls = options.connectNulls, useRaw = !xData, minVal, maxVal, minI, maxI, index, sdata = (isStacked ?
                             series.data :
                             (xData || rawData)), fillColor = (series.fillOpacity ?
-                            new Color(series.color).setOpacity(pick(options.fillOpacity, 0.75)).get() :
+                            Color.parse(series.color).setOpacity(pick(options.fillOpacity, 0.75)).get() :
                             series.color), 
                         //
                         stroke = function () {
@@ -359,7 +368,7 @@
                     if (rawData.length > 99999) {
                         chart.options.loading = merge(loadingOptions, {
                             labelStyle: {
-                                backgroundColor: color(palette.backgroundColor).setOpacity(0.75).get(),
+                                backgroundColor: color("#ffffff" /* backgroundColor */).setOpacity(0.75).get(),
                                 padding: '1em',
                                 borderRadius: '0.5em'
                             },

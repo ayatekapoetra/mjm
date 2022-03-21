@@ -1,0 +1,28 @@
+{
+  "RECORDS": [
+    {
+      "coa_tipe": "1",
+      "grp_name": "Aktiva Lancar",
+      "kode": "100.1",
+      "urut": "1"
+    },
+    {
+      "coa_tipe": "1",
+      "grp_name": "Aktiva Tetap",
+      "kode": "100.2",
+      "urut": "2"
+    },
+    {
+      "coa_tipe": "2",
+      "grp_name": "Jangka Pendek",
+      "kode": "200.1",
+      "urut": "1"
+    },
+    {
+      "coa_tipe": "2",
+      "grp_name": "Jangka Panjang",
+      "kode": "200.2",
+      "urut": "2"
+    }
+  ]
+}

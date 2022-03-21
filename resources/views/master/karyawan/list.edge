@@ -1,0 +1,79 @@
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No <br> # </th>
+                            <th width="50" class="bg-inverse b-all">ACTION<br>Button</th>
+                            <th width="200" class="bg-inverse b-all">NIK <br>Nama</th>
+                            <th width="70" class="bg-inverse b-all">Jenkel <br>Dept</th>
+                            <th width="*" class="bg-inverse b-all">Phone <br>Alamat</th>
+                            <th width="150" class="bg-inverse b-all">Status Karyawan <br>Status Nikah</th>
+                            <th width="100" class="bg-inverse b-all">Join Date <br>Expired</th>
+                            <th width="120" class="bg-inverse b-all">Tempat <br>Tanggal Lahir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(list.data.length > 0)
+                            @each(item in list.data)
+                                <tr>
+                                    <td class="text-center">{{$loop.index + 1}}</td>
+                                    <td>
+                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
+                                    </td>
+                                    <td>
+                                        <small>{{item.nik}}</small><br>
+                                        <strong class="text-white">{{item.nama}}</strong>
+                                    </td>
+                                    <td>
+                                        <strong>{{item.jenkel === 'm' ? 'Laki-laki' : 'Perempuan'}}</strong><br>
+                                        <small>{{item.dept.name}}
+                                    </td>
+                                    <td>
+                                        {{item.phone ? item.phone : '-'}}<br>
+                                        <small>{{item.alamat ? item.alamat : '-'}} </small>
+                                    </td>
+                                    <td>
+                                        <span class="text-capitalize">{{item.sts_karyawan}}</span> <br>
+                                        <span class="text-capitalize">{{item.sts_nikah}}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-white dateFormatDef" data-patten="DD-MM-YYYY" data-tgl="{{item.tgl_gabung}}"></span> <br>
+                                        <span class="text-danger dateFormatDef" data-patten="DD-MM-YYYY" data-tgl="{{item.tgl_expired}}"></span>
+                                    </td>
+                                    <td>
+                                        <span class="text-white">{{item.t4_lahir}}</span> <br>
+                                        <span class="text-inverse dateFormatDef" data-patten="DD-MM-YYYY" data-tgl="{{item.tgl_lahir}}"></span>
+                                    </td>
+                                </tr>
+                            @endeach
+                        @else
+                            <tr>
+                                <td colspan="10"> Data tidak ditemukan...</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

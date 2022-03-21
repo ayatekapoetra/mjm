@@ -24,7 +24,6 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 import OrganizationPoint from './OrganizationPoint.js';
-import palette from '../../Core/Color/Palette.js';
 import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
 var SankeySeries = SeriesRegistry.seriesTypes.sankey;
 import U from '../../Core/Utilities.js';
@@ -179,24 +178,9 @@ var OrganizationSeries = /** @class */ (function (_super) {
         };
         return node;
     };
-    OrganizationSeries.prototype.createNodeColumn = function () {
-        var column = _super.prototype.createNodeColumn.call(this);
-        // Wrap the offset function so that the hanging node's children are
-        // aligned to their parent
-        wrap(column, 'offset', function (proceed, node, factor) {
-            var offset = proceed.call(this, node, factor); // eslint-disable-line no-invalid-this
-            // Modify the default output if the parent's layout is 'hanging'
-            if (node.hangsFrom) {
-                return {
-                    absoluteTop: node.hangsFrom.nodeY
-                };
-            }
-            return offset;
-        });
-        return column;
-    };
     OrganizationSeries.prototype.pointAttribs = function (point, state) {
-        var series = this, attribs = SankeySeries.prototype.pointAttribs.call(series, point, state), level = point.isNode ? point.level : point.fromNode.level, levelOptions = series.mapOptionsToLevel[level || 0] || {}, options = point.options, stateOptions = (levelOptions.states && levelOptions.states[state]) || {}, values = ['borderRadius', 'linkColor', 'linkLineWidth']
+        var series = this, attribs = SankeySeries.prototype.pointAttribs.call(series, point, state), level = point.isNode ? point.level : point.fromNode.level, levelOptions = series.mapOptionsToLevel[level || 0] || {}, options = point.options, stateOptions = (levelOptions.states &&
+            levelOptions.states[state]) || {}, values = ['borderRadius', 'linkColor', 'linkLineWidth']
             .reduce(function (obj, key) {
             obj[key] = pick(stateOptions[key], options[key], levelOptions[key], series.options[key]);
             return obj;
@@ -264,16 +248,37 @@ var OrganizationSeries = /** @class */ (function (_super) {
     };
     OrganizationSeries.prototype.translateNode = function (node, column) {
         SankeySeries.prototype.translateNode.call(this, node, column);
-        if (node.hangsFrom) {
-            node.shapeArgs.height -=
-                this.options.hangingIndent;
-            if (!this.chart.inverted) {
-                node.shapeArgs.y += this.options.hangingIndent;
+        var parentNode = node.hangsFrom, indent = this.options.hangingIndent || 0, sign = this.chart.inverted ? -1 : 1, shapeArgs = node.shapeArgs, indentLogic = this.options.hangingIndentTranslation, minLength = this.options.minNodeLength || 10;
+        if (parentNode) {
+            if (indentLogic === 'cumulative') {
+                // Move to the right:
+                shapeArgs.height -= indent;
+                shapeArgs.y -= sign * indent;
+                while (parentNode) {
+                    shapeArgs.y += sign * indent;
+                    parentNode = parentNode.hangsFrom;
+                }
+            }
+            else if (indentLogic === 'shrink') {
+                // Resize the node:
+                while (parentNode &&
+                    shapeArgs.height > indent + minLength) {
+                    shapeArgs.height -= indent;
+                    parentNode = parentNode.hangsFrom;
+                }
+            }
+            else {
+                // indentLogic === "inherit"
+                // Do nothing (v9.3.2 and prev versions):
+                shapeArgs.height -= indent;
+                if (!this.chart.inverted) {
+                    shapeArgs.y += indent;
+                }
             }
         }
         node.nodeHeight = this.chart.inverted ?
-            node.shapeArgs.width :
-            node.shapeArgs.height;
+            shapeArgs.width :
+            shapeArgs.height;
     };
     /**
      * An organization chart is a diagram that shows the structure of an
@@ -303,7 +308,7 @@ var OrganizationSeries = /** @class */ (function (_super) {
          * @type {Highcharts.ColorString}
          * @private
          */
-        borderColor: palette.neutralColor60,
+        borderColor: "#666666" /* neutralColor60 */,
         /**
          * The border radius of the node cards.
          *
@@ -428,12 +433,37 @@ var OrganizationSeries = /** @class */ (function (_super) {
          */
         hangingIndent: 20,
         /**
+         * Defines the indentation of a `hanging` layout parent's children.
+         * Possible options:
+         *
+         * - `inherit` (default): Only the first child adds the indentation,
+         * children of a child with indentation inherit the indentation.
+         * - `cumulative`: All children of a child with indentation add its
+         * own indent. The option may cause overlapping of nodes.
+         * Then use `shrink` option:
+         * - `shrink`: Nodes shrink by the
+         * [hangingIndent](#plotOptions.organization.hangingIndent)
+         * value until they reach the
+         * [minNodeLength](#plotOptions.organization.minNodeLength).
+         *
+         * @sample highcharts/series-organization/hanging-cumulative
+         *         Every indent increases the indentation
+         *
+         * @sample highcharts/series-organization/hanging-shrink
+         *         Every indent decreases the nodes' width
+         *
+         * @type {Highcharts.OrganizationHangingIndentTranslationValue}
+         * @since 10.0.0
+         * @default inherit
+         */
+        hangingIndentTranslation: 'inherit',
+        /**
          * The color of the links between nodes.
          *
          * @type {Highcharts.ColorString}
          * @private
          */
-        linkColor: palette.neutralColor60,
+        linkColor: "#666666" /* neutralColor60 */,
         /**
          * The line width of the links connecting nodes, in pixels.
          *
@@ -444,9 +474,24 @@ var OrganizationSeries = /** @class */ (function (_super) {
          */
         linkLineWidth: 1,
         /**
-         * In a horizontal chart, the width of the nodes in pixels. Node that
+         * In a horizontal chart, the minimum width of the **hanging** nodes
+         * only, in pixels. In a vertical chart, the minimum height of the
+         * **haning** nodes only, in pixels too.
+         *
+         * Note: Used only when
+         * [hangingIndentTranslation](#plotOptions.organization.hangingIndentTranslation)
+         * is set to `shrink`.
+         *
+         * @see [nodeWidth](#plotOptions.organization.nodeWidth)
+         * @private
+         */
+        minNodeLength: 10,
+        /**
+         * In a horizontal chart, the width of the nodes in pixels. Note that
          * most organization charts are vertical, so the name of this option
          * is counterintuitive.
+         *
+         * @see [minNodeLength](#plotOptions.organization.minNodeLength)
          *
          * @private
          */
@@ -478,6 +523,13 @@ export default OrganizationSeries;
  * nodes in the diagram.
  *
  * @typedef {"normal"|"hanging"} Highcharts.SeriesOrganizationNodesLayoutValue
+ */
+/**
+ * Indent translation value for the child nodes in an organization chart, when
+ * parent has `hanging` layout. Option can shrink nodes (for tight charts),
+ * translate children to the left, or render nodes directly under the parent.
+ *
+ * @typedef {"inherit"|"cumulative"|"shrink"} Highcharts.OrganizationHangingIndentTranslationValue
  */
 ''; // detach doclets above
 /* *
@@ -544,6 +596,9 @@ export default OrganizationSeries;
 /**
  * Layout for the node's children. If `hanging`, this node's children will hang
  * below their parent, allowing a tighter packing of nodes in the diagram.
+ *
+ * Note: Since @next version, the `hanging` layout is set by default for
+ * children of a parent using `hanging` layout.
  *
  * @sample highcharts/demo/organization-chart
  *         Hanging layout

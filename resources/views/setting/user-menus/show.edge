@@ -1,0 +1,46 @@
+{{ script('ajax/opt-users') }}
+{{ script('ajax/opt-menu') }}
+{{ script('ajax/opt-submenu') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-update" data-id="{{data.id}}">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Pilih User</label>
+                            <select name="user_id" class="form-control selectUsers" data-values="{{data.user_id}}" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">Pilih Menu</label>
+                            <select name="menu_id" class="form-control selectMenu" data-values="{{data.menu_id}}" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="control-label">Pilih Submenu</label>
+                            <select name="submenu_id" class="form-control selectSubmenu" data-values="{{data.submenu_id}}" required></select>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <button type="button" class="btn btn-{{data.aktif === 'Y' ? 'danger' : 'info'}} waves-effect waves-light" id="bt-delete" data-id="{{data.id}}">
+                                {{data.aktif === 'Y' ? 'Non aktifkan menu' : 'Aktifkan menu'}}
+                            </button>
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

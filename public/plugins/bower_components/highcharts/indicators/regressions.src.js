@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Indicator series type for Highcharts Stock
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Stock/Indicators/LinearRegression/LinearRegression.js', [_modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (SeriesRegistry, U) {
@@ -94,13 +103,18 @@
              * */
             /**
              * Return the slope and intercept of a straight line function.
+             *
              * @private
-             * @param {Highcharts.LinearRegressionIndicator} this indicator to use
-             * @param {Array<number>} xData -  list of all x coordinates in a period
-             * @param {Array<number>} yData - list of all y coordinates in a period
+             *
+             * @param {Array<number>} xData
+             * List of all x coordinates in a period.
+             *
+             * @param {Array<number>} yData
+             * List of all y coordinates in a period.
+             *
              * @return {Highcharts.RegressionLineParametersObject}
-             *          object that contains the slope and the intercept
-             *          of a straight line function
+             * Object that contains the slope and the intercept of a straight line
+             * function.
              */
             LinearRegressionIndicator.prototype.getRegressionLineParameters = function (xData, yData) {
                 // least squares method
@@ -128,12 +142,18 @@
             };
             /**
              * Return the y value on a straight line.
+             *
              * @private
+             *
              * @param {Highcharts.RegressionLineParametersObject} lineParameters
-             *          object that contains the slope and the intercept
-             *          of a straight line function
-             * @param {number} endPointX - x coordinate of the point
-             * @return {number} - y value of the point that lies on the line
+             * Object that contains the slope and the intercept of a straight line
+             * function.
+             *
+             * @param {number} endPointX
+             * X coordinate of the point.
+             *
+             * @return {number}
+             * Y value of the point that lies on the line.
              */
             LinearRegressionIndicator.prototype.getEndPointY = function (lineParameters, endPointX) {
                 return lineParameters.slope * endPointX + lineParameters.intercept;
@@ -141,10 +161,17 @@
             /**
              * Transform the coordinate system so that x values start at 0 and
              * apply xAxisUnit.
+             *
              * @private
-             * @param {Array<number>} xData - list of all x coordinates in a period
-             * @param {number} xAxisUnit - option (see the API)
-             * @return {Array<number>} - array of transformed x data
+             *
+             * @param {Array<number>} xData
+             * List of all x coordinates in a period
+             *
+             * @param {number} xAxisUnit
+             * Option (see the API)
+             *
+             * @return {Array<number>}
+             * Array of transformed x data
              */
             LinearRegressionIndicator.prototype.transformXData = function (xData, xAxisUnit) {
                 var xOffset = xData[0];
@@ -228,7 +255,7 @@
              * @since        7.0.0
              * @product      highstock
              * @requires     stock/indicators/indicators
-             * @requires     stock/indicators/linearregression
+             * @requires     stock/indicators/regressions
              * @optionparent plotOptions.linearregression
              */
             LinearRegressionIndicator.defaultOptions = merge(SMAIndicator.defaultOptions, {
@@ -307,7 +334,7 @@
          * @product   highstock
          * @excluding dataParser,dataURL
          * @requires  stock/indicators/indicators
-         * @requires  stock/indicators/linearregression
+         * @requires  stock/indicators/regressions
          * @apioption series.linearregression
          */
         ''; // to include the above in the js output
@@ -391,7 +418,7 @@
              * @since        7.0.0
              * @product      highstock
              * @requires     stock/indicators/indicators
-             * @requires     stock/indicators/linearregression
+             * @requires  stock/indicators/regressions
              * @optionparent plotOptions.linearregressionslope
              */
             LinearRegressionSlopesIndicator.defaultOptions = merge(LinearRegressionIndicator.defaultOptions);
@@ -416,7 +443,7 @@
          * @product   highstock
          * @excluding dataParser,dataURL
          * @requires  stock/indicators/indicators
-         * @requires  stock/indicators/linearregressionslope
+         * @requires  stock/indicators/regressions
          * @apioption series.linearregressionslope
          */
         ''; // to include the above in the js output
@@ -500,7 +527,7 @@
              * @since        7.0.0
              * @product      highstock
              * @requires     stock/indicators/indicators
-             * @requires     stock/indicators/linearregressionintercept
+             * @requires  stock/indicators/regressions
              * @optionparent plotOptions.linearregressionintercept
              */
             LinearRegressionInterceptIndicator.defaultOptions = merge(LinearRegressionIndicator.defaultOptions);
@@ -525,7 +552,7 @@
          * @product   highstock
          * @excluding dataParser,dataURL
          * @requires  stock/indicators/indicators
-         * @requires  stock/indicators/linearregressionintercept
+         * @requires  stock/indicators/regressions
          * @apioption series.linearregressionintercept
          */
         ''; // to include the above in the js output
@@ -619,7 +646,7 @@
              * @since        7.0.0
              * @product      highstock
              * @requires     stock/indicators/indicators
-             * @requires     stock/indicators/linearregressionangle
+             * @requires  stock/indicators/regressions
              * @optionparent plotOptions.linearregressionangle
              */
             LinearRegressionAngleIndicator.defaultOptions = merge(LinearRegressionIndicator.defaultOptions, {
@@ -649,7 +676,7 @@
          * @product   highstock
          * @excluding dataParser,dataURL
          * @requires  stock/indicators/indicators
-         * @requires  stock/indicators/linearregressionangle
+         * @requires  stock/indicators/regressions
          * @apioption series.linearregressionangle
          */
         ''; // to include the above in the js output

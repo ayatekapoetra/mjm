@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * Item series type for Highcharts
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Series/Item/ItemPoint.js', [_modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (SeriesRegistry, U) {
@@ -362,9 +371,10 @@
                     rowsOption = this.options.rows, 
                     // How many rows (arcs) should be used
                     rowFraction = (diameter - innerSize) / diameter,
-                    isCircle = fullAngle % (2 * Math.PI) === 0;
+                    isCircle = fullAngle % (2 * Math.PI) === 0,
+                    total = this.total || 0;
                 // Increase the itemSize until we find the best fit
-                while (itemCount > this.total + (rows && isCircle ? rows.length : 0)) {
+                while (itemCount > total + (rows && isCircle ? rows.length : 0)) {
                     finalItemCount = itemCount;
                     // Reset
                     slots.length = 0;
@@ -418,8 +428,7 @@
                  * @private
                  * @param {Highcharts.ItemRowContainerObject} item
                  * Wrapped object with angle and row
-                 * @return {void}
-                 */
+                     */
                 function cutOffRow(item) {
                     if (overshoot > 0) {
                         item.row.colCount--;
@@ -638,7 +647,7 @@
          *
          * @type      {Array<number|Array<string,(number|null)>|null|*>}
          * @extends   series.pie.data
-         * @excludes  sliced
+         * @exclude   sliced
          * @product   highcharts
          * @apioption series.item.data
          */

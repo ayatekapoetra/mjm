@@ -5,6 +5,39 @@ $(function(){
 
     var body = $('body')
 
+    $('body td.long-text').each(function(){
+        var elm = $(this)
+        var text = elm.data('text')
+        var tag = elm.data('elm')
+        if(text.length > 100)
+        elm.find(tag).html(text.slice(0, 100) + '<br/><a class="more-text text-info">show more...</a>')
+        else
+        elm.find(tag).html(text)
+    })
+
+    $('body').on('click', 'a.more-text', function(){
+        var elm = $(this)
+        var text = elm.parents('td').data('text')
+        var tag = elm.parents('td').data('elm')
+        if(text){
+            var len = Math.ceil(text.length / 100)
+            for (let i = 0; i < len; i++) {
+                let end = parseInt(i + 100)
+                elm.parents('td').find(tag).html((text.slice(i, end) + 
+                '<br/>' + 
+                text.slice(i+100, end+100) + '<br/><a class="less-text text-primary">show less...</a>'))
+            }
+        }
+    })
+
+    $('body').on('click', 'a.less-text', function(){
+        var elm = $(this)
+        var text = elm.parents('td').data('text')
+        var tag = elm.parents('td').data('elm')
+        if(text)
+        elm.parents('td').find(tag).html((text.slice(0, 100) + '<br/><a class="more-text text-info">show more...</a>'))
+    })
+
     /** LIST NAMA COA **/
     $('body select.listCoaName').each(function(){
         var elm = $(this)
@@ -95,11 +128,10 @@ $(function(){
     $('body select.selectCabang').each(function(){
         var elm = $(this)
         var values = $(this).data('values')
-        var workdir = body.find('input#workdir').val()
-        console.log(values, workdir);
+        // console.log(values, workdir);
         $.ajax({
             async: true,
-            url: '/ajax/options/cabang?bisnis_id='+workdir+'&selected='+values,
+            url: '/ajax/options/cabang?selected='+values,
             method: 'GET',
             dataType: 'json',
             processData: false,
@@ -125,11 +157,10 @@ $(function(){
     $('body select.selectGudang').each(function(){
         var elm = $(this)
         var values = $(this).data('values')
-        var workdir = body.find('input#workdir').val()
         // console.log(values, workdir);
         $.ajax({
             async: true,
-            url: '/ajax/options/gudang?bisnis_id='+workdir+'&selected='+values,
+            url: '/ajax/options/gudang?selected='+values,
             method: 'GET',
             dataType: 'json',
             processData: false,

@@ -1,11 +1,10 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * (c) 2009-2021 Torstein Honsi
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -20,10 +19,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Extensions/DraggablePoints.js', [_modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Series/Point.js'], _modules['Core/Series/Series.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (A, Chart, H, Point, Series, SeriesRegistry, U) {
@@ -42,6 +51,7 @@
         var seriesTypes = SeriesRegistry.seriesTypes;
         var addEvent = U.addEvent,
             clamp = U.clamp,
+            isNumber = U.isNumber,
             merge = U.merge,
             objectEach = U.objectEach,
             pick = U.pick;
@@ -283,7 +293,7 @@
                     resize: true,
                     resizeSide: 'bottom',
                     handlePositioner: function (point) {
-                        var bBox = point.shapeArgs || point.graphic.getBBox();
+                        var bBox = (point.shapeArgs || point.graphic.getBBox());
                         return {
                             x: bBox.x || 0,
                             y: (bBox.y || 0) + (bBox.height || 0)
@@ -309,7 +319,7 @@
                     resize: true,
                     resizeSide: 'top',
                     handlePositioner: function (point) {
-                        var bBox = point.shapeArgs || point.graphic.getBBox();
+                        var bBox = (point.shapeArgs || point.graphic.getBBox());
                         return {
                             x: bBox.x || 0,
                             y: bBox.y || 0
@@ -759,7 +769,6 @@
          * @private
          * @param {string} type
          *        Unsupported series type
-         * @return {void}
          */
         function (type) {
             if (seriesTypes[type]) {
@@ -861,11 +870,11 @@
                 }
             };
         /**
-         * Options for the drag handles.
+         * Options for the drag handles available in column series.
          *
          * @declare      Highcharts.DragDropHandleOptionsObject
          * @since        6.2.0
-         * @optionparent plotOptions.series.dragDrop.dragHandle
+         * @optionparent plotOptions.column.dragDrop.dragHandle
          *
          * @private
          */
@@ -877,7 +886,7 @@
                  *
                  * @type      {Function}
                  * @since     6.2.0
-                 * @apioption plotOptions.series.dragDrop.dragHandle.pathFormatter
+                 * @apioption plotOptions.column.dragDrop.dragHandle.pathFormatter
                  */
                 // pathFormatter: null,
                 /**
@@ -887,7 +896,7 @@
                  *
                  * @type      {string}
                  * @since     6.2.0
-                 * @apioption plotOptions.series.dragDrop.dragHandle.cursor
+                 * @apioption plotOptions.column.dragDrop.dragHandle.cursor
                  */
                 // cursor: null,
                 /**
@@ -1280,7 +1289,7 @@
          * @param {Highcharts.SVGElement} [guideBox]
          *        The guide box to take snapshot of.
          *
-         * @return {object}
+         * @return {Object}
          *         Snapshot object. Point properties are placed in a hashmap with IDs as
          *         keys.
          */
@@ -1433,7 +1442,7 @@
          * @private
          * @function getNewPoints
          *
-         * @param {object} dragDropData
+         * @param {Object} dragDropData
          *        A chart's dragDropData with drag/drop origin information, and info on
          *        which points are being dragged.
          *
@@ -1638,7 +1647,7 @@
          * @private
          * @function Highcharts.Point#getDropValues
          *
-         * @param {object} origin
+         * @param {Object} origin
          *        Mouse position (chartX/Y) and point props at current data values.
          *        Point props should be organized per point.id in a hashmap.
          *
@@ -1737,12 +1746,20 @@
                 changed;
             // Find bounding box of all points
             points.forEach(function (point) {
-                var bBox = point.graphic && point.graphic.getBBox() || point.shapeArgs;
-                if (bBox && (bBox.width || bBox.height || bBox.x || bBox.y)) {
+                var bBox = (point.graphic && point.graphic.getBBox() || point.shapeArgs);
+                if (bBox) {
+                    var plotX2 = void 0;
+                    var x2 = point.x2;
+                    if (isNumber(x2)) {
+                        plotX2 = point.series.xAxis.translate(x2, false, false, false, true);
+                    }
+                    // Avoid a 0 min when some of the points being dragged are
+                    // completely outside the plot
+                    var skipBBox = !(bBox.width || bBox.height || bBox.x || bBox.y);
                     changed = true;
-                    minX = Math.min(point.plotX || 0, bBox.x || 0, minX);
-                    maxX = Math.max((bBox.x || 0) + (bBox.width || 0), maxX);
-                    minY = Math.min(point.plotY || 0, bBox.y || 0, minY);
+                    minX = Math.min(point.plotX || 0, plotX2 || 0, skipBBox ? Infinity : bBox.x || 0, minX);
+                    maxX = Math.max(point.plotX || 0, plotX2 || 0, (bBox.x || 0) + (bBox.width || 0), maxX);
+                    minY = Math.min(point.plotY || 0, skipBBox ? Infinity : bBox.y || 0, minY);
                     maxY = Math.max((bBox.y || 0) + (bBox.height || 0), maxY);
                 }
             });
@@ -1871,13 +1888,15 @@
                     // Find position and path of handle
                     pos = positioner(point);
                     handleAttrs.d = path = pathFormatter(point);
-                    if (!path || pos.x < 0 || pos.y < 0) {
+                    // Correct left edge value depending on the xAxis' type, #16596
+                    var minEdge = point.series.xAxis.categories ? -0.5 : 0;
+                    if (!path || pos.x < minEdge || pos.y < 0) {
                         return;
                     }
                     // If cursor is not set explicitly, use axis direction
                     handleAttrs.cursor = handleOptions.cursor ||
-                        (val.axis === 'x') !== !!chart.inverted ?
-                        'ew-resize' : 'ns-resize';
+                        ((val.axis === 'x') !== !!chart.inverted ?
+                            'ew-resize' : 'ns-resize');
                     // Create and add the handle element if it doesn't exist
                     handle = chart.dragHandles[val.optionName];
                     if (!handle) {
@@ -1928,7 +1947,7 @@
          * @private
          * @function countProps
          *
-         * @param {object} obj
+         * @param {Object} obj
          *        The object to count.
          *
          * @return {number}

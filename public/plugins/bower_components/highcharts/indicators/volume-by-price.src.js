@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Indicator series type for Highcharts Stock
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,13 +21,76 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Stock/Indicators/VBP/VBPIndicator.js', [_modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Globals.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (A, H, SeriesRegistry, U) {
+    _registerModule(_modules, 'Stock/Indicators/VBP/VBPPoint.js', [_modules['Core/Series/Point.js'], _modules['Core/Series/SeriesRegistry.js']], function (Point, SeriesRegistry) {
+        /* *
+         *
+         *  License: www.highcharts.com/license
+         *
+         *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+         *
+         * */
+        var __extends = (this && this.__extends) || (function () {
+                var extendStatics = function (d,
+            b) {
+                    extendStatics = Object.setPrototypeOf ||
+                        ({ __proto__: [] } instanceof Array && function (d,
+            b) { d.__proto__ = b; }) ||
+                        function (d,
+            b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+                return extendStatics(d, b);
+            };
+            return function (d, b) {
+                extendStatics(d, b);
+                function __() { this.constructor = d; }
+                d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+            };
+        })();
+        /* *
+         *
+         *  Imports
+         *
+         * */
+        var SMAIndicator = SeriesRegistry.seriesTypes.sma;
+        var VBPPoint = /** @class */ (function (_super) {
+                __extends(VBPPoint, _super);
+            function VBPPoint() {
+                return _super !== null && _super.apply(this, arguments) || this;
+            }
+            // Required for destroying negative part of volume
+            VBPPoint.prototype.destroy = function () {
+                // @todo: this.negativeGraphic doesn't seem to be used anywhere
+                if (this.negativeGraphic) {
+                    this.negativeGraphic = this.negativeGraphic.destroy();
+                }
+                return Point.prototype.destroy.apply(this, arguments);
+            };
+            return VBPPoint;
+        }(SMAIndicator.prototype.pointClass));
+        /* *
+         *
+         *  Default Export
+         *
+         * */
+
+        return VBPPoint;
+    });
+    _registerModule(_modules, 'Stock/Indicators/VBP/VBPIndicator.js', [_modules['Stock/Indicators/VBP/VBPPoint.js'], _modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Globals.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js'], _modules['Core/Chart/StockChart.js']], function (VBPPoint, A, H, SeriesRegistry, U, StockChart) {
         /* *
          *
          *  (c) 2010-2021 Paweł Dalek
@@ -63,6 +125,7 @@
             arrayMax = U.arrayMax,
             arrayMin = U.arrayMin,
             correctFloat = U.correctFloat,
+            defined = U.defined,
             error = U.error,
             extend = U.extend,
             isArray = U.isArray,
@@ -124,10 +187,21 @@
                     baseSeries,
                     volumeSeries;
                 H.seriesTypes.sma.prototype.init.apply(indicator, arguments);
-                params = indicator.options.params;
-                baseSeries = indicator.linkedParent;
-                volumeSeries = chart.get(params.volumeSeriesID);
-                indicator.addCustomEvents(baseSeries, volumeSeries);
+                // Only after series are linked add some additional logic/properties.
+                var unbinder = addEvent(StockChart, 'afterLinkSeries',
+                    function () {
+                        // Protection for a case where the indicator is being updated,
+                        // for a brief moment the indicator is deleted.
+                        if (indicator.options) {
+                            params = indicator.options.params;
+                        baseSeries = indicator.linkedParent;
+                        volumeSeries = chart.get(params.volumeSeriesID);
+                        indicator.addCustomEvents(baseSeries, volumeSeries);
+                    }
+                    unbinder();
+                }, {
+                    order: 1
+                });
                 return indicator;
             };
             // Adds events related with removing series
@@ -359,7 +433,15 @@
                     j = 1,
                     rangeStep,
                     zoneStartsLength;
-                if (!lowRange || !highRange) {
+                // If the compare mode is set on the main series, change the VBP
+                // zones to fit new extremes, #16277.
+                var mainSeries = indicator.linkedParent;
+                if (!indicator.options.compareToMain &&
+                    mainSeries.dataModify) {
+                    lowRange = mainSeries.dataModify.modifyValue(lowRange);
+                    highRange = mainSeries.dataModify.modifyValue(highRange);
+                }
+                if (!defined(lowRange) || !defined(highRange)) {
                     if (this.points.length) {
                         this.setData([]);
                         this.zoneStarts = [];
@@ -429,6 +511,15 @@
                                 yValues[i - 1][3] :
                                 yValues[i - 1]) :
                             value;
+                        // If the compare mode is set on the main series,
+                        // change the VBP zones to fit new extremes, #16277.
+                        var mainSeries = indicator.linkedParent;
+                        if (!indicator.options.compareToMain &&
+                            mainSeries.dataModify) {
+                            value = mainSeries.dataModify.modifyValue(value);
+                            previousValue = mainSeries.dataModify
+                                .modifyValue(previousValue);
+                        }
                         // Checks if this is the point with the
                         // lowest close value and if so, adds it calculations
                         if (value <= zone.start && zone.index === 0) {
@@ -542,11 +633,11 @@
                      * @default {"color": "#0A9AC9", "dashStyle": "LongDash", "lineWidth": 1}
                      */
                     styles: {
-                        /** @ignore-options */
+                        /** @ignore-option */
                         color: '#0A9AC9',
-                        /** @ignore-options */
+                        /** @ignore-option */
                         dashStyle: 'LongDash',
-                        /** @ignore-options */
+                        /** @ignore-option */
                         lineWidth: 1
                     }
                 },
@@ -599,11 +690,11 @@
         extend(VBPIndicator.prototype, {
             nameBase: 'Volume by Price',
             nameComponents: ['ranges'],
-            bindTo: {
-                series: false,
-                eventName: 'afterSetExtremes'
+            calculateOn: {
+                chart: 'render',
+                xAxis: 'afterSetExtremes'
             },
-            calculateOn: 'render',
+            pointClass: VBPPoint,
             markerAttribs: noop,
             drawGraph: noop,
             getColumnMetrics: columnPrototype.getColumnMetrics,
@@ -622,7 +713,7 @@
          * @extends   series,plotOptions.vbp
          * @since     6.0.0
          * @product   highstock
-         * @excluding dataParser, dataURL
+         * @excluding dataParser, dataURL, compare, compareBase, compareStart
          * @requires  stock/indicators/indicators
          * @requires  stock/indicators/volume-by-price
          * @apioption series.vbp

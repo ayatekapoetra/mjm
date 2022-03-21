@@ -1,0 +1,57 @@
+<div class="row">
+    <div class="col-xs-5">
+        <ul class="pagination pagination-sm m-b-0 vertical-middle">
+            @each(page in range(1, list.lastPage + 1))
+                @if(page === list.page)
+                    <li class="active"> 
+                        <a href="?page={{ page }}" class="btn-pagging" data-page="{{page}}">{{page}}</a> 
+                    </li>
+                @else
+                    <li> 
+                        <a href="?page={{ page }}" class="btn-pagging" data-page="{{page}}">{{page}}</a> 
+                    </li>
+                @endif
+            @endeach
+        </ul>
+    </div>
+    <div class="col-xs-7 m-t-20 p-t-10">
+        Page {{list.page}}/{{list.lastPage}}
+        <span class="pull-right" style="color: #FFF">Total {{list.total}} data</span>
+    </div>
+</div>
+
+<script>
+    $(function(){
+        var body = $('body')
+        $('a.btn-pagging').on('click', function(e){
+            e.preventDefault()
+            var limit = body.find('input#limit').val() || 25
+            var url = window.location.href + '/list'
+            var goPage = $(this).data('page')
+
+
+            $.ajax({
+                async: true,
+                url: url,
+                method: 'GET',
+                data: {
+                    limit: limit,
+                    page: goPage || 1
+                },
+                dataType: 'html',
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    body.find('div#content-list').html(result).show()
+                },
+                error: function(err){
+                    console.log(err)
+                },
+                complete: function() {
+                    body.find('div#content-list').css('display', 'block')
+                    body.find('div#content-form').css('display', 'none')
+                }
+            })
+        })
+    })
+</script>

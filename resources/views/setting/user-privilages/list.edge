@@ -1,0 +1,86 @@
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="50" class="bg-inverse b-all">ACT</th>
+                            <th width="*" class="bg-inverse b-all">Nama Lengkap</th>
+                            <th width="200" class="bg-inverse b-all">Usertype</th>
+                            <th width="*" class="bg-inverse b-all">Akses Konten</th>
+                            <th width="100" class="bg-inverse b-all">Create Data</th>
+                            <th width="100" class="bg-inverse b-all">Read Data</th>
+                            <th width="120" class="bg-inverse b-all">Update Data</th>
+                            <th width="100" class="bg-inverse b-all">Delete Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td>
+                                    <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                </td>
+                                <td>
+                                    <strong class="text-capitalize">{{item.nama_lengkap}}</strong>
+                                </td>
+                                <td>
+                                    {{item.usertype}}
+                                </td>
+                                <td>
+                                    <strong class="text-capitalize">{{item.konten}}</strong>
+                                </td>
+                                <td class="text-center" style="font-size:1em">
+                                    @if(item.create === 'Y')
+                                    <i class="ti-check-box text-success"></i>
+                                    @else
+                                    <i class="ti-close text-danger"></i>
+                                    @endif
+                                </td>
+                                <td class="text-center" style="font-size:1em">
+                                    @if(item.read === 'Y')
+                                    <i class="ti-check-box text-success"></i>
+                                    @else
+                                    <i class="ti-close text-danger"></i>
+                                    @endif
+                                </td>
+                                <td class="text-center" style="font-size:1em">
+                                    @if(item.update === 'Y')
+                                    <i class="ti-check-box text-success"></i>
+                                    @else
+                                    <i class="ti-close text-danger"></i>
+                                    @endif
+                                </td>
+                                <td class="text-center" style="font-size:1em">
+                                    @if(item.delete === 'Y')
+                                    <i class="ti-check-box text-success"></i>
+                                    @else
+                                    <i class="ti-close text-danger"></i>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  * @module highcharts/modules/annotations-advanced
  * @requires highcharts
  *
@@ -16,7 +16,9 @@ import '../../Extensions/Annotations/Types/CrookedLine.js';
 import '../../Extensions/Annotations/Types/ElliottWave.js';
 import '../../Extensions/Annotations/Types/Tunnel.js';
 import '../../Extensions/Annotations/Types/InfinityLine.js';
+import '../../Extensions/Annotations/Types/TimeCycles.js';
 import '../../Extensions/Annotations/Types/Fibonacci.js';
+import '../../Extensions/Annotations/Types/FibonacciTimeZones.js';
 import '../../Extensions/Annotations/Types/Pitchfork.js';
 import '../../Extensions/Annotations/Types/VerticalLine.js';
 import '../../Extensions/Annotations/Types/Measure.js';

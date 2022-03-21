@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  * @module highcharts/indicators/supertrend
  * @requires highcharts
  * @requires highcharts/modules/stock

@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Indicator series type for Highcharts Stock
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Stock/Indicators/MACD/MACDIndicator.js', [_modules['Core/Globals.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (H, SeriesRegistry, U) {
@@ -234,7 +243,7 @@
                 this.zones = histogramZones;
             };
             MACDIndicator.prototype.getValues = function (series, params) {
-                var indexToShift = params.longPeriod - params.shortPeriod, // #14197
+                var indexToShift = (params.longPeriod - params.shortPeriod), // #14197
                     j = 0,
                     MACD = [],
                     xMACD = [],
@@ -318,7 +327,7 @@
             /**
              * Moving Average Convergence Divergence (MACD). This series requires
              * `linkedTo` option to be set and should be loaded after the
-             * `stock/indicators/indicators.js` and `stock/indicators/ema.js`.
+             * `stock/indicators/indicators.js`.
              *
              * @sample stock/indicators/macd
              *         MACD indicator
@@ -423,7 +432,6 @@
         }(SMAIndicator));
         extend(MACDIndicator.prototype, {
             nameComponents: ['longPeriod', 'shortPeriod', 'signalPeriod'],
-            requiredIndicators: ['ema'],
             // "y" value is treated as Histogram data
             pointArrayMap: ['y', 'signal', 'MACD'],
             parallelArrays: ['x', 'y', 'signal', 'MACD'],

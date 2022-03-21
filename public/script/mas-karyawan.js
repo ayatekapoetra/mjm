@@ -1,4 +1,6 @@
 $(function(){
+    console.log('mas-karyawan');
+
     var body = $('body')
 
     initDefault()
@@ -21,11 +23,11 @@ $(function(){
         var nama = $('input[name="nama"]').val() && '&nama=' + $('input[name="nama"]').val()
         var cabang_id = $('select[name="cabang_id"]').val() && '&cabang_id=' + $('select[name="cabang_id"]').val()
         var department_id = $('select[name="department_id"]').val() && '&department_id=' + $('select[name="department_id"]').val()
-        var is_internal = $('select[name="is_internal"]').val() && '&is_internal=' + $('select[name="is_internal').val()
+        var sts_karyawan = $('select[name="sts_karyawan"]').val() && '&sts_karyawan=' + $('select[name="sts_karyawan').val()
         var phone = $('input[name="phone"]').val()  && '&phone=' + $('input[name="phone"]').val()
         var start_date = $('input[name="start_date"]').val()  && '&start_date=' + $('input[name="start_date"]').val()
         var end_date = $('input[name="end_date"]').val()  && '&end_date=' + $('input[name="end_date"]').val()
-        var url = `karyawan/list?keyword=true&limit=${limit}${department_id}${nama}${is_internal}${phone}${cabang_id}${start_date}${end_date}`
+        var url = `karyawan/list?keyword=true&limit=${limit}${department_id}${nama}${sts_karyawan}${phone}${cabang_id}${start_date}${end_date}`
         $.ajax({
             async: true,
             url: url,

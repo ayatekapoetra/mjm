@@ -7,11 +7,10 @@ $(function(){
 
     $('body select.selectCabang').each(function(){
         var elm = $(this)
-        var workdir = body.find('input#workdir').val()
         var values = $(this).data('values') || elm.val()
         $.ajax({
             async: true,
-            url: '/ajax/options/cabang?bisnis_id='+workdir+'&selected='+values,
+            url: '/ajax/options/cabang?selected='+values,
             method: 'GET',
             dataType: 'json',
             processData: false,

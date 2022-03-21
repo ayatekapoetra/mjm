@@ -10,12 +10,28 @@
 'use strict';
 import Pointer from '../Core/Pointer.js';
 import U from '../Core/Utilities.js';
-var extend = U.extend, pick = U.pick, wrap = U.wrap;
+var defined = U.defined, extend = U.extend, pick = U.pick, wrap = U.wrap;
 /* eslint-disable no-invalid-this */
+var normalize = Pointer.prototype.normalize;
 var totalWheelDelta = 0;
 var totalWheelDeltaTimer;
 // Extend the Pointer
 extend(Pointer.prototype, {
+    // Add lon and lat information to pointer events
+    normalize: function (e, chartPosition) {
+        var chart = this.chart;
+        e = normalize.call(this, e, chartPosition);
+        if (chart && chart.mapView) {
+            var lonLat = chart.mapView.pixelsToLonLat({
+                x: e.chartX - chart.plotLeft,
+                y: e.chartY - chart.plotTop
+            });
+            if (lonLat) {
+                extend(e, lonLat);
+            }
+        }
+        return e;
+    },
     // The event handler for the doubleclick event
     onContainerDblClick: function (e) {
         var chart = this.chart;
@@ -27,7 +43,7 @@ extend(Pointer.prototype, {
             }
         }
         else if (chart.isInsidePlot(e.chartX - chart.plotLeft, e.chartY - chart.plotTop)) {
-            chart.mapZoom(0.5, chart.xAxis[0].toValue(e.chartX), chart.yAxis[0].toValue(e.chartY), e.chartX, e.chartY);
+            chart.mapZoom(0.5, void 0, void 0, e.chartX, e.chartY);
         }
     },
     // The event handler for the mouse scroll event
@@ -35,7 +51,9 @@ extend(Pointer.prototype, {
         var chart = this.chart;
         e = this.normalize(e);
         // Firefox uses e.deltaY or e.detail, WebKit and IE uses wheelDelta
-        var delta = e.deltaY || e.detail || -(e.wheelDelta / 120);
+        // try wheelDelta first #15656
+        var delta = (defined(e.wheelDelta) && -e.wheelDelta / 120) ||
+            e.deltaY || e.detail;
         // Wheel zooming on trackpads have different behaviours in Firefox vs
         // WebKit. In Firefox the delta increments in steps by 1, so it is not
         // distinguishable from true mouse wheel. Therefore we use this timer
@@ -51,8 +69,9 @@ extend(Pointer.prototype, {
                 totalWheelDelta = 0;
             }, 50);
         }
-        if (totalWheelDelta < 10 && chart.isInsidePlot(e.chartX - chart.plotLeft, e.chartY - chart.plotTop)) {
-            chart.mapZoom(Math.pow(chart.options.mapNavigation.mouseWheelSensitivity, delta), chart.xAxis[0].toValue(e.chartX), chart.yAxis[0].toValue(e.chartY), e.chartX, e.chartY, 
+        if (totalWheelDelta < 10 && chart.isInsidePlot(e.chartX - chart.plotLeft, e.chartY - chart.plotTop) && chart.mapView) {
+            chart.mapView.zoomBy((chart.options.mapNavigation.mouseWheelSensitivity -
+                1) * -delta, void 0, [e.chartX, e.chartY], 
             // Delta less than 1 indicates stepless/trackpad zooming, avoid
             // animation delaying the zoom
             Math.abs(delta) < 1 ? false : void 0);

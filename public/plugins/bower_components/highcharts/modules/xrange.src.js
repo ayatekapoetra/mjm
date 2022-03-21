@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * X-range series
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Series/XRange/XRangePoint.js', [_modules['Core/Series/Point.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (Point, SeriesRegistry, U) {
@@ -89,14 +98,14 @@
              * @private
              * @function getColorByCategory
              *
-             * @param {object} series
-             *        The series which the point belongs to.
+             * @param {Object} series
+             * The series which the point belongs to.
              *
-             * @param {object} point
-             *        The point to calculate its color for.
+             * @param {Object} point
+             * The point to calculate its color for.
              *
-             * @return {object}
-             *         Returns an object containing the properties color and colorIndex.
+             * @return {Object}
+             * Returns an object containing the properties color and colorIndex.
              */
             XRangePoint.getColorByCategory = function (series, point) {
                 var colors = series.options.colors || series.chart.options.colors,
@@ -155,8 +164,6 @@
              *
              * @private
              * @function Highcharts.Point#init
-             *
-             * @return {Highcharts.Point}
              */
             XRangePoint.prototype.init = function () {
                 Point.prototype.init.apply(this, arguments);
@@ -176,8 +183,6 @@
             /**
              * @private
              * @function Highcharts.Point#getLabelConfig
-             *
-             * @return {Highcharts.PointLabelObject}
              */
             // Add x2 and yCategory to the available properties for tooltip formats
             XRangePoint.prototype.getLabelConfig = function () {
@@ -191,8 +196,6 @@
             /**
              * @private
              * @function Highcharts.Point#isValid
-             *
-             * @return {boolean}
              */
             XRangePoint.prototype.isValid = function () {
                 return typeof this.x === 'number' &&
@@ -201,6 +204,7 @@
             return XRangePoint;
         }(ColumnSeries.prototype.pointClass));
         extend(XRangePoint.prototype, {
+            ttBelow: false,
             tooltipDateKeys: ['x', 'x2']
         });
         /* *
@@ -355,7 +359,6 @@
             /**
              * @private
              * @function Highcarts.seriesTypes.xrange#init
-             * @return {void}
              */
             XRangeSeries.prototype.init = function () {
                 ColumnSeries.prototype.init.apply(this, arguments);
@@ -367,8 +370,6 @@
              *
              * @private
              * @function Highcharts.Series#getColumnMetrics
-             *
-             * @return {Highcharts.ColumnMetricsObject}
              */
             XRangeSeries.prototype.getColumnMetrics = function () {
                 var metrics,
@@ -394,18 +395,6 @@
              *
              * @private
              * @function Highcharts.Series#cropData
-             *
-             * @param {Array<number>} xData
-             *
-             * @param {Array<number>} yData
-             *
-             * @param {number} min
-             *
-             * @param {number} max
-             *
-             * @param {number} [cropShoulder]
-             *
-             * @return {*}
              */
             XRangeSeries.prototype.cropData = function (xData, yData, min, max) {
                 // Replace xData with x2Data to find the appropriate cropStart
@@ -425,9 +414,10 @@
              *
              * @private
              * @function Highcharts.Series#findPointIndex
-             * @param {object} options The options of the point.
-             * @returns {number|undefined} Returns index of a matching point,
-             * returns undefined if no match is found.
+             * @param {Object} options
+             * The options of the point.
+             * @return {number|undefined}
+             * Returns index of a matching point, or undefined if no match is found.
              */
             XRangeSeries.prototype.findPointIndex = function (options) {
                 var _a = this,
@@ -514,11 +504,14 @@
                     yAxis.categories) {
                     point.plotY = yAxis.translate(point.y, 0, 1, 0, 1, options.pointPlacement);
                 }
+                var x = Math.floor(Math.min(plotX,
+                    plotX2)) + crisper;
+                var x2 = Math.floor(Math.max(plotX,
+                    plotX2)) + crisper;
                 var shapeArgs = {
-                        x: Math.floor(Math.min(plotX,
-                    plotX2)) + crisper,
+                        x: x,
                         y: Math.floor(point.plotY + yOffset) + crisper,
-                        width: Math.round(Math.abs(plotX2 - plotX)),
+                        width: x2 - x,
                         height: pointHeight,
                         r: series.options.borderRadius
                     };
@@ -710,8 +703,6 @@
              *
              * @private
              * @function Highcharts.Series#getAnimationVerb
-             *
-             * @return {string}
              */
             XRangeSeries.prototype.getAnimationVerb = function () {
                 return (this.chart.pointCount < (this.options.animationLimit || 250) ?

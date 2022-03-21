@@ -1,0 +1,65 @@
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-users') }}
+{{ script('ajax/opt-route') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Pilih User</label>
+                            <select name="user_id" class="form-control selectUsers" data-values="" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Akses Konten</label>
+                            <select name="konten" class="form-control selectRoute" data-values="" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="checkbox checkbox-success">
+                            <input id="cbCreate" name="create" type="checkbox" checked="">
+                            <label for="cbCreate"> Can Create Data </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="checkbox checkbox-info">
+                            <input id="cbRead" name="read" type="checkbox" checked="">
+                            <label for="cbRead"> Can Read Data </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="checkbox checkbox-warning">
+                            <input id="cbUpdate" name="update" type="checkbox" checked="">
+                            <label for="cbUpdate"> Can Update Data </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="control-label">&nbsp;</label>
+                        <div class="checkbox checkbox-danger">
+                            <input id="cbDelete" name="delete" type="checkbox" checked="">
+                            <label for="cbDelete"> Can Delete Data </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

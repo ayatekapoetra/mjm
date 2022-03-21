@@ -8,11 +8,10 @@ $(function(){
     $('select.selectCoa').each(function(){
         var elm = $(this)
         var values = $(this).data('values') || elm.val()
-        var workdir = body.find('input#workdir').val()
         // console.log('values :::', values);
         $.ajax({
             async: true,
-            url: '/ajax/options/coa?bisnis_id='+workdir+'&selected='+values,
+            url: '/ajax/options/coa?selected='+values,
             method: 'GET',
             dataType: 'json',
             processData: false,
@@ -20,10 +19,8 @@ $(function(){
             contentType: false,
             success: function(result){
                 if(result.length > 0){
-                    var data = setSelected(result, values)
-                    elm.html(data.map( v => '<option value="'+v.id+'" kode="'+v.kode+'" '+v.selected+'>'+v.coa_name+'</option>'))
-                    initSelected(result, elm)
-                    elm.val(values).trigger('change');
+                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.coa_name+'</option>'))
+                    elm.trigger('change');
                 }else{
                     elm.html('<option value="" selected>Blum ada data...</option>')
                 }

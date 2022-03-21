@@ -1,0 +1,172 @@
+@layout('_layouts.main')
+@section('content')
+{{ script('ajax/index') }}
+{{ script('script/set-coa') }}
+<div class="container-fluid">
+    <div class="row bg-title">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+            <h4 class="page-title">SETTING AKUN PERKIRAAN</h4> 
+        </div>
+        <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 text-right">
+            <input type="number" id="workdir" class="hidden" value="{{workdir.bisnis_id}}">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Daftar Akun Perkiraan
+                </div>
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="panel">
+                                    <ul class="feeds b-all">
+                                        <li class="b-b">
+                                            <h3 class="">
+                                                Neraca
+                                                <span>
+                                                    <button class="btn btn-outline btn-info btn-xs bt-create-group" data-tipe="G">Group</button>
+                                                    <button class="btn btn-outline btn-warning btn-xs bt-create-akun" data-tipe="A">Akun</button>
+                                                </span>
+                                            </h3>
+                                            <hr>
+                                            <ul class="m-b-20">
+                                                @each(obj in data.neraca)
+                                                  <li class="b-b">
+                                                      <strong>{{obj.name}}</strong>
+                                                    </li>
+                                                    <ul>
+                                                        @if(obj.group.length > 0)
+                                                            @each(grp in obj.group)
+                                                                <li class="b-b item-coa">
+                                                                    {{grp.grp_name}}
+                                                                    <span class="pull-left m-r-10">
+                                                                        <i class="ti-folder" style="color:white"></i>
+                                                                    </span>
+                                                                    <span class="pull-right count-values" data-kode="{{grp.kode}}"></span>
+                                                                    <span><i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="G" data-id="{{grp.id}}"></i></span>
+                                                                </li>
+                                                                <ul class="feeds" style="margin-left: 20px">
+                                                                    @each(val in grp.akun)
+                                                                        <li class="b-b item-coa">
+                                                                            {{val.coa_name}}
+                                                                            <span class="pull-left m-r-10">
+                                                                                @if(val.is_akun != 'A')
+                                                                                    <i class="ti-folder" style="color:white"></i>
+                                                                                @else
+                                                                                    <i class="ti-control-forward" style="color:white"></i>
+                                                                                @endif
+                                                                            </span>
+                                                                            <span class="pull-right count-values" data-kode="{{val.kode}}">
+                                                                                {{val.alias ? val.alias : ''}}
+                                                                                <i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="A" data-id="{{val.id}}"></i>
+                                                                            </span>
+                                                                        </li>
+                                                                    @endeach
+                                                                </ul>
+                                                            @endeach
+                                                        @endif
+                                                        @if(obj.akun.length > 0)
+                                                            @each(elm in obj.akun)
+                                                                <li class="b-b item-coa">
+                                                                    {{elm.coa_name}}
+                                                                    <span class="pull-left m-r-10">
+                                                                        <i class="ti-control-forward" style="color:white"></i>
+                                                                    </span>
+                                                                    <span class="pull-right count-values" data-kode="{{elm.kode}}">
+                                                                        {{val.alias ? val.alias : ''}}
+                                                                        <i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="A" data-id="{{elm.id}}"></i>
+                                                                    </span>
+                                                                </li>
+                                                            @endeach
+                                                          
+                                                        @endif
+                                                    </ul>
+                                                @endeach
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="panel">
+                                    <ul class="feeds b-all">
+                                        <li class="b-b">
+                                            <h3 class="">
+                                                Laba Rugi
+                                                <span>
+                                                    <button class="btn btn-outline btn-info btn-xs bt-create-group">Group</button>
+                                                    <button class="btn btn-outline btn-warning btn-xs bt-create-akun">Akun</button>
+                                                </span>
+                                            </h3>
+                                            <hr>
+                                            <ul class="m-b-20">
+                                                @each(obj in data.labarugi)
+                                                  <li class="b-b">
+                                                      <strong>{{obj.name}}</strong>
+                                                    </li>
+                                                    <ul>
+                                                        @if(obj.group.length > 0)
+                                                            @each(grp in obj.group)
+                                                                <li class="b-b item-coa">
+                                                                    {{grp.grp_name}}
+                                                                    <span class="pull-left m-r-10">
+                                                                        <i class="ti-folder" style="color:white"></i>
+                                                                    </span>
+                                                                    <span class="pull-right count-values" data-kode="{{grp.kode}}"></span>
+                                                                    <span><i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="G" data-id="{{grp.id}}"></i></span>
+                                                                </li>
+                                                                <ul class="feeds" style="margin-left: 20px">
+                                                                    @each(val in grp.akun)
+                                                                        <li class="b-b item-coa">
+                                                                            {{val.coa_name}}
+                                                                            <span class="pull-left m-r-10">
+                                                                                @if(val.is_akun != 'A')
+                                                                                    <i class="ti-folder" style="color:white"></i>
+                                                                                @else
+                                                                                    <i class="ti-control-forward" style="color:white"></i>
+                                                                                @endif
+                                                                            </span>
+                                                                            <span class="pull-right count-values" data-kode="{{val.kode}}">
+                                                                                {{val.alias ? val.alias : ''}}
+                                                                                <i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="A" data-id="{{val.id}}"></i>
+                                                                            </span>
+                                                                        </li>
+                                                                    @endeach
+                                                                </ul>
+                                                            @endeach
+                                                        @endif
+                                                        @if(obj.akun.length > 0)
+                                                            @each(elm in obj.akun)
+                                                                <li class="b-b item-coa">
+                                                                    {{elm.coa_name}}
+                                                                    <span class="pull-left m-r-10">
+                                                                        <i class="ti-control-forward" style="color:white"></i>
+                                                                    </span>
+                                                                    <span class="pull-right count-values" data-kode="{{elm.kode}}">
+                                                                        {{val.alias ? val.alias : ''}}
+                                                                        <i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="A" data-id="{{elm.id}}"></i>
+                                                                    </span>
+                                                                </li>
+                                                            @endeach
+                                                          
+                                                        @endif
+                                                    </ul>
+                                                @endeach
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer"> Panel Footer </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="init-form"></div>
+@endsection

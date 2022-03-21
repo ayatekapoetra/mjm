@@ -1,11 +1,10 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * (c) 2009-2021 Torstein Honsi
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -20,13 +19,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Core/Axis/BrokenAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (Axis, Series, StackItem, U) {
+    _registerModule(_modules, 'Core/Axis/BrokenAxis.js', [_modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (StackItem, U) {
         /* *
          *
          *  (c) 2009-2021 Torstein Honsi
@@ -42,13 +51,28 @@
             isArray = U.isArray,
             isNumber = U.isNumber,
             pick = U.pick;
+        /* *
+         *
+         *  Composition
+         *
+         * */
         /**
          * Axis with support of broken data rows.
          * @private
-         * @class
          */
         var BrokenAxis;
         (function (BrokenAxis) {
+            /* *
+             *
+             *  Declarations
+             *
+             * */
+            /* *
+             *
+             *  Constants
+             *
+             * */
+            var composedClasses = [];
             /* *
              *
              *  Functions
@@ -60,15 +84,19 @@
              * @private
              */
             function compose(AxisClass, SeriesClass) {
-                if (AxisClass.keepProps.indexOf('brokenAxis') === -1) {
+                if (composedClasses.indexOf(AxisClass) === -1) {
+                    composedClasses.push(AxisClass);
                     AxisClass.keepProps.push('brokenAxis');
-                    var seriesProto = Series.prototype;
+                    addEvent(AxisClass, 'init', onAxisInit);
+                    addEvent(AxisClass, 'afterInit', onAxisAfterInit);
+                    addEvent(AxisClass, 'afterSetTickPositions', onAxisAfterSetTickPositions);
+                    addEvent(AxisClass, 'afterSetOptions', onAxisAfterSetOptions);
+                }
+                if (composedClasses.indexOf(SeriesClass) === -1) {
+                    composedClasses.push(SeriesClass);
+                    var seriesProto = SeriesClass.prototype;
                     seriesProto.drawBreaks = seriesDrawBreaks;
                     seriesProto.gappedPath = seriesGappedPath;
-                    addEvent(AxisClass, 'init', onInit);
-                    addEvent(AxisClass, 'afterInit', onAfterInit);
-                    addEvent(AxisClass, 'afterSetTickPositions', onAfterSetTickPositions);
-                    addEvent(AxisClass, 'afterSetOptions', onAfterSetOptions);
                     addEvent(SeriesClass, 'afterGeneratePoints', onSeriesAfterGeneratePoints);
                     addEvent(SeriesClass, 'afterRender', onSeriesAfterRender);
                 }
@@ -78,7 +106,7 @@
             /**
              * @private
              */
-            function onAfterInit() {
+            function onAxisAfterInit() {
                 if (typeof this.brokenAxis !== 'undefined') {
                     this.brokenAxis.setBreaks(this.options.breaks, false);
                 }
@@ -87,7 +115,7 @@
              * Force Axis to be not-ordinal when breaks are defined.
              * @private
              */
-            function onAfterSetOptions() {
+            function onAxisAfterSetOptions() {
                 var axis = this;
                 if (axis.brokenAxis && axis.brokenAxis.hasBreaks) {
                     axis.options.ordinal = false;
@@ -96,7 +124,7 @@
             /**
              * @private
              */
-            function onAfterSetTickPositions() {
+            function onAxisAfterSetTickPositions() {
                 var axis = this,
                     brokenAxis = axis.brokenAxis;
                 if (brokenAxis &&
@@ -116,7 +144,7 @@
             /**
              * @private
              */
-            function onInit() {
+            function onAxisInit() {
                 var axis = this;
                 if (!axis.brokenAxis) {
                     axis.brokenAxis = new Additions(axis);
@@ -190,8 +218,11 @@
                                         (threshold > brk.from && y < brk.from)) {
                                         eventName = 'pointBreak';
                                     }
-                                    else if ((threshold < brk.from && y > brk.from && y < brk.to) ||
-                                        (threshold > brk.from && y > brk.to && y < brk.from)) {
+                                    else if ((threshold < brk.from &&
+                                        y > brk.from &&
+                                        y < brk.to) || (threshold > brk.from &&
+                                        y > brk.to &&
+                                        y < brk.from)) {
                                         eventName = 'pointInBreak';
                                     }
                                     if (eventName) {
@@ -310,12 +341,9 @@
                                 isNull: true,
                                 x: xRange
                             });
-                            // For stacked chart generate empty stack items,
-                            // #6546
+                            // For stacked chart generate empty stack items, #6546
                             if (yAxis.stacking && this.options.stacking) {
-                                stack = yAxis.stacking.stacks[this.stackKey][xRange] =
-                                    new StackItem(yAxis, yAxis.options
-                                        .stackLabels, false, xRange, this.stack);
+                                stack = yAxis.stacking.stacks[this.stackKey][xRange] = new StackItem(yAxis, yAxis.options.stackLabels, false, xRange, this.stack);
                                 stack.total = 0;
                             }
                         }
@@ -529,10 +557,10 @@
                                     newMax = newMin;
                                 }
                             }
-                            Axis.prototype.setExtremes.call(this, newMin, newMax, redraw, animation, eventArguments);
+                            axis.constructor.prototype.setExtremes.call(this, newMin, newMax, redraw, animation, eventArguments);
                         };
                         axis.setAxisTranslation = function () {
-                            Axis.prototype.setAxisTranslation.call(this);
+                            axis.constructor.prototype.setAxisTranslation.call(this);
                             brokenAxis.unitLength = void 0;
                             if (brokenAxis.hasBreaks) {
                                 var breaks_2 = axis.options.breaks || [], 
@@ -552,10 +580,12 @@
                                     repeat_1 = brk.repeat || Infinity;
                                     if (isNumber(min_1) && isNumber(max_1)) {
                                         if (Additions.isInBreak(brk, min_1)) {
-                                            min_1 += (brk.to % repeat_1) - (min_1 % repeat_1);
+                                            min_1 += ((brk.to % repeat_1) -
+                                                (min_1 % repeat_1));
                                         }
                                         if (Additions.isInBreak(brk, max_1)) {
-                                            max_1 -= (max_1 % repeat_1) - (brk.from % repeat_1);
+                                            max_1 -= ((max_1 % repeat_1) -
+                                                (brk.from % repeat_1));
                                         }
                                     }
                                 });
@@ -603,13 +633,17 @@
                                             to: brk.value,
                                             len: brk.value - start_1 - (brk.size || 0)
                                         });
-                                        length_1 += brk.value - start_1 - (brk.size || 0);
+                                        length_1 += (brk.value -
+                                            start_1 -
+                                            (brk.size || 0));
                                     }
                                 });
                                 brokenAxis.breakArray = breakArray_1;
                                 // Used with staticScale, and below the actual axis
                                 // length, when breaks are substracted.
-                                if (isNumber(min_1) && isNumber(max_1) && isNumber(axis.min)) {
+                                if (isNumber(min_1) &&
+                                    isNumber(max_1) &&
+                                    isNumber(axis.min)) {
                                     brokenAxis.unitLength = max_1 - min_1 - length_1 +
                                         pointRangePadding;
                                     fireEvent(axis, 'afterBreaks');

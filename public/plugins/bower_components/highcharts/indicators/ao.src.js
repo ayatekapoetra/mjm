@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Indicator series type for Highcharts Stock
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,13 +21,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Stock/Indicators/AO/AOIndicator.js', [_modules['Core/Globals.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js'], _modules['Core/Color/Palette.js']], function (H, SeriesRegistry, U, palette) {
+    _registerModule(_modules, 'Stock/Indicators/AO/AOIndicator.js', [_modules['Core/Globals.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (H, SeriesRegistry, U) {
         /* *
          *
          *  License: www.highcharts.com/license
@@ -210,7 +219,7 @@
                  * @type  {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
                  * @since 7.0.0
                  */
-                greaterBarColor: palette.positiveColor,
+                greaterBarColor: "#06b535" /* positiveColor */,
                 /**
                  * Color of the Awesome oscillator series bar that is lower than the
                  * previous one. Note that if a `color` is defined, the `color`
@@ -222,7 +231,7 @@
                  * @type  {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
                  * @since 7.0.0
                  */
-                lowerBarColor: palette.negativeColor,
+                lowerBarColor: "#f21313" /* negativeColor */,
                 threshold: 0,
                 groupPadding: 0.2,
                 pointPadding: 0.2,

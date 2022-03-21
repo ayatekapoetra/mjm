@@ -1,0 +1,74 @@
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-department') }}
+<div class="modal fade" id="filtermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Filter Data</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="">Nama Lengkap</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control inp-filter" name="nama">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Cabang</label>
+                        <div class="form-group">
+                            <select class="form-control inp-filter selectCabang" name="cabang_id" data-values="" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Department</label>
+                        <div class="form-group">
+                            <select class="form-control inp-filter selectDepartement" name="department_id" data-values="" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Handphone</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control inp-filter" name="phone">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Status Karyawan</label>
+                        <div class="form-group">
+                            <select class="form-control selectOptions" data-group="status-karyawan" name="sts_karyawan" data-values="" required></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Mulai Bergabung</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control inp-filter" name="start_date">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Hingga Bergabung</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control inp-filter" name="end_date">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="reset-filter" class="btn btn-default" data-dismiss="modal">Reset Filter</button>
+                <button type="button" id="apply-filter" class="btn btn-info" data-dismiss="modal">Apply Filter</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .select2-container {
+        height: auto;
+    }
+</style>
+<script>
+    $(function(){
+        $('select.select2x').select2()
+    })
+</script>

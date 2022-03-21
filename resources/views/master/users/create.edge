@@ -1,0 +1,83 @@
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-bisnis') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-coa') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">Nama Lengkap</label>
+                            <input type="text" name="nama_lengkap" class="form-control" value="" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Handphone</label>
+                            <input type="text" name="handphone" class="form-control" value="">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Telephone</label>
+                            <input type="text" name="telephone" class="form-control" required> 
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Jenkel</label>
+                            <select class="form-control" name="jenkel" required>
+                                <option value="m">Laki-laki</option>
+                                <option value="f">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Usertype</label>
+                            <select class="form-control selectOptions" name="usertype" data-group="user-groups" data-values="" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">Username</label>
+                            <input type="text" name="username" class="form-control" required> 
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Photo</label>
+                            <input type="file" name="photo" class="form-control text-right">
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="control-label">Alamat</label>
+                            <textarea class="form-control" name="alamat" id="alamat" rows="5"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  * @module highcharts/modules/stock
  * @requires highcharts
  *
@@ -11,9 +11,11 @@
  */
 'use strict';
 import Highcharts from '../../Core/Globals.js';
-import '../../Core/Axis/OrdinalAxis.js';
+import OrdinalAxis from '../../Core/Axis/OrdinalAxis.js';
+import DataModifyComposition from '../../Series/DataModifyComposition.js';
 import './broken-axis.src.js';
 import '../../Extensions/DataGrouping.js';
+import '../../Series/HLC/HLCSeries.js';
 import '../../Series/OHLC/OHLCSeries.js';
 import '../../Series/Candlestick/CandlestickSeries.js';
 import '../../Series/Flags/FlagsSeries.js';
@@ -27,3 +29,5 @@ G.Scrollbar = Scrollbar;
 G.StockChart = G.stockChart = StockChart.stockChart;
 // Compositions
 Scrollbar.compose(G.Axis);
+OrdinalAxis.compose(G.Axis, G.Series, G.Chart);
+DataModifyComposition.compose(G.Series, G.Axis, G.Point);

@@ -13,116 +13,55 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-6 col-sm-6 col-xs-12" id="select-bisnis">
-                <div class="panel">
-                    <div class="p-20">
-                        <div class="row">
-                            <div class="col-xs-8">
-                                <h2 class="m-t-0 font-medium">Pilih Bisnis Unit</h2>
-                                <h4 class="m-b-0">pada list dibawah ini...</h4>
-                            </div>
-                        </div>
-                    </div>
-                    {{ csrfField() }}
-                    @each(item in bisnis)
-                    <div class="panel-footer {{item.id === item.bisnis_id ? 'bg-inverse' : 'bg-extralight'}}">
-                        <ul class="earning-box">
-                            <li>
-                                <a href="#" class="list-unit-bisnis" data-id="{{item.id}}">
-                                    <div class="er-row">
-                                        <div class="er-pic"><img src="{{ assetsUrl('/plugins/images/company-icon.png') }}" alt="varun" width="60" class="img-circle"></div>
-                                        <div class="er-text">
-                                            <h3> {{item.name}} </h3>
-                                            <span class="text-muted">{{item.alamat}}</span>
-                                            <p>
-                                                <small>{{item.id === item.bisnis_id ? 'working here...' : ''}}</small>
-                                            </p>
-                                        </div>
-                                        <div class="er-count ">{{item.initial}}</div>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    @endeach
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="white-box">
+                    <h3 class="box-title">Pelanggan</h3>
+                    <ul class="list-inline two-part">
+                        <li><i class="icon-people text-info"></i></li>
+                        <li class="text-right"><span class="counter">23</span></li>
+                    </ul>
                 </div>
             </div>
-            <div class="col-lg-6 col-sm-6 col-xs-12">
-                <div class="news-slide m-b-30 dashboard-slide">
-                    <div class="vcarousel slide">
-                        <!-- Carousel items -->
-                        <div class="carousel-inner" style="max-height: 400px;">
-                            <div class="active item">
-                                <div class="overlaybg"><img src="../plugins/images/slide11.jpg" alt="slide1" style="object-fit: cover" /></div>
-                                <div class="news-content">
-                                    <span class="label label-danger label-rounded">P5M</span>
-                                    <h3>P5M oleh pak Roni, materi penyampaian internal memo terbaru</h3> 
-                                    <a href="#">Read More</a>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="overlaybg"><img src="../plugins/images/slide22.jpg" alt="slide2" style="object-fit: cover"/></div>
-                                <div class="news-content">
-                                    <span class="label label-primary label-rounded">P2H</span>
-                                    <h3>Aktifitas P2H oleh pengawas</h3> 
-                                    <a href="#">Read More</a>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="overlaybg"><img src="../plugins/images/slide33.jpg" alt="slide3" style="object-fit: cover"/></div>
-                                <div class="news-content">
-                                    <span class="label label-success label-rounded">Support</span>
-                                    <h3>Maintenance Jalan di simpang 3 oleh unit</h3> 
-                                    <a href="#">Read More</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="white-box">
+                    <h3 class="box-title">Total Bill</h3>
+                    <ul class="list-inline two-part">
+                        <li><i class="icon-folder text-purple"></i></li>
+                        <li class="text-right"><span class="counter">169</span></li>
+                    </ul>
                 </div>
             </div>
-            <div class="col-lg-12 col-sm-12 col-xs-12">
-                <div class="row">
-
-                    <div class="col-lg-6 col-sm-6 col-xs-12">
-                        <div class="white-box">
-                            <h3 class="box-title">NEW SITE</h3>
-                            <ul class="list-inline two-part">
-                                <li><i class="icon-people text-info"></i></li>
-                                <li class="text-right"><span class="counter">2</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-sm-6 col-xs-12">
-                        <div class="white-box">
-                            <h3 class="box-title">TOT FLEET</h3>
-                            <ul class="list-inline two-part">
-                                <li><i class="icon-folder text-purple"></i></li>
-                                <li class="text-right"><span class="counter">7</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-sm-6 col-xs-12">
-                        <div class="white-box">
-                            <h3 class="box-title">BCM Target</h3>
-                            <ul class="list-inline two-part">
-                                <li><i class="icon-folder-alt text-danger"></i></li>
-                                <li class="text-right"><span class="">30K</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-sm-6 col-xs-12">
-                        <div class="white-box">
-                            <h3 class="box-title">BCM Actual</h3>
-                            <ul class="list-inline two-part">
-                                <li><i class="ti-wallet text-success"></i></li>
-                                <li class="text-right"><span class="">32K</span></li>
-                            </ul>
-                        </div>
-                    </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="white-box">
+                    <h3 class="box-title">Total Kas</h3>
+                    <ul class="list-inline two-part">
+                        <li><i class="icon-folder-alt text-danger"></i></li>
+                        <li class="text-right"><span class="">311</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="white-box">
+                    <h3 class="box-title">Tagihan</h3>
+                    <ul class="list-inline two-part">
+                        <li><i class="ti-wallet text-success"></i></li>
+                        <li class="text-right"><span class="">117</span></li>
+                    </ul>
                 </div>
             </div>
         </div>
-        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="white-box">
+                    <div id="container"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="white-box">
+                    <div id="container-donat"></div>
+                </div>
+            </div>
+        </div>
     </div>
     <!--
     <script>
@@ -172,5 +111,140 @@
                 })
             })
     })
+    </script>
+
+    <script>
+        $(function(){
+            Highcharts.chart('container', {
+                chart: {
+                    backgroundColor: '#2f323e'
+                },
+                title: {
+                    text: 'Solar Employment Growth by Sector, 2010-2016'
+                },
+
+                subtitle: {
+                    text: 'Source: thesolarfoundation.com'
+                },
+
+                yAxis: {
+                    title: {
+                        text: 'Number of Employees'
+                    }
+                },
+
+                xAxis: {
+                    accessibility: {
+                        rangeDescription: 'Range: 2010 to 2017'
+                    }
+                },
+
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle'
+                },
+
+                plotOptions: {
+                    series: {
+                        label: {
+                            connectorAllowed: false
+                        },
+                        pointStart: 2010
+                    }
+                },
+
+                series: [{
+                    name: 'Installation',
+                    data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
+                }, {
+                    name: 'Manufacturing',
+                    data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
+                }, {
+                    name: 'Sales & Distribution',
+                    data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387]
+                }, {
+                    name: 'Project Development',
+                    data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227]
+                }, {
+                    name: 'Other',
+                    data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111]
+                }],
+
+                responsive: {
+                    rules: [{
+                        condition: {
+                            maxWidth: 500
+                        },
+                        chartOptions: {
+                            legend: {
+                                layout: 'horizontal',
+                                align: 'center',
+                                verticalAlign: 'bottom'
+                            }
+                        }
+                    }]
+                }
+
+            });
+
+            Highcharts.chart('container-donat', {
+                chart: {
+                    backgroundColor: '#2f323e',
+                    plotBackgroundColor: null,
+                    plotBorderWidth: 0,
+                    plotShadow: false
+                },
+                title: {
+                    text: 'Browser<br>shares<br>2017',
+                    align: 'center',
+                    verticalAlign: 'middle',
+                    y: 60
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                accessibility: {
+                    point: {
+                        valueSuffix: '%'
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        dataLabels: {
+                            enabled: true,
+                            distance: -50,
+                            style: {
+                                fontWeight: 'bold',
+                                color: 'white'
+                            }
+                        },
+                        startAngle: -90,
+                        endAngle: 90,
+                        center: ['50%', '75%'],
+                        size: '110%'
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Browser share',
+                    innerSize: '50%',
+                    data: [
+                        ['Chrome', 58.9],
+                        ['Firefox', 13.29],
+                        ['Internet Explorer', 13],
+                        ['Edge', 3.78],
+                        ['Safari', 3.42],
+                        {
+                            name: 'Other',
+                            y: 7.61,
+                            dataLabels: {
+                                enabled: false
+                            }
+                        }
+                    ]
+                }]
+            });
+        })
     </script>
 @endsection

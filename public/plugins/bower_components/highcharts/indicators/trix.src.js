@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Indicator series type for Highcharts Stock
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,75 +21,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Mixins/IndicatorRequired.js', [_modules['Core/Utilities.js']], function (U) {
-        /**
-         *
-         *  (c) 2010-2021 Daniel Studencki
-         *
-         *  License: www.highcharts.com/license
-         *
-         *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
-         *
-         * */
-        var error = U.error;
-        /* eslint-disable no-invalid-this, valid-jsdoc */
-        var requiredIndicatorMixin = {
-                /**
-                 * Check whether given indicator is loaded,
-            else throw error.
-                 * @private
-                 * @param {Highcharts.Indicator} indicator
-                 *        Indicator constructor function.
-                 * @param {string} requiredIndicator
-                 *        Required indicator type.
-                 * @param {string} type
-                 *        Type of indicator where function was called (parent).
-                 * @param {Highcharts.IndicatorCallbackFunction} callback
-                 *        Callback which is triggered if the given indicator is loaded.
-                 *        Takes indicator as an argument.
-                 * @param {string} errMessage
-                 *        Error message that will be logged in console.
-                 * @return {boolean}
-                 *         Returns false when there is no required indicator loaded.
-                 */
-                isParentLoaded: function (indicator,
-            requiredIndicator,
-            type,
-            callback,
-            errMessage) {
-                    if (indicator) {
-                        return callback ? callback(indicator) : true;
-                }
-                error(errMessage || this.generateMessage(type, requiredIndicator));
-                return false;
-            },
-            /**
-             * @private
-             * @param {string} indicatorType
-             *        Indicator type
-             * @param {string} required
-             *        Required indicator
-             * @return {string}
-             *         Error message
-             */
-            generateMessage: function (indicatorType, required) {
-                return 'Error: "' + indicatorType +
-                    '" indicator type requires "' + required +
-                    '" indicator loaded before. Please read docs: ' +
-                    'https://api.highcharts.com/highstock/plotOptions.' +
-                    indicatorType;
-            }
-        };
-
-        return requiredIndicatorMixin;
-    });
-    _registerModule(_modules, 'Stock/Indicators/TRIX/TRIXIndicator.js', [_modules['Mixins/IndicatorRequired.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (RequiredIndicatorMixin, SeriesRegistry, U) {
+    _registerModule(_modules, 'Stock/Indicators/TRIX/TRIXIndicator.js', [_modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (SeriesRegistry, U) {
         /* *
          *
          *  License: www.highcharts.com/license
@@ -136,14 +83,6 @@
                 _this.points = void 0;
                 return _this;
             }
-            TRIXIndicator.prototype.init = function () {
-                var args = arguments,
-                    ctx = this;
-                RequiredIndicatorMixin.isParentLoaded(SeriesRegistry.seriesTypes.tema, 'tema', ctx.type, function (indicator) {
-                    indicator.prototype.init.apply(ctx, args);
-                    return;
-                });
-            };
             // TRIX is calculated using TEMA so we just extend getTemaPoint method.
             TRIXIndicator.prototype.getTemaPoint = function (xVal, tripledPeriod, EMAlevels, i) {
                 if (i > tripledPeriod) {
@@ -159,11 +98,8 @@
              * Triple exponential average (TRIX) oscillator. This series requires
              * `linkedTo` option to be set.
              *
-             * Requires https://code.highcharts.com/stock/indicators/ema.js
-             * and https://code.highcharts.com/stock/indicators/tema.js.
-             *
              * @sample {highstock} stock/indicators/trix
-             *         TRIX indicator
+             * TRIX indicator
              *
              * @extends      plotOptions.tema
              * @since        7.0.0
@@ -172,6 +108,9 @@
              *               navigatorOptions, pointInterval, pointIntervalUnit,
              *               pointPlacement, pointRange, pointStart, showInNavigator,
              *               stacking
+             * @requires     stock/indicators/indicators
+             * @requires     stock/indicators/tema
+             * @requires     stock/indicators/trix
              * @optionparent plotOptions.trix
              */
             TRIXIndicator.defaultOptions = merge(TEMAIndicator.defaultOptions);
@@ -193,6 +132,8 @@
          * @excluding allAreas, colorAxis, compare, compareBase, dataParser, dataURL,
          *            joinBy, keys, navigatorOptions, pointInterval, pointIntervalUnit,
          *            pointPlacement, pointRange, pointStart, showInNavigator, stacking
+         * @requires  stock/indicators/indicators
+         * @requires  stock/indicators/tema
          * @apioption series.trix
          */
         ''; // to include the above in the js output

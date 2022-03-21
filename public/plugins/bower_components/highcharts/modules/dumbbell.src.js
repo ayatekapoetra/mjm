@@ -1,11 +1,10 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * (c) 2009-2021 Sebastian Bochan, Rafal Sebestjanski
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -20,10 +19,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Series/AreaRange/AreaRangePoint.js', [_modules['Series/Area/AreaSeries.js'], _modules['Core/Series/Point.js'], _modules['Core/Utilities.js']], function (AreaSeries, Point, U) {
@@ -224,7 +233,6 @@
              * @private
              * @param {Highcharts.Point} this The point to inspect.
              *
-             * @return {void}
              */
             DumbbellPoint.prototype.setState = function () {
                 var point = this,
@@ -289,7 +297,7 @@
 
         return DumbbellPoint;
     });
-    _registerModule(_modules, 'Series/Dumbbell/DumbbellSeries.js', [_modules['Series/Column/ColumnSeries.js'], _modules['Series/Dumbbell/DumbbellPoint.js'], _modules['Core/Globals.js'], _modules['Core/Color/Palette.js'], _modules['Core/Series/Series.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (ColumnSeries, DumbbellPoint, H, palette, Series, SeriesRegistry, SVGRenderer, U) {
+    _registerModule(_modules, 'Series/Dumbbell/DumbbellSeries.js', [_modules['Series/Column/ColumnSeries.js'], _modules['Series/Dumbbell/DumbbellPoint.js'], _modules['Core/Globals.js'], _modules['Core/Series/Series.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (ColumnSeries, DumbbellPoint, H, Series, SeriesRegistry, SVGRenderer, U) {
         /* *
          *
          *  (c) 2010-2021 Sebastian Bochan, Rafal Sebestjanski
@@ -453,7 +461,6 @@
              *
              * @param {Highcharts.Point} point The point to inspect.
              *
-             * @return {void}
              */
             DumbbellSeries.prototype.drawConnector = function (point) {
                 var series = this,
@@ -499,7 +506,6 @@
              *
              * @param {Highcharts.Series} this The series of points.
              *
-             * @return {void}
              */
             DumbbellSeries.prototype.translate = function () {
                 // Calculate shapeargs
@@ -525,7 +531,6 @@
              *
              * @param {Highcharts.Series} this The series of points.
              *
-             * @return {void}
              */
             DumbbellSeries.prototype.drawPoints = function () {
                 var series = this,
@@ -647,7 +652,7 @@
                  * @since 8.0.0
                  * @product   highcharts highstock
                  */
-                lowColor: palette.neutralColor80,
+                lowColor: "#333333" /* neutralColor80 */,
                 /**
                  * Color of the line that connects the dumbbell point's values.
                  * By default it is the series' color.
@@ -787,7 +792,7 @@
          *
          * @type        {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
          * @since       8.0.0
-         * @default     ${palette.neutralColor80}
+         * @default     #333333
          * @product     highcharts highstock
          * @apioption   series.dumbbell.data.lowColor
          */

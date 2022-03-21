@@ -1,0 +1,34 @@
+{
+  "RECORDS": [
+    {
+      "user_id": "1",
+      "menu_id": "1",
+      "submenu_id": "1",
+      "aktif": "Y"
+    },
+    {
+      "user_id": "1",
+      "menu_id": "1",
+      "submenu_id": "2",
+      "aktif": "Y"
+    },
+    {
+      "user_id": "1",
+      "menu_id": "4",
+      "submenu_id": "3",
+      "aktif": "Y"
+    },
+    {
+      "user_id": "1",
+      "menu_id": "2",
+      "submenu_id": "5",
+      "aktif": "Y"
+    },
+    {
+      "user_id": "1",
+      "menu_id": "2",
+      "submenu_id": "4",
+      "aktif": "Y"
+    }
+  ]
+}

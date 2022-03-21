@@ -1,12 +1,11 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * (c) 2010-2021 Highsoft AS
  * Author: Sebastian Domas
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -21,13 +20,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Mixins/DerivedSeries.js', [_modules['Core/Globals.js'], _modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (H, Series, U) {
+    _registerModule(_modules, 'Series/DerivedComposition.js', [_modules['Core/Globals.js'], _modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (H, Series, U) {
         /* *
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
@@ -36,122 +45,137 @@
         var noop = H.noop;
         var addEvent = U.addEvent,
             defined = U.defined;
-        /* ************************************************************************** *
+        /* *
          *
-         * DERIVED SERIES MIXIN
+         *  Composition
          *
-         * ************************************************************************** */
+         * */
         /**
          * Provides methods for auto setting/updating series data based on the based
          * series data.
-         *
          * @private
-         * @mixin derivedSeriesMixin
          */
-        var derivedSeriesMixin = {
-                hasDerivedData: true,
-                /* eslint-disable valid-jsdoc */
-                /**
-                 * Initialise series
-                 *
-                 * @private
-                 * @function derivedSeriesMixin.init
-                 * @return {void}
-                 */
-                init: function () {
-                    Series.prototype.init.apply(this,
-            arguments);
-                this.initialised = false;
-                this.baseSeries = null;
-                this.eventRemovers = [];
-                this.addEvents();
-            },
+        var DerivedComposition;
+        (function (DerivedComposition) {
+            /* *
+             *
+             *  Declarations
+             *
+             * */
+            /* *
+             *
+             *  Constants
+             *
+             * */
+            var composedClasses = [];
+            DerivedComposition.hasDerivedData = true;
             /**
              * Method to be implemented - inside the method the series has already
              * access to the base series via m `this.baseSeries` and the bases data is
              * initialised. It should return data in the format accepted by
              * `Series.setData()` method
-             *
              * @private
-             * @function derivedSeriesMixin.setDerivedData
-             * @return {Array<Highcharts.PointOptionsType>}
-             *         An array of data
              */
-            setDerivedData: noop,
+            DerivedComposition.setDerivedData = noop;
+            /* *
+             *
+             *  Functions
+             *
+             * */
+            /* eslint-disable valid-jsdoc */
+            /**
+             * @private
+             */
+            function compose(SeriesClass) {
+                if (composedClasses.indexOf(SeriesClass) === -1) {
+                    composedClasses.push(SeriesClass);
+                    var seriesProto = SeriesClass.prototype;
+                    seriesProto.addBaseSeriesEvents = addBaseSeriesEvents;
+                    seriesProto.addEvents = addEvents;
+                    seriesProto.destroy = destroy;
+                    seriesProto.init = init;
+                    seriesProto.setBaseSeries = setBaseSeries;
+                }
+                return SeriesClass;
+            }
+            DerivedComposition.compose = compose;
+            /**
+             * Initialise series
+             * @private
+             */
+            function init() {
+                Series.prototype.init.apply(this, arguments);
+                this.initialised = false;
+                this.baseSeries = null;
+                this.eventRemovers = [];
+                this.addEvents();
+            }
+            DerivedComposition.init = init;
             /**
              * Sets base series for the series
-             *
              * @private
-             * @function derivedSeriesMixin.setBaseSeries
-             * @return {void}
              */
-            setBaseSeries: function () {
+            function setBaseSeries() {
                 var chart = this.chart,
                     baseSeriesOptions = this.options.baseSeries,
                     baseSeries = (defined(baseSeriesOptions) &&
                         (chart.series[baseSeriesOptions] ||
                             chart.get(baseSeriesOptions)));
                 this.baseSeries = baseSeries || null;
-            },
+            }
+            DerivedComposition.setBaseSeries = setBaseSeries;
             /**
              * Adds events for the series
-             *
              * @private
-             * @function derivedSeriesMixin.addEvents
-             * @return {void}
              */
-            addEvents: function () {
-                var derivedSeries = this,
-                    chartSeriesLinked;
-                chartSeriesLinked = addEvent(this.chart, 'afterLinkSeries', function () {
-                    derivedSeries.setBaseSeries();
-                    if (derivedSeries.baseSeries && !derivedSeries.initialised) {
-                        derivedSeries.setDerivedData();
-                        derivedSeries.addBaseSeriesEvents();
-                        derivedSeries.initialised = true;
+            function addEvents() {
+                var _this = this;
+                this.eventRemovers.push(addEvent(this.chart, 'afterLinkSeries', function () {
+                    _this.setBaseSeries();
+                    if (_this.baseSeries && !_this.initialised) {
+                        _this.setDerivedData();
+                        _this.addBaseSeriesEvents();
+                        _this.initialised = true;
                     }
-                });
-                this.eventRemovers.push(chartSeriesLinked);
-            },
+                }));
+            }
+            DerivedComposition.addEvents = addEvents;
             /**
              * Adds events to the base series - it required for recalculating the data
              * in the series if the base series is updated / removed / etc.
-             *
              * @private
-             * @function derivedSeriesMixin.addBaseSeriesEvents
-             * @return {void}
              */
-            addBaseSeriesEvents: function () {
-                var derivedSeries = this,
-                    updatedDataRemover,
-                    destroyRemover;
-                updatedDataRemover = addEvent(derivedSeries.baseSeries, 'updatedData', function () {
-                    derivedSeries.setDerivedData();
-                });
-                destroyRemover = addEvent(derivedSeries.baseSeries, 'destroy', function () {
-                    derivedSeries.baseSeries = null;
-                    derivedSeries.initialised = false;
-                });
-                derivedSeries.eventRemovers.push(updatedDataRemover, destroyRemover);
-            },
+            function addBaseSeriesEvents() {
+                var _this = this;
+                this.eventRemovers.push(addEvent(this.baseSeries, 'updatedData', function () {
+                    _this.setDerivedData();
+                }), addEvent(this.baseSeries, 'destroy', function () {
+                    _this.baseSeries = null;
+                    _this.initialised = false;
+                }));
+            }
+            DerivedComposition.addBaseSeriesEvents = addBaseSeriesEvents;
             /**
              * Destroys the series
-             *
              * @private
-             * @function derivedSeriesMixin.destroy
              */
-            destroy: function () {
+            function destroy() {
                 this.eventRemovers.forEach(function (remover) {
                     remover();
                 });
                 Series.prototype.destroy.apply(this, arguments);
             }
-            /* eslint-disable valid-jsdoc */
-        };
+            DerivedComposition.destroy = destroy;
+        })(DerivedComposition || (DerivedComposition = {}));
+        /* *
+         *
+         *  Default Export
+         *
+         * */
 
-        return derivedSeriesMixin;
+        return DerivedComposition;
     });
-    _registerModule(_modules, 'Series/Histogram/HistogramSeries.js', [_modules['Mixins/DerivedSeries.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (DerivedSeriesMixin, SeriesRegistry, U) {
+    _registerModule(_modules, 'Series/Histogram/HistogramSeries.js', [_modules['Series/DerivedComposition.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (DerivedComposition, SeriesRegistry, U) {
         /* *
          *
          *  Copyright (c) 2010-2021 Highsoft AS
@@ -207,9 +231,9 @@
         /**
          * Returns a function for mapping number to the closed (right opened) bins
          * @private
-         * @param {Array<number>} bins - Width of the bins
-         * @return {Function}
-         **/
+         * @param {Array<number>} bins
+         * Width of the bins
+         */
         function fitToBinLeftClosed(bins) {
             return function (y) {
                 var i = 1;
@@ -359,7 +383,7 @@
                  * which takes a `baseSeries` as a parameter and should return a
                  * positive integer.
                  *
-                 * @type {"square-root"|"sturges"|"rice"|number|function}
+                 * @type {"square-root"|"sturges"|"rice"|number|Function}
                  */
                 binsNumber: 'square-root',
                 /**
@@ -385,13 +409,9 @@
             return HistogramSeries;
         }(ColumnSeries));
         extend(HistogramSeries.prototype, {
-            addBaseSeriesEvents: DerivedSeriesMixin.addBaseSeriesEvents,
-            addEvents: DerivedSeriesMixin.addEvents,
-            destroy: DerivedSeriesMixin.destroy,
-            hasDerivedData: DerivedSeriesMixin.hasDerivedData,
-            init: DerivedSeriesMixin.init,
-            setBaseSeries: DerivedSeriesMixin.setBaseSeries
+            hasDerivedData: DerivedComposition.hasDerivedData
         });
+        DerivedComposition.compose(HistogramSeries);
         SeriesRegistry.registerSeriesType('histogram', HistogramSeries);
         /* *
          *
@@ -425,7 +445,7 @@
 
         return HistogramSeries;
     });
-    _registerModule(_modules, 'Series/Bellcurve/BellcurveSeries.js', [_modules['Mixins/DerivedSeries.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (DerivedSeriesMixin, SeriesRegistry, U) {
+    _registerModule(_modules, 'Series/Bellcurve/BellcurveSeries.js', [_modules['Series/DerivedComposition.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (DerivedComposition, SeriesRegistry, U) {
         /* *
          *
          *  (c) 2010-2021 Highsoft AS
@@ -512,7 +532,8 @@
             BellcurveSeries.standardDeviation = function (data, average) {
                 var len = data.length,
                     sum;
-                average = isNumber(average) ? average : BellcurveSeries.mean(data);
+                average = isNumber(average) ?
+                    average : BellcurveSeries.mean(data);
                 sum = data.reduce(function (sum, value) {
                     var diff = value - average;
                     return (sum += diff * diff);
@@ -621,13 +642,7 @@
             });
             return BellcurveSeries;
         }(AreaSplineSeries));
-        extend(BellcurveSeries.prototype, {
-            addBaseSeriesEvents: DerivedSeriesMixin.addBaseSeriesEvents,
-            addEvents: DerivedSeriesMixin.addEvents,
-            destroy: DerivedSeriesMixin.destroy,
-            init: DerivedSeriesMixin.init,
-            setBaseSeries: DerivedSeriesMixin.setBaseSeries
-        });
+        DerivedComposition.compose(BellcurveSeries);
         SeriesRegistry.registerSeriesType('bellcurve', BellcurveSeries);
         /* *
          *

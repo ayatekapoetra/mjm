@@ -1,5 +1,5 @@
 /**
- * @license Highmaps JS v9.1.2 (2021-06-16)
+ * @license Highmaps JS v10.0.0 (2022-03-07)
  *
  * Tilemap module
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,13 +21,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Series/Tilemap/TilemapPoint.js', [_modules['Mixins/ColorSeries.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (ColorSeriesModule, SeriesRegistry, U) {
+    _registerModule(_modules, 'Series/Tilemap/TilemapPoint.js', [_modules['Core/Axis/Color/ColorAxisComposition.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (ColorAxisComposition, SeriesRegistry, U) {
         /* *
          *
          *  Tilemaps module
@@ -57,7 +66,6 @@
                 d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
             };
         })();
-        var colorPointMixin = ColorSeriesModule.colorPointMixin;
         var Point = SeriesRegistry.series.prototype.pointClass,
             HeatmapPoint = SeriesRegistry.seriesTypes.heatmap.prototype.pointClass;
         var extend = U.extend;
@@ -92,8 +100,6 @@
             /**
              * @private
              * @function Highcharts.Point#haloPath
-             *
-             * @return {Highcharts.SVGElement|Highcharts.SVGPathArray|Array<Highcharts.SVGElement>}
              */
             TilemapPoint.prototype.haloPath = function () {
                 return this.series.tileShape.haloPath.apply(this, arguments);
@@ -102,7 +108,7 @@
         }(HeatmapPoint));
         extend(TilemapPoint.prototype, {
             setState: Point.prototype.setState,
-            setVisible: colorPointMixin.setVisible
+            setVisible: ColorAxisComposition.pointSetVisible
         });
         /* *
          *
@@ -134,13 +140,6 @@
         /**
          * Utility func to get padding definition from tile size division
          * @private
-         * @param {Highcharts.TilemapSeries} series
-         * series
-         * @param {Highcharts.number} xDiv
-         * xDiv
-         * @param {Highcharts.number} yDiv
-         * yDiv
-         * @return {Highcharts.TilemapPaddingObject}
          */
         function tilePaddingFromTileSize(series, xDiv, yDiv) {
             var options = series.options;

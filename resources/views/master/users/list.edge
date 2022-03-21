@@ -1,0 +1,74 @@
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="50" class="bg-inverse b-all">ACT</th>
+                            <th width="200" class="bg-inverse b-all">Nama Lengkap</th>
+                            <th width="100" class="bg-inverse b-all">Username</th>
+                            <th width="100" class="bg-inverse b-all">Usertype</th>
+                            <th width="150" class="bg-inverse b-all">phone</th>
+                            <th width="250" class="bg-inverse b-all">Alamat</th>
+                            <th width="70" width="150" class="text-center bg-inverse b-all">Images</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td>
+                                    <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                </td>
+                                <td>
+                                    <strong class="text-capitalize">{{item.nama_lengkap}}</strong>
+                                </td>
+                                <td>
+                                    {{item.username}}
+                                </td>
+                                <td>
+                                    {{item.usertype}}
+                                </td>
+                                <td>
+                                    {{item.handphone}}
+                                </td>
+                                <td>
+                                    {{item.alamat}}
+                                </td>
+                                <td class="text-center">
+                                    @if(item.avatar)
+                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl(item.avatar) }}" title="{{item.nama_lengkap}}">
+                                            <img class="img-rounded" src="{{ assetsUrl(item.avatar) }}" width="50" height="50"/>
+                                        </a>
+                                    @else
+                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl('images/ximg_not_found.jpeg') }}" title="{{item.nama_lengkap}}">
+                                            <img class="img-rounded" src="{{ assetsUrl('images/ximg_not_found.jpeg') }}" width="50"/>
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

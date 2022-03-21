@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Indicator series type for Highcharts Stock
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Stock/Indicators/IKH/IKHIndicator.js', [_modules['Core/Color/Color.js'], _modules['Core/Globals.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (Color, H, SeriesRegistry, U) {
@@ -409,16 +418,14 @@
                             }
                             else {
                                 // Compare middle point of the section
-                                concatArrIndex =
-                                    sectionPoints[x].plotY > sectionNextPoints[x].plotY ? 0 : 1;
+                                concatArrIndex = (sectionPoints[x].plotY > sectionNextPoints[x].plotY) ? 0 : 1;
                                 points[concatArrIndex] = points[concatArrIndex].concat(sectionPoints);
                                 nextPoints[concatArrIndex] = nextPoints[concatArrIndex].concat(sectionNextPoints);
                             }
                         }
                         else {
                             // Compare first point of the section
-                            concatArrIndex =
-                                sectionPoints[0].plotY > sectionNextPoints[0].plotY ? 0 : 1;
+                            concatArrIndex = (sectionPoints[0].plotY > sectionNextPoints[0].plotY) ? 0 : 1;
                             points[concatArrIndex] = points[concatArrIndex].concat(sectionPoints);
                             nextPoints[concatArrIndex] = nextPoints[concatArrIndex].concat(sectionNextPoints);
                         }
@@ -478,7 +485,8 @@
                     indicator.nextPoints);
                     if (spanA && spanA.length) {
                         spanA[0][0] = 'L';
-                        path = SeriesRegistry.seriesTypes.sma.prototype.getGraphPath.call(indicator, points);
+                        path = SeriesRegistry.seriesTypes.sma.prototype.getGraphPath
+                            .call(indicator, points);
                         spanAarr = spanA.slice(0, path.length);
                         for (var i = spanAarr.length - 1; i >= 0; i--) {
                             path.push(spanAarr[i]);
@@ -486,7 +494,8 @@
                     }
                 }
                 else {
-                    path = SeriesRegistry.seriesTypes.sma.prototype.getGraphPath.apply(indicator, arguments);
+                    path = SeriesRegistry.seriesTypes.sma.prototype.getGraphPath
+                        .apply(indicator, arguments);
                 }
                 return path;
             };

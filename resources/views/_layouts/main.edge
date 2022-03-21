@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <title>MakkuragaTama</title>
+    <title>Makassar Jaya Marine</title>
     {{--  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />  --}}
     
     
@@ -107,17 +107,16 @@
         <div id="page-wrapper" style="">
             <div class="container-fluid">
                 @!section('content')
-                @include('_layouts.sidebar_setting')
             </div>
             <footer class="footer" style="padding-left: 80px;">
                 <div class="pull-right hidden-xs">
-                    &copy; 2021 develop by <span class="text-primary">Ayat Ekapoetra</span> 
+                    &copy; 2022 develop by <span class="text-primary">Ayat Ekapoetra</span> 
                     <br>
                     <i class="ti-email"></i> ayat.ekapoetra@gmail.com
                 </div>
                 <div class="pull-left">
                     <h5>
-                        <span class="text-danger">MakkuragaTama</span> Personal license
+                        <span class="text-danger">Makassar Jaya Marine</span> Personal license
                     </h5>
                 </div>
             </footer>
@@ -219,6 +218,13 @@
     {{ script('js/jquery.PrintArea') }}
 
     {{ script('plugins/bower_components/terbilang-js/terbilang.min') }}
+
+    <!-- HIGHCHART -->
+    {{ script('plugins/bower_components/highcharts/highcharts') }}
+    {{ script('plugins/bower_components/highcharts/modules/exporting') }}
+    {{ script('plugins/bower_components/highcharts/modules/export-data') }}
+    {{ script('plugins/bower_components/highcharts/modules/drilldown') }}
+    {{ script('plugins/bower_components/highcharts/modules/accessibility') }}
     
     <script>
         var options = {

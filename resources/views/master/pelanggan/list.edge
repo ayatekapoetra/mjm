@@ -1,0 +1,66 @@
+{{ script('ajax/initNumber') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="50" class="bg-inverse b-all">ACT</th>
+                            <th width="250" class="bg-inverse b-all">Kode/Nama</th>
+                            <th width="150" class="bg-inverse b-all">Phone</th>
+                            <th width="150" class="bg-inverse b-all">Email</th>
+                            <th width="*" class="bg-inverse b-all">Alamat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td>
+                                    <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                </td>
+                                <td>
+                                    <small>{{item.kode}}</small><br>
+                                    <strong>{{item.nama}}</strong>
+                                </td>
+                                <td>
+                                    {{item.phone ? item.phone : ''}} 
+                                </td>
+                                <td>
+                                    {{item.email ? item.email : ''}}
+                                </td>
+                                <td>
+                                    @if(item.alamat_tagih)
+                                    <strong class="text-danger">Tagih :</strong> <span>{{item.alamat_tagih}}</span><br>
+                                    @endif
+
+                                    @if(item.alamat_kirim)
+                                    <strong class="text-success">Kirim :</strong> <span>{{item.alamat_kirim}}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

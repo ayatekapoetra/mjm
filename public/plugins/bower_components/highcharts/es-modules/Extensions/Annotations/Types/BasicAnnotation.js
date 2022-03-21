@@ -47,8 +47,11 @@ var BasicAnnotation = /** @class */ (function (_super) {
         var options = this.options;
         if (options.shapes) {
             delete options.labelOptions;
-            if (options.shapes[0].type === 'circle') {
-                this.basicType = 'circle';
+            var type = options.shapes[0].type;
+            // The rectangle is rendered as a path, whereas other basic shapes
+            // are rendered as their respecitve SVG shapes.
+            if (type && type !== 'path') {
+                this.basicType = type;
             }
             else {
                 this.basicType = 'rectangle';
@@ -166,6 +169,54 @@ var BasicAnnotation = /** @class */ (function (_super) {
                         annotation.userOptions.shapes[0].r = target.options.r;
                         annotation.userOptions.shapes[0].point =
                             target.options.point;
+                        target.redraw(false);
+                    }
+                }
+            }],
+        ellipse: [{
+                positioner: function (target) {
+                    var position = target.getAbsolutePosition(target.points[0]);
+                    return {
+                        x: position.x - this.graphic.width / 2,
+                        y: position.y - this.graphic.height / 2
+                    };
+                },
+                events: {
+                    drag: function (e, target) {
+                        var position = target.getAbsolutePosition(target.points[0]);
+                        target.translatePoint(e.chartX - position.x, e.chartY - position.y, 0);
+                        target.redraw(false);
+                    }
+                }
+            }, {
+                positioner: function (target) {
+                    var position = target.getAbsolutePosition(target.points[1]);
+                    return {
+                        x: position.x - this.graphic.width / 2,
+                        y: position.y - this.graphic.height / 2
+                    };
+                },
+                events: {
+                    drag: function (e, target) {
+                        var position = target.getAbsolutePosition(target.points[1]);
+                        target.translatePoint(e.chartX - position.x, e.chartY - position.y, 1);
+                        target.redraw(false);
+                    }
+                }
+            }, {
+                positioner: function (target) {
+                    var position = target.getAbsolutePosition(target.points[0]), position2 = target.getAbsolutePosition(target.points[1]), attrs = target.getAttrs(position, position2);
+                    return {
+                        x: attrs.cx - this.graphic.width / 2 +
+                            attrs.ry * Math.sin((attrs.angle * Math.PI) / 180),
+                        y: attrs.cy - this.graphic.height / 2 -
+                            attrs.ry * Math.cos((attrs.angle * Math.PI) / 180)
+                    };
+                },
+                events: {
+                    drag: function (e, target) {
+                        var position = target.getAbsolutePosition(target.points[0]), position2 = target.getAbsolutePosition(target.points[1]), newR = target.getDistanceFromLine(position, position2, e.chartX, e.chartY), yAxis = target.getYAxis(), newRY = Math.abs(yAxis.toValue(0) - yAxis.toValue(newR));
+                        target.setYRadius(newRY);
                         target.redraw(false);
                     }
                 }

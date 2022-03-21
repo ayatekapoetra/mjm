@@ -25,14 +25,15 @@ var __extends = (this && this.__extends) || (function () {
 })();
 import Color from '../../Core/Color/Color.js';
 import H from '../../Core/Globals.js';
-import NodesMixin from '../../Mixins/Nodes.js';
+import NodesComposition from '../NodesComposition.js';
 import SankeyPoint from './SankeyPoint.js';
 import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
+import SankeyColumnComposition from './SankeyColumnComposition.js';
 var Series = SeriesRegistry.series, ColumnSeries = SeriesRegistry.seriesTypes.column;
-import TreeSeriesMixin from '../../Mixins/TreeSeries.js';
-var getLevelOptions = TreeSeriesMixin.getLevelOptions;
+import TU from '../TreeUtilities.js';
+var getLevelOptions = TU.getLevelOptions;
 import U from '../../Core/Utilities.js';
-var defined = U.defined, extend = U.extend, find = U.find, isObject = U.isObject, merge = U.merge, pick = U.pick, relativeLength = U.relativeLength, stableSort = U.stableSort;
+var defined = U.defined, extend = U.extend, isObject = U.isObject, merge = U.merge, pick = U.pick, relativeLength = U.relativeLength, stableSort = U.stableSort;
 /* *
  *
  *  Class
@@ -98,53 +99,6 @@ var SankeySeries = /** @class */ (function (_super) {
      * */
     /* eslint-disable valid-jsdoc */
     /**
-     * Create a node column.
-     * @private
-     */
-    SankeySeries.prototype.createNodeColumn = function () {
-        var series = this, chart = this.chart, column = [];
-        column.sum = function () {
-            return this.reduce(function (sum, node) {
-                return sum + node.getSum();
-            }, 0);
-        };
-        // Get the offset in pixels of a node inside the column.
-        column.offset = function (node, factor) {
-            var offset = 0, totalNodeOffset, nodePadding = series.nodePadding;
-            for (var i = 0; i < column.length; i++) {
-                var sum = column[i].getSum();
-                var height = Math.max(sum * factor, series.options.minLinkWidth);
-                if (sum) {
-                    totalNodeOffset = height + nodePadding;
-                }
-                else {
-                    // If node sum equals 0 nodePadding is missed #12453
-                    totalNodeOffset = 0;
-                }
-                if (column[i] === node) {
-                    return {
-                        relativeTop: offset + relativeLength(node.options.offset || 0, totalNodeOffset)
-                    };
-                }
-                offset += totalNodeOffset;
-            }
-        };
-        // Get the top position of the column in pixels.
-        column.top = function (factor) {
-            var nodePadding = series.nodePadding;
-            var height = this.reduce(function (height, node) {
-                if (height > 0) {
-                    height += nodePadding;
-                }
-                var nodeHeight = Math.max(node.getSum() * factor, series.options.minLinkWidth);
-                height += nodeHeight;
-                return height;
-            }, 0);
-            return (chart.plotSizeY - height) / 2;
-        };
-        return column;
-    };
-    /**
      * Create node columns by analyzing the nodes and the relations between
      * incoming and outgoing links.
      * @private
@@ -152,48 +106,18 @@ var SankeySeries = /** @class */ (function (_super) {
     SankeySeries.prototype.createNodeColumns = function () {
         var columns = [];
         this.nodes.forEach(function (node) {
-            var fromColumn = -1, fromNode, i, point;
-            if (!defined(node.options.column)) {
-                // No links to this node, place it left
-                if (node.linksTo.length === 0) {
-                    node.column = 0;
-                    // There are incoming links, place it to the right of the
-                    // highest order column that links to this one.
-                }
-                else {
-                    for (i = 0; i < node.linksTo.length; i++) {
-                        point = node.linksTo[0];
-                        if (point.fromNode.column > fromColumn) {
-                            fromNode = point.fromNode;
-                            fromColumn = fromNode.column;
-                        }
-                    }
-                    node.column = fromColumn + 1;
-                    // Hanging layout for organization chart
-                    if (fromNode &&
-                        fromNode.options.layout === 'hanging') {
-                        node.hangsFrom = fromNode;
-                        i = -1; // Reuse existing variable i
-                        find(fromNode.linksFrom, function (link, index) {
-                            var found = link.toNode === node;
-                            if (found) {
-                                i = index;
-                            }
-                            return found;
-                        });
-                        node.column += i;
-                    }
-                }
-            }
+            node.setNodeColumn();
             if (!columns[node.column]) {
-                columns[node.column] = this.createNodeColumn();
+                columns[node.column] =
+                    SankeyColumnComposition.compose([], this);
             }
             columns[node.column].push(node);
         }, this);
         // Fill in empty columns (#8865)
         for (var i = 0; i < columns.length; i++) {
             if (typeof columns[i] === 'undefined') {
-                columns[i] = this.createNodeColumn();
+                columns[i] =
+                    SankeyColumnComposition.compose([], this);
             }
         }
         return columns;
@@ -204,7 +128,7 @@ var SankeySeries = /** @class */ (function (_super) {
      * @private
      */
     SankeySeries.prototype.generatePoints = function () {
-        NodesMixin.generatePoints.apply(this, arguments);
+        NodesComposition.generatePoints.apply(this, arguments);
         /**
          * Order the nodes, starting with the root node(s). (#9818)
          * @private
@@ -306,41 +230,6 @@ var SankeySeries = /** @class */ (function (_super) {
      * @private
      */
     SankeySeries.prototype.translate = function () {
-        var _this = this;
-        // Get the translation factor needed for each column to fill up the
-        // plot height
-        var getColumnTranslationFactor = function (column) {
-            var nodes = column.slice();
-            var minLinkWidth = _this.options.minLinkWidth || 0;
-            var exceedsMinLinkWidth;
-            var factor = 0;
-            var i;
-            var remainingHeight = chart.plotSizeY -
-                options.borderWidth - (column.length - 1) * series.nodePadding;
-            // Because the minLinkWidth option doesn't obey the direct
-            // translation, we need to run translation iteratively, check
-            // node heights, remove those nodes affected by minLinkWidth,
-            // check again, etc.
-            while (column.length) {
-                factor = remainingHeight / column.sum();
-                exceedsMinLinkWidth = false;
-                i = column.length;
-                while (i--) {
-                    if (column[i].getSum() * factor < minLinkWidth) {
-                        column.splice(i, 1);
-                        remainingHeight -= minLinkWidth;
-                        exceedsMinLinkWidth = true;
-                    }
-                }
-                if (!exceedsMinLinkWidth) {
-                    break;
-                }
-            }
-            // Re-insert original nodes
-            column.length = 0;
-            nodes.forEach(function (node) { return column.push(node); });
-            return factor;
-        };
         if (!this.processedXData) {
             this.processData();
         }
@@ -351,7 +240,7 @@ var SankeySeries = /** @class */ (function (_super) {
         this.nodePadding = this.getNodePadding();
         // Find out how much space is needed. Base it on the translation
         // factor of the most spaceous column.
-        this.translationFactor = nodeColumns.reduce(function (translationFactor, column) { return Math.min(translationFactor, getColumnTranslationFactor(column)); }, Infinity);
+        this.translationFactor = nodeColumns.reduce(function (translationFactor, column) { return Math.min(translationFactor, column.sankeyColumn.getTranslationFactor(series)); }, Infinity);
         this.colDistance =
             (chart.plotSizeX - nodeWidth -
                 options.borderWidth) / Math.max(1, nodeColumns.length - 1);
@@ -410,11 +299,10 @@ var SankeySeries = /** @class */ (function (_super) {
             return y;
         };
         var fromNode = point.fromNode, toNode = point.toNode, chart = this.chart, translationFactor = this.translationFactor, linkHeight = Math.max(point.weight * translationFactor, this.options.minLinkWidth), options = this.options, curvy = ((chart.inverted ? -this.colDistance : this.colDistance) *
-            options.curveFactor), fromY = getY(fromNode, 'linksFrom'), toY = getY(toNode, 'linksTo'), nodeLeft = fromNode.nodeX, nodeW = this.nodeWidth, right = toNode.column * this.colDistance, outgoing = point.outgoing, straight = right > nodeLeft + nodeW;
+            options.curveFactor), fromY = getY(fromNode, 'linksFrom'), toY = getY(toNode, 'linksTo'), nodeLeft = fromNode.nodeX, nodeW = this.nodeWidth, right = toNode.nodeX, outgoing = point.outgoing, straight = right > nodeLeft + nodeW;
         if (chart.inverted) {
             fromY = chart.plotSizeY - fromY;
             toY = (chart.plotSizeY || 0) - toY;
-            right = chart.plotSizeX - right;
             nodeW = -nodeW;
             linkHeight = -linkHeight;
             straight = nodeLeft > right;
@@ -511,11 +399,12 @@ var SankeySeries = /** @class */ (function (_super) {
      * @private
      */
     SankeySeries.prototype.translateNode = function (node, column) {
-        var translationFactor = this.translationFactor, chart = this.chart, options = this.options, sum = node.getSum(), nodeHeight = Math.max(Math.round(sum * translationFactor), this.options.minLinkWidth), crisp = Math.round(options.borderWidth) % 2 / 2, nodeOffset = column.offset(node, translationFactor), fromNodeTop = Math.floor(pick(nodeOffset.absoluteTop, (column.top(translationFactor) +
+        var translationFactor = this.translationFactor, chart = this.chart, options = this.options, sum = node.getSum(), nodeHeight = Math.max(Math.round(sum * translationFactor), this.options.minLinkWidth), nodeWidth = Math.round(this.nodeWidth), crisp = Math.round(options.borderWidth) % 2 / 2, nodeOffset = column.sankeyColumn.offset(node, translationFactor), fromNodeTop = Math.floor(pick(nodeOffset.absoluteTop, (column.sankeyColumn.top(translationFactor) +
             nodeOffset.relativeTop))) + crisp, left = Math.floor(this.colDistance * node.column +
-            options.borderWidth / 2) + crisp, nodeLeft = chart.inverted ?
+            options.borderWidth / 2) + relativeLength(node.options.offsetHorizontal || 0, nodeWidth) +
+            crisp, nodeLeft = chart.inverted ?
             chart.plotSizeX - left :
-            left, nodeWidth = Math.round(this.nodeWidth);
+            left;
         node.sum = sum;
         // If node sum is 0, don't render the rect #12453
         if (sum) {
@@ -818,20 +707,20 @@ var SankeySeries = /** @class */ (function (_super) {
     });
     return SankeySeries;
 }(ColumnSeries));
+NodesComposition.compose(SankeyPoint, SankeySeries);
 extend(SankeySeries.prototype, {
     animate: Series.prototype.animate,
     // Create a single node that holds information on incoming and outgoing
     // links.
-    createNode: NodesMixin.createNode,
-    destroy: NodesMixin.destroy,
+    createNode: NodesComposition.createNode,
     forceDL: true,
     invertible: true,
     isCartesian: false,
     orderNodes: true,
-    pointArrayMap: ['from', 'to'],
+    noSharedTooltip: true,
+    pointArrayMap: ['from', 'to', 'weight'],
     pointClass: SankeyPoint,
-    searchPoint: H.noop,
-    setData: NodesMixin.setData
+    searchPoint: H.noop
 });
 SeriesRegistry.registerSeriesType('sankey', SankeySeries);
 /* *
@@ -890,16 +779,50 @@ export default SankeySeries;
 * @type {string}
 * @product highcharts
 */ /**
+* This option is deprecated, use
+* {@link Highcharts.SankeyNodeObject#offsetHorizontal} and
+* {@link Highcharts.SankeyNodeObject#offsetVertical} instead.
+*
 * The vertical offset of a node in terms of weight. Positive values shift the
 * node downwards, negative shift it upwards.
+*
+* If a percantage string is given, the node is offset by the percentage of the
+* node size plus `nodePadding`.
 *
 * @see {@link https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/sankey-node-column/|Highcharts-Demo:}
 *         Specified node offset
 *
+* @deprecated
 * @name Highcharts.SankeyNodeObject#offset
-* @type {number}
+* @type {number|string}
 * @default 0
 * @since 6.0.5
+*/ /**
+* The horizontal offset of a node. Positive values shift the node right,
+* negative shift it left.
+*
+* If a percantage string is given, the node is offset by the percentage of the
+* node size.
+*
+* @see {@link https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/sankey-node-column/|Highcharts-Demo:}
+*         Specified node offset
+*
+* @name Highcharts.SankeyNodeObject#offsetHorizontal
+* @type {number|string}
+* @since 9.3.0
+*/ /**
+* The vertical offset of a node. Positive values shift the node down,
+* negative shift it up.
+*
+* If a percantage string is given, the node is offset by the percentage of the
+* node size.
+*
+* @see {@link https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/sankey-node-column/|Highcharts-Demo:}
+*         Specified node offset
+*
+* @name Highcharts.SankeyNodeObject#offsetVertical
+* @type {number|string}
+* @since 9.3.0
 */
 /**
  * Formatter callback function.
@@ -1026,6 +949,10 @@ export default SankeySeries;
  * @apioption series.sankey.nodes.name
  */
 /**
+ * This option is deprecated, use
+ * [offsetHorizontal](#series.sankey.nodes.offsetHorizontal) and
+ * [offsetVertical](#series.sankey.nodes.offsetVertical) instead.
+ *
  * In a horizontal layout, the vertical offset of a node in terms of weight.
  * Positive values shift the node downwards, negative shift it upwards. In a
  * vertical layout, like organization chart, the offset is horizontal.
@@ -1033,14 +960,42 @@ export default SankeySeries;
  * If a percantage string is given, the node is offset by the percentage of the
  * node size plus `nodePadding`.
  *
- * @sample highcharts/plotoptions/sankey-node-column/
- *         Specified node offset
- *
+ * @deprecated
  * @type      {number|string}
  * @default   0
  * @since     6.0.5
  * @product   highcharts
  * @apioption series.sankey.nodes.offset
+ */
+/**
+ * The horizontal offset of a node. Positive values shift the node right,
+ * negative shift it left.
+ *
+ * If a percantage string is given, the node is offset by the percentage of the
+ * node size.
+ *
+ * @sample highcharts/plotoptions/sankey-node-column/
+ *         Specified node offset
+ *
+ * @type      {number|string}
+ * @since 9.3.0
+ * @product   highcharts
+ * @apioption series.sankey.nodes.offsetHorizontal
+ */
+/**
+ * The vertical offset of a node. Positive values shift the node down,
+ * negative shift it up.
+ *
+ * If a percantage string is given, the node is offset by the percentage of the
+ * node size.
+ *
+ * @sample highcharts/plotoptions/sankey-node-column/
+ *         Specified node offset
+ *
+ * @type      {number|string}
+ * @since 9.3.0
+ * @product   highcharts
+ * @apioption series.sankey.nodes.offsetVertical
  */
 /**
  * An array of data points for the series. For the `sankey` series type,

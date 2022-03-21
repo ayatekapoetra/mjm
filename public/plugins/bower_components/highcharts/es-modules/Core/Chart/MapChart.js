@@ -55,24 +55,12 @@ var MapChart = /** @class */ (function (_super) {
      *        Function to run when the chart has loaded and and all external
      *        images are loaded.
      *
-     * @return {void}
      *
-     * @fires Highcharts.MapChart#event:init
-     * @fires Highcharts.MapChart#event:afterInit
+     * @emits Highcharts.MapChart#event:init
+     * @emits Highcharts.MapChart#event:afterInit
      */
     MapChart.prototype.init = function (userOptions, callback) {
-        var hiddenAxis = {
-            endOnTick: false,
-            visible: false,
-            minPadding: 0,
-            maxPadding: 0,
-            startOnTick: false
-        }, defaultCreditsOptions = getOptions().credits;
-        /* For visual testing
-        hiddenAxis.gridLineWidth = 1;
-        hiddenAxis.gridZIndex = 10;
-        hiddenAxis.tickPositions = undefined;
-        // */
+        var defaultCreditsOptions = getOptions().credits;
         var options = merge({
             chart: {
                 panning: {
@@ -86,18 +74,12 @@ var MapChart = /** @class */ (function (_super) {
                     '{geojson.copyrightShort}</a>'),
                 mapTextFull: pick(defaultCreditsOptions.mapTextFull, '{geojson.copyright}')
             },
+            mapView: {},
             tooltip: {
                 followTouchMove: false
-            },
-            xAxis: hiddenAxis,
-            yAxis: merge(hiddenAxis, { reversed: true })
-        }, userOptions, // user's options
-        {
-            chart: {
-                inverted: false,
-                alignTicks: false
             }
-        });
+        }, userOptions // user's options
+        );
         _super.prototype.init.call(this, options, callback);
     };
     return MapChart;
@@ -156,6 +138,7 @@ var MapChart = /** @class */ (function (_super) {
      * @param {string|Array<string|number>} path
      *
      * @return {Highcharts.SVGPathArray}
+     * Splitted SVG path
      */
     function splitPath(path) {
         var arr;

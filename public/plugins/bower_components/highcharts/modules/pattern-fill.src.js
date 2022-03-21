@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * Module for adding patterns and images as point fills.
  *
@@ -8,7 +8,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -23,10 +22,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Extensions/PatternFill.js', [_modules['Core/Animation/AnimationUtilities.js'], _modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/DefaultOptions.js'], _modules['Core/Series/Point.js'], _modules['Core/Series/Series.js'], _modules['Core/Renderer/SVG/SVGRenderer.js'], _modules['Core/Utilities.js']], function (A, Chart, H, D, Point, Series, SVGRenderer, U) {
@@ -95,7 +104,7 @@
          * @private
          * @function hashFromObject
          *
-         * @param {object} obj
+         * @param {Object} obj
          *        The javascript object to compute the hash from.
          *
          * @param {boolean} [preSeed=false]
@@ -242,7 +251,10 @@
             }, attribs;
             if (!id) {
                 this.idCounter = this.idCounter || 0;
-                id = 'highcharts-pattern-' + this.idCounter + '-' + (this.chartIndex || 0);
+                id = ('highcharts-pattern-' +
+                    this.idCounter +
+                    '-' +
+                    (this.chartIndex || 0));
                 ++this.idCounter;
             }
             if (this.forExport) {
@@ -357,10 +369,10 @@
                             !(point.shapeArgs &&
                                 point.shapeArgs.width &&
                                 point.shapeArgs.height)) {
-                            colorOptions.pattern._width =
-                                'defer';
-                            colorOptions.pattern._height =
-                                'defer';
+                            colorOptions
+                                .pattern._width = 'defer';
+                            colorOptions
+                                .pattern._height = 'defer';
                         }
                         else {
                             point.calculatePatternDimensions(colorOptions.pattern);
@@ -465,10 +477,10 @@
                         var colorOptions = point.options && point.options.color;
                         if (colorOptions &&
                             colorOptions.pattern) {
-                            colorOptions.pattern._width =
-                                'defer';
-                            colorOptions.pattern._height =
-                                'defer';
+                            colorOptions.pattern
+                                ._width = 'defer';
+                            colorOptions.pattern
+                                ._height = 'defer';
                         }
                     });
                 });
@@ -494,7 +506,10 @@
                             node.getAttribute('color') ||
                             node.getAttribute('stroke');
                     if (id) {
-                        var sanitizedId = id.replace(renderer.url, '').replace('url(#', '').replace(')', '');
+                        var sanitizedId = id
+                                .replace(renderer.url, '')
+                                .replace('url(#', '')
+                                .replace(')', '');
                         usedIds[sanitizedId] = true;
                     }
                 });

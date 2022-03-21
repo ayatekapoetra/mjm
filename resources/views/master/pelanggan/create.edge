@@ -1,0 +1,61 @@
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-coa') }}
+{{ script('ajax/opt-cabang') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-9">
+                        <div class="form-group">
+                            <label class="control-label">Nama</label>
+                            <input type="text" name="nama" class="form-control" value="" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Phone</label>
+                            <input type="text" name="phone" class="form-control text-right" value="" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">email</label>
+                            <input type="email" name="email" class="form-control"> 
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Limit Pagu</label>
+                            <input type="number" name="limit_pagu" class="form-control text-right" value="0" required> 
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Alamat Kirim</label>
+                            <textarea name="alamat_kirim" class="form-control" name="alamat_kirim" rows="5"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Alamat Tagih</label>
+                            <textarea name="alamat_tagih" class="form-control" name="alamat_tagih" rows="5"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

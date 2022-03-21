@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Indicator series type for Highcharts Stock
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,13 +21,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Stock/Indicators/Supertrend/SupertrendIndicator.js', [_modules['Core/Color/Palette.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (palette, SeriesRegistry, U) {
+    _registerModule(_modules, 'Stock/Indicators/Supertrend/SupertrendIndicator.js', [_modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js'], _modules['Core/Chart/StockChart.js']], function (SeriesRegistry, U, StockChart) {
         /* *
          *
          *  License: www.highcharts.com/license
@@ -55,7 +64,8 @@
         var _a = SeriesRegistry.seriesTypes,
             ATRIndicator = _a.atr,
             SMAIndicator = _a.sma;
-        var correctFloat = U.correctFloat,
+        var addEvent = U.addEvent,
+            correctFloat = U.correctFloat,
             isArray = U.isArray,
             extend = U.extend,
             merge = U.merge,
@@ -109,13 +119,25 @@
                 var options,
                     parentOptions;
                 SMAIndicator.prototype.init.apply(this, arguments);
-                options = this.options;
-                parentOptions = this.linkedParent.options;
-                // Indicator cropThreshold has to be equal linked series one
-                // reduced by period due to points comparison in drawGraph method
-                // (#9787)
-                options.cropThreshold = (parentOptions.cropThreshold -
-                    (options.params.period - 1));
+                var indicator = this;
+                // Only after series are linked add some additional logic/properties.
+                var unbinder = addEvent(StockChart, 'afterLinkSeries',
+                    function () {
+                        // Protection for a case where the indicator is being updated,
+                        // for a brief moment the indicator is deleted.
+                        if (indicator.options) {
+                            var options_1 = indicator.options;
+                        parentOptions = indicator.linkedParent.options;
+                        // Indicator cropThreshold has to be equal linked series one
+                        // reduced by period due to points comparison in drawGraph
+                        // (#9787)
+                        options_1.cropThreshold = (parentOptions.cropThreshold -
+                            (options_1.params.period - 1));
+                    }
+                    unbinder();
+                }, {
+                    order: 1
+                });
             };
             SupertrendIndicator.prototype.drawGraph = function () {
                 var indicator = this,
@@ -466,7 +488,7 @@
                  *
                  * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
                  */
-                risingTrendColor: palette.positiveColor,
+                risingTrendColor: "#06b535" /* positiveColor */,
                 /**
                  * Color of the Supertrend series line that is above the main series.
                  *
@@ -475,7 +497,7 @@
                  *
                  * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
                  */
-                fallingTrendColor: palette.negativeColor,
+                fallingTrendColor: "#f21313" /* negativeColor */,
                 /**
                  * The styles for the Supertrend line that intersect main series.
                  *
@@ -493,7 +515,7 @@
                          *
                          * @type {Highcharts.ColorString}
                          */
-                        lineColor: palette.neutralColor80,
+                        lineColor: "#333333" /* neutralColor80 */,
                         /**
                          * The dash or dot style of the grid lines. For possible
                          * values, see
@@ -515,8 +537,7 @@
         }(SMAIndicator));
         extend(SupertrendIndicator.prototype, {
             nameBase: 'Supertrend',
-            nameComponents: ['multiplier', 'period'],
-            requiredIndicators: ['atr']
+            nameComponents: ['multiplier', 'period']
         });
         SeriesRegistry.registerSeriesType('supertrend', SupertrendIndicator);
         /* *

@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  * @module highcharts/indicators/indicators
  * @requires highcharts
  * @requires highcharts/modules/stock
@@ -12,3 +12,4 @@
  */
 'use strict';
 import '../../Stock/Indicators/SMA/SMAIndicator.js';
+import '../../Stock/Indicators/EMA/EMAIndicator.js';

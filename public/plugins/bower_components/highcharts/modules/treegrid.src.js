@@ -1,5 +1,5 @@
 /**
- * @license Highcharts Gantt JS v9.1.2 (2021-06-16)
+ * @license Highcharts Gantt JS v10.0.0 (2022-03-07)
  *
  * Tree Grid
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,13 +21,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Core/Axis/BrokenAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Series/Series.js'], _modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (Axis, Series, StackItem, U) {
+    _registerModule(_modules, 'Core/Axis/BrokenAxis.js', [_modules['Extensions/Stacking.js'], _modules['Core/Utilities.js']], function (StackItem, U) {
         /* *
          *
          *  (c) 2009-2021 Torstein Honsi
@@ -44,13 +53,28 @@
             isArray = U.isArray,
             isNumber = U.isNumber,
             pick = U.pick;
+        /* *
+         *
+         *  Composition
+         *
+         * */
         /**
          * Axis with support of broken data rows.
          * @private
-         * @class
          */
         var BrokenAxis;
         (function (BrokenAxis) {
+            /* *
+             *
+             *  Declarations
+             *
+             * */
+            /* *
+             *
+             *  Constants
+             *
+             * */
+            var composedClasses = [];
             /* *
              *
              *  Functions
@@ -62,15 +86,19 @@
              * @private
              */
             function compose(AxisClass, SeriesClass) {
-                if (AxisClass.keepProps.indexOf('brokenAxis') === -1) {
+                if (composedClasses.indexOf(AxisClass) === -1) {
+                    composedClasses.push(AxisClass);
                     AxisClass.keepProps.push('brokenAxis');
-                    var seriesProto = Series.prototype;
+                    addEvent(AxisClass, 'init', onAxisInit);
+                    addEvent(AxisClass, 'afterInit', onAxisAfterInit);
+                    addEvent(AxisClass, 'afterSetTickPositions', onAxisAfterSetTickPositions);
+                    addEvent(AxisClass, 'afterSetOptions', onAxisAfterSetOptions);
+                }
+                if (composedClasses.indexOf(SeriesClass) === -1) {
+                    composedClasses.push(SeriesClass);
+                    var seriesProto = SeriesClass.prototype;
                     seriesProto.drawBreaks = seriesDrawBreaks;
                     seriesProto.gappedPath = seriesGappedPath;
-                    addEvent(AxisClass, 'init', onInit);
-                    addEvent(AxisClass, 'afterInit', onAfterInit);
-                    addEvent(AxisClass, 'afterSetTickPositions', onAfterSetTickPositions);
-                    addEvent(AxisClass, 'afterSetOptions', onAfterSetOptions);
                     addEvent(SeriesClass, 'afterGeneratePoints', onSeriesAfterGeneratePoints);
                     addEvent(SeriesClass, 'afterRender', onSeriesAfterRender);
                 }
@@ -80,7 +108,7 @@
             /**
              * @private
              */
-            function onAfterInit() {
+            function onAxisAfterInit() {
                 if (typeof this.brokenAxis !== 'undefined') {
                     this.brokenAxis.setBreaks(this.options.breaks, false);
                 }
@@ -89,7 +117,7 @@
              * Force Axis to be not-ordinal when breaks are defined.
              * @private
              */
-            function onAfterSetOptions() {
+            function onAxisAfterSetOptions() {
                 var axis = this;
                 if (axis.brokenAxis && axis.brokenAxis.hasBreaks) {
                     axis.options.ordinal = false;
@@ -98,7 +126,7 @@
             /**
              * @private
              */
-            function onAfterSetTickPositions() {
+            function onAxisAfterSetTickPositions() {
                 var axis = this,
                     brokenAxis = axis.brokenAxis;
                 if (brokenAxis &&
@@ -118,7 +146,7 @@
             /**
              * @private
              */
-            function onInit() {
+            function onAxisInit() {
                 var axis = this;
                 if (!axis.brokenAxis) {
                     axis.brokenAxis = new Additions(axis);
@@ -192,8 +220,11 @@
                                         (threshold > brk.from && y < brk.from)) {
                                         eventName = 'pointBreak';
                                     }
-                                    else if ((threshold < brk.from && y > brk.from && y < brk.to) ||
-                                        (threshold > brk.from && y > brk.to && y < brk.from)) {
+                                    else if ((threshold < brk.from &&
+                                        y > brk.from &&
+                                        y < brk.to) || (threshold > brk.from &&
+                                        y > brk.to &&
+                                        y < brk.from)) {
                                         eventName = 'pointInBreak';
                                     }
                                     if (eventName) {
@@ -312,12 +343,9 @@
                                 isNull: true,
                                 x: xRange
                             });
-                            // For stacked chart generate empty stack items,
-                            // #6546
+                            // For stacked chart generate empty stack items, #6546
                             if (yAxis.stacking && this.options.stacking) {
-                                stack = yAxis.stacking.stacks[this.stackKey][xRange] =
-                                    new StackItem(yAxis, yAxis.options
-                                        .stackLabels, false, xRange, this.stack);
+                                stack = yAxis.stacking.stacks[this.stackKey][xRange] = new StackItem(yAxis, yAxis.options.stackLabels, false, xRange, this.stack);
                                 stack.total = 0;
                             }
                         }
@@ -531,10 +559,10 @@
                                     newMax = newMin;
                                 }
                             }
-                            Axis.prototype.setExtremes.call(this, newMin, newMax, redraw, animation, eventArguments);
+                            axis.constructor.prototype.setExtremes.call(this, newMin, newMax, redraw, animation, eventArguments);
                         };
                         axis.setAxisTranslation = function () {
-                            Axis.prototype.setAxisTranslation.call(this);
+                            axis.constructor.prototype.setAxisTranslation.call(this);
                             brokenAxis.unitLength = void 0;
                             if (brokenAxis.hasBreaks) {
                                 var breaks_2 = axis.options.breaks || [], 
@@ -554,10 +582,12 @@
                                     repeat_1 = brk.repeat || Infinity;
                                     if (isNumber(min_1) && isNumber(max_1)) {
                                         if (Additions.isInBreak(brk, min_1)) {
-                                            min_1 += (brk.to % repeat_1) - (min_1 % repeat_1);
+                                            min_1 += ((brk.to % repeat_1) -
+                                                (min_1 % repeat_1));
                                         }
                                         if (Additions.isInBreak(brk, max_1)) {
-                                            max_1 -= (max_1 % repeat_1) - (brk.from % repeat_1);
+                                            max_1 -= ((max_1 % repeat_1) -
+                                                (brk.from % repeat_1));
                                         }
                                     }
                                 });
@@ -605,13 +635,17 @@
                                             to: brk.value,
                                             len: brk.value - start_1 - (brk.size || 0)
                                         });
-                                        length_1 += brk.value - start_1 - (brk.size || 0);
+                                        length_1 += (brk.value -
+                                            start_1 -
+                                            (brk.size || 0));
                                     }
                                 });
                                 brokenAxis.breakArray = breakArray_1;
                                 // Used with staticScale, and below the actual axis
                                 // length, when breaks are substracted.
-                                if (isNumber(min_1) && isNumber(max_1) && isNumber(axis.min)) {
+                                if (isNumber(min_1) &&
+                                    isNumber(max_1) &&
+                                    isNumber(axis.min)) {
                                     brokenAxis.unitLength = max_1 - min_1 - length_1 +
                                         pointRangePadding;
                                     fireEvent(axis, 'afterBreaks');
@@ -817,7 +851,8 @@
                     this.treeGrid &&
                     this.treeGrid.mapOfPosToGridNode) {
                     var treeDepth = this.treeGrid.mapOfPosToGridNode[-1].height || 0;
-                    dimensions.width += this.options.labels.indentation * (treeDepth - 1);
+                    dimensions.width += (this.options.labels.indentation *
+                        (treeDepth - 1));
                 }
                 return dimensions;
             }
@@ -983,8 +1018,10 @@
                                         axis.left,
                                         startPoint[2] || 0
                                     ],
-                                    upperBorderPath = [upperBorderStartPoint,
-                                    upperBorderEndPoint],
+                                    upperBorderPath = [
+                                        upperBorderStartPoint,
+                                        upperBorderEndPoint
+                                    ],
                                     lowerBorderEndPoint = [
                                         'L',
                                         axis.chart.chartWidth - axis.chart.marginRight,
@@ -995,8 +1032,10 @@
                                         endPoint[1] || 0,
                                         axis.toPixels(max + axis.tickmarkOffset)
                                     ],
-                                    lowerBorderPath = [lowerBorderStartPoint,
-                                    lowerBorderEndPoint];
+                                    lowerBorderPath = [
+                                        lowerBorderStartPoint,
+                                        lowerBorderEndPoint
+                                    ];
                                 if (!axis.grid.upperBorder && min % 1 !== 0) {
                                     axis.grid.upperBorder = axis.grid.renderBorder(upperBorderPath);
                                 }
@@ -1022,8 +1061,8 @@
                                     });
                                 }
                             }
-                            // Render an extra line parallel to the existing axes,
-                            // to close the grid.
+                            // Render an extra line parallel to the existing axes, to
+                            // close the grid.
                             if (!axis.grid.axisLineExtra) {
                                 axis.grid.axisLineExtra = axis.grid.renderBorder(linePath);
                             }
@@ -1036,8 +1075,7 @@
                                     d: linePath
                                 });
                             }
-                            // show or hide the line depending on
-                            // options.showEmpty
+                            // show or hide the line depending on options.showEmpty
                             axis.axisLine[axis.showAxis ? 'show' : 'hide'](true);
                         }
                     }
@@ -1053,11 +1091,20 @@
                         var tickmarkOffset = axis.tickmarkOffset,
                             lastTick = axis.tickPositions[axis.tickPositions.length - 1],
                             firstTick = axis.tickPositions[0];
+                        var label = void 0,
+                            tickMark = void 0;
+                        while ((label = axis.hiddenLabels.pop()) && label.element) {
+                            label.show(); // #15453
+                        }
+                        while ((tickMark = axis.hiddenMarks.pop()) &&
+                            tickMark.element) {
+                            tickMark.show(); // #16439
+                        }
                         // Hide/show firts tick label.
-                        var label = axis.ticks[firstTick].label;
+                        label = axis.ticks[firstTick].label;
                         if (label) {
                             if (min - firstTick > tickmarkOffset) {
-                                label.hide();
+                                axis.hiddenLabels.push(label.hide());
                             }
                             else {
                                 label.show();
@@ -1067,20 +1114,17 @@
                         label = axis.ticks[lastTick].label;
                         if (label) {
                             if (lastTick - max > tickmarkOffset) {
-                                label.hide();
+                                axis.hiddenLabels.push(label.hide());
                             }
                             else {
                                 label.show();
                             }
                         }
                         var mark = axis.ticks[lastTick].mark;
-                        if (mark) {
-                            if (lastTick - max < tickmarkOffset && lastTick - max > 0 && axis.ticks[lastTick].isLast) {
-                                mark.hide();
-                            }
-                            else if (axis.ticks[lastTick - 1]) {
-                                mark.show();
-                            }
+                        if (mark &&
+                            lastTick - max < tickmarkOffset &&
+                            lastTick - max > 0 && axis.ticks[lastTick].isLast) {
+                            axis.hiddenMarks.push(mark.hide());
                         }
                     }
                 }
@@ -1108,7 +1152,8 @@
                             options.dateTimeLabelFormats &&
                             options.labels &&
                             !defined(userLabels.align) &&
-                            (options.dateTimeLabelFormats[tickInfo.unitName].range === false ||
+                            (options.dateTimeLabelFormats[tickInfo.unitName]
+                                .range === false ||
                                 tickInfo.count > 1 // years
                             )) {
                             options.labels.align = 'left';
@@ -1322,7 +1367,8 @@
                 if (gridOptions.enabled && maxLabelDimensions) {
                     var labelPadding = (Math.abs(defaultLeftAxisOptions.labels.x) * 2);
                     var distance = horiz ?
-                            gridOptions.cellHeight || labelPadding + maxLabelDimensions.height :
+                            (gridOptions.cellHeight ||
+                                labelPadding + maxLabelDimensions.height) :
                             labelPadding + maxLabelDimensions.width;
                     if (isArray(e.tickSize)) {
                         e.tickSize[0] = distance;
@@ -1362,11 +1408,13 @@
                 var userOptions = e.userOptions || {};
                 var gridOptions = userOptions.grid || {};
                 if (gridOptions.enabled && defined(gridOptions.borderColor)) {
-                    userOptions.tickColor = userOptions.lineColor = gridOptions.borderColor;
+                    userOptions.tickColor = userOptions.lineColor = (gridOptions.borderColor);
                 }
                 if (!axis.grid) {
                     axis.grid = new Additions(axis);
                 }
+                axis.hiddenLabels = [];
+                axis.hiddenMarks = [];
             }
             /**
              * Center tick labels in cells.
@@ -1608,7 +1656,8 @@
                     var thisIndex = -1,
                         lastIndex = 0;
                     chart[axis.coll].forEach(function (otherAxis, index) {
-                        if (otherAxis.side === axis.side && !otherAxis.options.isInternal) {
+                        if (otherAxis.side === axis.side &&
+                            !otherAxis.options.isInternal) {
                             lastIndex = index;
                             if (otherAxis === parentAxis) {
                                 // Get the index of the axis in question
@@ -1617,17 +1666,17 @@
                         }
                     });
                     return (lastIndex === thisIndex &&
-                        (isNumber(columnIndex) ? columns.length === columnIndex : true));
+                        (isNumber(columnIndex) ?
+                            columns.length === columnIndex :
+                            true));
                 };
                 /**
                  * Add extra border based on the provided path.
-                 *  *
                  * @private
-                 *
                  * @param {SVGPath} path
                  * The path of the border.
-                 *
                  * @return {Highcharts.SVGElement}
+                 * Border
                  */
                 Additions.prototype.renderBorder = function (path) {
                     var axis = this.axis,
@@ -1892,7 +1941,7 @@
 
         return Tree;
     });
-    _registerModule(_modules, 'Core/Axis/TreeGridTick.js', [_modules['Core/Color/Palette.js'], _modules['Core/Utilities.js']], function (palette, U) {
+    _registerModule(_modules, 'Core/Axis/TreeGridTick.js', [_modules['Core/Utilities.js']], function (U) {
         /* *
          *
          *  (c) 2016 Highsoft AS
@@ -2013,7 +2062,7 @@
                     icon
                         .attr({
                         cursor: 'pointer',
-                        'fill': pick(params.color, palette.neutralColor60),
+                        'fill': pick(params.color, "#666666" /* neutralColor60 */),
                         'stroke-width': 1,
                         stroke: options.lineColor,
                         strokeWidth: options.lineWidth || 0
@@ -2096,7 +2145,10 @@
                     node.descendants > 0) {
                     collapsed = axis.treeGrid.isCollapsed(node);
                     renderLabelIcon(tick, {
-                        color: !styledMode && label.styles && label.styles.color || '',
+                        color: (!styledMode &&
+                            label.styles &&
+                            label.styles.color ||
+                            ''),
                         collapsed: collapsed,
                         group: label.parentGroup,
                         options: symbolOptions,
@@ -2187,6 +2239,17 @@
                     }
                 };
                 /**
+                 * Destroy remaining labelIcon if exist.
+                 *
+                 * @private
+                 * @function Highcharts.Tick#destroy
+                 */
+                Additions.prototype.destroy = function () {
+                    if (this.labelIcon) {
+                        this.labelIcon.destroy();
+                    }
+                };
+                /**
                  * Expand the grid cell. Used when axis is of type treegrid.
                  *
                  * @see gantt/treegrid-axis/collapsed-dynamically/demo.js
@@ -2242,8 +2305,14 @@
 
         return TreeGridTick;
     });
-    _registerModule(_modules, 'Mixins/TreeSeries.js', [_modules['Core/Color/Color.js'], _modules['Core/Utilities.js']], function (Color, U) {
+    _registerModule(_modules, 'Series/TreeUtilities.js', [_modules['Core/Color/Color.js'], _modules['Core/Utilities.js']], function (Color, U) {
         /* *
+         *
+         *  (c) 2014-2021 Highsoft AS
+         *
+         *  Authors: Jon Arild Nygard / Oystein Moseng
+         *
+         *  License: www.highcharts.com/license
          *
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
@@ -2254,37 +2323,148 @@
             isObject = U.isObject,
             merge = U.merge,
             pick = U.pick;
-        var isBoolean = function (x) {
-                return typeof x === 'boolean';
-        }, isFn = function (x) {
-            return typeof x === 'function';
-        };
+        /* *
+         *
+         *  Functions
+         *
+         * */
         /* eslint-disable valid-jsdoc */
         /**
-         * @todo Combine buildTree and buildNode with setTreeValues
-         * @todo Remove logic from Treemap and make it utilize this mixin.
          * @private
          */
-        var setTreeValues = function setTreeValues(tree,
-            options) {
-                var before = options.before,
-            idRoot = options.idRoot,
-            mapIdToNode = options.mapIdToNode,
-            nodeRoot = mapIdToNode[idRoot],
-            levelIsConstant = (isBoolean(options.levelIsConstant) ?
-                    options.levelIsConstant :
-                    true),
-            points = options.points,
-            point = points[tree.i],
-            optionsPoint = point && point.options || {},
-            childrenTotal = 0,
-            children = [],
-            value;
+        function getColor(node, options) {
+            var index = options.index,
+                mapOptionsToLevel = options.mapOptionsToLevel,
+                parentColor = options.parentColor,
+                parentColorIndex = options.parentColorIndex,
+                series = options.series,
+                colors = options.colors,
+                siblings = options.siblings,
+                points = series.points,
+                chartOptionsChart = series.chart.options.chart;
+            var getColorByPoint,
+                point,
+                level,
+                colorByPoint,
+                colorIndexByPoint,
+                color,
+                colorIndex;
+            /**
+             * @private
+             */
+            var variateColor = function (color) {
+                    var colorVariation = level && level.colorVariation;
+                if (colorVariation &&
+                    colorVariation.key === 'brightness' &&
+                    index &&
+                    siblings) {
+                    return Color.parse(color).brighten(colorVariation.to * (index / siblings)).get();
+                }
+                return color;
+            };
+            if (node) {
+                point = points[node.i];
+                level = mapOptionsToLevel[node.level] || {};
+                getColorByPoint = point && level.colorByPoint;
+                if (getColorByPoint) {
+                    colorIndexByPoint = point.index % (colors ?
+                        colors.length :
+                        chartOptionsChart.colorCount);
+                    colorByPoint = colors && colors[colorIndexByPoint];
+                }
+                // Select either point color, level color or inherited color.
+                if (!series.chart.styledMode) {
+                    color = pick(point && point.options.color, level && level.color, colorByPoint, parentColor && variateColor(parentColor), series.color);
+                }
+                colorIndex = pick(point && point.options.colorIndex, level && level.colorIndex, colorIndexByPoint, parentColorIndex, options.colorIndex);
+            }
+            return {
+                color: color,
+                colorIndex: colorIndex
+            };
+        }
+        /**
+         * Creates a map from level number to its given options.
+         *
+         * @private
+         *
+         * @param {Object} params
+         * Object containing parameters.
+         * - `defaults` Object containing default options. The default options are
+         *   merged with the userOptions to get the final options for a specific
+         *   level.
+         * - `from` The lowest level number.
+         * - `levels` User options from series.levels.
+         * - `to` The highest level number.
+         *
+         * @return {Highcharts.Dictionary<object>|null}
+         * Returns a map from level number to its given options.
+         */
+        function getLevelOptions(params) {
+            var result = null,
+                defaults,
+                converted,
+                i,
+                from,
+                to,
+                levels;
+            if (isObject(params)) {
+                result = {};
+                from = isNumber(params.from) ? params.from : 1;
+                levels = params.levels;
+                converted = {};
+                defaults = isObject(params.defaults) ? params.defaults : {};
+                if (isArray(levels)) {
+                    converted = levels.reduce(function (obj, item) {
+                        var level,
+                            levelIsConstant,
+                            options;
+                        if (isObject(item) && isNumber(item.level)) {
+                            options = merge({}, item);
+                            levelIsConstant = pick(options.levelIsConstant, defaults.levelIsConstant);
+                            // Delete redundant properties.
+                            delete options.levelIsConstant;
+                            delete options.level;
+                            // Calculate which level these options apply to.
+                            level = item.level + (levelIsConstant ? 0 : from - 1);
+                            if (isObject(obj[level])) {
+                                merge(true, obj[level], options); // #16329
+                            }
+                            else {
+                                obj[level] = options;
+                            }
+                        }
+                        return obj;
+                    }, {});
+                }
+                to = isNumber(params.to) ? params.to : 1;
+                for (i = 0; i <= to; i++) {
+                    result[i] = merge({}, defaults, isObject(converted[i]) ? converted[i] : {});
+                }
+            }
+            return result;
+        }
+        /**
+         * @private
+         * @todo Combine buildTree and buildNode with setTreeValues
+         * @todo Remove logic from Treemap and make it utilize this mixin.
+         */
+        function setTreeValues(tree, options) {
+            var before = options.before,
+                idRoot = options.idRoot,
+                mapIdToNode = options.mapIdToNode,
+                nodeRoot = mapIdToNode[idRoot],
+                levelIsConstant = (options.levelIsConstant !== false),
+                points = options.points,
+                point = points[tree.i],
+                optionsPoint = point && point.options || {},
+                children = [];
+            var childrenTotal = 0;
             tree.levelDynamic = tree.level - (levelIsConstant ? 0 : nodeRoot.level);
             tree.name = pick(point && point.name, '');
             tree.visible = (idRoot === tree.id ||
-                (isBoolean(options.visible) ? options.visible : false));
-            if (isFn(before)) {
+                options.visible === true);
+            if (typeof before === 'function') {
                 tree = before(tree, options);
             }
             // First give the children some values
@@ -2302,147 +2482,31 @@
                     childrenTotal += child.val;
                 }
             });
-            tree.visible = childrenTotal > 0 || tree.visible;
             // Set the values
-            value = pick(optionsPoint.value, childrenTotal);
+            var value = pick(optionsPoint.value,
+                childrenTotal);
+            tree.visible = value >= 0 && (childrenTotal > 0 || tree.visible);
             tree.children = children;
             tree.childrenTotal = childrenTotal;
             tree.isLeaf = tree.visible && !childrenTotal;
             tree.val = value;
             return tree;
-        };
-        /**
-         * @private
-         */
-        var getColor = function getColor(node,
-            options) {
-                var index = options.index,
-            mapOptionsToLevel = options.mapOptionsToLevel,
-            parentColor = options.parentColor,
-            parentColorIndex = options.parentColorIndex,
-            series = options.series,
-            colors = options.colors,
-            siblings = options.siblings,
-            points = series.points,
-            getColorByPoint,
-            chartOptionsChart = series.chart.options.chart,
-            point,
-            level,
-            colorByPoint,
-            colorIndexByPoint,
-            color,
-            colorIndex;
-            /**
-             * @private
-             */
-            function variation(color) {
-                var colorVariation = level && level.colorVariation;
-                if (colorVariation) {
-                    if (colorVariation.key === 'brightness') {
-                        return Color.parse(color).brighten(colorVariation.to * (index / siblings)).get();
-                    }
-                }
-                return color;
-            }
-            if (node) {
-                point = points[node.i];
-                level = mapOptionsToLevel[node.level] || {};
-                getColorByPoint = point && level.colorByPoint;
-                if (getColorByPoint) {
-                    colorIndexByPoint = point.index % (colors ?
-                        colors.length :
-                        chartOptionsChart.colorCount);
-                    colorByPoint = colors && colors[colorIndexByPoint];
-                }
-                // Select either point color, level color or inherited color.
-                if (!series.chart.styledMode) {
-                    color = pick(point && point.options.color, level && level.color, colorByPoint, parentColor && variation(parentColor), series.color);
-                }
-                colorIndex = pick(point && point.options.colorIndex, level && level.colorIndex, colorIndexByPoint, parentColorIndex, options.colorIndex);
-            }
-            return {
-                color: color,
-                colorIndex: colorIndex
-            };
-        };
-        /**
-         * Creates a map from level number to its given options.
-         *
-         * @private
-         * @function getLevelOptions
-         * @param {object} params
-         *        Object containing parameters.
-         *        - `defaults` Object containing default options. The default options
-         *           are merged with the userOptions to get the final options for a
-         *           specific level.
-         *        - `from` The lowest level number.
-         *        - `levels` User options from series.levels.
-         *        - `to` The highest level number.
-         * @return {Highcharts.Dictionary<object>|null}
-         *         Returns a map from level number to its given options.
-         */
-        var getLevelOptions = function getLevelOptions(params) {
-                var result = null,
-            defaults,
-            converted,
-            i,
-            from,
-            to,
-            levels;
-            if (isObject(params)) {
-                result = {};
-                from = isNumber(params.from) ? params.from : 1;
-                levels = params.levels;
-                converted = {};
-                defaults = isObject(params.defaults) ? params.defaults : {};
-                if (isArray(levels)) {
-                    converted = levels.reduce(function (obj, item) {
-                        var level,
-                            levelIsConstant,
-                            options;
-                        if (isObject(item) && isNumber(item.level)) {
-                            options = merge({}, item);
-                            levelIsConstant = (isBoolean(options.levelIsConstant) ?
-                                options.levelIsConstant :
-                                defaults.levelIsConstant);
-                            // Delete redundant properties.
-                            delete options.levelIsConstant;
-                            delete options.level;
-                            // Calculate which level these options apply to.
-                            level = item.level + (levelIsConstant ? 0 : from - 1);
-                            if (isObject(obj[level])) {
-                                extend(obj[level], options);
-                            }
-                            else {
-                                obj[level] = options;
-                            }
-                        }
-                        return obj;
-                    }, {});
-                }
-                to = isNumber(params.to) ? params.to : 1;
-                for (i = 0; i <= to; i++) {
-                    result[i] = merge({}, defaults, isObject(converted[i]) ? converted[i] : {});
-                }
-            }
-            return result;
-        };
+        }
         /**
          * Update the rootId property on the series. Also makes sure that it is
          * accessible to exporting.
          *
          * @private
-         * @function updateRootId
          *
-         * @param {object} series
-         *        The series to operate on.
+         * @param {Object} series
+         * The series to operate on.
          *
          * @return {string}
-         *         Returns the resulting rootId after update.
+         * Returns the resulting rootId after update.
          */
-        var updateRootId = function (series) {
-                var rootId,
-            options;
+        function updateRootId(series) {
+            var rootId,
+                options;
             if (isObject(series)) {
                 // Get the series options.
                 options = isObject(series.options) ? series.options : {};
@@ -2456,17 +2520,22 @@
                 series.rootNode = rootId;
             }
             return rootId;
-        };
-        var result = {
+        }
+        /* *
+         *
+         *  Default Export
+         *
+         * */
+        var TreeUtilities = {
                 getColor: getColor,
                 getLevelOptions: getLevelOptions,
                 setTreeValues: setTreeValues,
                 updateRootId: updateRootId
             };
 
-        return result;
+        return TreeUtilities;
     });
-    _registerModule(_modules, 'Core/Axis/TreeGridAxis.js', [_modules['Core/Axis/BrokenAxis.js'], _modules['Core/Axis/GridAxis.js'], _modules['Gantt/Tree.js'], _modules['Core/Axis/TreeGridTick.js'], _modules['Mixins/TreeSeries.js'], _modules['Core/Utilities.js']], function (BrokenAxis, GridAxis, Tree, TreeGridTick, mixinTreeSeries, U) {
+    _registerModule(_modules, 'Core/Axis/TreeGridAxis.js', [_modules['Core/Axis/BrokenAxis.js'], _modules['Core/Axis/GridAxis.js'], _modules['Gantt/Tree.js'], _modules['Core/Axis/TreeGridTick.js'], _modules['Series/TreeUtilities.js'], _modules['Core/Utilities.js']], function (BrokenAxis, GridAxis, Tree, TreeGridTick, TU, U) {
         /* *
          *
          *  (c) 2016 Highsoft AS
@@ -2477,7 +2546,7 @@
          *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
          *
          * */
-        var getLevelOptions = mixinTreeSeries.getLevelOptions;
+        var getLevelOptions = TU.getLevelOptions;
         var addEvent = U.addEvent,
             find = U.find,
             fireEvent = U.fireEvent,
@@ -2565,7 +2634,7 @@
              *
              * @param {number} numberOfSeries
              *
-             * @return {object}
+             * @return {Object}
              * Returns an object containing categories, mapOfIdToNode,
              * mapOfPosToGridNode, and tree.
              *
@@ -2578,7 +2647,8 @@
                 var categories = [],
                     collapsedNodes = [],
                     mapOfIdToNode = {},
-                    uniqueNamesEnabled = typeof uniqueNames === 'boolean' ? uniqueNames : false;
+                    uniqueNamesEnabled = typeof uniqueNames === 'boolean' ?
+                        uniqueNames : false;
                 var mapOfPosToGridNode = {},
                     posIterator = -1;
                 // Build the tree from the series data.
@@ -2601,7 +2671,9 @@
                     // Before the children has been created.
                     before: function (node) {
                         var data = isObject(node.data,
-                            true) ? node.data : {},
+                            true) ?
+                                node.data :
+                                {},
                             name = isString(data.name) ? data.name : '',
                             parentNode = mapOfIdToNode[node.parent],
                             parentGridNode = (isObject(parentNode,
@@ -2710,8 +2782,8 @@
             /**
              * Builds the tree of categories and calculates its positions.
              * @private
-             * @param {object} e Event object
-             * @param {object} e.target The chart instance which the event was fired on.
+             * @param {Object} e Event object
+             * @param {Object} e.target The chart instance which the event was fired on.
              * @param {object[]} e.target.axes The axes of the chart.
              */
             function onBeforeRender(e) {
@@ -2726,8 +2798,8 @@
                         max = options.max, 
                         // Check whether any of series is rendering for the first
                         // time, visibility has changed, or its data is dirty, and
-                        // only then update. #10570, #10580
-                        // Also check if mapOfPosToGridNode exists. #10887
+                        // only then update. #10570, #10580. Also check if
+                        // mapOfPosToGridNode exists. #10887
                         isDirty = (!axis.treeGrid.mapOfPosToGridNode ||
                             axis.series.some(function (series) {
                                 return !series.hasRendered ||
@@ -2745,13 +2817,15 @@
                                 (s.options.data || []).forEach(function (data) {
                                     // For using keys - rebuild the data structure
                                     if (s.options.keys && s.options.keys.length) {
-                                        data = s.pointClass.prototype.optionsToObject.call({ series: s }, data);
+                                        data = s.pointClass.prototype
+                                            .optionsToObject
+                                            .call({ series: s }, data);
                                         s.pointClass.setGanttPointAliases(data);
                                     }
                                     if (isObject(data, true)) {
                                         // Set series index on data. Removed again
                                         // after use.
-                                        data.seriesIndex = numberOfSeries;
+                                        data.seriesIndex = (numberOfSeries);
                                         arr.push(data);
                                     }
                                 });
@@ -2778,17 +2852,20 @@
                         treeGrid = getTreeGridFromData(data, uniqueNames || false, (uniqueNames === true) ? numberOfSeries : 1);
                         // Assign values to the axis.
                         axis.categories = treeGrid.categories;
-                        axis.treeGrid.mapOfPosToGridNode = treeGrid.mapOfPosToGridNode;
+                        axis.treeGrid.mapOfPosToGridNode = (treeGrid.mapOfPosToGridNode);
                         axis.hasNames = true;
                         axis.treeGrid.tree = treeGrid.tree;
                         // Update yData now that we have calculated the y values
                         axis.series.forEach(function (series) {
                             var axisData = (series.options.data || []).map(function (d) {
-                                    if (isArray(d) && series.options.keys && series.options.keys.length) {
+                                    if (isArray(d) &&
+                                        series.options.keys &&
+                                        series.options.keys.length) {
                                         // Get the axisData from the data array used to
                                         // build the treeGrid where has been modified
                                         data.forEach(function (point) {
-                                            if (d.indexOf(point.x) >= 0 && d.indexOf(point.x2) >= 0) {
+                                            if (d.indexOf(point.x) >= 0 &&
+                                                d.indexOf(point.x2) >= 0) {
                                                 d = point;
                                         }
                                     });
@@ -2898,10 +2975,11 @@
                                     axis.brokenAxis.setBreaks(breaks, false);
                                     // remove the node from the axis collapsedNodes
                                     if (axis.treeGrid.collapsedNodes) {
-                                        axis.treeGrid.collapsedNodes = axis.treeGrid.collapsedNodes.filter(function (n) {
-                                            return node.collapseStart !== n.collapseStart ||
-                                                node.collapseEnd !== n.collapseEnd;
-                                        });
+                                        axis.treeGrid.collapsedNodes = axis.treeGrid
+                                            .collapsedNodes
+                                            .filter(function (n) { return ((node.collapseStart !==
+                                            n.collapseStart) ||
+                                            node.collapseEnd !== n.collapseEnd); });
                                     }
                                 }
                             });
@@ -3182,7 +3260,7 @@
                  * @param {Highcharts.Axis} axis
                  * The axis to check against.
                  *
-                 * @param {object} node
+                 * @param {Object} node
                  * The node to check if is collapsed.
                  *
                  * @param {number} pos

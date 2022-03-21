@@ -1,5 +1,5 @@
 /**
- * @license Highcharts Gantt JS v9.1.2 (2021-06-16)
+ * @license Highcharts Gantt JS v10.0.0 (2022-03-07)
  *
  * GridAxis
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Core/Axis/GridAxis.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Axis/AxisDefaults.js'], _modules['Core/Globals.js'], _modules['Core/Utilities.js']], function (Axis, AxisDefaults, H, U) {
@@ -196,7 +205,8 @@
                     this.treeGrid &&
                     this.treeGrid.mapOfPosToGridNode) {
                     var treeDepth = this.treeGrid.mapOfPosToGridNode[-1].height || 0;
-                    dimensions.width += this.options.labels.indentation * (treeDepth - 1);
+                    dimensions.width += (this.options.labels.indentation *
+                        (treeDepth - 1));
                 }
                 return dimensions;
             }
@@ -362,8 +372,10 @@
                                         axis.left,
                                         startPoint[2] || 0
                                     ],
-                                    upperBorderPath = [upperBorderStartPoint,
-                                    upperBorderEndPoint],
+                                    upperBorderPath = [
+                                        upperBorderStartPoint,
+                                        upperBorderEndPoint
+                                    ],
                                     lowerBorderEndPoint = [
                                         'L',
                                         axis.chart.chartWidth - axis.chart.marginRight,
@@ -374,8 +386,10 @@
                                         endPoint[1] || 0,
                                         axis.toPixels(max + axis.tickmarkOffset)
                                     ],
-                                    lowerBorderPath = [lowerBorderStartPoint,
-                                    lowerBorderEndPoint];
+                                    lowerBorderPath = [
+                                        lowerBorderStartPoint,
+                                        lowerBorderEndPoint
+                                    ];
                                 if (!axis.grid.upperBorder && min % 1 !== 0) {
                                     axis.grid.upperBorder = axis.grid.renderBorder(upperBorderPath);
                                 }
@@ -401,8 +415,8 @@
                                     });
                                 }
                             }
-                            // Render an extra line parallel to the existing axes,
-                            // to close the grid.
+                            // Render an extra line parallel to the existing axes, to
+                            // close the grid.
                             if (!axis.grid.axisLineExtra) {
                                 axis.grid.axisLineExtra = axis.grid.renderBorder(linePath);
                             }
@@ -415,8 +429,7 @@
                                     d: linePath
                                 });
                             }
-                            // show or hide the line depending on
-                            // options.showEmpty
+                            // show or hide the line depending on options.showEmpty
                             axis.axisLine[axis.showAxis ? 'show' : 'hide'](true);
                         }
                     }
@@ -432,11 +445,20 @@
                         var tickmarkOffset = axis.tickmarkOffset,
                             lastTick = axis.tickPositions[axis.tickPositions.length - 1],
                             firstTick = axis.tickPositions[0];
+                        var label = void 0,
+                            tickMark = void 0;
+                        while ((label = axis.hiddenLabels.pop()) && label.element) {
+                            label.show(); // #15453
+                        }
+                        while ((tickMark = axis.hiddenMarks.pop()) &&
+                            tickMark.element) {
+                            tickMark.show(); // #16439
+                        }
                         // Hide/show firts tick label.
-                        var label = axis.ticks[firstTick].label;
+                        label = axis.ticks[firstTick].label;
                         if (label) {
                             if (min - firstTick > tickmarkOffset) {
-                                label.hide();
+                                axis.hiddenLabels.push(label.hide());
                             }
                             else {
                                 label.show();
@@ -446,20 +468,17 @@
                         label = axis.ticks[lastTick].label;
                         if (label) {
                             if (lastTick - max > tickmarkOffset) {
-                                label.hide();
+                                axis.hiddenLabels.push(label.hide());
                             }
                             else {
                                 label.show();
                             }
                         }
                         var mark = axis.ticks[lastTick].mark;
-                        if (mark) {
-                            if (lastTick - max < tickmarkOffset && lastTick - max > 0 && axis.ticks[lastTick].isLast) {
-                                mark.hide();
-                            }
-                            else if (axis.ticks[lastTick - 1]) {
-                                mark.show();
-                            }
+                        if (mark &&
+                            lastTick - max < tickmarkOffset &&
+                            lastTick - max > 0 && axis.ticks[lastTick].isLast) {
+                            axis.hiddenMarks.push(mark.hide());
                         }
                     }
                 }
@@ -487,7 +506,8 @@
                             options.dateTimeLabelFormats &&
                             options.labels &&
                             !defined(userLabels.align) &&
-                            (options.dateTimeLabelFormats[tickInfo.unitName].range === false ||
+                            (options.dateTimeLabelFormats[tickInfo.unitName]
+                                .range === false ||
                                 tickInfo.count > 1 // years
                             )) {
                             options.labels.align = 'left';
@@ -701,7 +721,8 @@
                 if (gridOptions.enabled && maxLabelDimensions) {
                     var labelPadding = (Math.abs(defaultLeftAxisOptions.labels.x) * 2);
                     var distance = horiz ?
-                            gridOptions.cellHeight || labelPadding + maxLabelDimensions.height :
+                            (gridOptions.cellHeight ||
+                                labelPadding + maxLabelDimensions.height) :
                             labelPadding + maxLabelDimensions.width;
                     if (isArray(e.tickSize)) {
                         e.tickSize[0] = distance;
@@ -741,11 +762,13 @@
                 var userOptions = e.userOptions || {};
                 var gridOptions = userOptions.grid || {};
                 if (gridOptions.enabled && defined(gridOptions.borderColor)) {
-                    userOptions.tickColor = userOptions.lineColor = gridOptions.borderColor;
+                    userOptions.tickColor = userOptions.lineColor = (gridOptions.borderColor);
                 }
                 if (!axis.grid) {
                     axis.grid = new Additions(axis);
                 }
+                axis.hiddenLabels = [];
+                axis.hiddenMarks = [];
             }
             /**
              * Center tick labels in cells.
@@ -987,7 +1010,8 @@
                     var thisIndex = -1,
                         lastIndex = 0;
                     chart[axis.coll].forEach(function (otherAxis, index) {
-                        if (otherAxis.side === axis.side && !otherAxis.options.isInternal) {
+                        if (otherAxis.side === axis.side &&
+                            !otherAxis.options.isInternal) {
                             lastIndex = index;
                             if (otherAxis === parentAxis) {
                                 // Get the index of the axis in question
@@ -996,17 +1020,17 @@
                         }
                     });
                     return (lastIndex === thisIndex &&
-                        (isNumber(columnIndex) ? columns.length === columnIndex : true));
+                        (isNumber(columnIndex) ?
+                            columns.length === columnIndex :
+                            true));
                 };
                 /**
                  * Add extra border based on the provided path.
-                 *  *
                  * @private
-                 *
                  * @param {SVGPath} path
                  * The path of the border.
-                 *
                  * @return {Highcharts.SVGElement}
+                 * Border
                  */
                 Additions.prototype.renderBorder = function (path) {
                     var axis = this.axis,

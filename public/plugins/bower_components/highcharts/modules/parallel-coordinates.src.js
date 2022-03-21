@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * Support for parallel coordinates in Highcharts
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Extensions/ParallelCoordinates.js', [_modules['Core/Axis/Axis.js'], _modules['Core/Chart/Chart.js'], _modules['Core/FormatUtilities.js'], _modules['Core/Globals.js'], _modules['Core/DefaultOptions.js'], _modules['Core/Series/Series.js'], _modules['Core/Utilities.js']], function (Axis, Chart, F, H, D, Series, U) {
@@ -260,7 +269,6 @@
              * @function Highcharts.Chart#setParallelInfo
              * @param {Highcharts.Options} options
              * User options
-             * @return {void}
              * @requires modules/parallel-coordinates
              */
             setParallelInfo: function (options) {
@@ -443,7 +451,8 @@
                 var parallel = this,
                     axis = parallel.axis,
                     chart = axis.chart,
-                    fraction = ((parallel.position || 0) + 0.5) / (chart.parallelInfo.counter + 1);
+                    fraction = ((parallel.position || 0) + 0.5) /
+                        (chart.parallelInfo.counter + 1);
                 if (chart.polar) {
                     options.angle = 360 * fraction;
                 }
@@ -484,7 +493,9 @@
                 var axis = this,
                     chart = axis.chart,
                     parallelCoordinates = axis.parallelCoordinates;
-                var axisPosition = ['left', 'width', 'height', 'top'];
+                var axisPosition = [
+                        'left', 'width', 'height', 'top'
+                    ];
                 if (chart.hasParallelCoordinates) {
                     if (chart.inverted) {
                         axisPosition = axisPosition.reverse();

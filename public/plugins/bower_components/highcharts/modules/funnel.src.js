@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * Highcharts funnel module
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,13 +21,23 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
-    _registerModule(_modules, 'Series/Funnel/FunnelSeries.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Color/Palette.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (Chart, H, palette, SeriesRegistry, U) {
+    _registerModule(_modules, 'Series/Funnel/FunnelSeries.js', [_modules['Core/Chart/Chart.js'], _modules['Core/Globals.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (Chart, H, SeriesRegistry, U) {
         /* *
          *
          *  Highcharts funnel module
@@ -115,11 +124,14 @@
                         (widthAtLabel - dlBox.bottomWidth) / 2,
                     y = dlBox.y,
                     x = dlBox.x;
+                // #16176: Only SVGLabel has height set
+                var dataLabelHeight = pick(dataLabel.height,
+                    dataLabel.getBBox().height);
                 if (verticalAlign === 'middle') {
-                    y = dlBox.y - dlBox.height / 2 + dataLabel.height / 2;
+                    y = dlBox.y - dlBox.height / 2 + dataLabelHeight / 2;
                 }
                 else if (verticalAlign === 'top') {
-                    y = dlBox.y - dlBox.height + dataLabel.height +
+                    y = dlBox.y - dlBox.height + dataLabelHeight +
                         options.padding;
                 }
                 if (verticalAlign === 'top' && !reversed ||
@@ -497,13 +509,13 @@
                          *
                          * @type {Highcharts.ColorString|Highcharts.GradientColorObject|Highcharts.PatternObject}
                          */
-                        color: palette.neutralColor20,
+                        color: "#cccccc" /* neutralColor20 */,
                         /**
                          * A specific border color for the selected point.
                          *
                          * @type {Highcharts.ColorString}
                          */
-                        borderColor: palette.neutralColor100
+                        borderColor: "#000000" /* neutralColor100 */
                     }
                 }
             });

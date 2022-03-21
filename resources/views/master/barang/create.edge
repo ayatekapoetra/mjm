@@ -1,0 +1,89 @@
+{{ script('ajax/opt-coa') }}
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-barang-brand') }}
+{{ script('ajax/opt-barang-kategori') }}
+{{ script('ajax/opt-barang-qualitas') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Part Number</label>
+                                <input type="text" name="num_part" class="form-control" placeholder="Input part number disini..." value="" required>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <label class="control-label">Nama</label>
+                                <input type="text" name="nama" class="form-control" placeholder="Input nama barang disini..." value="" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">Min. Stock</label>
+                                <input type="number" name="min_stok" class="form-control text-right" value="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Kategori</label>
+                                <select class="form-control selectBarangKategori" name="kategori_id" data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Brand</label>
+                                <select class="form-control selectBarangBrand" name="brand_id" data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Qualitas</label>
+                                <select class="form-control selectBarangQualitas" name="qualitas_id" data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Satuan</label>
+                                <select class="form-control selectOptions" name="satuan" data-group="satuan" required></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Kategori COA Debit</label>
+                                <select class="form-control selectCoa" name="coa_in" data-values=""></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Kategori COA Kredit</label>
+                                <select class="form-control selectCoa" name="coa_out" data-values=""></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Photo</label>
+                                <input type="file" name="photo" class="form-control text-right">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6"></div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

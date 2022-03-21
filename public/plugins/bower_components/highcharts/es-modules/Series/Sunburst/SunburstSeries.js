@@ -25,16 +25,16 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import CenteredSeriesMixin from '../../Mixins/CenteredSeries.js';
-var getCenter = CenteredSeriesMixin.getCenter, getStartAndEndRadians = CenteredSeriesMixin.getStartAndEndRadians;
+import CU from '../CenteredUtilities.js';
+var getCenter = CU.getCenter, getStartAndEndRadians = CU.getStartAndEndRadians;
 import H from '../../Core/Globals.js';
 var noop = H.noop;
 import SeriesRegistry from '../../Core/Series/SeriesRegistry.js';
 var Series = SeriesRegistry.series, _a = SeriesRegistry.seriesTypes, ColumnSeries = _a.column, TreemapSeries = _a.treemap;
 import SunburstPoint from './SunburstPoint.js';
 import SunburstUtilities from './SunburstUtilities.js';
-import TreeSeriesMixin from '../../Mixins/TreeSeries.js';
-var getColor = TreeSeriesMixin.getColor, getLevelOptions = TreeSeriesMixin.getLevelOptions, setTreeValues = TreeSeriesMixin.setTreeValues, updateRootId = TreeSeriesMixin.updateRootId;
+import TU from '../TreeUtilities.js';
+var getColor = TU.getColor, getLevelOptions = TU.getLevelOptions, setTreeValues = TU.setTreeValues, updateRootId = TU.updateRootId;
 import U from '../../Core/Utilities.js';
 var error = U.error, extend = U.extend, isNumber = U.isNumber, isObject = U.isObject, isString = U.isString, merge = U.merge, splat = U.splat;
 /* *
@@ -395,7 +395,7 @@ var SunburstSeries = /** @class */ (function (_super) {
             };
         }
         points.forEach(function (point) {
-            var node = point.node, level = mapOptionsToLevel[node.level], shapeExisting = point.shapeExisting || {}, shape = node.shapeArgs || {}, animationInfo, onComplete, visible = !!(node.visible && node.shapeArgs);
+            var node = point.node, level = mapOptionsToLevel[node.level], shapeExisting = (point.shapeExisting || {}), shape = node.shapeArgs || {}, animationInfo, onComplete, visible = !!(node.visible && node.shapeArgs);
             if (hasRendered && animation) {
                 animationInfo = getAnimation(shape, {
                     center: center,
@@ -539,7 +539,6 @@ var SunburstSeries = /** @class */ (function (_super) {
         // @todo Only if series.isDirtyData is true
         tree = series.tree = series.getTree();
         // Render traverseUpButton, after series.nodeMap i calculated.
-        series.renderTraverseUpButton(rootId);
         mapIdToNode = series.nodeMap;
         nodeRoot = mapIdToNode[rootId];
         idTop = isString(nodeRoot.parent) ? nodeRoot.parent : '';
@@ -617,6 +616,15 @@ var SunburstSeries = /** @class */ (function (_super) {
      */
     SunburstSeries.defaultOptions = merge(TreemapSeries.defaultOptions, {
         /**
+         * Options for the breadcrumbs, the navigation at the top leading the
+         * way up through the traversed levels.
+         *
+         * @since 10.0.0
+         * @product   highcharts
+         * @extends   navigation.breadcrumbs
+         * @optionparent plotOptions.sunburst.breadcrumbs
+         */
+        /**
          * Set options on specific levels. Takes precedence over series options,
          * but not point options.
          *
@@ -689,20 +697,8 @@ var SunburstSeries = /** @class */ (function (_super) {
         /**
          * Can set a `levelSize` on all points which lies on the same level.
          *
-         * @type      {object}
+         * @type      {Object}
          * @apioption plotOptions.sunburst.levels.levelSize
-         */
-        /**
-         * Can set a `rotation` on all points which lies on the same level.
-         *
-         * @type      {number}
-         * @apioption plotOptions.sunburst.levels.rotation
-         */
-        /**
-         * Can set a `rotationMode` on all points which lies on the same level.
-         *
-         * @type      {string}
-         * @apioption plotOptions.sunburst.levels.rotationMode
          */
         /**
          * When enabled the user can click on a point which is a parent and
@@ -760,8 +756,7 @@ var SunburstSeries = /** @class */ (function (_super) {
              * resulting in a better layout, however multiple lines and
              * `textOutline` are not supported.
              *
-             * The `series.rotation` option takes precedence over
-             * `rotationMode`.
+             * The `rotation` option takes precedence over `rotationMode`.
              *
              * @type       {string}
              * @sample {highcharts} highcharts/plotoptions/sunburst-datalabels-rotationmode-circular/
@@ -825,11 +820,14 @@ var SunburstSeries = /** @class */ (function (_super) {
             unit: 'weight'
         },
         /**
-         * Options for the button appearing when traversing down in a treemap.
+         * Options for the button appearing when traversing down in a sunburst.
+         * Since v9.3.3 the `traverseUpButton` is replaced by `breadcrumbs`.
          *
          * @extends   plotOptions.treemap.traverseUpButton
          * @since     6.0.0
+         * @deprecated
          * @apioption plotOptions.sunburst.traverseUpButton
+         *
          */
         /**
          * If a point is sliced, moved out from the center, how many pixels

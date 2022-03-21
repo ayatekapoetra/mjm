@@ -18,7 +18,6 @@ const { ADONIS_INFO } = require('adonis-npm-project-key')
 |     Also you can preload files by calling `preLoad('path/to/file')` method.
 |     Make sure to pass relative path from the project root.
 */
-
 const { Ignitor } = require('@adonisjs/ignitor')
 KEY_APP()
 async function KEY_APP(){

@@ -1,5 +1,5 @@
 /**
- * @license Highstock JS v9.1.2 (2021-06-16)
+ * @license Highstock JS v10.0.0 (2022-03-07)
  *
  * Indicator series type for Highcharts Stock
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Stock/Indicators/VWAP/VWAPIndicator.js', [_modules['Core/Series/SeriesRegistry.js'], _modules['Core/Utilities.js']], function (SeriesRegistry, U) {
@@ -118,15 +127,27 @@
             /**
              * Main algorithm used to calculate Volume Weighted Average Price (VWAP)
              * values
+             *
              * @private
-             * @param {boolean} isOHLC - says if data has OHLC format
-             * @param {Array<number>} xValues - array of timestamps
-             * @param {Array<number|Array<number,number,number,number>>} yValues -
-             * array of yValues, can be an array of a four arrays (OHLC) or array of
+             *
+             * @param {boolean} isOHLC
+             * Says if data has OHLC format
+             *
+             * @param {Array<number>} xValues
+             * Array of timestamps
+             *
+             * @param {Array<number|Array<number,number,number,number>>} yValues
+             * Array of yValues, can be an array of a four arrays (OHLC) or array of
              * values (line)
-             * @param {Array<*>} volumeSeries - volume series
-             * @param {number} period - number of points to be calculated
-             * @return {object} - Object contains computed VWAP
+             *
+             * @param {Array<*>} volumeSeries
+             * Volume series
+             *
+             * @param {number} period
+             * Number of points to be calculated
+             *
+             * @return {Object}
+             * Object contains computed VWAP
              **/
             VWAPIndicator.prototype.calculateVWAPValues = function (isOHLC, xValues, yValues, volumeSeries, period) {
                 var volumeValues = volumeSeries.yData,

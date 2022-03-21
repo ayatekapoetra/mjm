@@ -1,5 +1,10 @@
 'use strict'
 
+const User = use("App/Models/User")
+const initMenu = use("App/Helpers/_sidebar")
+const initFunc = use("App/Helpers/initFunc")
+const UsrWorkspace = use("App/Models/UsrWorkspace")
+
 class HomeController {
     async index ( { auth, response, view } ) {
         try {

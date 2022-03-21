@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v9.1.2 (2021-06-16)
+ * @license Highcharts JS v10.0.0 (2022-03-07)
  *
  * Solid angular gauge module
  *
@@ -7,7 +7,6 @@
  *
  * License: www.highcharts.com/license
  */
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && module.exports) {
         factory['default'] = factory;
@@ -22,10 +21,20 @@
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
+    'use strict';
     var _modules = Highcharts ? Highcharts._modules : {};
     function _registerModule(obj, path, args, fn) {
         if (!obj.hasOwnProperty(path)) {
             obj[path] = fn.apply(null, args);
+
+            if (typeof CustomEvent === 'function') {
+                window.dispatchEvent(
+                    new CustomEvent(
+                        'HighchartsModuleLoaded',
+                        { detail: { path: path, module: obj[path] }
+                    })
+                );
+            }
         }
     }
     _registerModule(_modules, 'Core/Axis/SolidGaugeAxis.js', [_modules['Core/Color/Color.js'], _modules['Core/Utilities.js']], function (Color, U) {
@@ -226,7 +235,22 @@
                     outerArcStart = path[0],
                     innerArcStart = path[2];
                 if (outerArcStart[0] === 'M' && innerArcStart[0] === 'L') {
-                    var x1 = outerArcStart[1], y1 = outerArcStart[2], x2 = innerArcStart[1], y2 = innerArcStart[2], roundStart = ['A', smallR, smallR, 0, 1, 1, x1, y1], roundEnd = ['A', smallR, smallR, 0, 1, 1, x2, y2];
+                    var x1 = outerArcStart[1],
+                        y1 = outerArcStart[2],
+                        x2 = innerArcStart[1],
+                        y2 = innerArcStart[2],
+                        roundStart = [
+                            'A',
+                        smallR,
+                        smallR, 0, 1, 1,
+                        x1,
+                        y1
+                        ],
+                        roundEnd = ['A',
+                        smallR,
+                        smallR, 0, 1, 1,
+                        x2,
+                        y2];
                     // Replace the line segment and the last close segment
                     path[2] = roundEnd;
                     path[4] = roundStart;
@@ -236,7 +260,7 @@
         };
 
     });
-    _registerModule(_modules, 'Series/SolidGauge/SolidGaugeSeries.js', [_modules['Mixins/LegendSymbol.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Axis/SolidGaugeAxis.js'], _modules['Core/Utilities.js']], function (LegendSymbolMixin, SeriesRegistry, SolidGaugeAxis, U) {
+    _registerModule(_modules, 'Series/SolidGauge/SolidGaugeSeries.js', [_modules['Core/Legend/LegendSymbol.js'], _modules['Core/Series/SeriesRegistry.js'], _modules['Core/Axis/SolidGaugeAxis.js'], _modules['Core/Utilities.js']], function (LegendSymbol, SeriesRegistry, SolidGaugeAxis, U) {
         /* *
          *
          *  Solid angular gauge module
@@ -537,7 +561,7 @@
             return SolidGaugeSeries;
         }(GaugeSeries));
         extend(SolidGaugeSeries.prototype, {
-            drawLegendSymbol: LegendSymbolMixin.drawRectangle
+            drawLegendSymbol: LegendSymbol.drawRectangle
         });
         SeriesRegistry.registerSeriesType('solidgauge', SolidGaugeSeries);
         /* *
