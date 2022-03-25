@@ -22,6 +22,7 @@ Route.get('/', 'HomeController.index')
 Route.get('/login', 'AuthentifikasiController.index')
 Route.post('/login', 'AuthentifikasiController.login')
 Route.get('/logout', 'AuthentifikasiController.loggingOut').as('auth.logout')
+Route.get('/profile', 'AuthentifikasiController.profile').as('auth.profile')
 
 Route.group(() => {
     
@@ -66,6 +67,7 @@ Route.group(() => {
     Route.get('/options/cabang', 'OptionsAjaxController.cabang').as('ajax.set.cabang')
     Route.get('/options/gudang', 'OptionsAjaxController.gudang').as('ajax.set.gudang')
     Route.get('/options/department', 'OptionsAjaxController.department').as('ajax.set.department')
+    Route.get('/options/rack', 'OptionsAjaxController.rack').as('ajax.set.rack')
     Route.get('/options/barang', 'OptionsAjaxController.barang').as('ajax.set.barang')
     Route.get('/options/barang-brand', 'OptionsAjaxController.barangBrand').as('ajax.set.barangBrand')
     Route.get('/options/barang-kategori', 'OptionsAjaxController.barangKategori').as('ajax.set.barangKategori')
@@ -133,6 +135,15 @@ Route.group(() => {
     Route.post('/rack/:id/update', 'RackController.update').as('mas.rack.update').middleware('U')
     Route.delete('/rack/:id/destroy', 'RackController.destroy').as('mas.rack.destroy').middleware('D')
 
+    /* MASTER BIN */
+    Route.get('/bin', 'BinController.index').as('mas.bin')
+    Route.post('/bin', 'BinController.store').as('mas.bin.store').middleware('C')
+    Route.get('/bin/list', 'BinController.list').as('mas.bin.list').middleware('R')
+    Route.get('/bin/create', 'BinController.create').as('mas.bin.create').middleware('C')
+    Route.get('/bin/:id/show', 'BinController.show').as('mas.bin.show').middleware('U')
+    Route.post('/bin/:id/update', 'BinController.update').as('mas.bin.update').middleware('U')
+    Route.delete('/bin/:id/destroy', 'BinController.destroy').as('mas.bin.destroy').middleware('D')
+
     /* MASTER BARANG */
     Route.get('/barang', 'BarangController.index').as('mas.barang')
     Route.post('/barang', 'BarangController.store').as('mas.barang.store').middleware('C')
@@ -141,6 +152,15 @@ Route.group(() => {
     Route.get('/barang/:id/show', 'BarangController.show').as('mas.barang.show').middleware('U')
     Route.post('/barang/:id/update', 'BarangController.update').as('mas.barang.update').middleware('U')
     Route.delete('/barang/:id/destroy', 'BarangController.destroy').as('mas.barang.destroy').middleware('D')
+
+    /* MASTER BARANG HARGA */
+    Route.get('/barang-harga', 'BarangHargaController.index').as('mas.barang-harga')
+    Route.post('/barang-harga', 'BarangHargaController.store').as('mas.barang-harga.store').middleware('C')
+    Route.get('/barang-harga/list', 'BarangHargaController.list').as('mas.barang-harga.list').middleware('R')
+    Route.get('/barang-harga/create', 'BarangHargaController.create').as('mas.barang-harga.create').middleware('C')
+    Route.get('/barang-harga/:id/show', 'BarangHargaController.show').as('mas.barang-harga.show').middleware('U')
+    Route.post('/barang-harga/:id/update', 'BarangHargaController.update').as('mas.barang-harga.update').middleware('U')
+    Route.delete('/barang-harga/:id/destroy', 'BarangHargaController.destroy').as('mas.barang-harga.destroy').middleware('D')
 
     /* MASTER PEMASOK */
     Route.get('/pemasok', 'PemasokController.index').as('mas.pemasok')
@@ -194,5 +214,14 @@ Route.group(() => {
     Route.get('/users-menu/:id/show', 'UserMenuController.show').as('set.users-menu.show').middleware('U')
     Route.post('/users-menu/:id/update', 'UserMenuController.update').as('set.users-menu.update').middleware('U')
     Route.delete('/users-menu/:id/destroy', 'UserMenuController.destroy').as('set.users-menu.destroy').middleware('D')
+
+    /** SETTING OPTIONS **/
+    Route.get('/options', 'OptionController.index').as('set.options').middleware('R')
+    Route.post('/options', 'OptionController.store').as('set.options.store').middleware('C')
+    Route.get('/options/list', 'OptionController.list').as('set.options.list').middleware('R')
+    Route.get('/options/create', 'OptionController.create').as('set.options.create').middleware('C')
+    Route.get('/options/:id/show', 'OptionController.show').as('set.options.show').middleware('U')
+    Route.post('/options/:id/update', 'OptionController.update').as('set.options.update').middleware('U')
+    Route.delete('/options/:id/destroy', 'OptionController.destroy').as('set.options.destroy').middleware('D')
 
 }).prefix('setting').namespace('setting').middleware(['MM'])

@@ -18,12 +18,11 @@ $(function(){
 
     $('body').on('click', '#apply-filter', function(){
         var limit = $('input[name="limit"]').val()
-        var kode = $('input[name="kode"]').val() && '&kode=' + $('input[name="kode"]').val()
-        var serial = $('input[name="serial"]').val() && '&serial=' + $('input[name="serial"]').val()
-        var num_part = $('input[name="num_part"]').val() && '&num_part=' + $('input[name="num_part"]').val()
-        var nama = $('input[name="nama"]').val() && '&nama=' + $('input[name="nama').val()
-        var satuan = $('select[name="satuan"]').val()  && '&satuan=' + $('select[name="satuan"]').val()
-        var url = `barang-harga/list?keyword=true&limit=${limit}${kode}${serial}${num_part}${nama}${satuan}`
+        var group = $('input[name="group"]').val() && '&group=' + $('input[name="group"]').val()
+        var teks = $('input[name="teks"]').val() && '&teks=' + $('input[name="teks"]').val()
+        var nilai = $('input[name="nilai"]').val() && '&nilai=' + $('input[name="nilai"]').val()
+        var url = `options/list?keyword=true&limit=${limit}${group}${teks}${nilai}`
+        console.log(url);
         $.ajax({
             async: true,
             url: url,
@@ -60,7 +59,7 @@ $(function(){
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'barang-harga',
+            url: 'options',
             method: 'POST',
             data: data,
             dataType: 'json',
@@ -68,6 +67,7 @@ $(function(){
             mimeType: "multipart/form-data",
             contentType: false,
             success: function(result){
+                console.log(result);
                 if(result.success){
                     swal('Okey', result.message, 'success')
                     initCreate()
@@ -81,14 +81,12 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'a.bt-show', function(e){
+    $('body').on('click', 'button.bt-show', function(e){
         e.preventDefault()
         var id = $(this).data('id')
-        var type = $(this).data('type')
-        console.log(type);
         $.ajax({
             async: true,
-            url: 'barang-harga/'+id+'/show',
+            url: 'options/'+id+'/show',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -112,10 +110,9 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'button.bt-delete', function(e){
+    $('body').on('click', 'button#bt-delete', function(e){
         e.preventDefault()
         var id = $(this).data('id')
-        var tipe = $(this).data('tipe')
         swal({
             title: "Are you sure?",
             text: "Your will not be able to recover this imaginary file!",
@@ -129,7 +126,7 @@ $(function(){
               $.ajax({
                   async: true,
                   headers: {'x-csrf-token': $('[name=_csrf]').val()},
-                  url: 'barang-harga/'+id+'/destroy?tipe='+tipe,
+                  url: 'options/'+id+'/destroy',
                   method: 'DELETE',
                   dataType: 'json',
                   processData: false,
@@ -158,7 +155,7 @@ $(function(){
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'barang-harga/'+id+'/update',
+            url: 'options/'+id+'/update',
             method: 'POST',
             data: data,
             dataType: 'json',
@@ -183,7 +180,7 @@ $(function(){
     function initDefault(limit, page){
         $.ajax({
             async: true,
-            url: 'barang-harga/list',
+            url: 'options/list',
             method: 'GET',
             data: {
                 limit: limit || 100,
@@ -197,7 +194,7 @@ $(function(){
                 body.find('div#content-form').html('')
             },
             error: function(err){
-                console.log(err)
+                body.find('div#content-list').html(JSON.stringify(err))
             },
             complete: function() {
                 body.find('button#bt-create-form').css('display', 'inline')
@@ -212,7 +209,7 @@ $(function(){
     function initCreate(){
         $.ajax({
             async: true,
-            url: 'barang-harga/create',
+            url: 'options/create',
             method: 'GET',
             dataType: 'html',
             contentType: false,

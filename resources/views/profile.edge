@@ -1,0 +1,76 @@
+@layout('_layouts.main')
+@section('content')
+<div class="container-fluid">
+    <div class="row bg-title">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+            <h4 class="page-title">Profile page</h4> 
+        </div>
+        <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-xs-12">
+            <div class="white-box">
+                <div class="user-bg" style="height:270px"> 
+                    <img width="100%" alt="user" src="../plugins/images/bg-profile.jpeg">
+                    <div class="overlay-box">
+                        <div class="user-content" style="margin-top: 50px">
+                            <a href="javascript:void(0)">
+                                @if(auth.user.avatar)
+                                    <img src="{{assetsUrl(auth.user.avatar)}}" alt="user-img" width="30" class="thumb-lg img-circle">
+                                @else
+                                    <img src=" {{ assetsUrl('/plugins/images/users/default-usr.png') }} " alt="user-img" width="30" class="thumb-lg img-circle">
+                                @endif
+                            </a>
+                            <h4 class="text-white">{{auth.user.username}}</h4>
+                            <h5 class="text-white">{{ auth.user.usertype }}</h5> 
+                        </div>
+                    </div>
+                </div>
+                <div class="user-btm-box m-t-10">
+                    <strong>Visi & Misi Perusahaan</strong> <br>
+                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8 col-xs-12">
+            <div class="white-box">
+                <h4>Profile Details</h4>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>Nama Lengkap</td>
+                                        <td>{{auth.user.nama_lengkap}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Email</td>
+                                        <td>{{auth.user.email}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Phone</td>
+                                        <td>{{auth.user.telephone}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Handphone</td>
+                                        <td>{{auth.user.handphone}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jenis Kelamin</td>
+                                        <td>{{auth.user.jenkel === 'm' ? 'Laki-laki':'Perempuan'}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Alamat</td>
+                                        <td>{{auth.user.alamat}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

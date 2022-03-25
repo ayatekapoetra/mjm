@@ -1,0 +1,63 @@
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-barang') }}
+{{ script('ajax/opt-gudang') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Barang</label>
+                                <select class="form-control selectBarang" name="kategori_id" data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">Periode <span class="text-info" style="font-size:10px"><small>( YYYY-MM )</small></span></label>
+                                <input type="text" name="periode" class="form-control" placeholder="format : YYYY-MM" value="{{periode}}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Gudang</label>
+                                <select class="form-control selectGudang" name="gudang_id" data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Harga Beli</label>
+                                <input type="number" name="harga_beli" class="form-control text-right" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Harga Jual</label>
+                                <input type="number" name="harga_jual" class="form-control text-right" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Keterangan</label>
+                                <textarea class="form-control" name="narasi" id="narasi" rows="5"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6"></div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

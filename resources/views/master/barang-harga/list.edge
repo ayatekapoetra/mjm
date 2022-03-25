@@ -1,0 +1,88 @@
+{{ script('ajax/initNumber') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="*"class="bg-inverse b-all">Nama</th>
+                            <th width="200"class="bg-inverse b-all">Part Number</th>
+                            <th width="50"class="bg-inverse b-all">Satuan</th>
+                            <th width="150"class="bg-inverse b-all">Harga Beli</th>
+                            <th width="150"class="bg-inverse b-all">Harga Jual</th>
+                            <th width="150" class="text-center bg-inverse b-all">Images</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td class="p-t-5">
+                                    <small>{{item.kode}}</small><br>
+                                    <strong>{{item.nama}}</strong>
+                                </td>
+                                <td class="p-b-5">
+                                    {{item.num_part || ''}}
+                                </td>
+                                <td class="text-uppercase text-center">
+                                    {{item.satuan}} 
+                                </td>
+                                <td class="text-warning text-right p-t-5">
+                                    <strong class="formatRp" data-number="{{item.harga_beli}}">{{item.harga_beli}}</strong> <br>
+                                    <small>
+                                        <small>{{item.periode_beli}}</small>
+                                        <a data-type="beli" class="text-warning bt-show" data-id="{{item.harga_beli_id}}">
+                                            <span class="">
+                                                <i class="ti-pencil-alt"></i> 
+                                            </span>
+                                        </a>
+                                    </small>
+                                </td>
+                                <td class="text-success text-right p-t-5">
+                                    <strong class="formatRp" data-number="{{item.harga_jual}}">{{item.harga_jual}}</strong> <br>
+                                    <small>
+                                        <small>{{item.periode_jual}}</small>
+                                        <a data-type="jual" class="text-success bt-show" data-id="{{item.harga_jual_id}}">
+                                            <span class="">
+                                                <i class="ti-pencil-alt"></i> 
+                                            </span>
+                                        </a>
+                                    </small>
+                                </td>
+                                <td class="text-center p-t-5">
+                                    @if(item.photo)
+                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl(item.photo) }}" title="{{item.nama}}">
+                                            <img class="img-rounded" src="{{ assetsUrl(item.photo) }}" width="50" height="50"/>
+                                        </a>
+                                    @else
+                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl('images/ximg_not_found.jpeg') }}" title="{{item.nama}}">
+                                            <img class="img-rounded" src="{{ assetsUrl('images/ximg_not_found.jpeg') }}" width="50"/>
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

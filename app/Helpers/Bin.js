@@ -4,8 +4,7 @@ const DB = use('Database')
 const _ = require('underscore')
 const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
-const Rack = use("App/Models/master/Rack")
-const BarangRack = use("App/Models/BarangRack")
+const Bin = use("App/Models/master/Bin")
 
 class masterRack {
     async LIST (req, user) {
@@ -14,16 +13,20 @@ class masterRack {
         let data
         try {
             data = (
-                await Rack
+                await Bin
                 .query()
                 .with('cabang')
                 .with('gudang')
+                .with('rack')
                 .where( w => {
                     if(req.cabang_id){
                         w.where('cabang_id', req.cabang_id)
                     }
                     if(req.gudang_id){
                         w.where('gudang_id', req.gudang_id)
+                    }
+                    if(req.rack_id){
+                        w.where('rack_id', req.rack_id)
                     }
                     if(req.kode){
                         w.where('kode', 'like', `%${req.kode}%`)
@@ -48,18 +51,18 @@ class masterRack {
     async POST (req, user, filex) {
         const trx = await DB.beginTransaction()
         
-        const rack = new Rack()
-        rack.fill({
+        const bin = new Bin()
+        bin.fill({
             cabang_id: req.cabang_id,
             gudang_id: req.gudang_id,
+            rack_id: req.rack_id,
             kode: req.kode,
             nama: req.nama,
-            keterangan: req.keterangan || null,
             user_id: user.id
         })
 
         try {
-            await rack.save(trx)
+            await bin.save(trx)
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -78,10 +81,11 @@ class masterRack {
 
     async SHOW (params) {
         const data = (
-            await Rack
+            await Bin
             .query()
             .with('cabang')
             .with('gudang')
+            .with('rack')
             .where('id', params.id)
             .last()
         ).toJSON()
@@ -91,18 +95,18 @@ class masterRack {
     async UPDATE (params, req, user) {
         const trx = await DB.beginTransaction()
         console.log(req);
-        const rack = await Rack.query().where('id', params.id).last()
-        rack.merge({
+        const bin = await Bin.query().where('id', params.id).last()
+        bin.merge({
             cabang_id: req.cabang_id,
             gudang_id: req.gudang_id,
+            rack_id: req.rack_id,
             kode: req.kode,
             nama: req.nama,
-            keterangan: req.keterangan,
             user_id: user.id
         })
 
         try {
-            await rack.save(trx)
+            await bin.save(trx)
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -121,7 +125,7 @@ class masterRack {
 
     async DELETE (params) {
         try {
-            await Rack.query().where('id', params.id).delete()
+            await Bin.query().where('id', params.id).delete()
             return {
                 success: true,
                 message: 'Success delete data...'

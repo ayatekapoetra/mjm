@@ -1,16 +1,16 @@
 $(function(){
-    console.log('ajax/opt-barang');
+    console.log('ajax/opt-rack');
 
     var body = $('body')
 
-    $('select.selectBarang').select2()
+    $('select.selectRack').select2()
 
-    $('select.selectBarang').each(function(){
+    $('body select.selectRack').each(function(){
         var elm = $(this)
         var values = $(this).data('values') || elm.val()
         $.ajax({
             async: true,
-            url: '/ajax/options/barang?selected='+values,
+            url: '/ajax/options/rack?selected='+values,
             method: 'GET',
             dataType: 'json',
             processData: false,
@@ -20,7 +20,7 @@ $(function(){
                 // console.log(result);
                 if(result.length > 0){
                     setSelected(result, values)
-                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>' +v.num_part+ ' | '+v.nama+'</option>'))
+                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.nama+'</option>'))
                     initSelected(result, elm)
                     elm.trigger('change');
                 }else{

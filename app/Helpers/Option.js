@@ -4,38 +4,30 @@ const DB = use('Database')
 const _ = require('underscore')
 const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
-const Rack = use("App/Models/master/Rack")
-const BarangRack = use("App/Models/BarangRack")
+const SysOption = use("App/Models/SysOption")
 
-class masterRack {
+class settingOption {
     async LIST (req, user) {
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
         let data
         try {
             data = (
-                await Rack
+                await SysOption
                 .query()
-                .with('cabang')
-                .with('gudang')
                 .where( w => {
-                    if(req.cabang_id){
-                        w.where('cabang_id', req.cabang_id)
+                    w.where('status', 'Y')
+                    if(req.group){
+                        w.where('group', `like`, `%${req.group}%`)
                     }
-                    if(req.gudang_id){
-                        w.where('gudang_id', req.gudang_id)
+                    if(req.teks){
+                        w.where('teks', `like`, `%${req.teks}%`)
                     }
-                    if(req.kode){
-                        w.where('kode', 'like', `%${req.kode}%`)
-                    }
-                    if(req.nama){
-                        w.where('nama', 'like', `%${req.nama}%`)
-                    }
-                    if(req.keterangan){
-                        w.where('keterangan', 'like', `%${req.keterangan}%`)
+                    if(req.nilai){
+                        w.where('nilai', `like`, `%${req.nilai}%`)
                     }
                 })
-                .orderBy('kode', 'asc')
+                .orderBy([{column: 'group'}, {column: 'urut'}])
                 .paginate(halaman, limit)
             ).toJSON()
         } catch (error) {
@@ -48,18 +40,16 @@ class masterRack {
     async POST (req, user, filex) {
         const trx = await DB.beginTransaction()
         
-        const rack = new Rack()
-        rack.fill({
-            cabang_id: req.cabang_id,
-            gudang_id: req.gudang_id,
-            kode: req.kode,
-            nama: req.nama,
-            keterangan: req.keterangan || null,
-            user_id: user.id
+        const sysOption = new SysOption()
+        sysOption.fill({
+            group: (req.group).toLowerCase(),
+            teks: req.teks,
+            nilai: (req.nilai).toLowerCase(),
+            urut: req.urut
         })
 
         try {
-            await rack.save(trx)
+            await sysOption.save(trx)
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -78,10 +68,8 @@ class masterRack {
 
     async SHOW (params) {
         const data = (
-            await Rack
+            await SysOption
             .query()
-            .with('cabang')
-            .with('gudang')
             .where('id', params.id)
             .last()
         ).toJSON()
@@ -91,18 +79,16 @@ class masterRack {
     async UPDATE (params, req, user) {
         const trx = await DB.beginTransaction()
         console.log(req);
-        const rack = await Rack.query().where('id', params.id).last()
-        rack.merge({
-            cabang_id: req.cabang_id,
-            gudang_id: req.gudang_id,
-            kode: req.kode,
-            nama: req.nama,
-            keterangan: req.keterangan,
-            user_id: user.id
+        const sysOption = await SysOption.query().where('id', params.id).last()
+        sysOption.merge({
+            group: (req.group).toLowerCase(),
+            teks: req.teks,
+            nilai: (req.nilai).toLowerCase(),
+            urut: req.urut
         })
 
         try {
-            await rack.save(trx)
+            await sysOption.save(trx)
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -121,7 +107,7 @@ class masterRack {
 
     async DELETE (params) {
         try {
-            await Rack.query().where('id', params.id).delete()
+            await SysOption.query().where('id', params.id).delete()
             return {
                 success: true,
                 message: 'Success delete data...'
@@ -135,4 +121,4 @@ class masterRack {
     }
 }
 
-module.exports = new masterRack()
+module.exports = new settingOption()

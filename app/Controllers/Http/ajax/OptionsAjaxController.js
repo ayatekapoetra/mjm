@@ -5,6 +5,7 @@ const VUser = use("App/Models/VUser")
 const UsrMenu = use("App/Models/UsrMenu")
 const SysMenu = use("App/Models/SysMenu")
 const Gaji = use("App/Models/master/Gaji")
+const Rack = use("App/Models/master/Rack")
 const SysOption = use("App/Models/SysOption")
 const Cabang = use("App/Models/master/Cabang")
 const Gudang = use("App/Models/master/Gudang")
@@ -311,19 +312,38 @@ class OptionsAjaxController {
         return data
     }
 
-    async barang ( { request } ) {
+    async rack ( { request } ) {
         const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
         let data = (
-                await Barang.query().where( w => {
-                w.where('bisnis_id', req.bisnis_id)
+                await Rack.query().where( w => {
                 w.where('aktif', 'Y')
             }).orderBy('nama', 'asc')
             .fetch()
         ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+        if(req.selected)
+        data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
+        else
+        data.push({id: '', kode: '', nama: 'Pilih', selected: 'selected'})
+        return data
+    }
 
-       return data
+    async barang ( { request } ) {
+        const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
+        let data = (
+                await Barang.query().where( w => {
+                w.where('aktif', 'Y')
+            }).orderBy('nama', 'asc')
+            .fetch()
+        ).toJSON()
+
+        if(req.selected)
+        data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
+        else
+        data.push({id: '', kode: '', num_part: '', nama: 'Pilih', selected: 'selected'})
+        return data
     }
 
     async barangID ( { params } ) {

@@ -8,7 +8,7 @@ const initFunc = use("App/Helpers/initFunc")
 const Barang = use("App/Models/master/Barang")
 const HargaBeli = use("App/Models/master/HargaBeli")
 const HargaJual = use("App/Models/master/HargaJual")
-const BarangLokasi = use("App/Models/BarangLokasi")
+const BarangHarga = use("App/Models/VBarangHarga")
 
 class masterBarang {
     async LIST (req, user) {
@@ -19,10 +19,9 @@ class masterBarang {
         let data
         if(req.keyword){
             data = (
-                await Barang
+                await BarangHarga
                 .query()
                 .where( w => {
-                    w.where('bisnis_id', ws.bisnis_id)
                     if(req.kode){
                         w.where('kode', 'like', `%${req.kode}%`)
                     }
@@ -44,50 +43,26 @@ class masterBarang {
             ).toJSON()
         }else{
             data = (
-                await Barang
+                await BarangHarga
                 .query()
                 .where( w => {
-                    w.where('bisnis_id', ws.bisnis_id)
+                    w.where('aktif', 'Y')
                 })
                 .orderBy('nama', 'asc')
                 .paginate(halaman, limit)
             ).toJSON()
         }
-
-        let resData = []
-
-        for (const obj of data.data) {
-            const hargaBeli = await HargaBeli.query().where( w => {
-                w.where('barang_id', obj.id)
-                w.where('bisnis_id', obj.bisnis_id)
-                w.where('periode', 'like', `${moment().format('YYYY')}%`)
-            }).getAvg('harga_beli') || 0.00
-
-            const hargaJual = await HargaJual.query().where( w => {
-                w.where('barang_id', obj.id)
-                w.where('bisnis_id', obj.bisnis_id)
-                w.where('periode', 'like', `${moment().format('YYYY')}%`)
-            }).getAvg('harga_jual') || 0.00
-            
-            resData.push({
-                ...obj, 
-                harga_beli: hargaBeli,
-                harga_jual: hargaJual,
-            })
-        }
-
-        return {...data, data: resData}
+        // console.log(data);
+        return data
     }
 
     async POST (req, user) {
-        const ws = await initFunc.GET_WORKSPACE(user.id)
         const trx = await DB.beginTransaction()
         
         const hargaBeli = new HargaBeli()
         hargaBeli.fill({
-            bisnis_id: ws.bisnis_id,
             barang_id: req.barang_id,
-            gudang_id: req.gudang_id,
+            gudang_id: req.gudang_id || null,
             periode: moment(req.periode).format('YYYY-MM'),
             narasi: req.narasi,
             harga_beli: req.harga_beli,
@@ -107,9 +82,8 @@ class masterBarang {
 
         const hargaJual = new HargaJual()
         hargaJual.fill({
-            bisnis_id: ws.bisnis_id,
             barang_id: req.barang_id,
-            gudang_id: req.gudang_id,
+            gudang_id: req.gudang_id || null,
             periode: moment(req.periode).format('YYYY-MM'),
             narasi: req.narasi,
             harga_jual: req.harga_jual,
@@ -138,7 +112,6 @@ class masterBarang {
         const data = (
             await Barang
             .query()
-            .with('bisnis')
             .with('hargaJual')
             .with('hargaBeli')
             .where('id', params.id)
