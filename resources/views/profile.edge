@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-md-4 col-xs-12">
             <div class="white-box">
-                <div class="user-bg" style="height:270px"> 
+                <div class="user-bg" style="height:287px"> 
                     <img width="100%" alt="user" src="../plugins/images/bg-profile.jpeg">
                     <div class="overlay-box">
                         <div class="user-content" style="margin-top: 50px">
@@ -34,43 +34,157 @@
         </div>
         <div class="col-md-8 col-xs-12">
             <div class="white-box">
-                <h4>Profile Details</h4>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <tbody>
-                                    <tr>
-                                        <td>Nama Lengkap</td>
-                                        <td>{{auth.user.nama_lengkap}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Email</td>
-                                        <td>{{auth.user.email}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Phone</td>
-                                        <td>{{auth.user.telephone}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Handphone</td>
-                                        <td>{{auth.user.handphone}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Jenis Kelamin</td>
-                                        <td>{{auth.user.jenkel === 'm' ? 'Laki-laki':'Perempuan'}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Alamat</td>
-                                        <td>{{auth.user.alamat}}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <div class="panel panel-default m-b-0">
+                    <div class="panel-wrapper collapse in">
+                        <ul class="nav customtab nav-tabs" role="tablist">
+                            <li role="presentation" class="active">
+                                <a href="#home1" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true">
+                                    <span class="visible-xs">
+                                        <i class="ti-home"></i>
+                                    </span>
+                                    <span class="hidden-xs"> User Profile</span>
+                                </a>
+                            </li>
+                            <li role="presentation" class="">
+                                <a href="#profile1" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false">
+                                    <span class="visible-xs">
+                                        <i class="ti-user"></i>
+                                    </span> 
+                                    <span class="hidden-xs">Ubah Password</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="panel-body p-b-0">
+                            <div class="tab-content m-t-0">
+                                <div role="tabpanel" class="tab-pane fade active in" id="home1">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="border:none;">Nama Lengkap</td>
+                                                            <td style="border:none;">{{auth.user.nama_lengkap}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="border:none;">Email</td>
+                                                            <td style="border:none;">{{auth.user.email}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="border:none;">Phone</td>
+                                                            <td style="border:none;">{{auth.user.telephone}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="border:none;">Handphone</td>
+                                                            <td style="border:none;">{{auth.user.handphone}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="border:none;">Jenis Kelamin</td>
+                                                            <td style="border:none;">{{auth.user.jenkel === 'm' ? 'Laki-laki':'Perempuan'}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="border:none;">Alamat</td>
+                                                            <td style="border:none;">{{auth.user.alamat}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane fade" id="profile1">
+                                    <form class="form-horizontal" id="form-create">
+                                        <div class="form-group">
+                                            <label for="exampleInputuname" class="col-sm-3 control-label">Username</label>
+                                            <div class="col-sm-9">
+                                                <div class="input-group">
+                                                    <div class="input-group-addon">
+                                                        <i class="ti-user"></i>
+                                                    </div>
+                                                    <input type="text" class="form-control" name="username" value="{{auth.user.username}}"> 
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputPassword3" class="col-sm-3 control-label">Old Password*</label>
+                                            <div class="col-sm-9">
+                                                <div class="input-group">
+                                                    <div class="input-group-addon">
+                                                        <i class="ti-lock"></i>
+                                                    </div>
+                                                    <input type="password" class="form-control" name="oldpass" placeholder="Enter password"> 
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputPassword3" class="col-sm-3 control-label">New Password*</label>
+                                            <div class="col-sm-9">
+                                                <div class="input-group">
+                                                    <div class="input-group-addon">
+                                                        <i class="ti-lock"></i>
+                                                    </div>
+                                                    <input type="password" class="form-control" name="passkey" placeholder="Enter password"> 
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inputPassword4" class="col-sm-3 control-label">Retype Password*</label>
+                                            <div class="col-sm-9">
+                                                <div class="input-group">
+                                                    <div class="input-group-addon">
+                                                        <i class="ti-lock"></i>
+                                                    </div>
+                                                    <input type="password" class="form-control" name="retypepass" placeholder="Re Enter password"> 
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group m-b-0">
+                                            <div class="col-sm-offset-3 col-sm-9">
+                                                <button type="submit" class="btn btn-danger waves-effect waves-light m-t-10">Update Password</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        $(function(){
+            console.log('upd...');
+            $('body').on('submit', 'form#form-create', function(e){
+                e.preventDefault()
+                var data = new FormData(this)
+                $.ajax({
+                    async: true,
+                    headers: {'x-csrf-token': $('[name=_csrf]').val()},
+                    url: 'profile/update-password',
+                    method: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    success: function(result){
+                        console.log(result);
+                        if(result.success){
+                            swal('Okey', result.message, 'success')
+                            window.location.assign("/");
+                        }else{
+                            swal('Opps', result.message, 'warning')
+                        }
+                    },
+                    error: function(err){
+                        console.log(err)
+                    }
+                })
+            })
+        })
+    </script>
 </div>
 @endsection

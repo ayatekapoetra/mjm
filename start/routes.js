@@ -23,6 +23,7 @@ Route.get('/login', 'AuthentifikasiController.index')
 Route.post('/login', 'AuthentifikasiController.login')
 Route.get('/logout', 'AuthentifikasiController.loggingOut').as('auth.logout')
 Route.get('/profile', 'AuthentifikasiController.profile').as('auth.profile')
+Route.post('/profile/update-password', 'AuthentifikasiController.updatePassword').as('auth.updatePassword')
 
 Route.group(() => {
     
