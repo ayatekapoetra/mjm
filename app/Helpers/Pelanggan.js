@@ -43,7 +43,6 @@ class masterPelanggan {
             data = (
                 await Pelanggan
                 .query()
-                .with('bisnis')
                 .where( w => {
                     w.where('aktif', 'Y')
                 })

@@ -27,7 +27,6 @@ class PelangganController {
             return view.render('401')
         }
 
-        await initFunc.INSERT_LABATAHAN(user)
         const data = await PelangganHelpers.LIST(req, user)
         return view.render('master.pelanggan.list', { list: data })
     }

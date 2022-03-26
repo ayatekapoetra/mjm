@@ -26,7 +26,6 @@ class UserController {
             return view.render('401')
         }
 
-        await initFunc.INSERT_LABATAHAN(user)
         const data = await UsersHelpers.LIST(req, user)
         
         return view.render('master.users.list', { list: data })
@@ -34,7 +33,6 @@ class UserController {
 
     async create ( { auth, view } ) {
         const user = await userValidate(auth)
-        const ws = await initFunc.GET_WORKSPACE(user.id)
         if(!user){
             return view.render('401')
         }
