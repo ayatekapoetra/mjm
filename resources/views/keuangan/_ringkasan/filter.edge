@@ -1,0 +1,49 @@
+{{ script('ajax/opt-options') }}
+<div class="modal fade" id="filtermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tampilkan Saldo untuk Periode</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="">Mulai Tanggal</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control inp-filter" name="rangeAwal">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="">Hingga Tanggal</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control inp-filter" name="rangeAkhir">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="checkbox checkbox-danger checkbox-circle">
+                            <input id="hideZero" name="hideZero" type="checkbox">
+                            <label id="txthideZero" class="text-inverse" for="hideZero"> Kecualikan Saldo Nol </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="reset-filter" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="apply-filter" class="btn btn-info" data-dismiss="modal">Apply Filter</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .select2-container {
+        height: auto;
+    }
+</style>
+<script>
+    $(function(){
+        $('select.select2x').select2()
+
+        $('input[name="rangeAwal"]').val(moment().startOf('year').format('YYYY-MM-DD'))
+        $('input[name="rangeAkhir"]').val(moment().format('YYYY-MM-DD'))
+    })
+</script>

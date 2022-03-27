@@ -17,9 +17,6 @@ class CoaAjaxController {
     /** LIST COA **/
     async listCoaName ( { request } ) {
         var req = request.all()
-        console.log('====================================');
-        console.log(req);
-        console.log('====================================');
         let data = (
             await AccCoa
             .query()

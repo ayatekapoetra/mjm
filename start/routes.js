@@ -25,6 +25,9 @@ Route.get('/logout', 'AuthentifikasiController.loggingOut').as('auth.logout')
 Route.get('/profile', 'AuthentifikasiController.profile').as('auth.profile')
 Route.post('/profile/update-password', 'AuthentifikasiController.updatePassword').as('auth.updatePassword')
 
+/*
+*   ROUTING AJAX OPTIONS
+*/
 Route.group(() => {
     
     /* COA */
@@ -88,7 +91,9 @@ Route.group(() => {
 
 }).prefix('ajax').namespace('ajax')
 
-
+/*
+*   ROUTING MASTER
+*/
 Route.group(() => {
 
     /* MASTER USER */
@@ -184,6 +189,174 @@ Route.group(() => {
 
 }).prefix('master').namespace('master')
 
+
+/*
+*   ROUTING AKUNTING
+*/
+Route.group(() => {
+    
+    /* RINGKASAN */
+    Route.get('/ringkasan', 'RingkasanController.index').as('acc.ringkasan').middleware('R')
+    Route.get('/ringkasan/list', 'RingkasanController.list').as('acc.ringkasan.list').middleware('R')
+    Route.get('/ringkasan/sum-values', 'RingkasanController.sumValues').as('acc.ringkasan.sumvalues')
+    Route.get('/ringkasan/profit-loss', 'RingkasanController.profitLoss').as('acc.ringkasan.profitLoss')
+
+    /* SALDO AWAL */
+    Route.get('/saldo-awal', 'SaldoAwalController.index').as('acc.saldo-awal').middleware('R')
+    Route.post('/saldo-awal', 'SaldoAwalController.store').as('acc.saldo-awal.store').middleware('C')
+    Route.get('/saldo-awal/list', 'SaldoAwalController.list').as('acc.saldo-awal.list').middleware('R')
+    Route.get('/saldo-awal/create', 'SaldoAwalController.create').as('acc.saldo-awal.create').middleware('C')
+    Route.get('/saldo-awal/:id/show', 'SaldoAwalController.show').as('acc.saldo-awal.show').middleware('U')
+    Route.post('/saldo-awal/:id/update', 'SaldoAwalController.update').as('acc.saldo-awal.show').middleware('U')
+
+    /* BANK & KAS AKUN */
+    Route.get('/bank-kas', 'BankKasController.index').as('acc.bank-kas').middleware('R')
+    Route.get('/bank-kas/list', 'BankKasController.list').as('acc.bank-kas.list').middleware('R')
+    Route.post('/bank-kas/kas', 'BankKasController.storeKas').as('acc.bank-kas.storeKas').middleware('C')
+    Route.post('/bank-kas/bank', 'BankKasController.storeBank').as('acc.bank-kas.storeBank').middleware('C')
+    Route.get('/bank-kas/kas/create', 'BankKasController.createKas').as('acc.bank-kas.createKas').middleware('C')
+    Route.get('/bank-kas/bank/create', 'BankKasController.createBank').as('acc.bank-kas.createBank').middleware('C')
+    Route.get('/bank-kas/kas/:id/show', 'BankKasController.showKas').as('acc.bank-kas.showKas').middleware('U')
+    Route.get('/bank-kas/kas/:id/details', 'BankKasController.detailsKas').as('acc.bank-kas.detailsKas').middleware('R')
+    Route.get('/bank-kas/bank/:id/show', 'BankKasController.showBank').as('acc.bank-kas.showBank').middleware('U')
+    Route.get('/bank-kas/bank/:id/details', 'BankKasController.detailsBank').as('acc.bank-kas.detailsBank').middleware('R')
+    // Route.post('/bank-kas/kas/:id/update', 'BankKasController.updateKas').as('acc.bank-kas.updateKas').middleware('U')
+    // Route.post('/bank-kas/bank/:id/update', 'BankKasController.updateBank').as('acc.bank-kas.updateBank').middleware('U')
+
+    /* PURCHASE REQUISITION */
+    Route.get('/pr', 'PrController.index').as('acc.pr').middleware('R')
+    Route.post('/pr', 'PrController.store').as('acc.pr.store').middleware('C')
+    Route.get('/pr/list', 'PrController.list').as('acc.list').middleware('R')
+    Route.get('/pr/create', 'PrController.create').as('acc.create').middleware('C')
+    Route.get('/pr/:id/view', 'PrController.view').as('acc.view').middleware('R')
+    Route.get('/pr/:id/edit', 'PrController.edit').as('acc.edit').middleware('U')
+    Route.post('/pr/:id/edit', 'PrController.editStore').as('acc.editStore').middleware('U')
+    Route.get('/pr/:id/validate', 'PrController.validate').as('acc.validate').middleware('U')
+    Route.post('/pr/:id/validate', 'PrController.validateStore').as('acc.validate.store').middleware('U')
+    Route.get('/pr/:id/approve', 'PrController.approve').as('acc.approve').middleware('U')
+    Route.post('/pr/:id/approve', 'PrController.approveStore').as('acc.approve.store').middleware('U')
+    Route.get('/pr/create/add-item', 'PrController.addItem').as('acc.add-item')
+    Route.post('/pr/show/:id/remove-item', 'PrController.removeItem').as('acc.remove-item')
+
+    /* FAKTUR BELI */
+    Route.get('/faktur-beli', 'FakturBeliController.index').as('acc.faktur-beli').middleware('R')
+    Route.post('/faktur-beli', 'FakturBeliController.store').as('acc.faktur-beli.store').middleware('C')
+    Route.get('/faktur-beli/list', 'FakturBeliController.list').as('acc.faktur-beli.list').middleware('R')
+    Route.get('/faktur-beli/create', 'FakturBeliController.create').as('acc.faktur-beli.create').middleware('C')
+    Route.get('/faktur-beli/:id/show', 'FakturBeliController.show').as('acc.faktur-beli.show').middleware('U')
+    Route.get('/faktur-beli/:id/print', 'FakturBeliController.print').as('acc.faktur-beli.print').middleware('R')
+    Route.post('/faktur-beli/:id/update', 'FakturBeliController.update').as('acc.faktur-beli.update').middleware('U')
+    Route.get('/faktur-beli/create/add-item', 'FakturBeliController.addItem').as('acc.faktur-beli.addItem')
+
+    /* FAKTUR JUAL */
+    Route.get('/faktur-jual', 'FakturJualController.index').as('acc.faktur-jual').middleware('R')
+    Route.post('/faktur-jual', 'FakturJualController.store').as('acc.faktur-jual.store').middleware('C')
+    Route.get('/faktur-jual/list', 'FakturJualController.list').as('acc.faktur-jual.list').middleware('R')
+    Route.get('/faktur-jual/create', 'FakturJualController.create').as('acc.faktur-jual.create').middleware('C')
+    Route.get('/faktur-jual/:id/view', 'FakturJualController.view').as('acc.faktur-jual.view').middleware('R')
+    Route.get('/faktur-jual/:id/print', 'FakturJualController.print').as('acc.faktur-jual.print').middleware('R')
+    Route.get('/faktur-jual/:id/show', 'FakturJualController.show').as('acc.faktur-jual.show').middleware('U')
+    Route.post('/faktur-jual/:id/update', 'FakturJualController.update').as('acc.faktur-jual.update').middleware('U')
+    Route.delete('/faktur-jual/:id/destroy', 'FakturJualController.destroy').as('acc.faktur-jual.destroy').middleware('D')
+    Route.get('/faktur-jual/create/add-item', 'FakturJualController.addItem').as('acc.faktur-jual.addItem')
+    
+    /* PENERIMAAN BARANG */
+    Route.get('/terima-barang', 'TerimaBarangController.index').as('acc.terima-barang').middleware('R')
+    Route.post('/terima-barang', 'TerimaBarangController.store').as('acc.terima-barang.store').middleware('C')
+    Route.get('/terima-barang/list', 'TerimaBarangController.list').as('acc.terima-barang.list').middleware('R')
+    Route.get('/terima-barang/create', 'TerimaBarangController.create').as('acc.terima-barang.create').middleware('C')
+    Route.get('/terima-barang/:id/show', 'TerimaBarangController.show').as('acc.terima-barang.show').middleware('U')
+    Route.get('/terima-barang/:id/print', 'TerimaBarangController.print').as('acc.terima-barang.print').middleware('R')
+    Route.get('/terima-barang/:id/terima', 'TerimaBarangController.terima').as('acc.terima-barang.terima').middleware('R')
+    Route.post('/terima-barang/:id/update', 'TerimaBarangController.update').as('acc.terima-barang.update').middleware('U')
+    Route.get('/terima-barang/create/add-item', 'TerimaBarangController.addItem').as('acc.terima-barang.addItem')
+
+    /* PERSEDIAAN BARANG */
+    Route.get('/persediaan-barang', 'PersediaanBarangController.index').as('acc.persediaan-barang').middleware('R')
+    Route.post('/persediaan-barang', 'PersediaanBarangController.store').as('acc.persediaan-barang.store').middleware('C')
+    Route.get('/persediaan-barang/list', 'PersediaanBarangController.list').as('acc.persediaan-barang.list').middleware('R')
+    Route.get('/persediaan-barang/create', 'PersediaanBarangController.create').as('acc.persediaan-barang.create').middleware('C')
+    Route.get('/persediaan-barang/:id/show', 'PersediaanBarangController.show').as('acc.persediaan-barang.show').middleware('U')
+    Route.get('/persediaan-barang/:id/history-harga', 'PersediaanBarangController.historyHarga').as('acc.persediaan-barang.historyHarga').middleware('R')
+    Route.post('/persediaan-barang/:id/update', 'PersediaanBarangController.update').as('acc.persediaan-barang.show').middleware('U')
+    Route.get('/persediaan-barang/create/add-item', 'PersediaanBarangController.addItem').as('acc.persediaan-barang.addItem')
+
+    /* PENGHAPUSAN PERSEDIAAN BARANG */
+    Route.get('/hapus-persediaan', 'HapusPersediaanController.index').as('acc.hapus-persediaan').middleware('R')
+    Route.post('/hapus-persediaan', 'HapusPersediaanController.store').as('acc.hapus-persediaan.store').middleware('C')
+    Route.get('/hapus-persediaan/list', 'HapusPersediaanController.list').as('acc.hapus-persediaan.list').middleware('R')
+    Route.get('/hapus-persediaan/create', 'HapusPersediaanController.create').as('acc.hapus-persediaan.create').middleware('C')
+    Route.get('/hapus-persediaan/:id/show', 'HapusPersediaanController.show').as('acc.hapus-persediaan.show').middleware('U')
+    Route.get('/hapus-persediaan/:id/print', 'HapusPersediaanController.print').as('acc.hapus-persediaan.print').middleware('R')
+    Route.get('/hapus-persediaan/:id/terima', 'HapusPersediaanController.terima').as('acc.hapus-persediaan.terima').middleware('R')
+    Route.post('/hapus-persediaan/:id/update', 'HapusPersediaanController.update').as('acc.hapus-persediaan.update').middleware('U')
+    Route.delete('/hapus-persediaan/:id/destroy', 'HapusPersediaanController.destroy').as('acc.hapus-persediaan.destroy').middleware('D')
+    Route.get('/hapus-persediaan/create/add-item', 'HapusPersediaanController.addItem').as('acc.hapus-persediaan.addItem')
+
+    /* TANDA TERIMA */
+    Route.get('/tanda-terima', 'TandaTerimaController.index').as('acc.tanda-terima').middleware('R')
+    Route.post('/tanda-terima', 'TandaTerimaController.store').as('acc.tanda-terima.store').middleware('C')
+    Route.get('/tanda-terima/list', 'TandaTerimaController.list').as('acc.tanda-terima.list').middleware('R')
+    Route.get('/tanda-terima/create', 'TandaTerimaController.create').as('acc.tanda-terima.create').middleware('C')
+    Route.get('/tanda-terima/search', 'TandaTerimaController.searchFaktur').as('acc.tanda-terima.searchFaktur').middleware('R')
+    Route.get('/tanda-terima/searchItems', 'TandaTerimaController.searchItems').as('acc.tanda-terima.searchItems').middleware('R')
+    Route.get('/tanda-terima/:id/show', 'TandaTerimaController.show').as('acc.tanda-terima.show').middleware('U')
+    Route.get('/tanda-terima/:id/print', 'TandaTerimaController.print').as('acc.tanda-terima.print').middleware('R')
+    Route.post('/tanda-terima/:id/update', 'TandaTerimaController.update').as('acc.tanda-terima.update').middleware('U')
+    Route.delete('/tanda-terima/:id/destroy', 'TandaTerimaController.destroy').as('acc.tanda-terima.destroy').middleware('D')
+    Route.get('/tanda-terima/create/add-item', 'TandaTerimaController.addItem').as('acc.tanda-terima.addItem')
+
+    /* PEMBAYARAN */
+    Route.get('/pembayaran', 'PembayaranController.index').as('acc.pembayaran').middleware('R')
+    Route.post('/pembayaran', 'PembayaranController.store').as('acc.pembayaran.store').middleware('C')
+    Route.get('/pembayaran/list', 'PembayaranController.list').as('acc.pembayaran.list').middleware('R')
+    Route.get('/pembayaran/create', 'PembayaranController.create').as('acc.pembayaran.create').middleware('C')
+    Route.get('/pembayaran/search', 'PembayaranController.searchFaktur').as('acc.pembayaran.searchFaktur').middleware('R')
+    Route.get('/pembayaran/searchItems', 'PembayaranController.searchItems').as('acc.pembayaran.searchItems').middleware('R')
+    Route.get('/pembayaran/:id/show', 'PembayaranController.show').as('acc.pembayaran.show').middleware('U')
+    Route.get('/pembayaran/:id/print', 'PembayaranController.print').as('acc.pembayaran.print').middleware('R')
+    Route.post('/pembayaran/:id/update', 'PembayaranController.update').as('acc.pembayaran.update').middleware('U')
+    Route.delete('/pembayaran/:id/destroy', 'PembayaranController.destroy').as('acc.pembayaran.destroy').middleware('D')
+    Route.get('/pembayaran/create/add-item', 'PembayaranController.addItem').as('acc.pembayaran.addItem')
+
+    /* ENTRI JURNAL */
+    Route.get('/entri-jurnal', 'EntriJurnalController.index').as('acc.entri-jurnal').middleware('R')
+    Route.post('/entri-jurnal', 'EntriJurnalController.store').as('acc.entri-jurnal.store').middleware('C')
+    Route.get('/entri-jurnal/list', 'EntriJurnalController.list').as('acc.entri-jurnal.list').middleware('R')
+    Route.get('/entri-jurnal/create', 'EntriJurnalController.create').as('acc.entri-jurnal.create').middleware('C')
+    Route.get('/entri-jurnal/search', 'EntriJurnalController.searchFaktur').as('acc.entri-jurnal.searchFaktur').middleware('R')
+    Route.get('/entri-jurnal/searchItems', 'EntriJurnalController.searchItems').as('acc.entri-jurnal.searchItems').middleware('R')
+    Route.get('/entri-jurnal/:id/show', 'EntriJurnalController.show').as('acc.entri-jurnal.show').middleware('U')
+    Route.post('/entri-jurnal/:id/update', 'EntriJurnalController.update').as('acc.entri-jurnal.update').middleware('U')
+    Route.delete('/entri-jurnal/:id/destroy', 'EntriJurnalController.destroy').as('acc.entri-jurnal.destroy').middleware('D')
+    Route.get('/entri-jurnal/create/add-item', 'EntriJurnalController.addItem').as('acc.entri-jurnal.addItem')
+
+    /* TRANSFER AKUN KAS & BANK */
+    Route.get('/transfer-kasbank', 'TransferKasBankController.index').as('acc.transfer-kasbank').middleware('R')
+    Route.post('/transfer-kasbank', 'TransferKasBankController.store').as('acc.transfer-kasbank.store').middleware('C')
+    Route.get('/transfer-kasbank/list', 'TransferKasBankController.list').as('acc.transfer-kasbank.list').middleware('R')
+    Route.get('/transfer-kasbank/create', 'TransferKasBankController.create').as('acc.transfer-kasbank.create').middleware('C')
+    Route.get('/transfer-kasbank/:id/show', 'TransferKasBankController.show').as('acc.transfer-kasbank.show').middleware('U')
+    Route.get('/transfer-kasbank/:id/print', 'TransferKasBankController.print').as('acc.transfer-kasbank.print').middleware('R')
+    Route.post('/transfer-kasbank/:id/update', 'TransferKasBankController.update').as('acc.transfer-kasbank.update').middleware('U')
+    Route.delete('/transfer-kasbank/:id/destroy', 'TransferKasBankController.destroy').as('acc.transfer-kasbank.destroy').middleware('D')
+
+    /* PINDAH PERSEDIAAN BARANG */
+    Route.get('/transfer-persediaan', 'TransferPersediaanController.index').as('acc.transfer-persediaan').middleware('R')
+    Route.post('/transfer-persediaan', 'TransferPersediaanController.store').as('acc.transfer-persediaan.store').middleware('C')
+    Route.get('/transfer-persediaan/list', 'TransferPersediaanController.list').as('acc.transfer-persediaan.list').middleware('R')
+    Route.get('/transfer-persediaan/create', 'TransferPersediaanController.create').as('acc.transfer-persediaan.create').middleware('C')
+    Route.get('/transfer-persediaan/:id/show', 'TransferPersediaanController.show').as('acc.transfer-persediaan.show').middleware('U')
+    Route.get('/transfer-persediaan/:id/print', 'TransferPersediaanController.print').as('acc.transfer-persediaan.print').middleware('R')
+    Route.post('/transfer-persediaan/:id/update', 'TransferPersediaanController.update').as('acc.transfer-persediaan.update').middleware('U')
+    Route.delete('/transfer-persediaan/:id/destroy', 'TransferPersediaanController.destroy').as('acc.transfer-kasbank.destroy').middleware('D')
+    Route.get('/transfer-persediaan/create/add-item', 'TransferPersediaanController.addItem').as('acc.transfer-persediaan.addItem')
+
+}).prefix('acc').namespace('keuangan')
+
+/*
+*   ROUTING SETTING
+*/
 Route.group(() => {
 
     /** SETTING COA AKUN **/
