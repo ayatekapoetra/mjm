@@ -75,6 +75,7 @@ Route.group(() => {
     Route.get('/options/barang', 'OptionsAjaxController.barang').as('ajax.set.barang')
     Route.get('/options/barang-brand', 'OptionsAjaxController.barangBrand').as('ajax.set.barangBrand')
     Route.get('/options/barang-kategori', 'OptionsAjaxController.barangKategori').as('ajax.set.barangKategori')
+    Route.get('/options/barang-subkategori', 'OptionsAjaxController.barangSubKategori').as('ajax.set.barangSubKategori')
     Route.get('/options/barang-qualitas', 'OptionsAjaxController.barangQualitas').as('ajax.set.barangQualitas')
     Route.get('/options/barang/show/:id', 'OptionsAjaxController.barangID').as('ajax.set.barangID')
     Route.get('/options/equipment', 'OptionsAjaxController.equipment').as('ajax.set.equipment')
@@ -149,6 +150,33 @@ Route.group(() => {
     Route.get('/bin/:id/show', 'BinController.show').as('mas.bin.show').middleware('U')
     Route.post('/bin/:id/update', 'BinController.update').as('mas.bin.update').middleware('U')
     Route.delete('/bin/:id/destroy', 'BinController.destroy').as('mas.bin.destroy').middleware('D')
+
+    /* MASTER BRANDS */
+    Route.get('/brands', 'BrandsController.index').as('mas.brands')
+    Route.post('/brands', 'BrandsController.store').as('mas.brands.store').middleware('C')
+    Route.get('/brands/list', 'BrandsController.list').as('mas.brands.list').middleware('R')
+    Route.get('/brands/create', 'BrandsController.create').as('mas.brands.create').middleware('C')
+    Route.get('/brands/:id/show', 'BrandsController.show').as('mas.brands.show').middleware('U')
+    Route.post('/brands/:id/update', 'BrandsController.update').as('mas.brands.update').middleware('U')
+    Route.delete('/brands/:id/destroy', 'BrandsController.destroy').as('mas.brands.destroy').middleware('D')
+
+    /* MASTER KATEGORI */
+    Route.get('/kategori', 'CategoryController.index').as('mas.kategori')
+    Route.post('/kategori', 'CategoryController.store').as('mas.kategori.store').middleware('C')
+    Route.get('/kategori/list', 'CategoryController.list').as('mas.kategori.list').middleware('R')
+    Route.get('/kategori/create', 'CategoryController.create').as('mas.kategori.create').middleware('C')
+    Route.get('/kategori/:id/show', 'CategoryController.show').as('mas.kategori.show').middleware('U')
+    Route.post('/kategori/:id/update', 'CategoryController.update').as('mas.kategori.update').middleware('U')
+    Route.delete('/kategori/:id/destroy', 'CategoryController.destroy').as('mas.kategori.destroy').middleware('D')
+
+    /* MASTER SUB KATEGORI */
+    Route.get('/sub-kategori', 'SubCategoryController.index').as('mas.sub-kategori')
+    Route.post('/sub-kategori', 'SubCategoryController.store').as('mas.sub-kategori.store').middleware('C')
+    Route.get('/sub-kategori/list', 'SubCategoryController.list').as('mas.sub-kategori.list').middleware('R')
+    Route.get('/sub-kategori/create', 'SubCategoryController.create').as('mas.sub-kategori.create').middleware('C')
+    Route.get('/sub-kategori/:id/show', 'SubCategoryController.show').as('mas.sub-kategori.show').middleware('U')
+    Route.post('/sub-kategori/:id/update', 'SubCategoryController.update').as('mas.sub-kategori.update').middleware('U')
+    Route.delete('/sub-kategori/:id/destroy', 'SubCategoryController.destroy').as('mas.sub-kategori.destroy').middleware('D')
 
     /* MASTER BARANG */
     Route.get('/barang', 'BarangController.index').as('mas.barang')

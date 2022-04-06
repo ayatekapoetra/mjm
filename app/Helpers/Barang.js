@@ -20,6 +20,7 @@ class masterBarang {
                 .query()
                 .with('brand')
                 .with('kategori')
+                .with('subkategori')
                 .with('qualitas')
                 .with('brand')
                 .where( w => {
@@ -48,6 +49,7 @@ class masterBarang {
                 .query()
                 .with('brand')
                 .with('kategori')
+                .with('subkategori')
                 .with('qualitas')
                 .with('brand')
                 .where( w => {

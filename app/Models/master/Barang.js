@@ -16,6 +16,10 @@ class Barang extends Model {
         return this.belongsTo("App/Models/master/BarangCategories", "kategori_id", "id")
     }
 
+    subkategori () {
+        return this.belongsTo("App/Models/master/BarangSubCategories", "subkategori_id", "id")
+    }
+
     qualitas () {
         return this.belongsTo("App/Models/master/BarangQualities", "qualitas_id", "id")
     }

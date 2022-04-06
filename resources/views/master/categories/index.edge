@@ -1,11 +1,11 @@
 @layout('_layouts.main')
 @section('content')
 {{ script('ajax/index') }}
-{{ script('script/mas-barang-harga') }}
+{{ script('script/mas-barang-kategori') }}
 <div class="container-fluid">
     <div class="row bg-title">
         <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-            <h4 class="page-title">MASTER HARGA BARANG</h4> 
+            <h4 class="page-title">MASTER KATEGORI</h4> 
         </div>
         <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 text-right">
         </div>
@@ -18,7 +18,7 @@
                         <div class="col-xs-10">
                             <button class="btn btn-info" id="bt-create-form">
                                 <i class="ti-plus"></i>
-                                Add Harga
+                                Add Kategori
                             </button>
                             <button class="btn btn-default bt-back" id="bt-back" style="display:none;">
                                 <i class="ti-arrow-left"></i>
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                 </div>
-                @include('master.barang-harga.filter')
+                @include('master.categories.filter')
                 <div id="content-list" style="display:none;"></div>
                 <div id="content-form" style="display:none;"></div>
             </div>

@@ -26,7 +26,11 @@
                                     <strong>{{item.nama}}</strong>
                                 </td>
                                 <td>
-                                    <small>{{item.kategori_id?item.kategori.nama: ''}}</small><br>
+                                    <small>{{item.kategori_id?item.kategori.nama: ''}}</small>
+                                    @if(item.subkategori_id)
+                                        <small class="text-success">-> {{item.subkategori_id?item.subkategori.nama: ''}} </small>
+                                    @endif
+                                    <br>
                                     <strong>{{item.brand_id?item.brand.nama:''}}</strong>
                                 </td>
                                 <td class="text-warning">

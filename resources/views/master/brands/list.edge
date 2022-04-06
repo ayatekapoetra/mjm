@@ -1,0 +1,54 @@
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="50" class="bg-inverse b-all">ACT</th>
+                            <th width="50" class="bg-inverse b-all">Kode</th>
+                            <th width="70" class="bg-inverse b-all">Nama</th>
+                            <th width="*" class="bg-inverse b-all">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td>
+                                    <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                </td>
+                                <td>
+                                    <strong>{{item.kode}}</strong>
+                                </td>
+                                <td>
+                                    {{item.nama}}
+                                </td>
+                                <td>
+                                    {{item.keterangan || ''}}
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

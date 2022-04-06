@@ -11,7 +11,6 @@ const Cabang = use("App/Models/master/Cabang")
 const Gudang = use("App/Models/master/Gudang")
 const Barang = use("App/Models/master/Barang")
 const SysSubmenu = use("App/Models/SysSubmenu")
-const BisnisUnit = use("App/Models/BisnisUnit")
 const Pemasok = use("App/Models/master/Pemasok")
 const AccCoa = use("App/Models/akunting/AccCoa")
 const Karyawan = use("App/Models/master/Karyawan")
@@ -29,6 +28,7 @@ const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
 const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
 const BarangQualities = use("App/Models/master/BarangQualities")
 const BarangCategories = use("App/Models/master/BarangCategories")
+const BarangSubCategories = use("App/Models/master/BarangSubCategories")
 
 // const jsonData = use("App/Helpers/JSON/barang_sewas")
 
@@ -405,10 +405,36 @@ class OptionsAjaxController {
             .fetch()
         ).toJSON()
 
-        if(req.selected)
-        data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
-        else
-        data.push({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: ''})
+        }
+        return data
+    }
+
+    async barangSubKategori ( { request } ) {
+        const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
+        let data = (
+                await BarangSubCategories.query().where( w => {
+                    if (req.kategori_id) {
+                        w.where('kategori_id', req.kategori_id)
+                    }
+                w.where('aktif', 'Y')
+            }).orderBy('nama', 'asc')
+            .fetch()
+        ).toJSON()
+
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            if (!req.kategori_id) {
+                data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
+            }else{
+                data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: ''})
+            }
+        }
         return data
     }
     
