@@ -15,8 +15,8 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label class="control-label">Cabang</label>
-                            <select class="form-control selectCabang" name="cabang_id" data-values="{{data.cabang_id}}" required></select>
+                            <label class="control-label">Limit</label>
+                            <input type="text" name="max_hutang" class="form-control text-right" value="{{data.max_hutang}}" required>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -25,10 +25,16 @@
                             <input type="text" name="phone" class="form-control text-right" value="{{data.phone}}" required>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label class="control-label">email</label>
                             <input type="email" name="email" class="form-control" value="{{data.email || ''}}"> 
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">PIC</label>
+                            <input type="text" name="pic" class="form-control" value="{{data.pic}}"> 
                         </div>
                     </div>
                     <div class="col-md-6">

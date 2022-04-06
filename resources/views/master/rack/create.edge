@@ -11,13 +11,13 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label class="control-label">Cabang</label>
-                                <select class="form-control selectCabang" name="cabang_id" required></select>
+                                <select class="form-control selectCabang" id="cabang_id" name="cabang_id" required></select>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="div-gudang col-md-3" style="display:none">
                             <div class="form-group">
                                 <label class="control-label">Gudang</label>
-                                <select class="form-control selectGudang" name="gudang_id" required></select>
+                                <select class="form-control selectGudang" data-link="cabang_id" name="gudang_id" required></select>
                             </div>
                         </div>
                     </div>
@@ -57,3 +57,22 @@
         </div>
     </div>
 </div>
+<script>
+    $(function(){
+        // var root = $('body').find('div.panel-body')
+        // $('select[name="cabang_id"]').change(function(){
+        //     var values = $(this).val()
+        //     if(values){
+        //         root.find('.div-gudang').css('display','inline')
+        //         root.find('select[name="gudang_id"] > option').each(function(){
+        //             $(this).attr('cabang') != values ? $(this).attr('disabled', 'disabled') : $(this).removeAttr('disabled')
+        //         })
+        //     }else{
+        //         root.find('.div-gudang').css('display','none')
+        //         root.find('select[name="gudang_id"] > option').each(function(){
+        //             $(this).attr('disabled', 'disabled')
+        //         })
+        //     }
+        // })
+    })
+</script>

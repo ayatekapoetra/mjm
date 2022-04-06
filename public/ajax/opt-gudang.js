@@ -5,25 +5,24 @@ $(function(){
 
     $('select.selectGudang').select2()
 
-    $('body select.selectGudang').each(function(){
+    $('body select[name="gudang_id"]').each(function(){
         var elm = $(this)
+        var link = $(this).data('link')
+        var relation = body.find('#'+link).data('values') || ''
         var values = $(this).data('values') || elm.val()
-        var workdir = body.find('input#workdir').val()
-        // console.log(values, workdir);
+        console.log('relation ::', link);
         $.ajax({
             async: true,
-            url: '/ajax/options/gudang?bisnis_id='+workdir+'&selected='+values,
+            url: '/ajax/options/gudang?selected='+values+'&'+link+'='+relation,
             method: 'GET',
             dataType: 'json',
             processData: false,
             mimeType: "multipart/form-data",
             contentType: false,
             success: function(result){
-                // console.log(result);
+                console.log(result);
                 if(result.length > 0){
-                    setSelected(result, values)
-                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.nama+'</option>'))
-                    initSelected(result, elm)
+                    elm.html(result.map( v => '<option cabang="'+v.cabang_id+'" value="'+v.id+'" '+v.selected+'>['+v.kode+']  '+v.nama+'</option>'))
                     elm.trigger('change');
                 }else{
                     elm.html('<option value="" selected>Blum ada data...</option>')
@@ -35,16 +34,35 @@ $(function(){
         })
     })
 
-    function setSelected(list, value){
-        let data = list.map(elm => elm.id === value ? {...elm, selected: 'selected'} : {...elm, selected: ''})
-        return data
-    }
-    
-    function initSelected(data, elm){
-        var lenSelected = data.filter( a => a.selected === 'selected')
-        if(!lenSelected.length > 0){
-            elm.prepend('<option value="" selected>Pilih</option>')
+    $('select[name="gudang_id"]').on('change', function(){
+        var values = $(this).val()
+        var selected = body.find('select[name="rack_id"]').data('values')
+        if (values) {
+            $.ajax({
+                async: true,
+                url: '/ajax/options/rack?selected='+selected+'&gudang_id='+values,
+                method: 'GET',
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    console.log(result);
+                    body.find('.div-rack').css('display','inline')
+                    if(result.length > 0){
+                        body.find('select[name="rack_id"]').html(result.map( v => '<option gudang="'+v.gudang_id+'" value="'+v.id+'" '+v.selected+'>['+v.kode+']  '+v.nama+'</option>'))
+                        body.find('select[name="rack_id"]').trigger('change');
+                    }else{
+                        body.find('select[name="rack_id"]').html('<option value="" selected>Blum ada data...</option>')
+                    }
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }else{
+            body.find('.div-rack').css('display','none')
         }
-    }
+    })
 })
 

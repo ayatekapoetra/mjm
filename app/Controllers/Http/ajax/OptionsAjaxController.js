@@ -250,22 +250,23 @@ class OptionsAjaxController {
         return data
     }
 
-    async bisnis ( { request } ) {
-        const req = request.all()
-        let data = (
-                await BisnisUnit.query().orderBy('initial', 'asc')
-            .fetch()
-        ).toJSON()
+    // async bisnis ( { request } ) {
+    //     const req = request.all()
+    //     let data = (
+    //             await BisnisUnit.query().orderBy('initial', 'asc')
+    //         .fetch()
+    //     ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+    //     data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
 
         
-        return data
+    //     return data
 
-    }
+    // }
 
     async cabang ( { request } ) {
         const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
         let data = (
                 await Cabang.query().where( w => {
                 w.where('aktif', 'Y')
@@ -273,8 +274,11 @@ class OptionsAjaxController {
             .fetch()
         ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
-
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
+        }
         
         return data
 
@@ -282,17 +286,28 @@ class OptionsAjaxController {
 
     async gudang ( { request } ) {
         const req = request.all()
-        console.log('CABANG :::', req);
+        req.selected = req.selected === 'null' ? null : req.selected
+        console.log('GUDANG REQ :::', req);
         let data = (
                 await Gudang.query().where( w => {
+                    if (req.cabang_id) {
+                        w.where('cabang_id', req.cabang_id)
+                    }
                 w.where('aktif', 'Y')
             }).orderBy('nama', 'asc')
             .fetch()
         ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
-
-        
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            if (!req.cabang_id) {
+                data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
+            }else{
+                data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: ''})
+            }
+        }
+        console.log('GUDANG OPT ::', data);
         return data
     }
 
@@ -300,15 +315,16 @@ class OptionsAjaxController {
         const req = request.all()
         let data = (
                 await Department.query().where( w => {
-                w.where('bisnis_id', req.bisnis_id)
                 w.where('aktif', 'Y')
             }).orderBy('name', 'asc')
             .fetch()
         ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
-
-        
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            data.unshift({id: '', kode: '', nama: 'Pilih', selected: 'selected'})
+        }
         return data
     }
 
@@ -317,6 +333,9 @@ class OptionsAjaxController {
         req.selected = req.selected === 'null' ? null : req.selected
         let data = (
                 await Rack.query().where( w => {
+                    if (req.gudang_id) {
+                        w.where('gudang_id', req.gudang_id)
+                    }
                 w.where('aktif', 'Y')
             }).orderBy('nama', 'asc')
             .fetch()
@@ -325,7 +344,7 @@ class OptionsAjaxController {
         if(req.selected)
         data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
         else
-        data.push({id: '', kode: '', nama: 'Pilih', selected: 'selected'})
+        data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
         return data
     }
 
@@ -342,7 +361,7 @@ class OptionsAjaxController {
         if(req.selected)
         data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
         else
-        data.push({id: '', kode: '', num_part: '', nama: 'Pilih', selected: 'selected'})
+        data.push({id: '', kode: 'x', num_part: '', nama: 'Pilih', selected: 'selected'})
         return data
     }
 
@@ -372,7 +391,7 @@ class OptionsAjaxController {
         if(req.selected)
         data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
         else
-        data.push({id: '', kode: '', nama: 'Pilih', selected: 'selected'})
+        data.push({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
         return data
     }
 
@@ -389,7 +408,7 @@ class OptionsAjaxController {
         if(req.selected)
         data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
         else
-        data.push({id: '', kode: '', nama: 'Pilih', selected: 'selected'})
+        data.push({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
         return data
     }
     
@@ -406,7 +425,7 @@ class OptionsAjaxController {
         if(req.selected)
         data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
         else
-        data.push({id: '', kode: '', nama: 'Pilih', selected: 'selected'})
+        data.push({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
        return data
     }
 

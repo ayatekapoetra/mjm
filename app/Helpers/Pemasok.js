@@ -62,6 +62,8 @@ class masterPemasok {
             phone: req.phone || null,
             email: req.email || null,
             alamat: req.alamat || null,
+            max_hutang: req.max_hutang,
+            pic: req.pic,
             user_id: user.id
         })
 
@@ -107,6 +109,8 @@ class masterPemasok {
             phone: req.phone,
             email: req.email,
             alamat: req.alamat,
+            max_hutang: req.max_hutang,
+            pic: req.pic,
             user_id: user.id
         })
 

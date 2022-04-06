@@ -125,62 +125,62 @@ $(function(){
     })
 
     /** LIST NAMA CABANG **/
-    $('body select.selectCabang').each(function(){
-        var elm = $(this)
-        var values = $(this).data('values')
-        // console.log(values, workdir);
-        $.ajax({
-            async: true,
-            url: '/ajax/options/cabang?selected='+values,
-            method: 'GET',
-            dataType: 'json',
-            processData: false,
-            mimeType: "multipart/form-data",
-            contentType: false,
-            success: function(result){
-                console.log(result);
-                if(result.length > 0){
-                    setSelected(result, values)
-                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.nama+'</option>'))
-                    initSelected(result, elm)
-                }else{
-                    elm.html('<option value="" selected>Blum ada data...</option>')
-                }
-            },
-            error: function(err){
-                console.log(err)
-            }
-        })
-    })
+    // $('body select.selectCabang').each(function(){
+    //     var elm = $(this)
+    //     var values = $(this).data('values')
+    //     // console.log(values, workdir);
+    //     $.ajax({
+    //         async: true,
+    //         url: '/ajax/options/cabang?selected='+values,
+    //         method: 'GET',
+    //         dataType: 'json',
+    //         processData: false,
+    //         mimeType: "multipart/form-data",
+    //         contentType: false,
+    //         success: function(result){
+    //             console.log(result);
+    //             if(result.length > 0){
+    //                 setSelected(result, values)
+    //                 elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.nama+'</option>'))
+    //                 initSelected(result, elm)
+    //             }else{
+    //                 elm.html('<option value="" selected>Blum ada data...</option>')
+    //             }
+    //         },
+    //         error: function(err){
+    //             console.log(err)
+    //         }
+    //     })
+    // })
 
     /** LIST NAMA GUDANG **/
-    $('body select.selectGudang').each(function(){
-        var elm = $(this)
-        var values = $(this).data('values')
-        // console.log(values, workdir);
-        $.ajax({
-            async: true,
-            url: '/ajax/options/gudang?selected='+values,
-            method: 'GET',
-            dataType: 'json',
-            processData: false,
-            mimeType: "multipart/form-data",
-            contentType: false,
-            success: function(result){
-                // console.log(result);
-                if(result.length > 0){
-                    setSelected(result, values)
-                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.nama+'</option>'))
-                    initSelected(result, elm)
-                }else{
-                    elm.html('<option value="" selected>Blum ada data...</option>')
-                }
-            },
-            error: function(err){
-                console.log(err)
-            }
-        })
-    })
+    // $('body select.selectGudang').each(function(){
+    //     var elm = $(this)
+    //     var values = $(this).data('values')
+    //     // console.log(values, workdir);
+    //     $.ajax({
+    //         async: true,
+    //         url: '/ajax/options/gudang?selected='+values,
+    //         method: 'GET',
+    //         dataType: 'json',
+    //         processData: false,
+    //         mimeType: "multipart/form-data",
+    //         contentType: false,
+    //         success: function(result){
+    //             // console.log(result);
+    //             if(result.length > 0){
+    //                 setSelected(result, values)
+    //                 elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.nama+'</option>'))
+    //                 initSelected(result, elm)
+    //             }else{
+    //                 elm.html('<option value="" selected>Blum ada data...</option>')
+    //             }
+    //         },
+    //         error: function(err){
+    //             console.log(err)
+    //         }
+    //     })
+    // })
 })
 
 function setSelected(list, value){

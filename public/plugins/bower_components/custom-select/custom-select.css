@@ -441,9 +441,10 @@ disabled look for disabled choices in the results dropdown
     cursor: default;
 }
 .select2-results .select2-disabled {
-  background: #f4f4f4;
-  display: list-item;
-  cursor: default;
+    background: #3c4452;
+    display: list-item;
+    cursor: default;
+    color: #606e86;
 }
 
 .select2-results .select2-selected {

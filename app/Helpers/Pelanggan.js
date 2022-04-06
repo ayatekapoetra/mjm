@@ -62,6 +62,7 @@ class masterPelanggan {
         pelanggan.fill({
             kode: kode,
             nama: req.nama,
+            pic: req.pic,
             phone: req.phone || null,
             email: req.email || null,
             alamat_tagih: req.alamat_tagih || null,
@@ -107,6 +108,7 @@ class masterPelanggan {
         pelanggan.merge({
             kode: kode,
             nama: req.nama,
+            pic: req.pic,
             phone: req.phone || null,
             email: req.email || null,
             alamat_tagih: req.alamat_tagih || null,

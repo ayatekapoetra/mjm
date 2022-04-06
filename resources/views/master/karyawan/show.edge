@@ -8,76 +8,86 @@
             <form id="form-update" data-id="{{data.id}}">
                 {{ csrfField() }}
                 <div class="panel-body">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Cabang</label>
-                            <select class="form-control selectCabang" name="cabang_id" data-values="{{data.cabang_id}}" required></select>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Cabang</label>
+                                <select class="form-control selectCabang" name="cabang_id" data-values="{{data.cabang_id}}" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Department</label>
+                                <select class="form-control selectDepartement" name="department_id" data-values="{{data.department_id}}" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Nama Lengkap</label>
+                                <input type="text" name="nama" class="form-control" value="{{data.nama}}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Phone Number</label>
+                                <input type="text" name="phone" class="form-control" value="{{data.phone}}" required> 
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Jenkel</label>
+                                <select class="form-control selectOptions" data-group="sex" data-values="{{data.jenkel}}" name="jenkel" id="jenkel" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Tempat Lahir</label>
+                                <input type="text" name="t4_lahir" class="form-control setDate" value="{{data.t4_lahir}}" required> 
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Tanggal Lahir</label>
+                                <input type="date" name="tgl_lahir" class="form-control setDate" data-tgl="{{data.tgl_lahir}}" required> 
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Tanggal Gabung</label>
+                                <input type="date" name="tgl_gabung" class="form-control setDate" data-tgl="{{data.tgl_gabung}}" required> 
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Expired Kontrak</label>
+                                <input type="date" name="tgl_expired" class="form-control setDate"  data-tgl="{{data.tgl_expired}}"> 
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Status Karyawan</label>
+                                <select class="form-control selectOptions" data-group="status-karyawan" name="sts_karyawan" data-values="{{data.sts_karyawan}}" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Status Pernikahan</label>
+                                <select class="form-control selectOptions" data-group="pernikahan-karyawan" name="sts_nikah" data-values="{{data.sts_nikah}}" required></select>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Department</label>
-                            <select class="form-control selectDepartement" name="department_id" data-values="{{data.department_id}}" required></select>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Email</label>
+                                <input type="email" name="email" class="form-control" value="{{data.email}}"> 
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">Nama Lengkap</label>
-                            <input type="text" name="nama" class="form-control" value="{{data.nama}}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Phone Number</label>
-                            <input type="text" name="phone" class="form-control" value="{{data.phone}}" required> 
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Jenkel</label>
-                            <select class="form-control selectOptions" data-group="sex" data-values="{{data.jenkel}}" name="jenkel" id="jenkel" required></select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Tempat Lahir</label>
-                            <input type="text" name="t4_lahir" class="form-control setDate" value="{{data.t4_lahir}}" required> 
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Tanggal Lahir</label>
-                            <input type="date" name="tgl_lahir" class="form-control setDate" data-tgl="{{data.tgl_lahir}}" required> 
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Tanggal Gabung</label>
-                            <input type="date" name="tgl_gabung" class="form-control setDate" data-tgl="{{data.tgl_gabung}}" required> 
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Expired Kontrak</label>
-                            <input type="date" name="tgl_expired" class="form-control setDate"  data-tgl="{{data.tgl_expired}}"> 
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Status Karyawan</label>
-                            <select class="form-control selectOptions" data-group="status-karyawan" name="sts_karyawan" data-values="{{data.sts_karyawan}}" required></select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Status Pernikahan</label>
-                            <select class="form-control selectOptions" data-group="pernikahan-karyawan" name="sts_nikah" data-values="{{data.sts_nikah}}" required></select>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label class="control-label">Alamat</label>
-                            <textarea name="alamat" class="form-control" rows="5">{{data.alamat ? data.alamat : ''}}</textarea>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Alamat</label>
+                                <textarea name="alamat" class="form-control" rows="5">{{data.alamat ? data.alamat : ''}}</textarea>
+                            </div>
                         </div>
                     </div>
                 </div>

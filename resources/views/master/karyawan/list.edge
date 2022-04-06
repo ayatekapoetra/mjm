@@ -33,7 +33,12 @@
                                         <small>{{item.dept.name}}
                                     </td>
                                     <td>
-                                        {{item.phone ? item.phone : '-'}}<br>
+                                        {{item.phone ? item.phone : '-'}} 
+                                        <span class="text-primary">
+                                            @if(item.email)
+                                            <small>[ {{item.email}} ]</small>
+                                            @endif
+                                        </span><br>
                                         <small>{{item.alamat ? item.alamat : '-'}} </small>
                                     </td>
                                     <td>
