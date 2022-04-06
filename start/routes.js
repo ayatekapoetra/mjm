@@ -83,6 +83,7 @@ Route.group(() => {
     Route.get('/options/pemasok', 'OptionsAjaxController.pemasok').as('ajax.set.pemasok')
     Route.get('/options/pelanggan', 'OptionsAjaxController.pelanggan').as('ajax.set.pelanggan')
     Route.get('/options/karyawan', 'OptionsAjaxController.karyawan').as('ajax.set.karyawan')
+    Route.get('/options/karyawan/:id', 'OptionsAjaxController.karyawanID').as('ajax.set.karyawanID')
     Route.get('/options/gaji', 'OptionsAjaxController.gaji').as('ajax.set.gaji')
     Route.get('/options/component-gaji', 'OptionsAjaxController.componentGaji').as('ajax.set.componentGaji')
     Route.get('/options/faktur-beli', 'OptionsAjaxController.fakturBeli').as('ajax.set.fakturBeli')

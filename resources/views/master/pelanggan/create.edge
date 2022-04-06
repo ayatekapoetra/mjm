@@ -7,10 +7,16 @@
             <form id="form-create">
                 {{ csrfField() }}
                 <div class="panel-body">
-                    <div class="col-md-9">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label class="control-label">Nama</label>
                             <input type="text" name="nama" class="form-control" value="" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">PIC</label>
+                            <input type="text" name="pic" class="form-control text-right" value="" required>
                         </div>
                     </div>
                     <div class="col-md-3">

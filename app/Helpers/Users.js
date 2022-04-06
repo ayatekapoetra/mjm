@@ -62,7 +62,12 @@ class masterUsers {
     async POST (req, filex) {
         const trx = await DB.beginTransaction()
 
-        
+        if(!req.username){
+            return {
+                success: false,
+                message: 'Username harus ditentukan... '
+            } 
+        }
 
         /** JIKA PHOTO DITEMUKAN **/
         let avatar
@@ -84,6 +89,7 @@ class masterUsers {
         }
 
         const checkUsername = await User.query().where('username', req.username).last()
+
         if(checkUsername){
             return {
                 success: false,

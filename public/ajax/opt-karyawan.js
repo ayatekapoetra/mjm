@@ -9,20 +9,19 @@ $(function(){
         var elm = $(this)
         var values = $(this).data('values') || elm.val()
         var section = $(this).data('section')
-        var workdir = body.find('input#workdir').val()
         $.ajax({
             async: true,
-            url: '/ajax/options/karyawan?bisnis_id='+workdir+'&section='+section+'&selected='+values,
+            url: '/ajax/options/karyawan?section='+section+'&selected='+values,
             method: 'GET',
             dataType: 'json',
             processData: false,
             mimeType: "multipart/form-data",
             contentType: false,
             success: function(result){
-                // console.log(result);
+                console.log(result);
                 if(result.length > 0){
                     setSelected(result, values)
-                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>' +v.section+ ' | '+v.nama+'</option>'))
+                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>[' +v.dept.name+ ']  '+v.nama+'</option>'))
                     initSelected(result, elm)
                     elm.trigger('change');
                 }else{

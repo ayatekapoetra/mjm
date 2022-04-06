@@ -49,7 +49,6 @@ class masterGudang {
             data = (
                 await Karyawan
                 .query()
-                .with('bisnis')
                 .with('cabang')
                 .with('dept')
                 .where( w => {
@@ -107,7 +106,6 @@ class masterGudang {
         const data = (
             await Karyawan
             .query()
-            .with('bisnis')
             .with('cabang')
             .with('dept')
             .where('id', params.id)

@@ -8,10 +8,6 @@ class Karyawan extends Model {
         return 'mas_karyawans'
     }
 
-    bisnis () {
-        return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
-    }
-
     cabang () {
         return this.belongsTo("App/Models/master/Cabang", "cabang_id", "id")
     }

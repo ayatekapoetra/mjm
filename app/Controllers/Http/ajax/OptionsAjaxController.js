@@ -522,11 +522,12 @@ class OptionsAjaxController {
 
     async karyawan ( { request } ) {
         const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
+        req.section = req.section === 'null' ? null : req.selected
         let data = (
-                await Karyawan.query().where( w => {
-                w.where('bisnis_id', req.bisnis_id)
+                await Karyawan.query().with('dept').where( w => {
                 if(req.section){
-                    w.where('section', req.section)
+                    w.where('section', req.department_id)
                 }
                 w.where('aktif', 'Y')
             }).orderBy('nama', 'asc')
@@ -534,6 +535,14 @@ class OptionsAjaxController {
         ).toJSON()
 
         data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+
+        return data
+    }
+
+    async karyawanID ( { params } ) {
+        let data = (
+                await Karyawan.query().with('dept').where('id', params.id).last()
+        ).toJSON()
 
         return data
     }
