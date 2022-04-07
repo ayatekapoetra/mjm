@@ -82,45 +82,49 @@ class masterBarang {
             }
         }
         
-        const hargaBeli = new HargaBeli()
-        hargaBeli.fill({
-            barang_id: req.barang_id,
-            gudang_id: req.gudang_id || null,
-            periode: moment(req.periode).format('YYYY-MM'),
-            narasi: req.narasi,
-            harga_beli: req.harga_beli,
-            created_by: user.id
-        })
-
-        try {
-            await hargaBeli.save(trx)
-        } catch (error) {
-            console.log(error);
-            await trx.rollback()
-            return {
-                success: false,
-                message: 'Failed save harga beli '+ JSON.stringify(error)
+        if(req.harga_beli){
+            const hargaBeli = new HargaBeli()
+            hargaBeli.fill({
+                barang_id: req.barang_id,
+                gudang_id: req.gudang_id || null,
+                periode: moment(req.periode).format('YYYY-MM'),
+                narasi: req.narasi,
+                harga_beli: req.harga_beli,
+                created_by: user.id
+            })
+    
+            try {
+                await hargaBeli.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save harga beli '+ JSON.stringify(error)
+                }
             }
         }
 
-        const hargaJual = new HargaJual()
-        hargaJual.fill({
-            barang_id: req.barang_id,
-            gudang_id: req.gudang_id || null,
-            periode: moment(req.periode).format('YYYY-MM'),
-            narasi: req.narasi,
-            harga_jual: req.harga_jual,
-            created_by: user.id
-        })
-
-        try {
-            await hargaJual.save(trx)
-        } catch (error) {
-            console.log(error);
-            await trx.rollback()
-            return {
-                success: false,
-                message: 'Failed save harga jual '+ JSON.stringify(error)
+        if(req.harga_jual){
+            const hargaJual = new HargaJual()
+            hargaJual.fill({
+                barang_id: req.barang_id,
+                gudang_id: req.gudang_id || null,
+                periode: moment(req.periode).format('YYYY-MM'),
+                narasi: req.narasi,
+                harga_jual: req.harga_jual,
+                created_by: user.id
+            })
+    
+            try {
+                await hargaJual.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save harga jual '+ JSON.stringify(error)
+                }
             }
         }
 
