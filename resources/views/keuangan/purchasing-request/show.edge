@@ -1,0 +1,61 @@
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-coa') }}
+{{ script('ajax/opt-bisnis') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-update" data-id="{{data.id}}">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="control-label">Kode</label>
+                                    <input type="text" name="kode" class="form-control text-white" value="{{kode_PR}}" style="font-weight: bold;" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Cabang</label>
+                                    <select class="form-control selectCabang" name="cabang_id" data-values="" required></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">Gudang</label>
+                                    <select class="form-control selectGudang" data-link="cabang_id" name="gudang_id" required></select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Tanggal</label>
+                                    <input type="date" name="date" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Keterangan</label>
+                                    <textarea class="form-control" name="keterangan" id="" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <button type="button" class="btn btn-danger waves-effect waves-light" id="bt-delete" data-id="{{data.id}}">Delete</button>
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -18,12 +18,12 @@ $(function(){
 
     $('body').on('click', '#apply-filter', function(){
         var limit = $('input[name="limit"]').val()
-        var kode = $('input[name="kode"]').val() && '&kode=' + $('input[name="kode"]').val()
-        var serial = $('input[name="serial"]').val() && '&serial=' + $('input[name="serial"]').val()
-        var num_part = $('input[name="num_part"]').val() && '&num_part=' + $('input[name="num_part"]').val()
-        var nama = $('input[name="nama"]').val() && '&nama=' + $('input[name="nama').val()
-        var satuan = $('select[name="satuan"]').val()  && '&satuan=' + $('select[name="satuan"]').val()
-        var url = `barang-harga/list?keyword=true&limit=${limit}${kode}${serial}${num_part}${nama}${satuan}`
+        var barang_id = $('select[name="barang_id"]').val() && '&barang_id=' + $('select[name="barang_id"]').val()
+        var gudang_id = $('select[name="gudang_id"]').val() && '&gudang_id=' + $('select[name="gudang_id"]').val()
+        var periode = $('input[name="periode"]').val() && '&periode=' + $('input[name="periode"]').val()
+        var narasi = $('input[name="narasi"]').val() && '&narasi=' + $('input[name="narasi').val()
+        var tipe = $('select[name="tipe"]').val() && '&tipe=' + $('select[name="tipe').val()
+        var url = `barang-harga/list?keyword=true&limit=${limit}${barang_id}${gudang_id}${periode}${narasi}${tipe}`
         $.ajax({
             async: true,
             url: url,
@@ -81,14 +81,14 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'a.bt-show', function(e){
+    $('body').on('click', 'button.bt-show-beli', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         var type = $(this).data('type')
         console.log(type);
         $.ajax({
             async: true,
-            url: 'barang-harga/'+id+'/show',
+            url: 'barang-harga/'+id+'/show?type='+type,
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -112,7 +112,38 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'button.bt-delete', function(e){
+    $('body').on('click', 'button.bt-show-jual', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        var type = $(this).data('type')
+        console.log(type);
+        $.ajax({
+            async: true,
+            url: 'barang-harga/'+id+'/show?type='+type,
+            method: 'GET',
+            dataType: 'html',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                body.find('div#content-form').html(result)
+                body.find('div#content-list').html('')
+            },
+            error: function(err){
+                console.log(err)
+                body.find('div#content-form').css('display', 'none')
+            },
+            complete: function() {
+                body.find('button#bt-create-form').css('display', 'none')
+                body.find('button.bt-back').css('display', 'inline')
+                body.find('div#content-list').css('display', 'none')
+                body.find('div#content-form').css('display', 'inline')
+                body.find('div#div-filter-limit').css('display', 'none')
+            }
+        })
+    })
+
+    $('body').on('click', 'button#bt-delete', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         var tipe = $(this).data('tipe')
@@ -129,7 +160,7 @@ $(function(){
               $.ajax({
                   async: true,
                   headers: {'x-csrf-token': $('[name=_csrf]').val()},
-                  url: 'barang-harga/'+id+'/destroy?tipe='+tipe,
+                  url: 'barang-harga/'+id+'/destroy/'+tipe,
                   method: 'DELETE',
                   dataType: 'json',
                   processData: false,

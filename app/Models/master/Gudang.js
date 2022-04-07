@@ -11,10 +11,6 @@ class Gudang extends Model {
     cabang () {
         return this.belongsTo("App/Models/master/Cabang", "cabang_id", "id")
     }
-
-    bisnis () {
-        return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
-    }
 }
 
 module.exports = Gudang

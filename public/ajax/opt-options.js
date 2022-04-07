@@ -8,7 +8,7 @@ $(function(){
     $('select.selectOptions').each(function(){
         var elm = $(this)
         var group = $(this).data('group')
-        var values = $(this).data('values')
+        var values = $(this).data('values') || elm.val()
         $.ajax({
             async: true,
             url: '/ajax/options?group='+group+'&selected='+values,

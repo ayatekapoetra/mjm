@@ -1,0 +1,43 @@
+
+<tr class="item-rows">
+    <td>
+        <h3 class="urut-rows"></h3>
+        <input type="hidden" class="item-data-details" name="id" value="{{data.id ? data.id : ''}}">   
+    </td>
+    <td class="b-all">
+        <div class="row">
+            <div class="col-md-5">            
+                <div class="form-group">                
+                    <label for="">Barang</label>                
+                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="{{item.barang_id ? item.barang_id : ''}}" id=""></select>
+                </div>        
+            </div>
+            <div class="col-md-3">            
+                <div class="form-group">                
+                    <label for="">Satuan</label>                
+                    <select class="form-control item-data-details selectOptions" name="satuan" data-values="{{item.stn ? item.stn : ''}}" id="" data-group="satuan"></select>
+                </div>        
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Qty</label>                
+                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty_req}}">
+                </div>        
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Prioritas</label>                
+                    <select class="form-control item-data-details selectOptions" name="prioritas" data-values="{{item.prioritas ? item.prioritas : ''}}" id="" data-group="prioritas"></select>
+                </div>        
+            </div>
+        </div>
+    </td>
+    <td class="text-center">
+        <button type="button" class="btn btn-danger btn-circle m-t-30 bt-remove-item">
+            <i class="fa fa-trash"></i> 
+        </button>
+    </td>
+</tr>
+{{ script('ajax/opt-barang') }}
+{{ script('ajax/opt-equipment') }}
+{{ script('ajax/opt-options') }}

@@ -19,9 +19,9 @@ $(function(){
             success: function(result){
                 // console.log(result);
                 if(result.length > 0){
-                    setSelected(result, values)
-                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>' +v.num_part+ ' | '+v.nama+'</option>'))
-                    initSelected(result, elm)
+                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>[ ' +v.num_part+ ' ] '+v.nama+'</option>'))
+                    // setSelected(result, values)
+                    // initSelected(result, elm)
                     elm.trigger('change');
                 }else{
                     elm.html('<option value="" selected>Blum ada data...</option>')

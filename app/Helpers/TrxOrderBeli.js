@@ -1,142 +1,124 @@
 'use strict'
 
+const DB = use('Database')
 const Helpers = use('Helpers')
 const _ = require('underscore')
 const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
 const Barang = use("App/Models/master/Barang")
-const BisnisUnit = use("App/Models/BisnisUnit")
-const Pemasok = use("App/Models/master/Pemasok")
 const BarangLokasi = use("App/Models/BarangLokasi")
 const LampiranFile = use("App/Models/LampiranFile")
-const TrxOrderBeli = use("App/Models/transaksi/TrxOrderBeli")
-const TrxFakturBeliHelpers = use("App/Helpers/TrxFakturBeli")
-const TrxTerimaBarangHelpers = use("App/Helpers/TrxTerimaBarang")
-const TrxOrderBeliItem = use("App/Models/transaksi/TrxOrderBeliItem")
+const OpsPurchasingOrder = use("App/Models/operational/OpsPurchasingOrder")
+// const TrxFakturBeliHelpers = use("App/Helpers/TrxFakturBeli")
+// const TrxTerimaBarangHelpers = use("App/Helpers/TrxTerimaBarang")
+const OpsPurchasingOrderItem = use("App/Models/operational/OpsPurchasingOrderItem")
 
 class PurchaseReq {
-    async LIST (req, ws) {
+    async LIST (req) {
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
         let data
-        if(req.keyword){
-            data = await TrxOrderBeli.query()
-            .with('files')
-            .with('bisnis')
-            .with('cabang')
-            .with('gudang')
-            .with('items', a => {
-                a.with('barang')
-                a.with('pemasok')
-                a.with('equipment')
-                a.with('userValidate')
-                a.with('userApprove')
-            })
-            .where( w => {
-                w.where('bisnis_id', ws.bisnis_id)
-                if(req.cabang_id){
-                    w.where('cabang_id', req.cabang_id)
-                }
-                if(req.gudang_id){
-                    w.where('gudang_id', req.gudang_id)
-                }
-                if(req.status){
-                    w.where('status', req.status)
-                }
-                if(req.kode){
-                    w.where('kode', 'like', `%${req.kode}%`)
-                }
-            })
-            .orderBy('kode', 'desc')
-            .paginate(halaman, limit)
-        }else{
-            data = await TrxOrderBeli.query()
-                .with('files')
-                .with('bisnis')
+        try {
+            
+            if(req.keyword){
+                data = await OpsPurchasingOrder.query()
                 .with('cabang')
                 .with('gudang')
                 .with('items', a => {
                     a.with('barang')
                     a.with('pemasok')
-                    a.with('equipment')
                     a.with('userValidate')
                     a.with('userApprove')
                 })
-                .where('bisnis_id', ws.bisnis_id)
+                .where( w => {
+                    if(req.cabang_id){
+                        w.where('cabang_id', req.cabang_id)
+                    }
+                    if(req.gudang_id){
+                        w.where('gudang_id', req.gudang_id)
+                    }
+                    if(req.status){
+                        w.where('status', req.status)
+                    }
+                    if(req.kode){
+                        w.where('kode', 'like', `%${req.kode}%`)
+                    }
+                })
                 .orderBy('kode', 'desc')
                 .paginate(halaman, limit)
-        }
-       
-        if(data){
-            return data.toJSON()
-        }else{
-            return null
-        }
-    }
-
-    async POST (req, user, filex) {
-        const {cabang_id, gudang_id, description, date_ro, items} = req
-        const ws = await initFunc.GET_WORKSPACE(user.id)
-        const kode = await initFunc.GEN_KODE_PR(ws.bisnis_id)
-
-        try {
-            const trxOrderBeli = new TrxOrderBeli()
-            trxOrderBeli.fill({
-                bisnis_id: ws.bisnis_id,
-                kode: kode,
-                cabang_id: cabang_id,
-                gudang_id: gudang_id,
-                date_ro: date_ro,
-                description: description,
-                createdby: user.id
-            })
-
-            await trxOrderBeli.save()
-
-            for (const obj of items) {
-                const trxOrderBeliItem = new TrxOrderBeliItem()
-                trxOrderBeliItem.fill({
-                    ro_id: trxOrderBeli.id,
-                    barang_id: obj.barang_id,
-                    stn: obj.satuan,
-                    qty_req: obj.qty,
-                    prioritas: obj.prioritas,
-                    equipment_id: obj.equipment_id ? obj.equipment_id : null,
-                    description: obj.description
-                })
-
-                await trxOrderBeliItem.save()
+            }else{
+                data = await OpsPurchasingOrder.query()
+                    .with('cabang')
+                    .with('gudang')
+                    .with('items', a => {
+                        a.with('barang')
+                        a.with('pemasok')
+                        a.with('userValidate')
+                        a.with('userApprove')
+                    })
+                    .orderBy('kode', 'desc')
+                    .paginate(halaman, limit)
             }
-
-            if(filex){
-                const randURL = moment().format('YYYYMMDDHHmmss')
-                const aliasName = `RO-${randURL}.${filex.extname}`
-                var uriLampiran = '/upload/'+aliasName
-                await filex.move(Helpers.publicPath(`upload`), {
-                    name: aliasName,
-                    overwrite: true,
-                })
-
-                const lampiranFile = new LampiranFile()
-                lampiranFile.fill({
-                    ro_id: trxOrderBeli.id,
-                    datatype: filex.extname,
-                    url: uriLampiran
-                })
-
-                await lampiranFile.save()
-            }
-            
-            return {
-                success: true,
-                message: 'Success save data...'
+           
+            if(data){
+                return data.toJSON()
+            }else{
+                return null
             }
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    async POST (req, user) {
+        const trx = await DB.beginTransaction()
+        const kode = await initFunc.GEN_KODE_PR()
+        
+        const trxOrderBeli = new OpsPurchasingOrder()
+        trxOrderBeli.fill({
+            kode: kode,
+            cabang_id: req.cabang_id,
+            gudang_id: req.gudang_id,
+            date: req.date,
+            narasi: req.narasi,
+            createdby: user.id
+        })
+        try {
+            await trxOrderBeli.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
             return {
                 success: false,
-                message: 'Failed save data...'+JSON.stringify(error)
+                message: 'Failed save data '+ JSON.stringify(error)
             }
+        }
+        
+        for (const obj of req.items) {
+            const trxOrderBeliItem = new OpsPurchasingOrderItem()
+            trxOrderBeliItem.fill({
+                order_id: trxOrderBeli.id,
+                barang_id: obj.barang_id,
+                stn: obj.satuan,
+                qty: obj.qty,
+                prioritas: obj.prioritas
+            })
+            try {
+                await trxOrderBeliItem.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save details '+ JSON.stringify(error)
+                }
+            }
+        }
+        
+        await trx.commit()
+        return {
+            success: true,
+            message: 'Success save data...'
         }
     }
 

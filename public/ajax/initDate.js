@@ -37,7 +37,7 @@ $(function(){
     /** ON ELEMENT TABLE **/
     $('.dateFormatDef').each(function(){
         var elm = $(this).data('elm')
-        var format = $(this).data('patten')
+        var format = $(this).data('patten') || 'DD-MM-YYYY'
         var data = $(this).data('tgl')
         if(data){
             if(elm){

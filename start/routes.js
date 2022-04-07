@@ -195,7 +195,7 @@ Route.group(() => {
     Route.get('/barang-harga/create', 'BarangHargaController.create').as('mas.barang-harga.create').middleware('C')
     Route.get('/barang-harga/:id/show', 'BarangHargaController.show').as('mas.barang-harga.show').middleware('U')
     Route.post('/barang-harga/:id/update', 'BarangHargaController.update').as('mas.barang-harga.update').middleware('U')
-    Route.delete('/barang-harga/:id/destroy', 'BarangHargaController.destroy').as('mas.barang-harga.destroy').middleware('D')
+    Route.delete('/barang-harga/:id/destroy/:tipe', 'BarangHargaController.destroy').as('mas.barang-harga.destroy').middleware('D')
 
     /* MASTER PEMASOK */
     Route.get('/pemasok', 'PemasokController.index').as('mas.pemasok')
@@ -253,19 +253,19 @@ Route.group(() => {
     // Route.post('/bank-kas/bank/:id/update', 'BankKasController.updateBank').as('acc.bank-kas.updateBank').middleware('U')
 
     /* PURCHASE REQUISITION */
-    Route.get('/pr', 'PrController.index').as('acc.pr').middleware('R')
-    Route.post('/pr', 'PrController.store').as('acc.pr.store').middleware('C')
-    Route.get('/pr/list', 'PrController.list').as('acc.list').middleware('R')
-    Route.get('/pr/create', 'PrController.create').as('acc.create').middleware('C')
-    Route.get('/pr/:id/view', 'PrController.view').as('acc.view').middleware('R')
-    Route.get('/pr/:id/edit', 'PrController.edit').as('acc.edit').middleware('U')
-    Route.post('/pr/:id/edit', 'PrController.editStore').as('acc.editStore').middleware('U')
-    Route.get('/pr/:id/validate', 'PrController.validate').as('acc.validate').middleware('U')
-    Route.post('/pr/:id/validate', 'PrController.validateStore').as('acc.validate.store').middleware('U')
-    Route.get('/pr/:id/approve', 'PrController.approve').as('acc.approve').middleware('U')
-    Route.post('/pr/:id/approve', 'PrController.approveStore').as('acc.approve.store').middleware('U')
-    Route.get('/pr/create/add-item', 'PrController.addItem').as('acc.add-item')
-    Route.post('/pr/show/:id/remove-item', 'PrController.removeItem').as('acc.remove-item')
+    Route.get('/purchasing-request', 'PurchasingRequestController.index').as('acc.purchasing-request').middleware('R')
+    Route.post('/purchasing-request', 'PurchasingRequestController.store').as('acc.purchasing-request.store').middleware('C')
+    Route.get('/purchasing-request/list', 'PurchasingRequestController.list').as('acc.purchasing-request.list').middleware('R')
+    Route.get('/purchasing-request/create', 'PurchasingRequestController.create').as('acc.purchasing-request.create').middleware('C')
+    // Route.get('/purchasing-request/:id/view', 'PurchasingRequestController.view').as('acc.view').middleware('R')
+    // Route.get('/purchasing-request/:id/edit', 'PurchasingRequestController.edit').as('acc.edit').middleware('U')
+    // Route.post('/purchasing-request/:id/edit', 'PurchasingRequestController.editStore').as('acc.editStore').middleware('U')
+    // Route.get('/purchasing-request/:id/validate', 'PurchasingRequestController.validate').as('acc.validate').middleware('U')
+    // Route.post('/purchasing-request/:id/validate', 'PurchasingRequestController.validateStore').as('acc.validate.store').middleware('U')
+    // Route.get('/purchasing-request/:id/approve', 'PurchasingRequestController.approve').as('acc.approve').middleware('U')
+    // Route.post('/purchasing-request/:id/approve', 'PurchasingRequestController.approveStore').as('acc.approve.store').middleware('U')
+    Route.get('/purchasing-request/create/add-item', 'PurchasingRequestController.addItem').as('acc.add-item')
+    // Route.post('/purchasing-request/show/:id/remove-item', 'PurchasingRequestController.removeItem').as('acc.remove-item')
 
     /* FAKTUR BELI */
     Route.get('/faktur-beli', 'FakturBeliController.index').as('acc.faktur-beli').middleware('R')

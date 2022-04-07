@@ -361,7 +361,7 @@ class OptionsAjaxController {
         if(req.selected)
         data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
         else
-        data.push({id: '', kode: 'x', num_part: '', nama: 'Pilih', selected: 'selected'})
+        data.unshift({id: '', kode: 'x', num_part: 'x', nama: 'Pilih', selected: 'selected'})
         return data
     }
 

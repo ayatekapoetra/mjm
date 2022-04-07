@@ -27,8 +27,14 @@ class BarangHargaController {
         }
 
         const data = await BarangHargaHelpers.LIST(req, user)
-        console.log(data);
-        return view.render('master.barang-harga.list', { list: data })
+        switch (req.type) {
+            case 'hargajual':
+                return view.render('components.barang-harga.table-harga-jual', { list: data })
+            case 'hargabeli':
+                return view.render('components.barang-harga.table-harga-beli', { list: data })
+            default:
+                return view.render('master.barang-harga.list', { list: data })
+        }
     }
     
     async create ( { auth, view } ) {
@@ -50,14 +56,16 @@ class BarangHargaController {
         return data
     }
 
-    async show ( { auth, params, view } ) {
+    async show ( { auth, params, request, view } ) {
+        const req = request.all()
         const user = await userValidate(auth)
         if(!user){
             return view.render('401')
         }
-        const data = await BarangHargaHelpers.SHOW(params)
+        console.log(req);
+        const data = await BarangHargaHelpers.SHOW(params, req)
 
-        return view.render('master.barang-harga.show', { data: data })
+        return view.render('master.barang-harga.show', { data: data, type: req.type })
     }
 
     async update ( { auth, params, request } ) {
@@ -66,13 +74,7 @@ class BarangHargaController {
         if(!user){
             return view.render('401')
         }
-        const validateFile = {
-            types: ['image'],
-            size: '10mb',
-            extnames: ['png', 'gif', 'jpg', 'jpeg', 'pdf']
-        }
-        const attchment = request.file('photo', validateFile)
-        const data = await BarangHargaHelpers.UPDATE(params, req, user, attchment)
+        const data = await BarangHargaHelpers.UPDATE(params, req, user)
         return data
     }
 

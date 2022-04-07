@@ -12,52 +12,75 @@ const BarangHarga = use("App/Models/VBarangHarga")
 
 class masterBarang {
     async LIST (req, user) {
-        const limit = req.limit || 25;
-        // const limit = 5;
+        const limit = req.limit || 100;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
-        const ws = await initFunc.GET_WORKSPACE(user.id)
-        let data
-        if(req.keyword){
-            data = (
-                await BarangHarga
+        try {
+            console.log(req);
+            const hargaBeli = (
+                await HargaBeli
                 .query()
+                .with('barang')
+                .with('gudang')
                 .where( w => {
-                    if(req.kode){
-                        w.where('kode', 'like', `%${req.kode}%`)
+                    if(req.barang_id && req.tipe === 'hargaBeli'){
+                        w.where('barang_id', req.barang_id)
                     }
-                    if(req.serial){
-                        w.where('serial', 'like', `%${req.serial}%`)
+                    if(req.gudang_id && req.tipe === 'hargaBeli'){
+                        w.where('gudang_id', req.gudang_id)
                     }
-                    if(req.num_part){
-                        w.where('num_part', 'like', `%${req.num_part}%`)
+                    if(req.periode && req.tipe === 'hargaBeli'){
+                        w.where('periode', req.periode)
                     }
-                    if(req.nama){
-                        w.where('nama', 'like', `%${req.nama}%`)
-                    }
-                    if(req.satuan){
-                        w.where('satuan', req.satuan)
+                    if(req.narasi && req.tipe === 'hargaBeli'){
+                        w.where('narasi', 'like', `%${req.narasi}%`)
                     }
                 })
-                .orderBy('nama', 'asc')
+                .orderBy('periode', 'desc')
                 .paginate(halaman, limit)
             ).toJSON()
-        }else{
-            data = (
-                await BarangHarga
+    
+            const hargaJual = (
+                await HargaJual
                 .query()
+                .with('barang')
+                .with('gudang')
                 .where( w => {
-                    w.where('aktif', 'Y')
+                    if(req.barang_id && req.tipe === 'hargaJual'){
+                        w.where('barang_id', req.barang_id)
+                    }
+                    if(req.gudang_id && req.tipe === 'hargaJual'){
+                        w.where('gudang_id', req.gudang_id)
+                    }
+                    if(req.periode && req.tipe === 'hargaJual'){
+                        w.where('periode', req.periode)
+                    }
+                    if(req.narasi && req.tipe === 'hargaJual'){
+                        w.where('narasi', 'like', `%${req.narasi}%`)
+                    }
                 })
-                .orderBy('nama', 'asc')
+                .orderBy('periode', 'desc')
                 .paginate(halaman, limit)
             ).toJSON()
+    
+            return {
+                hargaBeli: hargaBeli,
+                hargaJual: hargaJual
+            }
+        } catch (error) {
+            console.log(error);
+            return
         }
-        // console.log(data);
-        return data
     }
 
     async POST (req, user) {
         const trx = await DB.beginTransaction()
+
+        if(!req.barang_id){
+            return {
+                success: false,
+                message: 'Barang harus ditentukan... '
+            }
+        }
         
         const hargaBeli = new HargaBeli()
         hargaBeli.fill({
@@ -108,78 +131,86 @@ class masterBarang {
         }
     }
 
-    async SHOW (params) {
-        const data = (
-            await Barang
-            .query()
-            .with('hargaJual')
-            .with('hargaBeli')
-            .where('id', params.id)
-            .last()
-        ).toJSON()
-        console.log(data);
+    async SHOW (params, req) {
+        let data
+        if(req.type === 'hargaBeli'){
+            data = (
+                await HargaBeli
+                .query()
+                .with('barang')
+                .with('gudang')
+                .where('id', params.id)
+                .last()
+            ).toJSON()
+            
+        }else{
+            data = (
+                await HargaJual
+                .query()
+                .with('barang')
+                .with('gudang')
+                .where('id', params.id)
+                .last()
+            ).toJSON()
+        }
+        console.log('SHOW :::', data);
         return data
     }
 
-    // async UPDATE (params, req, user, filex) {
-    //     const ws = await initFunc.GET_WORKSPACE(user.id)
-    //     const trx = await DB.beginTransaction()
+    async UPDATE (params, req) {
+        const trx = await DB.beginTransaction()
 
-    //     /** JIKA PHOTO DITEMUKAN **/
-    //     let photoBarang
-    //     if(filex){
-    //         const randURL = moment().format('YYYYMMDDHHmmss')
-    //         const aliasName = `BRG-${randURL}.${filex.extname}`
-    //         photoBarang = 'images/barang/'+aliasName
-    //         await filex.move(Helpers.publicPath(`images/barang`), {
-    //             name: aliasName,
-    //             overwrite: true,
-    //         })
+        if (req.type === 'hargaBeli') {
+            const hargaBeli = await HargaBeli.query().where('id', params.id).last()
+            hargaBeli.merge({
+                barang_id: req.barang_id,
+                gudang_id: req.gudang_id,
+                periode: req.periode || moment().format('YYYY-MM'),
+                narasi: req.narasi,
+                harga_beli: req.harga_beli
+            })
+            try {
+                await hargaBeli.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save harga barang '+ JSON.stringify(error)
+                }
+            }
+        } else {
+            const hargaJual = await HargaJual.query().where('id', params.id).last()
+            hargaJual.merge({
+                barang_id: req.barang_id,
+                gudang_id: req.gudang_id,
+                periode: req.periode || moment().format('YYYY-MM'),
+                narasi: req.narasi,
+                harga_jual: req.harga_jual
+            })
+            try {
+                await hargaJual.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save harga barang '+ JSON.stringify(error)
+                }
+            }
+        }
 
-    //         if (!filex.moved()) {
-    //             return {
-    //                 success: false,
-    //                 message: 'Failed upload photo image...'+ profilePic.error()
-    //             }
-    //         }
-    //     }
 
-    //     const barang = await Barang.query().where('id', params.id).last()
-    //     barang.merge({
-    //         bisnis_id: ws.bisnis_id,
-    //         serial: req.serial,
-    //         num_part: req.num_part,
-    //         nama: req.nama,
-    //         satuan: req.satuan,
-    //         min_stok: req.min_stok,
-    //         createdby: user.id,
-    //         photo: photoBarang || null,
-    //         coa_in: req.coa_in || null,
-    //         coa_out: req.coa_out || null
-    //     })
+        await trx.commit()
+        return {
+            success: true,
+            message: 'Success save data...'
+        }
+    }
 
-    //     try {
-    //         await barang.save(trx)
-    //     } catch (error) {
-    //         console.log(error);
-    //         await trx.rollback()
-    //         return {
-    //             success: false,
-    //             message: 'Failed save barang '+ JSON.stringify(error)
-    //         }
-    //     }
-
-    //     await trx.commit()
-    //     return {
-    //         success: true,
-    //         message: 'Success save data...'
-    //     }
-    // }
-
-    async DELETE (params, req) {
+    async DELETE (params) {
         console.log(params);
-        console.log(req);
-        if(req.tipe === 'beli'){
+        if(params.tipe === 'hargaBeli'){
             try {
                 await HargaBeli.query().where('id', params.id).delete()
                 return {
@@ -193,7 +224,7 @@ class masterBarang {
                 }
             }
         }
-        if(req.tipe === 'jual'){
+        if(params.tipe === 'hargaJual'){
             try {
                 await HargaJual.query().where('id', params.id).delete()
                 return {

@@ -21,14 +21,16 @@ const AccCoaTipe = use("App/Models/akunting/AccCoaTipe")
 const AccCoaGroup = use("App/Models/akunting/AccCoaGroup")
 const UsrPrivilage = use("App/Models/UsrPrivilage")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
-const TrxOrderBeli = use("App/Models/transaksi/TrxOrderBeli")
+// const TrxOrderBeli = use("App/Models/transaksi/TrxOrderBeli")
 const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
 const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
 const TrxJurnalSaldo = use("App/Models/transaksi/TrxJurnalSaldo")
 const TrxTerimaBarang = use("App/Models/transaksi/TrxTerimaBarang")
-const TrxOrderBeliItem = use("App/Models/transaksi/TrxOrderBeliItem")
+// const TrxOrderBeliItem = use("App/Models/transaksi/TrxOrderBeliItem")
 const TrxFakturJualBayar = use("App/Models/transaksi/TrxFakturJualBayar")
 const TrxFakturBeliBayar = use("App/Models/transaksi/TrxFakturBeliBayar")
+const OpsPurchasingOrder = use("App/Models/operational/OpsPurchasingOrder")
+const OpsPurchasingOrderItem = use("App/Models/operational/OpsPurchasingOrderItem")
 
 const { performance } = require('perf_hooks')
 // const RECONSILIASI_KAS_BANK = use("App/Helpers/_setKasBankValues")
@@ -442,12 +444,10 @@ class initFunc {
         return patten
     }
 
-    async GEN_KODE_PR (bisnis_id) {
-        const conf = (await SysConfig.find(1)).toJSON()
-        let nomor = await TrxOrderBeli.query().where( w => {
-            w.where('bisnis_id', bisnis_id)
-            w.where('date_ro', '>=', moment().startOf('month').format('YYYY-MM-DD'))
-            w.where('date_ro', '<=', moment().endOf('month').format('YYYY-MM-DD'))
+    async GEN_KODE_PR () {
+        let nomor = await OpsPurchasingOrder.query().where( w => {
+            w.where('date', '>=', moment().startOf('year').format('YYYY-MM-DD'))
+            w.where('date', '<=', moment().endOf('year').format('YYYY-MM-DD'))
         }).last()
 
         
@@ -455,20 +455,17 @@ class initFunc {
         
         if(nomor){
             lastNumber = (nomor.kode).split('.')
-            lastNumber = parseInt(lastNumber[2]) // PR01.YYMMDD.00001
+            lastNumber = parseInt(lastNumber[1]) + 1 // PRYYMMDD.00001
         }else{
-            lastNumber = 0
+            lastNumber = 1
         }
         
         let strDate = moment().format('YYMMDD')
         
-        let strBisnis = '0'.repeat(2 - `${bisnis_id}`.length) + bisnis_id
         
-        let strPrefix = '0'.repeat(conf.prefix_no_pr - `${lastNumber + 1}`.length)
-        
-        let patten = `${conf.prefix_init_pr}${strBisnis}.${strDate}.${strPrefix}${lastNumber + 1}`
+        let strPrefix = '0'.repeat(5 - `${lastNumber}`.length) + lastNumber
 
-        return patten
+        return 'PR' + strDate + '.' + strPrefix
     }
 
     async GEN_KODE_TERIMA_BRG (bisnis_id) {

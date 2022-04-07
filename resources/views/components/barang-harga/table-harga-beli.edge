@@ -1,0 +1,60 @@
+<h3>Harga Beli</h3>
+<div class="table-responsive">
+    <table class="table table-hover manage-u-table">
+        <thead>
+            <tr>
+                <th width="70" class="text-center bg-inverse b-all">No</th>
+                <th width="50" class="text-center bg-inverse b-all">ACT</th>
+                <th width="*"class="bg-inverse b-all">Nama</th>
+                <th width="200"class="bg-inverse b-all">Part Number</th>
+                <th width="50"class="bg-inverse b-all">STN</th>
+                <th width="150"class="bg-inverse b-all">Harga Beli</th>
+            </tr>
+        </thead>
+        <tbody>
+            @each(item in list.hargaBeli.data)
+                <tr>
+                    <td class="text-center" style="vertical-align: middle;">{{$loop.index + 1}}</td>
+                    <td class="text-center" style="vertical-align: middle;">
+                        <button class="btn btn-outline btn-warning btn-xs bt-show-beli" data-type="hargaBeli" data-id="{{item.id}}">show</button>
+                    </td>
+                    <td class="">
+                        <div class="flex-td">
+                            @if(item.photo)
+                                <a class="image-popup-vertical-fit" href="{{ assetsUrl(item.photo) }}" title="{{item.nama}}">
+                                    <img class="img-circle" src="{{ assetsUrl(item.photo) }}" width="50" height="50"/>
+                                </a>
+                            @else
+                                <a class="image-popup-vertical-fit" href="{{ assetsUrl('images/ximg_not_found.jpeg') }}" title="{{item.nama}}">
+                                    <img class="img-circle" src="{{ assetsUrl('images/ximg_not_found.jpeg') }}" width="50"/>
+                                </a>
+                            @endif
+                            <span class="m-l-10">
+                                <small>{{item.barang.kode}}</small><br>
+                                <strong>{{item.barang.nama}}</strong>
+                            </span>
+                        </div>
+                    </td>
+                    <td style="vertical-align: middle;">
+                        {{item.barang.num_part || ''}} <br>
+                        <small class="text-inverse">{{item.periode}}</small>
+                    </td>
+                    <td class="text-uppercase text-center" style="vertical-align: middle;">
+                        {{item.barang.satuan}} <br>
+                        <small class="text-inverse">{{item.gudang.kode || ''}}</small>
+                    </td>
+                    <td class="text-warning text-right" style="vertical-align: middle;">
+                        <span class="formatRp" data-number="{{item.harga_beli}}">{{item.harga_beli}}</span>
+                    </td>
+                </tr>
+            @endeach
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="6">
+                    @include('components.pagination-harga-beli')
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
