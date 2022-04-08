@@ -1,8 +1,8 @@
 
 <tr class="item-rows">
-    <td class="items-vcenter b-all">
+    <td>
         <h3 class="urut-rows"></h3>
-        <input type="hidden" class="item-data-details" name="id" value="{{data.id ? data.id : ''}}">   
+        <input type="hidden" class="item-data-details" name="id" value="{{item.id ? item.id : ''}}">   
     </td>
     <td class="b-all">
         <div class="row">
@@ -21,7 +21,7 @@
             <div class="col-md-2">            
                 <div class="form-group">                
                     <label for="">Qty</label>                
-                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty_req}}">
+                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty}}">
                 </div>        
             </div>
             <div class="col-md-2">            
@@ -32,8 +32,8 @@
             </div>
         </div>
     </td>
-    <td class="text-center items-vcenter b-all">
-        <button type="button" class="btn btn-danger btn-circle bt-remove-item">
+    <td class="text-center">
+        <button type="button" class="btn btn-danger btn-circle m-t-30 bt-remove-item">
             <i class="fa fa-trash"></i> 
         </button>
     </td>
@@ -41,3 +41,10 @@
 {{ script('ajax/opt-barang') }}
 {{ script('ajax/opt-equipment') }}
 {{ script('ajax/opt-options') }}
+<script>
+    $(function(){
+        $('h3.urut-rows').each(function(i){
+            $(this).html(i + 1)
+        })
+    })
+</script>

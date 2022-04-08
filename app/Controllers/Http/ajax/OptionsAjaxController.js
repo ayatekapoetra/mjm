@@ -491,17 +491,19 @@ class OptionsAjaxController {
 
     async pemasok ( { request } ) {
         const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
+        console.log('PEMASOK ::', req);
         let data = (
                 await Pemasok.query().where( w => {
-                w.where('bisnis_id', req.bisnis_id)
                 w.where('aktif', 'Y')
             }).orderBy('nama', 'asc')
             .fetch()
         ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
-
-        
+        if(req.selected)
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
+        else
+            data.unshift({id: '', kode: 'x', num_part: 'x', nama: 'Pilih', selected: 'selected'})
         return data
     }
 

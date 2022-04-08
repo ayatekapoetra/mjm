@@ -16,6 +16,10 @@ class OpsPurchasingOrder extends Model {
         return this.belongsTo("App/Models/master/Gudang", "gudang_id", "id")
     }
 
+    author () {
+        return this.belongsTo("App/Models/VUser", "createdby", "id")
+    }
+
     items () {
         return this.hasMany("App/Models/operational/OpsPurchasingOrderItem", "id", "order_id")
     }

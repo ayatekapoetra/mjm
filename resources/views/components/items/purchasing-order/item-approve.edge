@@ -2,7 +2,7 @@
 <tr class="item-rows">
     <td class="items-vcenter b-all">
         <h3 class="urut-rows"></h3>
-        <input type="hidden" class="item-data-details" name="id" value="{{data.id ? data.id : ''}}">   
+        <input type="hidden" class="item-data-details" name="id" value="{{item.id ? item.id : ''}}">   
     </td>
     <td class="b-all">
         <div class="row">
@@ -21,7 +21,7 @@
             <div class="col-md-2">            
                 <div class="form-group">                
                     <label for="">Qty</label>                
-                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty_req}}">
+                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty}}">
                 </div>        
             </div>
             <div class="col-md-2">            
@@ -30,6 +30,28 @@
                     <select class="form-control item-data-details selectOptions" name="prioritas" data-values="{{item.prioritas ? item.prioritas : ''}}" id="" data-group="prioritas"></select>
                 </div>        
             </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5">            
+                <div class="form-group">                
+                    <label for="">Pemasok</label>                
+                    <select class="form-control item-data-details selectPemasok" name="pemasok_id" data-values="{{item.pemasok_id ? item.pemasok_id : ''}}" id=""></select>
+                </div>        
+            </div>
+            <div class="col-md-3">            
+                <div class="form-group">                
+                    <label for="">Metode Bayar</label>                
+                    <select class="form-control item-data-details selectOptions" name="metode" data-values="{{item.metode ? item.metode : ''}}" id="" data-group="metode-bayar"></select>
+                </div>        
+            </div>
+            <!--
+            <div class="col-md-3">
+                <div style="margin-top: 24px;">
+                    <button class="fcbtn btn btn-primary btn-outline btn-1b bt-">
+                        <i class="mdi mdi-checkbox-blank-outline"></i> Pending
+                    </button>
+                </div>                   
+            </div>-->
         </div>
     </td>
     <td class="text-center items-vcenter b-all">
@@ -40,4 +62,12 @@
 </tr>
 {{ script('ajax/opt-barang') }}
 {{ script('ajax/opt-equipment') }}
+{{ script('ajax/opt-pemasok') }}
 {{ script('ajax/opt-options') }}
+<script>
+    $(function(){
+        $('h3.urut-rows').each(function(i){
+            $(this).html(i + 1)
+        })
+    })
+</script>

@@ -7,11 +7,10 @@ $(function(){
 
     $('select.selectPemasok').each(function(){
         var elm = $(this)
-        var values = $(this).data('values')
-        var workdir = body.find('input#workdir').val()
+        var values = $(this).data('values')|| elm.val()
         $.ajax({
             async: true,
-            url: '/ajax/options/pemasok?bisnis_id='+workdir+'&selected='+values,
+            url: '/ajax/options/pemasok?selected='+values,
             method: 'GET',
             dataType: 'json',
             processData: false,
@@ -20,9 +19,9 @@ $(function(){
             success: function(result){
                 // console.log(result);
                 if(result.length > 0){
-                    setSelected(result, values)
-                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>' +v.kode+ ' | '+v.nama+'</option>'))
-                    initSelected(result, elm)
+                    elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'> [' +v.kode+ '] '+v.nama+'</option>'))
+                    // setSelected(result, values)
+                    // initSelected(result, elm)
                     elm.trigger('change');
                 }else{
                     elm.html('<option value="" selected>Blum ada data...</option>')

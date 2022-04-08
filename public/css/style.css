@@ -3,6 +3,11 @@
 @import "spinners.css";
 @import "icons/material-design-iconic-font/css/materialdesignicons.min.css";
 
+
+.items-vcenter {
+	vertical-align: middle !important;
+}
+
 .ct-bar {
     stroke-width: 20px !important;
 }

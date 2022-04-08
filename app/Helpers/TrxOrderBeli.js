@@ -15,6 +15,7 @@ const OpsPurchasingOrderItem = use("App/Models/operational/OpsPurchasingOrderIte
 
 class PurchaseReq {
     async LIST (req) {
+        console.log('LIST ::', req);
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
         let data
@@ -24,6 +25,7 @@ class PurchaseReq {
                 data = await OpsPurchasingOrder.query()
                 .with('cabang')
                 .with('gudang')
+                .with('author')
                 .with('items', a => {
                     a.with('barang')
                     a.with('pemasok')
@@ -43,6 +45,10 @@ class PurchaseReq {
                     if(req.kode){
                         w.where('kode', 'like', `%${req.kode}%`)
                     }
+                    if(req.date_begin && req.date_end){
+                        w.where('date', '>=', req.date_begin)
+                        w.where('date', '<=', req.date_end)
+                    }
                 })
                 .orderBy('kode', 'desc')
                 .paginate(halaman, limit)
@@ -50,6 +56,7 @@ class PurchaseReq {
                 data = await OpsPurchasingOrder.query()
                     .with('cabang')
                     .with('gudang')
+                    .with('author')
                     .with('items', a => {
                         a.with('barang')
                         a.with('pemasok')
@@ -122,96 +129,169 @@ class PurchaseReq {
         }
     }
 
-    async EDIT (params, req, user, filex) {
-        const {cabang_id, gudang_id, description, date_ro, items} = req
+    async APPROVE (params, req, user) {
+        const trx = await DB.beginTransaction()
 
         try {
-            let trxOrderBeli = await TrxOrderBeli.query().where('id', params.id).last()
-            trxOrderBeli.merge({
-                cabang_id: cabang_id,
-                gudang_id: gudang_id,
-                date_ro: date_ro,
-                description: description,
-                createdby: user.id
-            })
-
-            await trxOrderBeli.save()
-
-            /** CARI ITEMS BARANG **/
-            let arrItems = (
-                await TrxOrderBeliItem
-                    .query()
-                    .where('ro_id', trxOrderBeli.id)
-                    .fetch()
-            ).toJSON()
-
-            for (const obj of arrItems) {
-                let eksistData = await TrxOrderBeliItem.query().where('id', obj.id).last()
-                await eksistData.delete()
-            }
-
-            for (const obj of items) {
-                const trxOrderBeliItem = new TrxOrderBeliItem()
-                trxOrderBeliItem.fill({
-                    ro_id: trxOrderBeli.id,
-                    barang_id: obj.barang_id,
-                    stn: obj.satuan,
-                    qty_req: obj.qty,
-                    prioritas: obj.prioritas,
-                    equipment_id: obj.equipment_id ? obj.equipment_id : null,
-                    description: obj.description
-                })
-
-                await trxOrderBeliItem.save()
-            }
-
-            if(filex){
-                /** DELETE LAMPIRAN **/
-                let eksistLampiran = await LampiranFile.query().where('ro_id', params.id).last()
-                if(eksistLampiran){
-                await eksistLampiran.delete()
-            }
-                const randURL = moment().format('YYYYMMDDHHmmss')
-                const aliasName = `RO-${randURL}.${filex.extname}`
-                var uriLampiran = '/upload/'+aliasName
-                await filex.move(Helpers.publicPath(`upload`), {
-                    name: aliasName,
-                    overwrite: true,
-                })
-
-                const lampiranFile = new LampiranFile()
-                lampiranFile.fill({
-                    ro_id: trxOrderBeli.id,
-                    datatype: filex.extname,
-                    url: uriLampiran
-                })
-
-                await lampiranFile.save()
-            }
-            
-            return {
-                success: true,
-                message: 'Success save data...'
+            const doc = await DB.from('sys_config_documents').where( w => {
+                w.where('document_type', 'purchasing order')
+                w.where('user_id', user.id)
+            }).last()
+            if (!doc) {
+                return {
+                    success: false,
+                    message: 'User not authorized...'
+                }
             }
         } catch (error) {
             console.log(error);
             return {
                 success: false,
-                message: 'Failed save data...'+JSON.stringify(error)
+                message: 'Error sys_config_documents...'
             }
+        }
+
+        const trxOrderBeli = await OpsPurchasingOrder.query().where('id', params.id).last()
+        trxOrderBeli.merge({
+            cabang_id: req.cabang_id,
+            gudang_id: req.gudang_id,
+            date: req.date,
+            narasi: req.narasi,
+            status: 'approved'
+        })
+        try {
+            await trxOrderBeli.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed save data '+ JSON.stringify(error)
+            }
+        }
+
+        for (const obj of req.items) {
+            const trxOrderBeliItem = await OpsPurchasingOrderItem.query().where('id', obj.id).last()
+            if(trxOrderBeliItem){
+                trxOrderBeliItem.merge({
+                    order_id: params.id,
+                    barang_id: obj.barang_id,
+                    stn: obj.satuan,
+                    qty: obj.qty,
+                    prioritas: obj.prioritas,
+                    pemasok_id: obj.pemasok_id,
+                    metode: obj.metode,
+                    date_approved: new Date(),
+                    user_approved: user.id
+                })
+
+                try {
+                    await trxOrderBeliItem.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed save details '+ JSON.stringify(error)
+                    }
+                }
+            }
+        }
+        
+        await trx.commit()
+        return {
+            success: true,
+            message: 'Success save data...'
         }
     }
 
+    // async EDIT (params, req, user, filex) {
+    //     const {cabang_id, gudang_id, description, date_ro, items} = req
+
+    //     try {
+    //         let trxOrderBeli = await TrxOrderBeli.query().where('id', params.id).last()
+    //         trxOrderBeli.merge({
+    //             cabang_id: cabang_id,
+    //             gudang_id: gudang_id,
+    //             date_ro: date_ro,
+    //             description: description,
+    //             createdby: user.id
+    //         })
+
+    //         await trxOrderBeli.save()
+
+    //         /** CARI ITEMS BARANG **/
+    //         let arrItems = (
+    //             await TrxOrderBeliItem
+    //                 .query()
+    //                 .where('ro_id', trxOrderBeli.id)
+    //                 .fetch()
+    //         ).toJSON()
+
+    //         for (const obj of arrItems) {
+    //             let eksistData = await TrxOrderBeliItem.query().where('id', obj.id).last()
+    //             await eksistData.delete()
+    //         }
+
+    //         for (const obj of items) {
+    //             const trxOrderBeliItem = new TrxOrderBeliItem()
+    //             trxOrderBeliItem.fill({
+    //                 ro_id: trxOrderBeli.id,
+    //                 barang_id: obj.barang_id,
+    //                 stn: obj.satuan,
+    //                 qty_req: obj.qty,
+    //                 prioritas: obj.prioritas,
+    //                 equipment_id: obj.equipment_id ? obj.equipment_id : null,
+    //                 description: obj.description
+    //             })
+
+    //             await trxOrderBeliItem.save()
+    //         }
+
+    //         if(filex){
+    //             /** DELETE LAMPIRAN **/
+    //             let eksistLampiran = await LampiranFile.query().where('ro_id', params.id).last()
+    //             if(eksistLampiran){
+    //             await eksistLampiran.delete()
+    //         }
+    //             const randURL = moment().format('YYYYMMDDHHmmss')
+    //             const aliasName = `RO-${randURL}.${filex.extname}`
+    //             var uriLampiran = '/upload/'+aliasName
+    //             await filex.move(Helpers.publicPath(`upload`), {
+    //                 name: aliasName,
+    //                 overwrite: true,
+    //             })
+
+    //             const lampiranFile = new LampiranFile()
+    //             lampiranFile.fill({
+    //                 ro_id: trxOrderBeli.id,
+    //                 datatype: filex.extname,
+    //                 url: uriLampiran
+    //             })
+
+    //             await lampiranFile.save()
+    //         }
+            
+    //         return {
+    //             success: true,
+    //             message: 'Success save data...'
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //         return {
+    //             success: false,
+    //             message: 'Failed save data...'+JSON.stringify(error)
+    //         }
+    //     }
+    // }
+
     async SHOW (params) {
-        const data = await TrxOrderBeli.query()
-        .with('files')
-        .with('bisnis')
+        const data = await OpsPurchasingOrder.query()
         .with('cabang')
         .with('gudang')
         .with('items', a => {
             a.with('barang')
             a.with('pemasok')
-            a.with('equipment')
             a.with('userApprove', b => b.with('profile'))
             a.with('userValidate', b => b.with('profile'))
         })

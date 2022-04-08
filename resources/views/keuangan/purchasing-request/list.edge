@@ -1,3 +1,4 @@
+{{ script('ajax/index') }}
 {{ script('ajax/initDate') }}
 <div class="panel-wrapper collapse in">
     <div class="panel-body">
@@ -10,9 +11,10 @@
                             <th width="50" class="bg-inverse b-all">ACT</th>
                             <th width="50" class="bg-inverse b-all">Kode</th>
                             <th width="70" class="bg-inverse b-all">Date</th>
-                            <th width="70" class="bg-inverse b-all">Cabang</th>
-                            <th width="70" class="bg-inverse b-all">Gudang</th>
-                            <th width="*" class="bg-inverse b-all">Keterangan</th>
+                            <th width="*" class="bg-inverse b-all">Cabang</th>
+                            <th width="*" class="bg-inverse b-all">Gudang</th>
+                            <th width="70" class="bg-inverse b-all">CreatedBy</th>
+                            <th width="70" class="bg-inverse b-all">Sts Doc</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -20,7 +22,14 @@
                             <tr>
                                 <td class="text-center">{{$loop.index + 1}}</td>
                                 <td>
-                                    <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                    @if(item.status === 'created')
+                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                        <button class="btn btn-outline btn-info btn-xs bt-approve" data-id="{{item.id}}">approve</button>
+                                    @elseif(item.status === 'approved')
+                                        <button class="btn btn-outline btn-info btn-xs bt-approve" data-id="{{item.id}}">approve</button>
+                                    @else
+                                        <button class="btn btn-outline btn-default btn-xs">finish</button>
+                                    @endif
                                 </td>
                                 <td>
                                     <strong>{{item.kode}}</strong>
@@ -35,7 +44,12 @@
                                     {{item.gudang.nama}}
                                 </td>
                                 <td>
-                                    {{item.narasi || ''}}
+                                    <small>
+                                        {{item.author.nama_lengkap}}
+                                    </small>
+                                </td>
+                                <td>
+                                    {{item.status}}
                                 </td>
                             </tr>
                         @endeach

@@ -1,5 +1,6 @@
 'use strict'
 
+const DB = use('Database')
 const initMenu = use("App/Helpers/_sidebar")
 const initFunc = use("App/Helpers/initFunc")
 const moment = require('moment')
@@ -28,9 +29,6 @@ class PurchasingRequestController {
         }
 
         const data = await TrxOrderBeliHelpers.LIST(req, user)
-        console.log('====================================');
-        console.log(data);
-        console.log('====================================');
         return view.render('keuangan.purchasing-request.list', { list: data })
     }
 
@@ -43,6 +41,40 @@ class PurchasingRequestController {
         return view.render('keuangan.purchasing-request.create', { kode_PR: kode })
     }
 
+    async approve ( { auth, params, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        try {
+            const doc = await DB.from('sys_config_documents').where( w => {
+                w.where('document_type', 'purchasing order')
+                w.where('user_id', user.id)
+            }).last()
+            if (!doc) {
+                return view.render('unauthorized')
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                success: false,
+                message: 'Error sys_config_documents...'
+            }
+        }
+        const data = await TrxOrderBeliHelpers.SHOW(params)
+        return view.render('keuangan.purchasing-request.approve', { data: data })
+    }
+
+    async show ( { auth, params, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+        const data = await TrxOrderBeliHelpers.SHOW(params)
+        return view.render('keuangan.purchasing-request.show', { data: data })
+    }
+
     async store ( { auth, request } ){
         let req = request.all()
         req = JSON.parse(req.data)
@@ -53,6 +85,19 @@ class PurchasingRequestController {
 
         console.log(req);
         const data = await TrxOrderBeliHelpers.POST(req, user)
+        return data
+    }
+
+    async approveStore ( { auth, params, request, view } ){
+        let req = request.all()
+        req = JSON.parse(req.data)
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        console.log(req);
+        const data = await TrxOrderBeliHelpers.APPROVE(params, req, user)
         return data
     }
 
