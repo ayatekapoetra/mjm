@@ -1,0 +1,25 @@
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12" id="table-bank">
+                @include('components.kas-bank.table-bank')
+            </div>
+            <div class="col-md-12" id="table-kas">
+                @include('components.kas-bank.table-kas')
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

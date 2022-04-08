@@ -5,11 +5,11 @@ const Model = use('Model')
 
 class Bank extends Model {
     static get table(){
-        return 'mas_banks'
+        return 'keu_banks'
     }
 
-    bisnis () {
-        return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
+    cabang () {
+        return this.belongsTo("App/Models/master/Cabang", "cabang_id", "id")
     }
 }
 

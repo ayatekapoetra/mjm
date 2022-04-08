@@ -1,0 +1,50 @@
+{{ script('ajax/initNumber') }}
+<h3>BANK</h3>
+<div class="table-responsive">
+    <table class="table table-hover manage-u-table">
+        <thead>
+            <tr>
+                <th width="70" class="text-center bg-inverse b-all">No</th>
+                <th width="50" class="text-center bg-inverse b-all">ACT</th>
+                <th width="*"class="bg-inverse b-all">Nama</th>
+                <th width="*"class="bg-inverse b-all">Saldo Net</th>
+                <th width="*"class="bg-inverse b-all">Tarik Tunda</th>
+                <th width="*"class="bg-inverse b-all">Setor Tunda</th>
+                <th width="*"class="bg-inverse b-all">Saldo Rill</th>
+            </tr>
+        </thead>
+        <tbody>
+            @each(item in list.bank.data)
+                <tr>
+                    <td class="text-center" style="vertical-align: middle;">{{$loop.index + 1}}</td>
+                    <td class="text-center" style="vertical-align: middle;">
+                        <button class="btn btn-outline btn-warning btn-xs bt-show-beli" data-type="hargaBeli" data-id="{{item.id}}">show</button>
+                    </td>
+                    <td style="vertical-align: middle;">
+                        <span class="text-info">[{{item.initial}}]</span> {{item.name}} <br>
+                        <small>{{item.cabang.kode}} - {{item.rekening}}</small>
+                    </td>
+                    <td class="formatRp" data-elm="small" data-number="{{item.saldo_net}}" style="vertical-align: middle;">
+                        <small></small>
+                    </td>
+                    <td class="formatRp" data-elm="small" data-number="{{item.setor_tunda}}" style="vertical-align: middle;">
+                        <small></small>
+                    </td>
+                    <td class="formatRp" data-elm="small" data-number="{{item.tarik_tunda}}" style="vertical-align: middle;">
+                        <small></small>
+                    </td>
+                    <td class="formatRp" data-elm="small" data-number="{{item.saldo_rill}}" style="vertical-align: middle;">
+                        <small></small>
+                    </td>
+                </tr>
+            @endeach
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7">
+                    @include('components.pagination-harga-beli')
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

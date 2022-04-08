@@ -239,18 +239,16 @@ Route.group(() => {
     Route.post('/saldo-awal/:id/update', 'SaldoAwalController.update').as('acc.saldo-awal.show').middleware('U')
 
     /* BANK & KAS AKUN */
-    Route.get('/bank-kas', 'BankKasController.index').as('acc.bank-kas').middleware('R')
-    Route.get('/bank-kas/list', 'BankKasController.list').as('acc.bank-kas.list').middleware('R')
-    Route.post('/bank-kas/kas', 'BankKasController.storeKas').as('acc.bank-kas.storeKas').middleware('C')
-    Route.post('/bank-kas/bank', 'BankKasController.storeBank').as('acc.bank-kas.storeBank').middleware('C')
-    Route.get('/bank-kas/kas/create', 'BankKasController.createKas').as('acc.bank-kas.createKas').middleware('C')
-    Route.get('/bank-kas/bank/create', 'BankKasController.createBank').as('acc.bank-kas.createBank').middleware('C')
-    Route.get('/bank-kas/kas/:id/show', 'BankKasController.showKas').as('acc.bank-kas.showKas').middleware('U')
-    Route.get('/bank-kas/kas/:id/details', 'BankKasController.detailsKas').as('acc.bank-kas.detailsKas').middleware('R')
-    Route.get('/bank-kas/bank/:id/show', 'BankKasController.showBank').as('acc.bank-kas.showBank').middleware('U')
-    Route.get('/bank-kas/bank/:id/details', 'BankKasController.detailsBank').as('acc.bank-kas.detailsBank').middleware('R')
-    // Route.post('/bank-kas/kas/:id/update', 'BankKasController.updateKas').as('acc.bank-kas.updateKas').middleware('U')
-    // Route.post('/bank-kas/bank/:id/update', 'BankKasController.updateBank').as('acc.bank-kas.updateBank').middleware('U')
+    Route.get('/kas-bank', 'KasBankController.index').as('acc.kas-bank').middleware('R')
+    Route.get('/kas-bank/list', 'KasBankController.list').as('acc.kas-bank.list').middleware('R')
+    Route.post('/kas-bank/kas', 'KasBankController.storeKas').as('acc.kas-bank.storeKas').middleware('C')
+    Route.post('/kas-bank/bank', 'KasBankController.storeBank').as('acc.kas-bank.storeBank').middleware('C')
+    Route.get('/kas-bank/kas/create', 'KasBankController.createKas').as('acc.kas-bank.createKas').middleware('C')
+    Route.get('/kas-bank/bank/create', 'KasBankController.createBank').as('acc.kas-bank.createBank').middleware('C')
+    Route.get('/kas-bank/kas/:id/show', 'KasBankController.showKas').as('acc.kas-bank.showKas').middleware('U')
+    Route.get('/kas-bank/kas/:id/details', 'KasBankController.detailsKas').as('acc.kas-bank.detailsKas').middleware('R')
+    Route.get('/kas-bank/bank/:id/show', 'KasBankController.showBank').as('acc.kas-bank.showBank').middleware('U')
+    Route.get('/kas-bank/bank/:id/details', 'KasBankController.detailsBank').as('acc.kas-bank.detailsBank').middleware('R')
 
     /* PURCHASE REQUISITION */
     Route.get('/purchasing-request', 'PurchasingRequestController.index').as('acc.purchasing-request').middleware('R')

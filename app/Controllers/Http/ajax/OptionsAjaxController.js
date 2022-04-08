@@ -287,7 +287,6 @@ class OptionsAjaxController {
     async gudang ( { request } ) {
         const req = request.all()
         req.selected = req.selected === 'null' ? null : req.selected
-        console.log('GUDANG REQ :::', req);
         let data = (
                 await Gudang.query().where( w => {
                     if (req.cabang_id) {
@@ -307,7 +306,7 @@ class OptionsAjaxController {
                 data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: ''})
             }
         }
-        console.log('GUDANG OPT ::', data);
+        
         return data
     }
 
