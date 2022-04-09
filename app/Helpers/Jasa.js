@@ -4,10 +4,9 @@ const DB = use('Database')
 const _ = require('underscore')
 const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
-const Gudang = use("App/Models/master/Gudang")
-const BarangRack = use("App/Models/BarangRack")
+const Jasa = use("App/Models/master/Jasa")
 
-class masterGudang {
+class masterJasa {
     async LIST (req, user) {
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
@@ -15,7 +14,7 @@ class masterGudang {
         let data
         if(req.keyword){
             data = (
-                await Gudang
+                await Jasa
                 .query()
                 .with('cabang')
                 .where( w => {
@@ -28,22 +27,13 @@ class masterGudang {
                     if(req.nama){
                         w.where('nama', 'like', `%${req.nama}%`)
                     }
-                    if(req.email){
-                        w.where('email', 'like', `%${req.email}%`)
-                    }
-                    if(req.phone){
-                        w.where('phone', 'like', `%${req.phone}%`)
-                    }
-                    if(req.alamat){
-                        w.where('alamat', 'like', `%${req.alamat}%`)
-                    }
                 })
                 .orderBy('created_at', 'desc')
                 .paginate(halaman, limit)
             ).toJSON()
         }else{
             data = (
-                await Gudang
+                await Jasa
                 .query()
                 .with('cabang')
                 .where( w => {
@@ -57,22 +47,21 @@ class masterGudang {
         return data
     }
 
-    async POST (req, user, filex) {
+    async POST (req, user) {
         const trx = await DB.beginTransaction()
         
-        const gudang = new Gudang()
-        gudang.fill({
+        const jasa = new Jasa()
+        jasa.fill({
             cabang_id: req.cabang_id,
             kode: req.kode,
             nama: req.nama,
-            phone: req.phone || null,
-            email: req.email || null,
-            alamat: req.alamat || null,
+            narasi: req.narasi || '',
+            biaya: req.biaya || 0.00,
             createdby: user.id
         })
 
         try {
-            await gudang.save(trx)
+            await jasa.save(trx)
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -91,7 +80,7 @@ class masterGudang {
 
     async SHOW (params) {
         const data = (
-            await Gudang
+            await Jasa
             .query()
             .with('cabang')
             .where('id', params.id)
@@ -103,19 +92,18 @@ class masterGudang {
     async UPDATE (params, req, user) {
         const trx = await DB.beginTransaction()
         // console.log(req);
-        const gudang = await Gudang.query().where('id', params.id).last()
-        gudang.merge({
+        const jasa = await Jasa.query().where('id', params.id).last()
+        jasa.merge({
             cabang_id: req.cabang_id,
             kode: req.kode,
             nama: req.nama,
-            phone: req.phone,
-            email: req.email,
-            alamat: req.alamat,
+            narasi: req.narasi || '',
+            biaya: req.biaya,
             createdby: user.id
         })
 
         try {
-            await gudang.save(trx)
+            await jasa.save(trx)
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -134,7 +122,7 @@ class masterGudang {
 
     async DELETE (params) {
         try {
-            await Gudang.query().where('id', params.id).delete()
+            await Jasa.query().where('id', params.id).delete()
             return {
                 success: true,
                 message: 'Success delete data...'
@@ -148,4 +136,4 @@ class masterGudang {
     }
 }
 
-module.exports = new masterGudang()
+module.exports = new masterJasa()

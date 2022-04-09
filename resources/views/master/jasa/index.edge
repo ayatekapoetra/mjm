@@ -1,0 +1,47 @@
+@layout('_layouts.main')
+@section('content')
+{{ script('ajax/index') }}
+{{ script('script/mas-jasa') }}
+<div class="container-fluid">
+    <div class="row bg-title">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+            <h4 class="page-title">MASTER BIAYA JASA</h4> 
+        </div>
+        <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 text-right">
+            <input type="number" id="workdir" class="hidden" value="{{workdir.bisnis_id}}">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-10">
+                            <button class="btn btn-info" id="bt-create-form">
+                                <i class="ti-plus"></i>
+                                Add Biaya Jasa
+                            </button>
+                            <button class="btn btn-default bt-back" id="bt-back" style="display:none;">
+                                <i class="ti-arrow-left"></i>
+                                Back
+                            </button>
+                        </div>
+                        <div class="col-xs-2 pull-right" id="div-filter-limit">
+                            <div class="input-group m-b-30">
+                                <input type="number" class="form-control text-right" id="limit" name="limit" value="100">
+                                <span class="input-group-btn"> 
+                                    <button class="btn btn-info" type="button" id="open-filter" data-toggle="modal" data-target="#filtermodal">Filter</button> 
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @include('master.jasa.filter')
+                <div id="content-list" style="display:none;"></div>
+                <div id="content-form" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="init-form"></div>
+@endsection

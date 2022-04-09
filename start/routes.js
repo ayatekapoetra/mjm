@@ -204,7 +204,7 @@ Route.group(() => {
     Route.get('/jasa/create', 'JasaController.create').as('mas.jasa.create').middleware('C')
     Route.get('/jasa/:id/show', 'JasaController.show').as('mas.jasa.show').middleware('U')
     Route.post('/jasa/:id/update', 'JasaController.update').as('mas.jasa.update').middleware('U')
-    Route.delete('/jasa/:id/destroy/:tipe', 'JasaController.destroy').as('mas.jasa.destroy').middleware('D')
+    Route.delete('/jasa/:id/destroy', 'JasaController.destroy').as('mas.jasa.destroy').middleware('D')
 
     /* MASTER PEMASOK */
     Route.get('/pemasok', 'PemasokController.index').as('mas.pemasok')
