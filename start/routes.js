@@ -197,6 +197,15 @@ Route.group(() => {
     Route.post('/barang-harga/:id/update', 'BarangHargaController.update').as('mas.barang-harga.update').middleware('U')
     Route.delete('/barang-harga/:id/destroy/:tipe', 'BarangHargaController.destroy').as('mas.barang-harga.destroy').middleware('D')
 
+    /* MASTER JASA */
+    Route.get('/jasa', 'JasaController.index').as('mas.jasa')
+    Route.post('/jasa', 'JasaController.store').as('mas.jasa.store').middleware('C')
+    Route.get('/jasa/list', 'JasaController.list').as('mas.jasa.list').middleware('R')
+    Route.get('/jasa/create', 'JasaController.create').as('mas.jasa.create').middleware('C')
+    Route.get('/jasa/:id/show', 'JasaController.show').as('mas.jasa.show').middleware('U')
+    Route.post('/jasa/:id/update', 'JasaController.update').as('mas.jasa.update').middleware('U')
+    Route.delete('/jasa/:id/destroy/:tipe', 'JasaController.destroy').as('mas.jasa.destroy').middleware('D')
+
     /* MASTER PEMASOK */
     Route.get('/pemasok', 'PemasokController.index').as('mas.pemasok')
     Route.post('/pemasok', 'PemasokController.store').as('mas.pemasok.store').middleware('C')

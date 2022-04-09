@@ -45,7 +45,6 @@ class masterGudang {
             data = (
                 await Gudang
                 .query()
-                .with('bisnis')
                 .with('cabang')
                 .where( w => {
                     w.where('aktif', 'Y')
