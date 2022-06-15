@@ -9,6 +9,7 @@ $(function(){
     $('.formatRp').each(function(){
         var elm = $(this).data('elm')
         var data = $(this).data('number')
+        // console.log('INIT NUMBER ::', data.toLocaleString('id-ID'));
         if(data){
             if(elm){
                 $(this).find(elm).html('Rp. ' + data.toLocaleString('id-ID'))

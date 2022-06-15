@@ -33,10 +33,6 @@ class AksesMenu {
         ).toJSON()
         
       let groupingMenu = _.groupBy(usrMenu, 'menu_id')
-        
-      console.log('====================================');
-      console.log(groupingMenu);
-      console.log('====================================');
       
       groupingMenu = Object.keys(groupingMenu).map( key => {
         return {

@@ -1,4 +1,5 @@
 {{ script('ajax/opt-coa-group') }}
+{{ script('ajax/opt-coa-group-sub') }}
 {{ script('ajax/opt-coa-kategori') }}
 <div class="modal fade" data-backdrop="false" data-keyboard="false" id="modal-upd-coa" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -9,7 +10,7 @@
                 </button>
                 <h4 class="modal-title" id="myModalLabel">Update Data</h4>
             </div>
-            <form class="form-horizontal" id="{{form}}" data-id="{{data.id}}">
+            <form class="form-horizontal" id="{{form}}" data-id="{{data.id}}" data-type="{{tipe}}">
                 {{ csrfField() }}
                 <div class="modal-body">
                     <div class="row">
@@ -22,7 +23,14 @@
                                                 Nama 
                                             </label>
                                             <div class="col-md-12">
-                                                <input type="text" id="name" name="name" class="form-control" value="{{tipe === 'G' ? data.grp_name : data.coa_name}}" required> 
+                                                @if(tipe === 'G')
+                                                    <input type="text" id="name" name="name" class="form-control" value="{{data.grp_name}}" required> 
+                                                @elseif(tipe === 'SG')
+                                                    <input type="text" id="name" name="name" class="form-control" value="{{data.subgrp_name}}" required>
+                                                @else
+                                                    <input type="text" id="name" name="name" class="form-control" value="{{data.coa_name}}" required> 
+                                                  
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -31,6 +39,7 @@
                                             </label>
                                             <div class="col-md-12">
                                                 <input type="text" id="alias" name="alias" class="form-control" value="{{data.alias ? data.alias : ''}}"> 
+                                                <input type="hidden" id="tipe" name="tipe" class="form-control" value="{{tipe || ''}}"> 
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -48,6 +57,40 @@
                                                 </label>
                                                 <div class="col-md-12">
                                                     <select id="coa_grp" name="coa_grp" data-values="{{data.coa_grp}}" class="form-control selectCoaGroup"></select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-12">
+                                                    SubGroup
+                                                </label>
+                                                <div class="col-md-12">
+                                                    <select id="coa_subgrp" name="coa_subgrp" data-values="" class="form-control selectSubCoaKategori"></select>
+                                                </div>
+                                            </div>
+                                        @elseif(tipe === 'G')
+                                            <div class="form-group">
+                                                <label class="col-md-12">
+                                                    Group
+                                                </label>
+                                                <div class="col-md-12">
+                                                    <select id="coa_grp" name="coa_grp" data-values="{{data.coa_grp}}" class="form-control selectCoaGroup"></select>
+                                                </div>
+                                            </div>
+                                        @elseif(tipe === 'SG')
+                                            <div class="form-group">
+                                                <label class="col-md-12">
+                                                    Group
+                                                </label>
+                                                <div class="col-md-12">
+                                                    <select id="coa_grp" name="coa_grp" data-values="{{data.coa_grp}}" class="form-control selectCoaGroup"></select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-12">
+                                                    SubGroup
+                                                </label>
+                                                <div class="col-md-12">
+                                                    <select id="coa_subgrp" name="coa_subgrp" data-values="" class="form-control selectSubCoaKategori"></select>
                                                 </div>
                                             </div>
                                         @endif

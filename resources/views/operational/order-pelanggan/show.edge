@@ -1,7 +1,6 @@
 {{ script('ajax/opt-options') }}
 {{ script('ajax/opt-cabang') }}
-{{ script('ajax/opt-gudang') }}
-{{ script('ajax/opt-rack') }}
+{{ script('ajax/opt-coa') }}
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
         <div class="col-sm-12 col-xs-12">
@@ -17,28 +16,28 @@
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Gudang</label>
-                                <select class="form-control selectGudang" name="gudang_id" data-values="{{data.gudang_id}}" required></select>
+                                <label class="control-label">Kode</label>
+                                <input type="text" name="kode" class="form-control" value="{{data.kode}}" required>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <div class="form-group">
-                                <label class="control-label">Rak</label>
-                                <select class="form-control selectRack" name="rack_id" data-values="{{data.rack_id}}" required></select>
+                                <label class="control-label">Nama</label>
+                                <input type="text" name="nama" class="form-control" value="{{data.nama}}" required>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Kode</label>
-                                <input type="text" name="kode" class="form-control" value="{{data.kode}}" required>
+                                <label class="control-label">Biaya</label>
+                                <input type="number" name="biaya" class="form-control text-right" value="{{data.biaya}}" required>
                             </div>
                         </div>
                         <div class="col-md-9">
                             <div class="form-group">
-                                <label class="control-label">Nama</label>
-                                <input type="text" name="nama" class="form-control" value="{{data.nama}}" required>
+                                <label class="control-label">Narasi</label>
+                                <input type="text" name="narasi" class="form-control" value="{{data.narasi}}"> 
                             </div>
                         </div>
                     </div>

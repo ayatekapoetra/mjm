@@ -33,7 +33,7 @@ class Barang extends Model {
     }
 
     hargaJual () {
-        return this.hasMany("App/Models/master/HargaJual", "id", "barang_id")
+        return this.hasOne("App/Models/master/HargaJual", "id", "barang_id")
     }
 
     hargaBeli () {

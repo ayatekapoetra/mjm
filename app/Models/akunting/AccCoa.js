@@ -4,10 +4,11 @@
 const Model = use('Model')
 
 class AccCoa extends Model {
-    bisnis () {
-        return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
-    }
 
+    static get table(){
+        return 'acc_coas'
+    }
+    
     tipe () {
         return this.belongsTo("App/Models/akunting/AccCoaTipe", "coa_tipe", "id")
     }

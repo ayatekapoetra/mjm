@@ -5,8 +5,12 @@ $(function(){
 
     initDefault()
 
-    $('body').on('click', 'button#bt-create-form', function(){
-        initCreate()
+    $('body').on('click', 'button#bt-create-form-kas', function(){
+        initCreate('kas')
+    })
+
+    $('body').on('click', 'button#bt-create-form-bank', function(){
+        initCreate('bank')
     })
 
     $('body').on('click', 'button.bt-back, button#bt-back', function(){
@@ -56,16 +60,13 @@ $(function(){
         })
     })
 
-    $('body').on('submit', 'form#form-create', function(e){
+    $('body').on('submit', 'form#form-create-kas', function(e){
         e.preventDefault()
-        var data = getDataForm()
-        var formdata = new FormData()
-        formdata.append('data', JSON.stringify(data))
-        // formdata.append('lampiran', $('input#lampiran')[0].files[0])
+        var formdata = new FormData(this)
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'kas-bank',
+            url: 'kas-bank/kas',
             method: 'POST',
             data: formdata,
             dataType: 'json',
@@ -88,12 +89,41 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'button.bt-approve', function(e){
+    $('body').on('submit', 'form#form-create-bank', function(e){
+        e.preventDefault()
+        var formdata = new FormData(this)
+        $.ajax({
+            async: true,
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: 'kas-bank/bank',
+            method: 'POST',
+            data: formdata,
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                // console.log(result);
+                if(result.success){
+                    swal('Okey', result.message, 'success')
+                    initDefault()
+                }else{
+                    swal('Opps', result.message, 'warning')
+                }
+            },
+            error: function(err){
+                console.log(err)
+                swal('Opps', err.responseJSON?.error.message || 'error 500', 'error')
+            }
+        })
+    })
+
+    $('body').on('click', 'button.bt-show-kas', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'kas-bank/'+id+'/approve',
+            url: 'kas-bank/kas/'+id+'/show',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -109,7 +139,8 @@ $(function(){
             },
             complete: function() {
                 body.find('div#div-filter-limit').toggleClass('hidden')
-                body.find('button#bt-create-form').css('display', 'none')
+                body.find('button#bt-create-form-kas').css('display', 'none')
+                body.find('button#bt-create-form-bank').css('display', 'none')
                 body.find('button.bt-back').css('display', 'inline')
                 body.find('div#content-list').css('display', 'none')
                 body.find('div#content-form').css('display', 'inline')
@@ -117,18 +148,44 @@ $(function(){
         })
     })
 
-    $('body').on('submit', 'form#form-approved', function(e){
+    $('body').on('click', 'button.bt-show-bank', function(e){
         e.preventDefault()
-        var data = getDataForm()
-        var formdata = new FormData()
-        formdata.append('data', JSON.stringify(data))
         var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'kas-bank/bank/'+id+'/show',
+            method: 'GET',
+            dataType: 'html',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                body.find('div#content-form').html(result)
+                body.find('div#content-list').html('')
+            },
+            error: function(err){
+                console.log(err)
+                body.find('div#content-form').css('display', 'none')
+            },
+            complete: function() {
+                body.find('div#div-filter-limit').toggleClass('hidden')
+                body.find('button#bt-create-form-kas').css('display', 'none')
+                body.find('button#bt-create-form-bank').css('display', 'none')
+                body.find('button.bt-back').css('display', 'inline')
+                body.find('div#content-list').css('display', 'none')
+                body.find('div#content-form').css('display', 'inline')
+            }
+        })
+    })
 
-        console.log(data);
+    $('body').on('submit', 'form#form-update-kas', function(e){
+        e.preventDefault()
+        var formdata = new FormData(this)
+        var id = $(this).data('id')
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'kas-bank/'+id+'/approve',
+            url: 'kas-bank/kas/'+id+'/update',
             method: 'POST',
             data: formdata,
             dataType: 'json',
@@ -150,31 +207,31 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'button.bt-show', function(e){
+    $('body').on('submit', 'form#form-update-bank', function(e){
         e.preventDefault()
+        var formdata = new FormData(this)
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'kas-bank/'+id+'/show',
-            method: 'GET',
-            dataType: 'html',
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: 'kas-bank/bank/'+id+'/update',
+            method: 'POST',
+            data: formdata,
+            dataType: 'json',
             processData: false,
             mimeType: "multipart/form-data",
             contentType: false,
             success: function(result){
-                body.find('div#content-form').html(result)
-                body.find('div#content-list').html('')
+                if(result.success){
+                    swal("Okey,,,!", result.message, "success")
+                    initDefault()
+                }else{
+                    swal("Opps,,,!", result.message, "warning")
+                }
             },
             error: function(err){
-                console.log(err)
-                body.find('div#content-form').css('display', 'none')
-            },
-            complete: function() {
-                body.find('div#div-filter-limit').toggleClass('hidden')
-                body.find('button#bt-create-form').css('display', 'none')
-                body.find('button.bt-back').css('display', 'inline')
-                body.find('div#content-list').css('display', 'none')
-                body.find('div#content-form').css('display', 'inline')
+                console.log(err);
+                swal('Opps', err.responseJSON?.error.message || 'error 500', 'error')
             }
         })
     })
@@ -270,7 +327,7 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
-                body.find('button#bt-create-form').css('display', 'inline')
+                body.find('button.create-form').css('display', 'inline')
                 body.find('button.bt-back').css('display', 'none')
                 body.find('div#content-list').css('display', 'block')
                 body.find('div#content-form').css('display', 'none')
@@ -278,10 +335,10 @@ $(function(){
         })
     }
 
-    function initCreate(){
+    function initCreate(type){
         $.ajax({
             async: true,
-            url: 'kas-bank/create',
+            url: 'kas-bank/'+type+'/create',
             method: 'GET',
             dataType: 'html',
             contentType: false,
@@ -289,13 +346,12 @@ $(function(){
                 body.find('div#div-filter-limit').toggleClass('hidden')
                 body.find('div#content-form').html(result)
                 body.find('div#content-list').html('')
-                addItems(1)
             },
             error: function(err){
                 console.log(err)
             },
             complete: function() {
-                body.find('button#bt-create-form').css('display', 'none')
+                body.find('button.create-form').css('display', 'none')
                 body.find('button.bt-back').css('display', 'inline')
                 body.find('div#content-form').css('display', 'block')
                 body.find('div#content-list').css('display', 'none')

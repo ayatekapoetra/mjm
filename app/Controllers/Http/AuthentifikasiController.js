@@ -1,9 +1,10 @@
 'use strict'
 
 const Hash = use('Hash')
-const Token = use("App/Models/Token")
 const User = use("App/Models/User")
+const Token = use("App/Models/Token")
 const initMenu = use("App/Helpers/_sidebar")
+const UsrCabang = use("App/Models/UsrCabang")
 
 class AuthentifikasiController {
     async index ( { view } ) {
@@ -84,6 +85,45 @@ class AuthentifikasiController {
             return {
                 success: false,
                 message: error
+            }
+        }
+    }
+
+    async updateWorkspace ( { auth, request } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+
+        if(!user){
+            return {
+                success: false,
+                message: 'not authorized...'
+            }
+        }
+
+        try {
+            await UsrCabang.query().where('user_id', user.id).update({ aktif: 'N' })
+        } catch (error) {
+            console.log(error);
+            return {
+                success: false,
+                message: 'Workspace gagal dipindahkan....'
+            }
+        }
+
+        try {
+            const usrCabang = await UsrCabang.query().where({user_id: user.id, cabang_id: req.cabang_id}).last()
+            console.log(usrCabang.toJSON());
+            usrCabang.merge({aktif: 'Y'})
+            await usrCabang.save()
+            return {
+                success: true,
+                message: 'Workspace berhasil dipindahkan....'
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                success: false,
+                message: 'Workspace gagal dipindahkan....'
             }
         }
     }

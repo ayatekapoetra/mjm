@@ -38,118 +38,30 @@ class keuKasBank {
         }
     }
 
-    async POST (req, user) {
+    async POST_KAS (req, user) {
         const trx = await DB.beginTransaction()
-        const coa = await initFunc.GET_COA_ID(req.bisnis_id, req.kode)
-        // const coa_bank = await AccCoa.query(trx).where('id', coa.id).last()
-        
-        req.coa_id = coa.id
-
-        try {
-            const kass = new Kass()
-            kass.fill({
-                createdby: user.id,
-                coa_id: coa.id,
-                bisnis_id: req.bisnis_id,
-                kode: req.kode,
-                name: req.name,
-                saldo_rill: req.saldo_rill,
-                aktif: 'Y'
-            })
-            await kass.save(trx)
-            
-            const trxKases = new TrxKases()
-            trxKases.fill({
-                kas_id: kass.id,
-                trx_date: new Date(),
-                saldo_rill: req.saldo_rill,
-                desc: 'saldo awal kas',
-                aktif: 'Y'
-            })
-            await trxKases.save(trx)
-            
-
-            let trxJurnal = await TrxJurnal.query(trx).where( w => {
-                w.where('trx_date', moment().format('YYYY-MM-DD'))
-                w.where('narasi', 'saldo awal kas')
-                w.where('bisnis_id', req.bisnis_id)
-                w.where('kas_id', kass.id)
-                w.where('coa_id', coa.id)
-                w.where('is_delay', 'N')
-            }).last()
-
-            if(trxJurnal){
-                trxJurnal.merge({
-                    createdby: user.id,
-                    bisnis_id: req.bisnis_id,
-                    kas_id: kass.id,
-                    coa_id: coa.id,
-                    kode: req.kode,
-                    narasi: 'saldo awal kas',
-                    trx_date: moment().format('YYYY-MM-DD'),
-                    nilai: req.saldo_rill,
-                    dk: coa.dk,
-                    is_delay: 'N'
-                })
-                await trxJurnal.save(trx)
-            }else{
-                trxJurnal = new TrxJurnal()
-                trxJurnal.fill({
-                    createdby: user.id,
-                    bisnis_id: req.bisnis_id,
-                    kas_id: kass.id,
-                    coa_id: coa.id,
-                    kode: req.kode,
-                    narasi: 'saldo awal kas',
-                    trx_date: moment().format('YYYY-MM-DD'),
-                    nilai: req.saldo_rill,
-                    dk: coa.dk,
-                    is_delay: 'N'
-                })
-                await trxJurnal.save(trx)
-            }
-            
-        } catch (error) {
-            console.log(error);
-            await trx.rollback()
-            return {
-                success: false,
-                message: 'Failed save data... \n'+JSON.stringify(error)
-            }
-        }
-
-        /** TRX JURNAL KREDIT PADA MODAL **/
-        async function GET_DATA_COA_ID(kode){
-            const data = await AccCoa.query().where( w => {
-                w.where('kode', kode)
-                w.where('bisnis_id', req.bisnis_id)
-            }).last()
-            return data
-        }
-        const coaKredit = await GET_DATA_COA_ID('300.1')
-
-        const trxJurnalKredit = new TrxJurnal()
-        trxJurnalKredit.fill({
+        const masKas = new Kass()
+        masKas.fill({
             createdby: user.id,
-            bisnis_id: req.bisnis_id, 
-            coa_id: coaKredit.id,
-            kode: coaKredit.kode,
-            narasi: 'Tambah modal akun Kas',
-            trx_date: new Date(),
-            nilai: req.saldo_rill,
-            dk: 'k',
-            is_delay: 'N'
+            coa_id: req.coa_id,
+            cabang_id: req.cabang_id,
+            kode: req.coa_id,
+            name: req.nama,
+            saldo_rill: 0,
+            aktif: 'Y'
         })
+        
         try {
-            await trxJurnalKredit.save(trx)
+            await masKas.save(trx)
         } catch (error) {
-            console.log(error);
             await trx.rollback()
+            console.log(error);
             return {
                 success: false,
-                messsage: 'Failed save data jurnal kredit...'+JSON.stringify(error)
+                message: 'Failed save data...\n'+JSON.stringify(error)
             }
         }
+        
         await trx.commit()
 
         return {
@@ -158,13 +70,59 @@ class keuKasBank {
         }
     }
 
-    async SHOW (params) {
+    async POST_BANK (req, user) {
+        const trx = await DB.beginTransaction()
+        const masBank = new Bank()
+        masBank.fill({
+            createdby: user.id,
+            coa_id: req.coa_id,
+            cabang_id: req.cabang_id,
+            kode: req.coa_id,
+            initial: req.initial,
+            name: req.nama,
+            rekening: req.rekening,
+            saldo_net: 0,
+            setor_tunda: 0,
+            tarik_tunda: 0,
+            saldo_rill: 0,
+            aktif: 'Y'
+        })
+        
+        try {
+            await masBank.save(trx)
+        } catch (error) {
+            await trx.rollback()
+            console.log(error);
+            return {
+                success: false,
+                message: 'Failed save data...\n'+JSON.stringify(error)
+            }
+        }
+
+        await trx.commit()
+
+        return {
+            success: true,
+            message: 'Success save data...'
+        }
+    }
+
+    async SHOW_KAS (params) {
         const kas = (
             await Kass.query()
             .where('id', params.id)
             .last()
         ).toJSON()
         return kas
+    }
+
+    async SHOW_BANK (params) {
+        const bank = (
+            await Bank.query()
+            .where('id', params.id)
+            .last()
+        ).toJSON()
+        return bank
     }
 
     async DETAILS (params) {
@@ -192,117 +150,60 @@ class keuKasBank {
         }
     }
 
-    async UPDATE (params, req, user) {
+    async UPDATE_KAS (params, req, user) {
         const trx = await DB.beginTransaction()
+        const kas = await Kass.query().where('id', params.id).last()
         
-        let kass = await Kass.query().where('id', params.id).last()
-
-        const coa_kas = await AccCoa.query(trx).where('id', kass.coa_id).last()
-        
-        const sumtrxKases = await TrxKases.query().where('kas_id', params.id).getSum('saldo_rill')
-        
-        try {
-            // kass.merge({
-            //     id: kass.id,
-            //     createdby: user.id,
-            //     coa_id: coa_kas.id,
-            //     name: req.name,
-            //     bisnis_id: req.bisnis_id,
-            //     saldo_rill: req.saldo_rill
-            // })
-            // await kass.save(trx)
-            
-            const trxKases = new TrxKases()
-            trxKases.fill({
-                kas_id: params.id,
-                trx_date: new Date(),
-                desc: 'update kas',
-                saldo_rill: (parseFloat(req.saldo_rill) - (parseFloat(sumtrxKases) || 0))
-            })
-            await trxKases.save(trx)
-            
-            
-            let trxJurnal = await TrxJurnal.query().where( w => {
-                w.where('trx_date', moment().format('YYYY-MM-DD'))
-                w.where('narasi', 'saldo awal kas')
-                w.where('bisnis_id', req.bisnis_id)
-                w.where('kas_id', params.id)
-                w.where('coa_id', coa_kas.id)
-                w.where('is_delay', 'N')
-            }).last()
-
-            if(trxJurnal){
-                trxJurnal.merge({
-                    createdby: user.id,
-                    bisnis_id: req.bisnis_id,
-                    kas_id: params.id,
-                    coa_id: coa_kas.id,
-                    kode: coa_kas.kode,
-                    narasi: 'saldo awal kas',
-                    trx_date: moment().format('YYYY-MM-DD'),
-                    nilai: req.saldo_rill,
-                    dk: coa_kas.dk,
-                    is_delay: 'N'
-                })
-
-                await trxJurnal.save(trx)
-                
-            }else{
-                trxJurnal = new TrxJurnal()
-                trxJurnal.fill({
-                    createdby: user.id,
-                    bisnis_id: req.bisnis_id,
-                    kas_id: params.id,
-                    coa_id: coa_kas.id,
-                    kode: coa_kas.kode,
-                    narasi: 'saldo awal kas',
-                    trx_date: moment().format('YYYY-MM-DD'),
-                    nilai: req.saldo_rill,
-                    dk: coa_kas.dk,
-                    is_delay: 'N'
-                })
-                await trxJurnal.save(trx)
-            }
-
-        } catch (error) {
-            console.log(error);
-            await trx.rollback()
-            return {
-                success: false,
-                message: 'Failed save data... \n'+JSON.stringify(error)
-            }
-        }
-
-        /** TRX JURNAL KREDIT PADA MODAL **/
-        async function GET_DATA_COA_ID(kode){
-            const data = await AccCoa.query().where( w => {
-                w.where('kode', kode)
-                w.where('bisnis_id', req.bisnis_id)
-            }).last()
-            return data
-        }
-        const coaKredit = await GET_DATA_COA_ID('300.1')
-
-        const trxJurnalKredit = new TrxJurnal()
-        trxJurnalKredit.fill({
+        kas.merge({
             createdby: user.id,
-            bisnis_id: req.bisnis_id, 
-            coa_id: coaKredit.id,
-            kode: coaKredit.kode,
-            narasi: 'Tambah modal akun Kas',
-            trx_date: new Date(),
-            nilai: req.saldo_rill,
-            dk: 'k',
-            is_delay: 'N'
+            coa_id: req.coa_id,
+            cabang_id: req.cabang_id,
+            kode: req.coa_id,
+            name: req.nama,
+            aktif: 'Y'
         })
+
         try {
-            await trxJurnalKredit.save(trx)
+            await kas.save(trx)
         } catch (error) {
-            console.log(error);
             await trx.rollback()
+            console.log(error);
             return {
                 success: false,
-                messsage: 'Failed save data jurnal kredit...'+JSON.stringify(error)
+                message: 'Failed save data...\n'+JSON.stringify(error)
+            }
+        }
+        await trx.commit()
+
+        return {
+            success: true,
+            message: 'Success save data...'
+        }
+    }
+
+    async UPDATE_BANK (params, req, user) {
+        const trx = await DB.beginTransaction()
+        const bank = await Bank.query().where('id', params.id).last()
+        
+        bank.merge({
+            createdby: user.id,
+            coa_id: req.coa_id,
+            cabang_id: req.cabang_id,
+            kode: req.coa_id,
+            initial: req.initial,
+            name: req.nama,
+            rekening: req.rekening,
+            aktif: 'Y'
+        })
+
+        try {
+            await bank.save(trx)
+        } catch (error) {
+            await trx.rollback()
+            console.log(error);
+            return {
+                success: false,
+                message: 'Failed save data...\n'+JSON.stringify(error)
             }
         }
         await trx.commit()

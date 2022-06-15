@@ -16,14 +16,15 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-// Route.on('/').render('welcome')
 Route.get('/', 'HomeController.index')
+Route.on('/kebijakan-privasi').render('privasi')
 // Route.post('/workspace', 'HomeController.workspace').as('auth.workspace')
 Route.get('/login', 'AuthentifikasiController.index')
 Route.post('/login', 'AuthentifikasiController.login')
 Route.get('/logout', 'AuthentifikasiController.loggingOut').as('auth.logout')
 Route.get('/profile', 'AuthentifikasiController.profile').as('auth.profile')
 Route.post('/profile/update-password', 'AuthentifikasiController.updatePassword').as('auth.updatePassword')
+Route.post('/profile/update-workspace', 'AuthentifikasiController.updateWorkspace').as('auth.updateWorkspace')
 
 /*
 *   ROUTING AJAX OPTIONS
@@ -32,6 +33,7 @@ Route.group(() => {
     
     /* COA */
     Route.get('/coa', 'CoaAjaxController.listCoaName').as('ajax.set.coa')
+    Route.get('/select-coa', 'CoaAjaxController.selectCoa').as('ajax.set.selectCoa')
     Route.get('/coa/by-id', 'CoaAjaxController.coaById').as('ajax.set.coa.id')
     Route.get('/coa/by-kode', 'CoaAjaxController.coaByKode').as('ajax.set.coa.kode')
     Route.get('/coa/by-aset', 'CoaAjaxController.coaAset').as('ajax.set.coa.coaAset')
@@ -67,8 +69,10 @@ Route.group(() => {
     Route.get('/options/coa-kode', 'OptionsAjaxController.coaKode').as('ajax.set.coaKode')
     Route.get('/options/coa-tipe', 'OptionsAjaxController.coaKategori').as('ajax.set.coaKategori')
     Route.get('/options/coa-group', 'OptionsAjaxController.coaGroup').as('ajax.set.coaGroup')
+    Route.get('/options/coa-subgroup', 'OptionsAjaxController.coaSubGroup').as('ajax.set.coaSubGroup')
     Route.get('/options/bisnis', 'OptionsAjaxController.bisnis').as('ajax.set.bisnis')
     Route.get('/options/cabang', 'OptionsAjaxController.cabang').as('ajax.set.cabang')
+    Route.get('/options/workspace', 'OptionsAjaxController.workspace').as('ajax.set.workspace')
     Route.get('/options/gudang', 'OptionsAjaxController.gudang').as('ajax.set.gudang')
     Route.get('/options/department', 'OptionsAjaxController.department').as('ajax.set.department')
     Route.get('/options/rack', 'OptionsAjaxController.rack').as('ajax.set.rack')
@@ -78,17 +82,18 @@ Route.group(() => {
     Route.get('/options/barang-subkategori', 'OptionsAjaxController.barangSubKategori').as('ajax.set.barangSubKategori')
     Route.get('/options/barang-qualitas', 'OptionsAjaxController.barangQualitas').as('ajax.set.barangQualitas')
     Route.get('/options/barang/show/:id', 'OptionsAjaxController.barangID').as('ajax.set.barangID')
-    Route.get('/options/equipment', 'OptionsAjaxController.equipment').as('ajax.set.equipment')
+    Route.get('/options/jasa', 'OptionsAjaxController.jasa').as('ajax.set.jasa')
+    Route.get('/options/jasa/show/:id', 'OptionsAjaxController.jasaID').as('ajax.set.jasaID')
     Route.get('/options/equipment/show/:id', 'OptionsAjaxController.equipmentID').as('ajax.set.equipmentID')
     Route.get('/options/pemasok', 'OptionsAjaxController.pemasok').as('ajax.set.pemasok')
     Route.get('/options/pelanggan', 'OptionsAjaxController.pelanggan').as('ajax.set.pelanggan')
+    Route.get('/options/pelanggan/:id', 'OptionsAjaxController.pelangganID').as('ajax.set.pelangganID')
     Route.get('/options/karyawan', 'OptionsAjaxController.karyawan').as('ajax.set.karyawan')
     Route.get('/options/karyawan/:id', 'OptionsAjaxController.karyawanID').as('ajax.set.karyawanID')
     Route.get('/options/gaji', 'OptionsAjaxController.gaji').as('ajax.set.gaji')
     Route.get('/options/component-gaji', 'OptionsAjaxController.componentGaji').as('ajax.set.componentGaji')
     Route.get('/options/faktur-beli', 'OptionsAjaxController.fakturBeli').as('ajax.set.fakturBeli')
     Route.get('/options/faktur-jual', 'OptionsAjaxController.fakturJual').as('ajax.set.fakturJual')
-    Route.get('/options/equipment/harga-rental', 'OptionsAjaxController.hargaRental').as('ajax.set.hargaRental')
     Route.get('/options/barang/harga-jual', 'OptionsAjaxController.hargaJualBarang').as('ajax.set.hargaJualBarang')
 
 }).prefix('ajax').namespace('ajax')
@@ -256,8 +261,10 @@ Route.group(() => {
     Route.get('/kas-bank/bank/create', 'KasBankController.createBank').as('acc.kas-bank.createBank').middleware('C')
     Route.get('/kas-bank/kas/:id/show', 'KasBankController.showKas').as('acc.kas-bank.showKas').middleware('U')
     Route.get('/kas-bank/kas/:id/details', 'KasBankController.detailsKas').as('acc.kas-bank.detailsKas').middleware('R')
+    Route.post('/kas-bank/kas/:id/update', 'KasBankController.updateKas').as('acc.kas-bank.updateKas').middleware('U')
     Route.get('/kas-bank/bank/:id/show', 'KasBankController.showBank').as('acc.kas-bank.showBank').middleware('U')
     Route.get('/kas-bank/bank/:id/details', 'KasBankController.detailsBank').as('acc.kas-bank.detailsBank').middleware('R')
+    Route.post('/kas-bank/bank/:id/update', 'KasBankController.updateBank').as('acc.kas-bank.updateBank').middleware('U')
 
     /* PURCHASE REQUISITION */
     Route.get('/purchasing-request', 'PurchasingRequestController.index').as('acc.purchasing-request').middleware('R')
@@ -390,6 +397,19 @@ Route.group(() => {
 }).prefix('acc').namespace('keuangan')
 
 /*
+*   ROUTING OPERATIONAL
+*/
+Route.group(() => {
+    /* ORDER PELANGGAN */
+    Route.get('/entry-order', 'OrderPelangganController.index').as('ops.entry-order').middleware('R')
+    Route.post('/entry-order', 'OrderPelangganController.store').as('ops.entry-order.store').middleware('C')
+    Route.get('/entry-order/list', 'OrderPelangganController.list').as('ops.entry-order.list').middleware('R')
+    Route.get('/entry-order/create', 'OrderPelangganController.create').as('ops.entry-order.create').middleware('C')
+    Route.get('/entry-order/create-items', 'OrderPelangganController.createItems').as('ops.entry-order.createItems').middleware('C')
+    Route.get('/entry-order/create-jasa', 'OrderPelangganController.createJasa').as('ops.entry-order.createJasa').middleware('C')
+}).prefix('operational').namespace('operational')
+
+/*
 *   ROUTING SETTING
 */
 Route.group(() => {
@@ -402,8 +422,10 @@ Route.group(() => {
     Route.get('/coa/create-group', 'AccCoaController.createGroup').as('set.coa.createGroup').middleware('C')
     Route.get('/coa/:id/show-akun', 'AccCoaController.showAkun').as('set.coa.showAkun').middleware('R')
     Route.get('/coa/:id/show-group', 'AccCoaController.showGroup').as('set.coa.showGroup').middleware('R')
+    Route.get('/coa/:id/show-subgroup', 'AccCoaController.showSubGroup').as('set.coa.showSubGroup').middleware('R')
     Route.post('/coa/:id/update-akun', 'AccCoaController.updateAkun').as('set.coa.updateAkun').middleware('U')
     Route.post('/coa/:id/update-group', 'AccCoaController.updateGroup').as('set.coa.updateGroup').middleware('U')
+    Route.post('/coa/:id/update-subgroup', 'AccCoaController.updateSubGroup').as('set.coa.updateSubGroup').middleware('U')
     Route.delete('/coa/:id/destroy', 'AccCoaController.destroy').as('set.coa.destroy').middleware('D')
 
     /** SETTING USER PRIVILAGES **/

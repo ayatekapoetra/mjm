@@ -30,7 +30,7 @@ class KasBankController {
         }
         
         const data = await KasBankHelpers.LIST(req, user)
-        // console.log('req', data);
+        console.log('req', data);
         switch (req.type) {
             case 'kas':
                 return view.render('components.kas-bank.table-kas', { list: data })
@@ -39,6 +39,87 @@ class KasBankController {
             default:
                 return view.render('keuangan.kas-bank.list', { list: data })
         }
+    }
+
+    async createKas ( { auth, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+        const cabang = await initFunc.WORKSPACE(user)
+        return view.render('keuangan.kas-bank.create-kas', {formName: 'form-create-kas'})
+    }
+
+    async createBank ( { auth, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+        const cabang = await initFunc.WORKSPACE(user)
+        return view.render('keuangan.kas-bank.create-bank', {formName: 'form-create-bank'})
+    }
+
+    async showKas ( { auth, params, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+        const data = await KasBankHelpers.SHOW_KAS(params)
+        return view.render('keuangan.kas-bank.show-kas', {formName: 'form-update-kas', data: data})
+    }
+
+    async showBank ( { auth, params, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+        console.log(params);
+        const data = await KasBankHelpers.SHOW_BANK(params)
+        return view.render('keuangan.kas-bank.show-bank', {formName: 'form-update-bank', data: data})
+    }
+
+    async storeKas ( { auth, request } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        const data = await KasBankHelpers.POST_KAS(req, user)
+        return data
+    }
+
+    async storeBank ( { auth, request } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        const data = await KasBankHelpers.POST_BANK(req, user)
+        return data
+    }
+
+    async updateKas ( { auth, params, request } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        const data = await KasBankHelpers.UPDATE_KAS(params, req, user)
+        return data
+    }
+
+    async updateBank ( { auth, params, request } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        const data = await KasBankHelpers.UPDATE_BANK(params, req, user)
+        return data
     }
 }
 

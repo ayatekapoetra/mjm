@@ -11,7 +11,7 @@ class KaryawanController {
         try {
             usr = await auth.getUser()
             const sideMenu = await initMenu.SIDEBAR(usr.id)
-            const workdir = await initFunc.GET_WORKSPACE(usr.id)
+            // const workdir = await initFunc.GET_WORKSPACE(usr.id)
             return view.render('master.karyawan.index', {
                 menu: sideMenu
             })

@@ -10,7 +10,7 @@ class masterPelanggan {
     async LIST (req, user) {
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
-        const ws = await initFunc.GET_WORKSPACE(user.id)
+        // const ws = await initFunc.GET_WORKSPACE(user.id)
         let data
         if(req.keyword){
             data = (
@@ -63,6 +63,7 @@ class masterPelanggan {
             kode: kode,
             nama: req.nama,
             pic: req.pic,
+            npwp: req.npwp,
             phone: req.phone || null,
             email: req.email || null,
             alamat_tagih: req.alamat_tagih || null,
@@ -109,6 +110,7 @@ class masterPelanggan {
             kode: kode,
             nama: req.nama,
             pic: req.pic,
+            npwp: req.npwp,
             phone: req.phone || null,
             email: req.email || null,
             alamat_tagih: req.alamat_tagih || null,

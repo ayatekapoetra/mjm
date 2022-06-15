@@ -18,23 +18,23 @@
                 <tr>
                     <td class="text-center" style="vertical-align: middle;">{{$loop.index + 1}}</td>
                     <td class="text-center" style="vertical-align: middle;">
-                        <button class="btn btn-outline btn-warning btn-xs bt-show-beli" data-type="hargaBeli" data-id="{{item.id}}">show</button>
+                        <button class="btn btn-outline btn-warning btn-xs bt-show-bank" data-id="{{item.id}}">show</button>
                     </td>
                     <td style="vertical-align: middle;">
                         <span class="text-info">[{{item.initial}}]</span> {{item.name}} <br>
                         <small>{{item.cabang.kode}} - {{item.rekening}}</small>
                     </td>
                     <td class="formatRp" data-elm="small" data-number="{{item.saldo_net}}" style="vertical-align: middle;">
-                        <small></small>
+                        <small>{{item.saldo_net}}</small>
                     </td>
                     <td class="formatRp" data-elm="small" data-number="{{item.setor_tunda}}" style="vertical-align: middle;">
-                        <small></small>
+                        <small>{{item.setor_tunda}}</small>
                     </td>
                     <td class="formatRp" data-elm="small" data-number="{{item.tarik_tunda}}" style="vertical-align: middle;">
-                        <small></small>
+                        <small>{{item.tarik_tunda}}</small>
                     </td>
                     <td class="formatRp" data-elm="small" data-number="{{item.saldo_rill}}" style="vertical-align: middle;">
-                        <small></small>
+                        <small>{{item.saldo_rill}}</small>
                     </td>
                 </tr>
             @endeach

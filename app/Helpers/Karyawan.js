@@ -10,7 +10,7 @@ class masterGudang {
     async LIST (req, user) {
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
-        const ws = await initFunc.GET_WORKSPACE(user.id)
+        // const ws = await initFunc.GET_WORKSPACE(user.id)
         let data
         if(req.keyword){
             data = (

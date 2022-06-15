@@ -61,5 +61,32 @@ $(function(){
             body.find('.div-gudang').css('display','none')
         }
     })
+
+    $('body select[name="workspace"]').each(function(){
+        var elm = $(this)
+        var user = $(this).data('user')
+        var values = $(this).data('values') || elm.val()
+        $.ajax({
+            async: true,
+            url: '/ajax/options/workspace?user_id='+user+'&selected='+values,
+            method: 'GET',
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                // console.log(result);
+                elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>['+v.kode+']  '+v.nama+'</option>'))
+                elm.trigger('change');
+                // if(result.length > 0){
+                // }else{
+                //     elm.html('<option value="" selected>Blum ada data...</option>')
+                // }
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    })
 })
 

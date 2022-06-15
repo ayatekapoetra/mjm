@@ -14,6 +14,7 @@ class masterBarang {
     async LIST (req, user) {
         const limit = req.limit || 100;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
+        const ws = await initFunc.WORKSPACE(user)
         try {
             console.log(req);
             const hargaBeli = (
@@ -22,6 +23,7 @@ class masterBarang {
                 .with('barang')
                 .with('gudang')
                 .where( w => {
+                    w.where('cabang_id', ws.cabang_id)
                     if(req.barang_id && req.tipe === 'hargaBeli'){
                         w.where('barang_id', req.barang_id)
                     }
@@ -45,6 +47,7 @@ class masterBarang {
                 .with('barang')
                 .with('gudang')
                 .where( w => {
+                    w.where('cabang_id', ws.cabang_id)
                     if(req.barang_id && req.tipe === 'hargaJual'){
                         w.where('barang_id', req.barang_id)
                     }
@@ -73,6 +76,7 @@ class masterBarang {
     }
 
     async POST (req, user) {
+        const ws = await initFunc.WORKSPACE(user)
         const trx = await DB.beginTransaction()
 
         if(!req.barang_id){
@@ -86,6 +90,7 @@ class masterBarang {
             const hargaBeli = new HargaBeli()
             hargaBeli.fill({
                 barang_id: req.barang_id,
+                cabang_id: ws.cabang_id,
                 gudang_id: req.gudang_id || null,
                 periode: moment(req.periode).format('YYYY-MM'),
                 narasi: req.narasi,
@@ -109,6 +114,7 @@ class masterBarang {
             const hargaJual = new HargaJual()
             hargaJual.fill({
                 barang_id: req.barang_id,
+                cabang_id: ws.cabang_id,
                 gudang_id: req.gudang_id || null,
                 periode: moment(req.periode).format('YYYY-MM'),
                 narasi: req.narasi,

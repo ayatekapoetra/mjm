@@ -6,6 +6,7 @@ const moment = require('moment')
 const User = use("App/Models/User")
 const DefCoa = use("App/Models/DefCoa")
 const UsrMenu = use("App/Models/UsrMenu")
+const UsrCabang = use("App/Models/UsrCabang")
 const SysConfig = use("App/Models/SysConfig")
 const Barang = use("App/Models/master/Barang")
 const Pemasok = use("App/Models/master/Pemasok")
@@ -19,6 +20,7 @@ const AccCoa = use("App/Models/akunting/AccCoa")
 const Karyawan = use("App/Models/master/Karyawan")
 const AccCoaTipe = use("App/Models/akunting/AccCoaTipe")
 const AccCoaGroup = use("App/Models/akunting/AccCoaGroup")
+const AccCoaSubGroup = use("App/Models/akunting/AccCoaSubGroup")
 const UsrPrivilage = use("App/Models/UsrPrivilage")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
 // const TrxOrderBeli = use("App/Models/transaksi/TrxOrderBeli")
@@ -90,21 +92,18 @@ class initFunc {
         }
     }
 
-    async GET_WORKSPACE (id) {
+    async WORKSPACE (user) {
         try {
             const data = (
-                await User.query()
-                    .with('workspace', a => a.with('bisnis'))
-                    .where('id', id)
-                    .last()
+                await UsrCabang.query().with('cabang').where( w => {
+                    w.where('aktif', 'Y')
+                    w.where('user_id', user.id)
+                }).last()
             ).toJSON()
-            let { bisnis } = data.workspace
-
-            /** UPDATE NILAI KAS dari SUM JURNAL **/
-            // await RECONSILIASI_KAS_BANK.UPDATE_VALUES(bisnis.id)
-
-            return data.workspace
+            
+            return data
         } catch (error) {
+            console.log(error);
             return null
         }
     }
@@ -517,43 +516,81 @@ class initFunc {
     }
 
     async RINGKASAN (user) {
-        const ws = await this.GET_WORKSPACE(user.id)
-        let akunArr = (
-            await AccCoa
-            .query()
-            .where( w => {
-                w.where('is_akun', 'A')
-            })
-            .orderBy('urut', 'asc')
-            .fetch()
-        ).toJSON()
+        // let akunArr = (
+        //     await AccCoa
+        //     .query()
+        //     .where( w => {
+        //         w.where('is_akun', 'A')
+        //     })
+        //     .orderBy('urut', 'asc', 'first')
+        //     .fetch()
+        // ).toJSON()
 
-        let akun = (
-            await AccCoaTipe.query()
-            .with('group', g => {
-                g.with('akun')
-            })
-            .orderBy('urut', 'asc')
-            .fetch()
-        ).toJSON()
+        // let akun = (
+        //     await AccCoaTipe.query()
+        //     .with('group', g => {
+        //         g.with('akun')
+        //     })
+        //     .orderBy('urut', 'asc')
+        //     .fetch()
+        // ).toJSON()
 
-        /* AKUN NERACA */ 
-        akun = akun.map(obj => {
-            if(obj.group.length > 0){
-                return {
-                    ...obj,
-                    akun: akunArr.filter(elm => elm.coa_tipe === obj.id && !elm.coa_grp)
-                }
-            }else{
-                return {
-                    ...obj,
-                    akun: akunArr.filter(elm => elm.coa_tipe === obj.id)
-                }
-            }
-        })
+        // // console.log(akun);
+
+        // /* AKUN NERACA */ 
+        // akun = akun.map(obj => {
+        //     if(obj.group.length > 0){
+        //         return {
+        //             ...obj,
+        //             akun: akunArr.filter(elm => elm.coa_tipe === obj.id && !elm.coa_grp)
+        //         }
+        //     }else{
+        //         return {
+        //             ...obj,
+        //             akun: akunArr.filter(elm => elm.coa_tipe === obj.id)
+        //         }
+        //     }
+        // })
 
         // console.log(JSON.stringify(akun, null, 2));
 
+        // return {
+        //     neraca : akun.filter(el => el.id <= 3),
+        //     labarugi : akun.filter(el => el.id > 3),
+        // }
+
+        let akun = []
+
+        const kategori = (
+            await AccCoaTipe.query()
+            .with('group', w => w.with('subgroup', x => x.with('akun'))).orderBy('urut', 'asc').fetch()
+        ).toJSON()
+
+        for (let obj of kategori) {
+            const akunTipe = (await AccCoa.query().where( w => {
+                w.where('coa_tipe', obj.id)
+                w.whereNull('coa_subgrp')
+                w.whereNull('coa_grp')
+            }).orderBy('urut', 'asc').fetch()).toJSON()
+            
+            if(akunTipe.length > 0){
+                obj = {...obj, akun: akunTipe}
+            }
+            
+            let arrAkunGrp = []
+            for (let elm of obj.group) {
+                const akunGrp = (await AccCoa.query().where( w => {
+                    w.where('coa_tipe', obj.id)
+                    w.where('coa_grp', elm.id)
+                    w.whereNull('coa_subgrp')
+                }).orderBy('urut', 'asc').fetch()).toJSON()
+
+                elm = {...elm, akun: akunGrp}
+                arrAkunGrp.push(elm)
+            }
+            obj.group = arrAkunGrp
+            akun.push(obj)
+        }
         return {
             neraca : akun.filter(el => el.id <= 3),
             labarugi : akun.filter(el => el.id > 3),

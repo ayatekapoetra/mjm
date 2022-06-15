@@ -34,19 +34,47 @@
                                             <hr>
                                             <ul class="m-b-20">
                                                 @each(obj in data.neraca)
-                                                  <li class="b-b">
-                                                      <strong>{{obj.name}}</strong>
+                                                    <li class="b-b">
+                                                        <strong>{{obj.name}}</strong>
                                                     </li>
-                                                    <ul>
+                                                    <ul class="feeds">
                                                         @if(obj.group.length > 0)
                                                             @each(grp in obj.group)
                                                                 <li class="b-b item-coa">
                                                                     {{grp.grp_name}}
                                                                     <span class="pull-left m-r-10">
-                                                                        <i class="ti-folder" style="color:white"></i>
+                                                                        <i class="ti-harddrives" style="color:white"></i>
                                                                     </span>
                                                                     <span class="pull-right count-values" data-kode="{{grp.kode}}"></span>
                                                                     <span><i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="G" data-id="{{grp.id}}"></i></span>
+                                                                    @if(grp.subgroup.length > 0)
+                                                                      <ul class="feeds">
+                                                                        @each(sub in grp.subgroup)
+                                                                            <li class="item-coa b-t p-r-0 m-t-10">
+                                                                                {{sub.subgrp_name}}
+                                                                                <span class="pull-left m-r-10">
+                                                                                    <i class="ti-folder" style="color:white"></i>
+                                                                                </span>
+                                                                                <span class="pull-right count-values" data-kode="{{sub.kode}}"></span>
+                                                                                <span><i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="SG" data-id="{{sub.id}}"></i></span>
+                                                                                @if(sub.akun.length > 0)
+                                                                                    <ul class="feeds">
+                                                                                        @each(akunx in sub.akun)
+                                                                                            <li class="item-coa p-r-0">
+                                                                                                {{akunx.coa_name}}
+                                                                                                <span class="pull-left m-r-10">
+                                                                                                    <i class="ti-control-forward" style="color:white"></i>
+                                                                                                </span>
+                                                                                                <span class="pull-right count-values" data-kode="{{akunx.kode}}"></span>
+                                                                                                <span><i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="A" data-id="{{akunx.id}}"></i></span>
+                                                                                            </li>
+                                                                                        @endeach
+                                                                                    </ul>
+                                                                                @endif
+                                                                            </li>
+                                                                        @endeach
+                                                                      </ul>
+                                                                    @endif
                                                                 </li>
                                                                 <ul class="feeds" style="margin-left: 20px">
                                                                     @each(val in grp.akun)
@@ -107,16 +135,44 @@
                                                   <li class="b-b">
                                                       <strong>{{obj.name}}</strong>
                                                     </li>
-                                                    <ul>
+                                                    <ul class="feeds">
                                                         @if(obj.group.length > 0)
                                                             @each(grp in obj.group)
                                                                 <li class="b-b item-coa">
                                                                     {{grp.grp_name}}
                                                                     <span class="pull-left m-r-10">
-                                                                        <i class="ti-folder" style="color:white"></i>
+                                                                        <i class="ti-harddrives" style="color:white"></i>
                                                                     </span>
                                                                     <span class="pull-right count-values" data-kode="{{grp.kode}}"></span>
                                                                     <span><i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="G" data-id="{{grp.id}}"></i></span>
+                                                                    @if(grp.subgroup.length > 0)
+                                                                      <ul class="feeds">
+                                                                        @each(sub in grp.subgroup)
+                                                                            <li class="item-coa b-t p-r-0 m-t-10">
+                                                                                {{sub.subgrp_name}}
+                                                                                <span class="pull-left m-r-10">
+                                                                                    <i class="ti-folder" style="color:white"></i>
+                                                                                </span>
+                                                                                <span class="pull-right count-values" data-kode="{{sub.kode}}"></span>
+                                                                                <span><i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="SG" data-id="{{sub.id}}"></i></span>
+                                                                                @if(sub.akun.length > 0)
+                                                                                    <ul class="feeds">
+                                                                                        @each(akunx in sub.akun)
+                                                                                            <li class="item-coa p-r-0">
+                                                                                                {{akunx.coa_name}}
+                                                                                                <span class="pull-left m-r-10">
+                                                                                                    <i class="ti-control-forward" style="color:white"></i>
+                                                                                                </span>
+                                                                                                <span class="pull-right count-values" data-kode="{{sub.kode}}"></span>
+                                                                                                <span><i class="m-l-20 fa fa-pencil text-warning bt-upd-akun" data-tipe="G" data-id="{{sub.id}}"></i></span>
+                                                                                            </li>
+                                                                                        @endeach
+                                                                                    </ul>
+                                                                                @endif
+                                                                            </li>
+                                                                        @endeach
+                                                                      </ul>
+                                                                    @endif
                                                                 </li>
                                                                 <ul class="feeds" style="margin-left: 20px">
                                                                     @each(val in grp.akun)

@@ -31,19 +31,41 @@
                                                         <span class="pull-right count-values" data-kode="{{grp.kode}}">Rp. 0</span>
                                                     </li>
                                                     <ul class="feeds" style="margin-left: 20px">
-                                                        @each(val in grp.akun)
+                                                        
+                                                        @each(val in grp.subgroup)
                                                             <li class="b-b item-coa">
-                                                                {{val.coa_name}}
+                                                                {{val.subgrp_name}} 
                                                                 <span class="pull-left m-r-10">
-                                                                    @if(val.is_akun != 'A')
-                                                                        <i class="ti-folder" style="color:white"></i>
-                                                                    @else
-                                                                        <i class="ti-control-forward" style="color:white"></i>
-                                                                    @endif
+                                                                    <i class="ti-folder" style="color:white"></i>
                                                                 </span>
-                                                                <span class="pull-right count-values" data-kode="{{val.kode}}">Rp. 0</span>
+                                                                <span class="pull-right count-values" data-kode="{{val.id}}">Rp. 0</span>
+                                                                <ul class="feeds text-white">
+                                                                    @if(val.akun)
+                                                                        @each(item in val.akun)
+                                                                        <li class="item-coa p-r-0">
+                                                                            {{item.coa_name}}
+                                                                            <span class="pull-left m-r-10">
+                                                                                <i class="ti-control-forward" style="color:white"></i>
+                                                                            </span>
+                                                                            <span class="pull-right count-values" data-kode="{{item.id}}">Rp. 0</span>
+                                                                        </li>
+                                                                        @endeach
+                                                                    @endif
+                                                                </ul>
                                                             </li>
                                                         @endeach
+
+                                                        @if(grp.akun.length > 0)
+                                                            @each(elm in grp.akun)
+                                                                <li class="b-b item-coa">
+                                                                    {{elm.coa_name}}
+                                                                    <span class="pull-left m-r-10">
+                                                                        <i class="ti-control-forward" style="color:white"></i>
+                                                                    </span>
+                                                                    <span class="pull-right count-values" data-kode="{{elm.id}}">Rp. 0</span>
+                                                                </li>
+                                                            @endeach
+                                                        @endif
                                                     </ul>
                                                 @endeach
                                             @endif
@@ -54,7 +76,7 @@
                                                         <span class="pull-left m-r-10">
                                                             <i class="ti-control-forward" style="color:white"></i>
                                                         </span>
-                                                        <span class="pull-right count-values" data-kode="{{elm.kode}}">Rp.</span>
+                                                        <span class="pull-right count-values" data-kode="{{elm.kode}}">Rp. 0</span>
                                                     </li>
                                                 @endeach
                                             @endif
@@ -75,59 +97,87 @@
                 <div class="row">
                     <div class="col-sm-12">
                         @each(obj in labarugi)
-                            <div class="panel">
-                                <div class="panel-heading bg-warning" style="color: #2f323e"> 
-                                    {{obj.name}}
-                                    <div class="pull-left p-r-10">
-                                        <a href="#" data-perform="panel-collapse">
-                                            <i class="ti-folder" style="color:black"></i>
-                                        </a>
-                                    </div>
-                                    <span class="pull-right count-values" data-kode="{{obj.kode}}">Rp. 0</span>
+                        <div class="panel">
+                            <div class="panel-heading bg-warning" style="color: #2f323e"> 
+                                {{obj.name}}
+                                <div class="pull-left p-r-10">
+                                    <a href="#" data-perform="panel-collapse">
+                                        <i class="ti-folder" style="color:black"></i>
+                                    </a>
                                 </div>
-                                <div class="panel-wrapper collapse in" aria-expanded="true">
-                                    <div class="panel-body">
-                                        <ul class="feeds text-white">
-                                            @if(obj.group.length > 0)
-                                                @each(grp in obj.group)
-                                                    <li class="b-b item-coa">
-                                                        {{grp.grp_name}}
-                                                        <span class="pull-left m-r-10">
-                                                            <i class="ti-folder" style="color:white"></i>
-                                                        </span>
-                                                        <span class="pull-right count-values" data-kode="{{grp.kode}}">Rp. 0</span>
-                                                    </li>
-                                                    <ul class="feeds" style="margin-left: 20px">
-                                                        @each(val in grp.akun)
+                                <span class="pull-right count-values" data-kode="{{obj.kode}}">Rp. 0</span>
+                            </div>
+                            <div class="panel-wrapper collapse in" aria-expanded="true">
+                                <div class="panel-body">
+                                    <ul class="feeds text-white">
+                                        @if(obj.group.length > 0)
+                                            @each(grp in obj.group)
+                                                <li class="b-b item-coa">
+                                                    {{grp.grp_name}}
+                                                    <span class="pull-left m-r-10">
+                                                        <i class="ti-folder" style="color:white"></i>
+                                                    </span>
+                                                    <span class="pull-right count-values" data-kode="{{grp.kode}}">Rp. 0</span>
+                                                </li>
+                                                <ul class="feeds" style="margin-left: 20px">
+                                                    @each(val in grp.subgroup)
+                                                        <li class="b-b item-coa">
+                                                            {{val.subgrp_name}}
+                                                            <span class="pull-left m-r-10">
+                                                                <i class="ti-folder" style="color:white"></i>
+                                                            </span>
+                                                            <span class="pull-right count-values" data-kode="{{grp.kode}}">Rp. 0</span>
+                                                            
+                                                            <ul class="feeds text-white">
+                                                                @if(val.akun)
+                                                                    @each(item in val.akun)
+                                                                    <li class="item-coa">
+                                                                        {{item.coa_name}}
+                                                                        <span class="pull-left m-r-10">
+                                                                            @if(val.is_akun != 'A')
+                                                                                <i class="ti-folder" style="color:white"></i>
+                                                                            @else
+                                                                                <i class="ti-control-forward" style="color:white"></i>
+                                                                            @endif
+                                                                        </span>
+                                                                        <span class="pull-right count-values" data-kode="{{val.kode}}">Rp. 0</span>
+                                                                    </li>
+                                                                    @endeach
+                                                                @endif
+                                                            </ul>
+                                                            
+                                                        </li>
+                                                    @endeach
+
+                                                    @if(grp.akun.length > 0)
+                                                        @each(elm in grp.akun)
                                                             <li class="b-b item-coa">
-                                                                {{val.coa_name}}
+                                                                {{elm.coa_name}}
                                                                 <span class="pull-left m-r-10">
-                                                                    @if(val.is_akun != 'A')
-                                                                        <i class="ti-folder" style="color:white"></i>
-                                                                    @else
-                                                                        <i class="ti-control-forward" style="color:white"></i>
-                                                                    @endif
+                                                                    <i class="ti-control-forward" style="color:white"></i>
                                                                 </span>
-                                                                <span class="pull-right count-values total-{{val.dk}}" data-kode="{{val.kode}}">Rp. 0</span>
+                                                                <span class="pull-right count-values" data-kode="{{elm.kode}}">Rp. 0</span>
                                                             </li>
                                                         @endeach
-                                                    </ul>
-                                                @endeach
-                                            @else
-                                                @each(elm in obj.akun)
-                                                    <li class="b-b item-coa">
-                                                        {{elm.coa_name}}
-                                                        <span class="pull-left m-r-10">
-                                                            <i class="ti-control-forward" style="color:white"></i>
-                                                        </span>
-                                                        <span class="pull-right count-values total-{{elm.dk}}" data-kode="{{elm.kode}}">Rp.</span>
-                                                    </li>
-                                                @endeach
-                                            @endif
-                                        </ul>
-                                    </div>
+                                                    @endif
+                                                </ul>
+                                            @endeach
+                                        @endif
+                                        @if(obj.akun.length > 0)
+                                            @each(elm in obj.akun)
+                                                <li class="b-b item-coa">
+                                                    {{elm.coa_name}}
+                                                    <span class="pull-left m-r-10">
+                                                        <i class="ti-control-forward" style="color:white"></i>
+                                                    </span>
+                                                    <span class="pull-right count-values" data-kode="{{elm.kode}}">Rp. 0</span>
+                                                </li>
+                                            @endeach
+                                        @endif
+                                    </ul>
                                 </div>
                             </div>
+                        </div>
                         @endeach
                     </div>
                 </div>

@@ -1,0 +1,71 @@
+{{ script('ajax/opt-cabang') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="{{formName}}">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Account</label>
+                                <select name="coa_id" id="coa_id" class="form-control selectCoaSubGroup" data-subgroup="111" data-group=""  data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Cabang</label>
+                                <select name="cabang_id" id="cabang_id" class="form-control selectCoaSubGroup" data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label class="control-label">Nama</label>
+                                <input type="text" name="nama" class="form-control" value="" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function(){
+        $('select[name="coa_id"]').each(function(){
+            var elm = $(this)
+            $.ajax({
+                async: true,
+                url: '/ajax/kas?selected=',
+                method: 'GET',
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(data){
+                    elm.html(data.map(v => '<option value="'+v.id+'" name="'+v.coa_name+'" '+v.selected+'>'+v.coa_name+'</option>'))
+                },
+                error: function(e){
+                    console.log(e);
+                }
+            })
+        })
+
+        $('select[name="coa_id"]').on('change', function(){
+            var elm = $(this)
+            $('input[name="nama"]').val(elm.find('option[value="'+elm.val()+'"]').attr('name'))
+        })
+    })
+</script>

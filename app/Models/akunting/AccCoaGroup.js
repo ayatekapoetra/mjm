@@ -12,9 +12,13 @@ class AccCoaGroup extends Model {
         return this.belongsTo("App/Models/akunting/AccCoaTipe", "coa_tipe", "id")
     }
 
-    akun () {
-        return this.hasMany("App/Models/akunting/AccCoa", "id", "coa_grp")
+    subgroup () {
+        return this.hasMany("App/Models/akunting/AccCoaSubGroup", "id", "coa_group")
     }
+
+    // akun () {
+    //     return this.hasMany("App/Models/akunting/AccCoa", "id", "coa_grp")
+    // }
 }
 
 module.exports = AccCoaGroup

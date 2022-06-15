@@ -4,8 +4,11 @@ const _ = require('underscore')
 const VUser = use("App/Models/VUser")
 const UsrMenu = use("App/Models/UsrMenu")
 const SysMenu = use("App/Models/SysMenu")
+const Jasa = use("App/Models/master/Jasa")
 const Gaji = use("App/Models/master/Gaji")
 const Rack = use("App/Models/master/Rack")
+const initFunc = use("App/Helpers/initFunc")
+const UsrCabang = use("App/Models/UsrCabang")
 const SysOption = use("App/Models/SysOption")
 const Cabang = use("App/Models/master/Cabang")
 const Gudang = use("App/Models/master/Gudang")
@@ -22,6 +25,7 @@ const BarangBrand = use("App/Models/master/BarangBrand")
 const AccCoaTipe = use("App/Models/akunting/AccCoaTipe")
 const HargaRental = use("App/Models/master/HargaRental")
 const AccCoaGroup = use("App/Models/akunting/AccCoaGroup")
+const AccCoaSubGroup = use("App/Models/akunting/AccCoaSubGroup")
 const HargaJualBarang = use("App/Models/master/HargaJual")
 const GajiComponent = use("App/Models/master/GajiComponent")
 const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
@@ -235,7 +239,6 @@ class OptionsAjaxController {
         try {
             data = (
                 await AccCoaGroup.query().with('tipe').where( w => {
-                    w.where('bisnis_id', req.bisnis_id)
                     if(req.coa_tipe){
                         w.where('coa_tipe', req.coa_tipe)
                     }
@@ -245,9 +248,32 @@ class OptionsAjaxController {
             console.log(error);
         }
 
-        data = data.map(obj => obj.kode === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+        data = data?.map(obj => obj.kode === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''}) || []
 
         return data
+    }
+
+    async coaSubGroup ( { request } ) {
+        const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
+        let data = (
+                await AccCoaSubGroup.query().where( w => {
+                    if(req.coa_group){
+                        w.where('coa_group', req.coa_group)
+                    }
+                w.where('aktif', 'Y')
+            }).orderBy('coa_group', 'asc')
+            .fetch()
+        ).toJSON()
+
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            data.unshift({id: '', kode: 'x', subgrp_name: 'Pilih', selected: 'selected'})
+        }
+        
+        return data
+
     }
 
     // async bisnis ( { request } ) {
@@ -273,6 +299,35 @@ class OptionsAjaxController {
             }).orderBy('tipe', 'desc')
             .fetch()
         ).toJSON()
+
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
+        }
+        
+        return data
+
+    }
+
+    async workspace ( { request } ) {
+        const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
+        let data = (
+                await UsrCabang.query().with('cabang').where( w => {
+                w.where('user_id', req.user_id)
+            }).orderBy('cabang_id', 'asc')
+            .fetch()
+        ).toJSON()
+
+        data = data.map(obj => {
+            return {
+                cabang_id: obj.cabang_id,
+                user_id: obj.user_id,
+                kode: obj.cabang?.kode,
+                nama: obj.cabang?.nama
+            }
+        })
 
         if(req.selected){
             data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
@@ -364,13 +419,75 @@ class OptionsAjaxController {
         return data
     }
 
-    async barangID ( { params } ) {
-        console.log('PARAMS ::', params);
+    async barangID ( { auth, params } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+        
+        const ws = await initFunc.WORKSPACE(user)
+        console.log('PARAMS ::', params, ws);
         let data = (
-                await Barang.query().where( w => {
-                w.where('id', params.id)
+                await Barang.query()
+                .with('brand')
+                .with('qualitas')
+                .with('kategori')
+                .with('subkategori')
+                .with('hargaJual')
+                .with('hargaBeli')
+                .with('coaIn')
+                .with('coaOut')
+                .where( w => {
+                    w.where('id', params.id)
+                    w.where('aktif', 'Y')
+                }).orderBy('nama', 'asc')
+            .last()
+        ).toJSON()
+
+       return data
+    }
+
+    async jasa ( { auth, request } ) {
+        const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
+
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+        
+        const ws = await initFunc.WORKSPACE(user)
+        let data = (
+                await Jasa.query().where( w => {
+                w.where('cabang_id', ws.cabang_id)
                 w.where('aktif', 'Y')
             }).orderBy('nama', 'asc')
+            .fetch()
+        ).toJSON()
+
+        if(req.selected)
+        data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
+        else
+        data.unshift({id: '', kode: 'x', num_part: 'x', nama: 'Pilih', selected: 'selected'})
+        return data
+    }
+
+    async jasaID ( { auth, params } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+        
+        const ws = await initFunc.WORKSPACE(user)
+        console.log('PARAMS ::', params, ws);
+        let data = (
+                await Jasa.query()
+                .with('cabang')
+                .where( w => {
+                    w.where('cabang_id', ws.cabang_id)
+                    w.where('id', params.id)
+                    w.where('aktif', 'Y')
+                }).orderBy('nama', 'asc')
             .last()
         ).toJSON()
 
@@ -510,13 +627,24 @@ class OptionsAjaxController {
         const req = request.all()
         let data = (
                 await Pelanggan.query().where( w => {
-                w.where('bisnis_id', req.bisnis_id)
                 w.where('aktif', 'Y')
             }).orderBy('nama', 'asc')
             .fetch()
         ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+        if(req.selected)
+            data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+        else
+            data.unshift({id: '', kode: 'x', num_part: 'x', nama: 'Pilih', selected: 'selected'})
+        return data
+    }
+
+    async pelangganID ( { params } ) {
+        let data = (
+                await Pelanggan.query().where( w => {
+                w.where('id', params.id)
+            }).last()
+        ).toJSON()
 
         return data
     }
@@ -660,3 +788,14 @@ class OptionsAjaxController {
 }
 
 module.exports = OptionsAjaxController
+
+async function userValidate(auth){
+    let user
+    try {
+        user = await auth.getUser()
+        return user
+    } catch (error) {
+        console.log(error);
+        return null
+    }
+}

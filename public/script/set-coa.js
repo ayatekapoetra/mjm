@@ -57,7 +57,13 @@ $(function(){
         e.preventDefault()
         var id = $(this).data('id')
         var tipe = $(this).data('tipe')
-        var uri = tipe === 'A' ? '/setting/coa/'+id+'/show-akun' : '/setting/coa/'+id+'/show-group'
+        if(tipe === 'A'){
+            var uri = '/setting/coa/'+id+'/show-akun'
+        }else if(tipe === 'G'){
+            var uri = '/setting/coa/'+id+'/show-group'
+        }else{
+            var uri = '/setting/coa/'+id+'/show-subgroup'
+        }
         $.ajax({
             async: true,
             url: uri,
@@ -126,7 +132,7 @@ $(function(){
             mimeType: "multipart/form-data",
             contentType: false,
             beforeSend: function(){
-                $('#modal-add-group').modal('hide')
+                // $('#modal-add-group').modal('hide')
             },
             success: function(result){
                 console.log(result)
@@ -171,7 +177,7 @@ $(function(){
                 const { message } = result
                 if(result.success){
                     swal("Okey,,,!", message, "success")
-                    window.location.reload()
+                    // window.location.reload()
                 }else{
                     swal("Opps,,,!", message, "warning")
                 }
@@ -195,6 +201,43 @@ $(function(){
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
             url: '/setting/coa/'+id+'/update-group',
+            method: 'POST',
+            data: data,
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            beforeSend: function(){
+                $('#modal-add-group').modal('hide')
+            },
+            success: function(result){
+                console.log(result)
+                const { message } = result
+                if(result.success){
+                    swal("Okey,,,!", message, "success")
+                }else{
+                    swal("Opps,,,!", message, "warning")
+                }
+            },
+            error: function(err){
+                console.log(err)
+                const { message } = err.responseJSON
+                swal("Opps,,,!", message ? message : 'something wrong...', "warning")
+            },
+            complete: function() {
+                // window.location.reload()
+            }
+        })
+    })
+
+    body.on('submit', 'form#form-update-subgroup', function(e){
+        e.preventDefault()
+        var data = new FormData(this)
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: '/setting/coa/'+id+'/update-subgroup',
             method: 'POST',
             data: data,
             dataType: 'json',

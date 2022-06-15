@@ -1,7 +1,7 @@
 'use strict'
 
-const Kas = use("App/Models/master/Kas")
-const Bank = use("App/Models/master/Bank")
+const Kas = use("App/Models/akunting/Kas")
+const Bank = use("App/Models/akunting/Bank")
 const initFunc = use("App/Helpers/initFunc")
 const Barang = use("App/Models/master/Barang")
 const Gudang = use("App/Models/master/Gudang")
@@ -36,13 +36,20 @@ class CoaAjaxController {
         var req = request.all()
         let data = (
             await AccCoa.query().where( w => {
+                if(req.cabang_id){
+                    w.where('bisnis_id', req.cabang_id)
+                }
                 w.where('is_akun', 'A')
-                w.where('bisnis_id', req.bisnis_id)
-                w.where('kode', 'like', '100.1%')
+                w.where('id', 'like', '111%')
             }).fetch()
         ).toJSON()
 
-        data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            // data = [...data, {id: '', coa_name: 'Pilih', selected: 'selected'}]
+            data.unshift({id: '', coa_name: 'Pilih', selected: 'selected'})
+        }
 
         return data
     }
@@ -227,13 +234,19 @@ class CoaAjaxController {
         var req = request.all()
         let data = (
             await AccCoa.query().where( w => {
+                if(req.cabang_id){
+                    w.where('cabang_id', req.cabang_id)
+                }
                 w.where('is_akun', 'A')
-                w.where('bisnis_id', req.bisnis_id)
-                w.where('kode', 'like', '100.1.2%')
+                w.where('id', 'like', '112%')
             }).fetch()
         ).toJSON()
 
-        data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            data.unshift({id: '', coa_name: 'Pilih', selected: 'selected'})
+        }
 
         return data
     }

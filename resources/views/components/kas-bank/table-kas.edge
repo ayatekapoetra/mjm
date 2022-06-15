@@ -10,24 +10,25 @@
             </tr>
         </thead>
         <tbody>
-            @if(list.kas.length > 0)
+            @if(list.kas.data.length > 0)
                 @each(item in list.kas.data)
                     <tr>
                         <td class="text-center" style="vertical-align: middle;">{{$loop.index + 1}}</td>
                         <td class="text-center" style="vertical-align: middle;">
-                            <button class="btn btn-outline btn-warning btn-xs bt-show-beli" data-type="hargaBeli" data-id="{{item.id}}">show</button>
+                            <button class="btn btn-outline btn-warning btn-xs bt-show-kas" data-id="{{item.id}}">show</button>
                         </td>
                         <td class="">
-                            xxx
+                            <span class="text-info">[{{item.cabang.kode}}] </span>
+                            {{item.name}}
                         </td>
-                        <td style="vertical-align: middle;">
-                            zzzz
+                        <td class="formatRp" data-elm="small" data-number="{{item.saldo_rill}}" style="vertical-align: middle;">
+                            <small>{{item.saldo_rill}}</small>
                         </td>
                     </tr>
                 @endeach
             @else
               <tr>
-                  <td colspan="4">Data tidak di temukan...</td>
+                  <td colspan="4">Data tidak di temukan... </td>
               </tr>
             @endif
         </tbody>

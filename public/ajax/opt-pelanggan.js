@@ -11,7 +11,7 @@ $(function(){
         var workdir = body.find('input#workdir').val()
         $.ajax({
             async: true,
-            url: '/ajax/options/pelanggan?bisnis_id='+workdir+'&selected='+values,
+            url: '/ajax/options/pelanggan?selected='+values,
             method: 'GET',
             dataType: 'json',
             processData: false,

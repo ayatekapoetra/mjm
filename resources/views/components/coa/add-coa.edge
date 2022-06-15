@@ -1,4 +1,5 @@
 {{ script('ajax/opt-coa-group') }}
+{{ script('ajax/opt-coa-group-sub') }}
 {{ script('ajax/opt-coa-kategori') }}
 <div class="modal fade" data-backdrop="false" data-keyboard="false" id="modal-add-group" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -17,7 +18,31 @@
                             <div class="white-box m-b-0">
                                 <div class="form-group">
                                     <label class="col-md-12">
-                                        Nama
+                                        Kategori
+                                    </label>
+                                    <div class="col-md-12">
+                                        <select id="coa_tipe" name="coa_tipe" data-values="" class="form-control selectCoaKategori" required></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-12">
+                                        Group
+                                    </label>
+                                    <div class="col-md-12">
+                                        <select id="coa_group" name="coa_group" data-values="" class="form-control selectCoaGroup"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-12">
+                                        SubGroup
+                                    </label>
+                                    <div class="col-md-12">
+                                        <select id="coa_subgrp" name="coa_subgrp" data-values="" class="form-control selectSubCoaKategori"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-12">
+                                        Nama {{data === 'G' ? 'Group' : 'Akun'}}
                                     </label>
                                     <div class="col-md-12">
                                         <input type="text" id="name" name="name" class="form-control" value="" required> 
@@ -31,24 +56,6 @@
                                         <input type="text" id="alias" name="alias" class="form-control" value=""> 
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-md-12">
-                                        Kategori
-                                    </label>
-                                    <div class="col-md-12">
-                                        <select id="coa_tipe" name="coa_tipe" data-values="" class="form-control selectCoaKategori" required></select>
-                                    </div>
-                                </div>
-                                @if(data === 'A')
-                                    <div class="form-group">
-                                        <label class="col-md-12">
-                                            Group
-                                        </label>
-                                        <div class="col-md-12">
-                                            <select id="coa_grp" name="coa_grp" data-values="" class="form-control selectCoaGroup"></select>
-                                        </div>
-                                    </div>
-                                @endif
                             </div>
                         </div>
                     </div>
