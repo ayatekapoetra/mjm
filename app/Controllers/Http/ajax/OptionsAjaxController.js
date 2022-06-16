@@ -341,6 +341,7 @@ class OptionsAjaxController {
 
     async gudang ( { request } ) {
         const req = request.all()
+        console.log(req);
         req.selected = req.selected === 'null' ? null : req.selected
         let data = (
                 await Gudang.query().where( w => {

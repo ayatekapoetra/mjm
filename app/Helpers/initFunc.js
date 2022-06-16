@@ -32,7 +32,7 @@ const TrxTerimaBarang = use("App/Models/transaksi/TrxTerimaBarang")
 const TrxFakturJualBayar = use("App/Models/transaksi/TrxFakturJualBayar")
 const TrxFakturBeliBayar = use("App/Models/transaksi/TrxFakturBeliBayar")
 const OpsPurchasingOrder = use("App/Models/operational/OpsPurchasingOrder")
-const OpsPurchasingOrderItem = use("App/Models/operational/OpsPurchasingOrderItem")
+const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
 
 const { performance } = require('perf_hooks')
 // const RECONSILIASI_KAS_BANK = use("App/Helpers/_setKasBankValues")
@@ -465,6 +465,23 @@ class initFunc {
         let strPrefix = '0'.repeat(5 - `${lastNumber}`.length) + lastNumber
 
         return 'PR' + strDate + '.' + strPrefix
+    }
+
+    async GEN_KODE_INVOICES (user) {
+        let ws = await this.WORKSPACE(user)
+        let nomor = await OpsPelangganOrder.query().where( w => {
+            w.where('date', '>=', moment().startOf('year').format('YYYY-MM-DD'))
+            w.where('date', '<=', moment().endOf('year').format('YYYY-MM-DD'))
+            w.where('status', '!=', 'batal')
+        }).last()
+
+        let cabKode = ws.cabang?.kode || "XX"
+        let prefix1 = 'INV' + moment().format('YYMMDD')
+        let prefix2 = '0'.repeat(2 - `${user.id}`.length) + user.id
+        let lastNumber = nomor ? (parseInt((nomor.kdpesanan).split('.')[1]) + 1) : 1
+        lastNumber = '0'.repeat(3 - `${lastNumber}`.length) + lastNumber
+        
+        return prefix1 + cabKode + prefix2 + '.' + lastNumber
     }
 
     async GEN_KODE_TERIMA_BRG (bisnis_id) {

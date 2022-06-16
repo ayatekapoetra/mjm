@@ -1,6 +1,7 @@
 {{ script('ajax/opt-pelanggan') }}
 {{ script('ajax/opt-options') }}
 {{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
 {{ script('ajax/initDate') }}
 {{ script('ajax/opt-coa') }}
 <div class="panel-wrapper collapse in" aria-expanded="true">
@@ -12,12 +13,6 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Cabang</label>
-                                <select class="form-control selectCabang field-form" name="cabang_id" data-values="{{ws}}" required></select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
                                 <label class="control-label">Tanggal</label>
                                 <div class="input-group"> 
                                     <span class="input-group-addon">
@@ -25,6 +20,14 @@
                                     </span>
                                     <input type="datetime-local" name="date" class="form-control text-right initDateTime field-form" value="" required readonly>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Gudang</label>
+                                <select class="form-control selectGudang field-form" name="gudang_id" data-cabang="{{ws}}" required></select>
                             </div>
                         </div>
                         <div class="col-md-5">
@@ -36,7 +39,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label class="control-label">Keterangan</label>
-                                <textarea name="narasi" id="narasi" class="form-control field-form" rows="5"></textarea>
+                                <input type="text" class="form-control field-form" name="narasi" id="narasi">
                             </div>
                         </div>
                     </div>
@@ -78,7 +81,7 @@
                                     <a href="#" data-perform="panel-collapse"><i class="ti-minus"></i></a> 
                                 </div>
                             </div>
-                            <div class="panel-wrapper collapse in" aria-expanded="true">
+                            <div class="panel-wrapper collapse" aria-expanded="true">
                                 <div class="panel-body p-t-0">
                                     <div class="table-responsive">
                                         <table class="table">

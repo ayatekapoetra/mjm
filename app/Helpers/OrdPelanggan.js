@@ -5,7 +5,8 @@ const _ = require('underscore')
 const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
 const Jasa = use("App/Models/master/Jasa")
-const Barang = use("App/Models/master/Barang")
+const VBarangStok = use("App/Models/VBarangStok")
+const BarangLokasi = use("App/Models/BarangLokasi")
 const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
 const OpsPelangganOrderItem = use("App/Models/operational/OpsPelangganOrderItem")
 const OpsPelangganOrderService = use("App/Models/operational/OpsPelangganOrderService")
@@ -52,27 +53,138 @@ class orderPelanggan {
 
     async POST (req, user) {
         const trx = await DB.beginTransaction()
-        
-        const jasa = new Jasa()
-        jasa.fill({
-            cabang_id: req.cabang_id,
-            kode: req.kode,
-            nama: req.nama,
-            narasi: req.narasi || '',
-            biaya: req.biaya || 0.00,
-            createdby: user.id
+        const ws = await initFunc.WORKSPACE(user)
+        const sumBarang = req.items.reduce((a, b) => {return a + (parseFloat(b.qty) * parseFloat(b.hargaJual))}, 0)
+        const sumJasa = req.jasa.reduce((a, b) => {return a + (parseFloat(b.qty) * parseFloat(b.biaya))}, 0)
+
+        const order = new OpsPelangganOrder()
+        order.fill({
+            kdpesanan: req.kode,
+            cabang_id: ws.cabang_id,
+            pelanggan_id: req.pelanggan_id,
+            date: req.date,
+            narasi: req.narasi,
+            tot_order: sumBarang,
+            tot_service: sumJasa,
+            createdby: user.id,
+            status: 'pending',
         })
 
         try {
-            await jasa.save(trx)
+            await order.save(trx)
         } catch (error) {
             console.log(error);
             await trx.rollback()
             return {
                 success: false,
-                message: 'Failed save cabang '+ JSON.stringify(error)
+                message: 'Failed save Order '+ JSON.stringify(error)
             }
         }
+        
+        for (const obj of req.items) {
+            const itemBarang = new OpsPelangganOrderItem()
+            itemBarang.fill({
+                order_id: order.id,
+                gudang_id: req.gudang_id,
+                barang_id: obj.barang_id,
+                qty: obj.qty,
+                harga: obj.hargaJual,
+                total: parseFloat(obj.qty) * parseFloat(obj.hargaJual)
+            })
+            try {
+                await itemBarang.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save Order Barang'+ JSON.stringify(error)
+                }
+            }
+
+            /* CHECK JUMLAH BARANG & LOKASI BARANG */
+            try {
+                const barangStok = await VBarangStok.query().where( w => {
+                    w.where('id', obj.barang_id)
+                    w.where('cabang_id', ws.cabang_id)
+                    w.where('gudang_id', req.gudang_id)
+                }).last()
+
+                /* JIKA TIDAK DITEMUKAN BARANGNYA */
+                if(!barangStok){
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Barang tidak ditemukan gudang ini...'
+                    }
+                }
+
+                /* JIKA TIDAK CUKUP STOK BARANGNYA */
+                if(barangStok.brg_hand < parseInt(obj.qty)){
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Jumlah Barang tidak cukup di gudang ini...'
+                    }
+                }
+                
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'xxx..'+JSON.stringify(error)
+                }
+            }
+
+            const barangLokasi = new BarangLokasi()
+            barangLokasi.fill({
+                trx_inv: itemBarang.id,
+                barang_id: obj.barang_id,
+                gudang_id: req.gudang_id,
+                cabang_id: ws.cabang_id,
+                qty_del: parseInt(obj.qty),
+                qty_hand: parseInt(obj.qty) * -1,
+                qty_own: parseInt(obj.qty) * -1,
+                createdby: user.id
+            })
+
+            try {
+                await barangLokasi.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Gagal mempengaruhi stok barang...\n'+JSON.stringify(error)
+                }
+            }
+            
+        }
+
+        for (const obj of req.jasa) {
+            
+            const biayaJasa = new OpsPelangganOrderService()
+            biayaJasa.fill({
+                order_id: order.id,
+                jasa_id: obj.jasa_id,
+                qty: obj.qty,
+                harga: obj.biaya,
+                total: parseFloat(obj.qty) * parseFloat(obj.biaya)
+            })
+            try {
+                await biayaJasa.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save Order Jasa'+ JSON.stringify(error)
+                }
+                
+            }
+        }
+
 
         await trx.commit()
         return {

@@ -13,7 +13,7 @@
                             <th width="*" class="bg-inverse b-all">Data<br/>Pelanggan</th>
                             <th width="150" class="bg-inverse b-all text-right">Tanggal<br/>Transaksi</th>
                             <th width="150" class="bg-inverse b-all text-right">Tot.Harga<br/>Barang</th>
-                            <th width="150" class="bg-inverse b-all text-right">Tot.Harga<br/>Services</th>
+                            <th width="150" class="bg-inverse b-all text-right">Tot.Biaya<br/>Services</th>
                             <th width="*" class="bg-inverse b-all">Status<br/>Keterangan</th>
                         </tr>
                     </thead>
@@ -40,7 +40,7 @@
                                         <small class="dateFormatDef" data-tgl="{{item.date}}" data-patten="HH:mm"></small>
                                         <i class="icon-clock"></i>
                                     </td>
-                                    <td class="formatRp text-right" data-number="{{item.tot_service}}">
+                                    <td class="formatRp text-right" data-number="{{item.tot_order}}">
                                         {{item.tot_service}}
                                     </td>
                                     <td class="formatRp text-right" data-number="{{item.tot_service}}">
@@ -48,7 +48,7 @@
                                     </td>
                                     <td>
                                         {{item.status}} <br>
-                                        is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's 
+                                        <small>{{item.narasi || ''}}</small> 
                                     </td>
                                 </tr>
                             @endeach
