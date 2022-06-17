@@ -1,0 +1,70 @@
+{{ script('ajax/index') }}
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">#</th>
+                            <th width="200" class="bg-inverse b-all">Cabang <br>Gudang</th>
+                            <th width="*" class="bg-inverse b-all">Desciptions <br>Barang</th>
+                            <th width="*" class="bg-inverse b-all">Brand <br>Qualitas</th>
+                            <th width="*" class="bg-inverse b-all">Kategori <br>Subkategori</th>
+                            <th width="100" class="text-right bg-inverse b-all">Barang <br>onHand</th>
+                            <th width="100" class="text-right bg-inverse b-all">Barang <br>onReveived</th>
+                            <th width="100" class="text-right bg-inverse b-all">Barang <br>onDeliver</th>
+                            <th width="100" class="text-right bg-inverse b-all">Barang <br>OWN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td>
+                                    <small>{{item.kd_cabang}} - {{item.nm_cabang}}</small> <br>
+                                    [{{item.kd_gudang}}] - {{item.nm_gudang}}
+                                </td>
+                                <td>
+                                    <small>{{item.kd_barang}}</small> <br>
+                                    <strong>{{item.nm_barang}}</strong>
+                                </td>
+                                <td>
+                                    {{item.barang.brand.nama}} <br>
+                                    <small>{{item.barang.qualitas.nama}}</small>
+                                </td>
+                                <td>
+                                    {{item.barang.kategori.nama}} <br>
+                                    @if(item.barang.subkategori)
+                                        <small>{{item.barang.subkategori.nama}}</small>
+                                    @endif
+                                </td>
+                                <td class="text-right {{item.brg_hand > 0 ? 'text-white':'text-danger'}}">{{item.brg_hand}}</td>
+                                <td class="text-right text-white">{{item.brg_onreceived}}</td>
+                                <td class="text-right text-white">{{item.brg_ondelivered}}</td>
+                                <td class="text-right text-white">{{item.brg_own}}</td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+            type: 'image',
+            closeOnContentClick: true,
+            mainClass: 'mfp-img-mobile',
+            image: {
+                verticalFit: true
+            }
+            
+        });
+    })
+</script>

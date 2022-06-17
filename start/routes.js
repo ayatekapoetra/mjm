@@ -407,6 +407,20 @@ Route.group(() => {
     Route.get('/entry-order/create', 'OrderPelangganController.create').as('ops.entry-order.create').middleware('C')
     Route.get('/entry-order/create-items', 'OrderPelangganController.createItems').as('ops.entry-order.createItems').middleware('C')
     Route.get('/entry-order/create-jasa', 'OrderPelangganController.createJasa').as('ops.entry-order.createJasa').middleware('C')
+    Route.get('/entry-order/:id/inv', 'OrderPelangganController.invoice').as('ops.entry-order.invoice').middleware('R')
+    Route.get('/entry-order/:id/show', 'OrderPelangganController.show').as('ops.entry-order.show').middleware('R')
+
+    /* PEMBAYARAN PELANGGAN */
+    Route.get('/entry-pembayaran', 'PembayaranPelangganController.index').as('ops.entry-pembayaran').middleware('R')
+    Route.post('/entry-pembayaran', 'PembayaranPelangganController.store').as('ops.entry-pembayaran.store').middleware('C')
+    Route.get('/entry-pembayaran/list', 'PembayaranPelangganController.list').as('ops.entry-pembayaran.list').middleware('R')
+    Route.get('/entry-pembayaran/list-order', 'PembayaranPelangganController.listOrder').as('ops.entry-pembayaran.listOrder').middleware('R')
+    Route.get('/entry-pembayaran/create', 'PembayaranPelangganController.create').as('ops.entry-pembayaran.create').middleware('C')
+    // Route.get('/entry-pembayaran/create-items', 'PembayaranPelangganController.createItems').as('ops.entry-pembayaran.createItems').middleware('C')
+    // Route.get('/entry-pembayaran/create-jasa', 'PembayaranPelangganController.createJasa').as('ops.entry-pembayaran.createJasa').middleware('C')
+    // Route.get('/entry-pembayaran/:id/inv', 'PembayaranPelangganController.invoice').as('ops.entry-pembayaran.invoice').middleware('R')
+    Route.get('/entry-pembayaran/:id/paid', 'PembayaranPelangganController.payment').as('ops.entry-pembayaran.payment').middleware('R')
+    Route.get('/entry-pembayaran/:id/show', 'PembayaranPelangganController.show').as('ops.entry-pembayaran.show').middleware('R')
 }).prefix('operational').namespace('operational')
 
 /*

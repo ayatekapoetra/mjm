@@ -1,0 +1,81 @@
+<tr class="item-rows-barang">
+    <td class="urut"></td>
+    <td style="vertical-align: middle;border-left: 1px solid #393d48;">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="form-group m-b-10">
+                    <label class="control-label">Barang</label>
+                    <select class="form-control input-sm selectBarang item-barang" name="barang_id" data-values="{{item.barang_id}}"></select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group m-b-10">
+                    <label class="control-label">Qty</label>
+                    <input type="number" class="form-control input-sm text-right item-barang" name="qty" id="qty" value="{{item.qty}}" required>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group m-b-10">
+                    <label class="control-label">Harga</label>
+                    <input type="number" class="form-control input-sm text-right item-barang" name="hargaJual" id="hargaJual" value="{{item.harga}}" required readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group m-b-10">
+                    <label class="control-label">Total</label>
+                    <input type="number" class="form-control input-sm text-right item-barang" name="totalJual" id="totalJual" value="{{item.total}}" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group m-b-10">
+                    <label class="control-label">Kode Barang</label>
+                    <input type="text" class="form-control input-sm item-barang" name="kode" readonly>
+                    <input type="hidden" class="form-control input-sm item-barang" name="nama">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group m-b-10">
+                    <label class="control-label">Satuan</label>
+                    <input type="text" class="form-control input-sm" name="satuan" readonly>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group m-b-10">
+                    <label class="control-label">Sub Kategori</label>
+                    <input type="text" class="form-control input-sm" name="subkategori" readonly>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group m-b-10">
+                    <label class="control-label">Qualitas</label>
+                    <input type="text" class="form-control input-sm" name="qualitas" readonly>
+                </div>
+            </div>
+        </div>
+    </td>
+    <td style="vertical-align: middle;border-left: 1px solid #393d48;">
+        <button type="button" class="btn btn-warning btn-circle bt-add-barang" style="display:none" disabled>
+            <i class="fa fa-plus"></i> 
+        </button>
+        <button type="button" class="btn btn-danger btn-circle bt-del-barang">
+            <i class="fa fa-trash"></i>
+        </button>
+    </td>
+</tr>
+{{ script('ajax/opt-barang') }}
+<script>
+    $(function(){
+        $('input[name="qty"]').on('change, keyup', function(){
+            var elm = $(this)
+            var qty = elm.parents('td').find('input[name="qty"]').val()
+            var hargaJual = elm.parents('td').find('input[name="hargaJual"]').val()
+            var totJual = parseFloat(qty) * parseFloat(hargaJual)
+            elm.parents('td').find('input[name="totalJual"]').val(totJual)
+        })
+
+        // $('tr.item-rows-barang td').last().find('button.bt-add-barang').css('display', 'inline')
+        // $('tr.item-rows-barang td').last().find('button.bt-del-barang').css('display', 'none')
+    })
+</script>

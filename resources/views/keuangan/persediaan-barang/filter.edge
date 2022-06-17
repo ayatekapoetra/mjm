@@ -1,0 +1,71 @@
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
+<div class="modal fade" id="filtermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Filter Data</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="">Kode</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control inp-filter input-sm" name="kode">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="">Cabang</label>
+                        <div class="form-group">
+                            <select class="form-control selectCabang input-sm" name="cabang_id"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="">Gudang</label>
+                        <div class="form-group">
+                            <select class="form-control selectGudang input-sm" name="gudang_id"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Status</label>
+                        <div class="form-group">
+                            <select class="form-control input-sm" name="status">
+                                <option value="">[x] Pilih</option>
+                                <option value="created">New Created</option>
+                                <option value="approved">Approved</option>
+                                <option value="finish">Finish</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Date Start</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control inp-filter input-sm" name="date_begin">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Date End</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control inp-filter input-sm" name="date_end">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="reset-filter" class="btn btn-default" data-dismiss="modal">Reset Filter</button>
+                <button type="button" id="apply-filter" class="btn btn-info" data-dismiss="modal">Apply Filter</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .select2-container {
+        height: auto;
+    }
+</style>
+<script>
+    $(function(){
+        $('select.select2x').select2()
+    })
+</script>

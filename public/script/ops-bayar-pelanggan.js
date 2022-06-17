@@ -18,110 +18,110 @@ $(function(){
         initDefault(limit, null)
     })
 
-    $('body').on('click', 'button.bt-add-barang', function(){
-        initCreateItem()
-        var elm = $(this)
-        var urut = elm.parents('tr').data('urut')
-        var dataBarang = elm.parents('tr').data('barang')
-        var qty = elm.parents('tr').find('input[name="qty"]').val()
-        var hargaJual = elm.parents('tr').find('input[name="hargaJual"]').val()
-        var tothargabarang = parseFloat(qty) * parseFloat(hargaJual)
-        elm.parents('tr').find('input, select').attr('readonly', 'readonly')
-        elm.parents('td').find('button.bt-add-barang').css('display', 'none')
-        elm.parents('td').find('button.bt-del-barang').css('display', 'block')
-        /* Tambah Data Details Barang */
-        body.find('tbody#list-details-order-pelanggan').append(
-            '<tr id="B'+urut+'" data-tothargabarang="'+tothargabarang+'" data-totbiaya="0">'+
-            '<td>'+qty+'</td>'+
-            '<td>'+dataBarang.nama+'</td>'+
-            '<td class="text-right">'+dataBarang.satuan+'</td>'+
-            '<td class="text-right">'+hargaJual+'</td>'+
-            '</tr>'
-        )
-        totalBelanja()
-    })
+    // $('body').on('click', 'button.bt-add-barang', function(){
+    //     initCreateItem()
+    //     var elm = $(this)
+    //     var urut = elm.parents('tr').data('urut')
+    //     var dataBarang = elm.parents('tr').data('barang')
+    //     var qty = elm.parents('tr').find('input[name="qty"]').val()
+    //     var hargaJual = elm.parents('tr').find('input[name="hargaJual"]').val()
+    //     var tothargabarang = parseFloat(qty) * parseFloat(hargaJual)
+    //     elm.parents('tr').find('input, select').attr('readonly', 'readonly')
+    //     elm.parents('td').find('button.bt-add-barang').css('display', 'none')
+    //     elm.parents('td').find('button.bt-del-barang').css('display', 'block')
+    //     /* Tambah Data Details Barang */
+    //     body.find('tbody#list-details-order-pelanggan').append(
+    //         '<tr id="B'+urut+'" data-tothargabarang="'+tothargabarang+'" data-totbiaya="0">'+
+    //         '<td>'+qty+'</td>'+
+    //         '<td>'+dataBarang.nama+'</td>'+
+    //         '<td class="text-right">'+dataBarang.satuan+'</td>'+
+    //         '<td class="text-right">'+hargaJual+'</td>'+
+    //         '</tr>'
+    //     )
+    //     totalBelanja()
+    // })
 
-    $('body').on('click', 'button.bt-del-barang', function(){
-        var elm = $(this)
-        var urut = elm.parents('tr').data('urut')
-        body.find('tbody#list-details-order-pelanggan tr#B'+urut).remove()
-        elm.parents('tr').remove()
-        body.find('tbody#item-barang tr').each(function(i){
-            $(this).find('td.urut').html(i+1)
-        })
-        totalBelanja()
-    })
+    // $('body').on('click', 'button.bt-del-barang', function(){
+    //     var elm = $(this)
+    //     var urut = elm.parents('tr').data('urut')
+    //     body.find('tbody#list-details-order-pelanggan tr#B'+urut).remove()
+    //     elm.parents('tr').remove()
+    //     body.find('tbody#item-barang tr').each(function(i){
+    //         $(this).find('td.urut').html(i+1)
+    //     })
+    //     totalBelanja()
+    // })
 
-    $('body').on('click', 'button.bt-add-jasa', function(){
-        initCreateJasa()
-        var elm = $(this)
-        var urut = elm.parents('tr').data('urut')
-        var qty = elm.parents('tr').find('input[name="qty"]').val()
-        var biaya = elm.parents('tr').find('input[name="biaya"]').val()
-        var totbiaya = parseFloat(qty) * parseFloat(biaya)
-        var nama = elm.parents('tr').find('input[name="nama"]').val()
-        elm.parents('td').find('button.bt-add-jasa').css('display', 'none')
-        elm.parents('td').find('button.bt-del-jasa').css('display', 'block')
-        /* Tambah Data Details Barang */
-        body.find('tbody#list-details-order-pelanggan').append(
-            '<tr id="J'+urut+'" data-tothargabarang="0" data-totbiaya="'+totbiaya+'">'+
-            '<td>'+qty+'</td>'+
-            '<td>'+nama+'</td>'+
-            '<td class="text-right">-</td>'+
-            '<td class="text-right">'+biaya+'</td>'+
-            '</tr>'
-        )
-        totalBelanja()
-    })
+    // $('body').on('click', 'button.bt-add-jasa', function(){
+    //     initCreateJasa()
+    //     var elm = $(this)
+    //     var urut = elm.parents('tr').data('urut')
+    //     var qty = elm.parents('tr').find('input[name="qty"]').val()
+    //     var biaya = elm.parents('tr').find('input[name="biaya"]').val()
+    //     var totbiaya = parseFloat(qty) * parseFloat(biaya)
+    //     var nama = elm.parents('tr').find('input[name="nama"]').val()
+    //     elm.parents('td').find('button.bt-add-jasa').css('display', 'none')
+    //     elm.parents('td').find('button.bt-del-jasa').css('display', 'block')
+    //     /* Tambah Data Details Barang */
+    //     body.find('tbody#list-details-order-pelanggan').append(
+    //         '<tr id="J'+urut+'" data-tothargabarang="0" data-totbiaya="'+totbiaya+'">'+
+    //         '<td>'+qty+'</td>'+
+    //         '<td>'+nama+'</td>'+
+    //         '<td class="text-right">-</td>'+
+    //         '<td class="text-right">'+biaya+'</td>'+
+    //         '</tr>'
+    //     )
+    //     totalBelanja()
+    // })
 
-    $('body').on('click', 'button.bt-del-jasa', function(){
-        var elm = $(this)
-        var urut = elm.parents('tr').data('urut')
-        body.find('tbody#list-details-order-pelanggan tr#J'+urut).remove()
-        elm.parents('tr').remove()
-        body.find('tbody#item-jasa tr').each(function(i){
-            console.log($(this).find('td.urut').html(i+1));
-        })
-        totalBelanja()
-    })
+    // $('body').on('click', 'button.bt-del-jasa', function(){
+    //     var elm = $(this)
+    //     var urut = elm.parents('tr').data('urut')
+    //     body.find('tbody#list-details-order-pelanggan tr#J'+urut).remove()
+    //     elm.parents('tr').remove()
+    //     body.find('tbody#item-jasa tr').each(function(i){
+    //         console.log($(this).find('td.urut').html(i+1));
+    //     })
+    //     totalBelanja()
+    // })
 
-    $('body').on('click', '#apply-filter', function(){
-        var limit = $('input[name="limit"]').val()
-        var kode = $('input[name="kode"]').val() && '&kode=' + $('input[name="kode"]').val()
-        var nama = $('input[name="nama"]').val() && '&nama=' + $('input[name="nama"]').val()
-        var email = $('input[name="email"]').val() && '&email=' + $('input[name="email"]').val()
-        var phone = $('input[name="phone"]').val() && '&phone=' + $('input[name="phone').val()
-        var cabang_id = $('select[name="cabang_id"]').val()  && '&cabang_id=' + $('select[name="cabang_id"]').val()
-        var url = `jasa/list?keyword=true&limit=${limit}${kode}${nama}${email}${phone}${cabang_id}`
-        $.ajax({
-            async: true,
-            url: url,
-            method: 'GET',
-            dataType: 'html',
-            contentType: false,
-            success: function(result){
-                body.find('div#content-list').html(result)
-                body.find('div#content-form').html('')
-            },
-            error: function(err){
-                console.log(err)
-            },
-            complete: function() {
-                body.find('button#bt-create-form').css('display', 'inline')
-                body.find('button.bt-back').css('display', 'none')
-                body.find('div#content-list').css('display', 'block')
-                body.find('div#content-form').css('display', 'none')
-                body.find('div#div-filter-limit').css('display', 'inline')
-            }
-        })
-    })
+    // $('body').on('click', '#apply-filter', function(){
+    //     var limit = $('input[name="limit"]').val()
+    //     var kode = $('input[name="kode"]').val() && '&kode=' + $('input[name="kode"]').val()
+    //     var nama = $('input[name="nama"]').val() && '&nama=' + $('input[name="nama"]').val()
+    //     var email = $('input[name="email"]').val() && '&email=' + $('input[name="email"]').val()
+    //     var phone = $('input[name="phone"]').val() && '&phone=' + $('input[name="phone').val()
+    //     var cabang_id = $('select[name="cabang_id"]').val()  && '&cabang_id=' + $('select[name="cabang_id"]').val()
+    //     var url = `jasa/list?keyword=true&limit=${limit}${kode}${nama}${email}${phone}${cabang_id}`
+    //     $.ajax({
+    //         async: true,
+    //         url: url,
+    //         method: 'GET',
+    //         dataType: 'html',
+    //         contentType: false,
+    //         success: function(result){
+    //             body.find('div#content-list').html(result)
+    //             body.find('div#content-form').html('')
+    //         },
+    //         error: function(err){
+    //             console.log(err)
+    //         },
+    //         complete: function() {
+    //             body.find('button#bt-create-form').css('display', 'inline')
+    //             body.find('button.bt-back').css('display', 'none')
+    //             body.find('div#content-list').css('display', 'block')
+    //             body.find('div#content-form').css('display', 'none')
+    //             body.find('div#div-filter-limit').css('display', 'inline')
+    //         }
+    //     })
+    // })
 
-    $('body').on('click', '#reset-filter', function(){
-        var limit = $('input[name="limit"]').val()
-        initDefault(limit)
-        $('div#filtermodal').find('input').val('')
-        $('div#filtermodal').find('select').val(null).trigger('change')
-    })
+    // $('body').on('click', '#reset-filter', function(){
+    //     var limit = $('input[name="limit"]').val()
+    //     initDefault(limit)
+    //     $('div#filtermodal').find('input').val('')
+    //     $('div#filtermodal').find('select').val(null).trigger('change')
+    // })
 
     $('body').on('submit', 'form#form-create', function(e){
         e.preventDefault()
@@ -187,12 +187,12 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'button.bt-show', function(e){
+    $('body').on('click', 'button.bt-bayar', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'entry-order/'+id+'/show',
+            url: 'entry-pembayaran/'+id+'/paid',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -285,20 +285,20 @@ $(function(){
         })
     })
 
-    function totalBelanja(){
-        var arr = []
-        body.find('tbody#list-details-order-pelanggan > tr').each(function(){
-            arr.push($(this).data('tothargabarang'))
-            arr.push($(this).data('totbiaya'))
-        })
-        var total = arr.reduce((a, b) => { return parseFloat(a) + parseFloat(b)}, 0)
-        body.find('td#total-belanja-barang').html(total?.toLocaleString('ID-id') || 0)
-    }
+    // function totalBelanja(){
+    //     var arr = []
+    //     body.find('tbody#list-details-order-pelanggan > tr').each(function(){
+    //         arr.push($(this).data('tothargabarang'))
+    //         arr.push($(this).data('totbiaya'))
+    //     })
+    //     var total = arr.reduce((a, b) => { return parseFloat(a) + parseFloat(b)}, 0)
+    //     body.find('td#total-belanja-barang').html(total?.toLocaleString('ID-id') || 0)
+    // }
 
     function initDefault(limit, page){
         $.ajax({
             async: true,
-            url: 'entry-order/list',
+            url: 'entry-pembayaran/list-order',
             method: 'GET',
             data: {
                 limit: limit || 100,
@@ -328,7 +328,7 @@ $(function(){
     function initCreate(){
         $.ajax({
             async: true,
-            url: 'entry-order/create',
+            url: 'entry-pembayaran/create',
             method: 'GET',
             dataType: 'html',
             contentType: false,

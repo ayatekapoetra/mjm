@@ -54,70 +54,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="panel panel-default">
-                            <div class="bg-inverse panel-heading">List Order Barang
-                                <div class="panel-action">
-                                    <a href="#" data-perform="panel-collapse"><i class="fa fa-minus"></i></a> 
-                                </div>
-                            </div>
-                            <div class="panel-wrapper collapse in" aria-expanded="true">
-                                <div class="panel-body p-t-0">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <!--
-                                            <thead>
-                                                <tr>
-                                                    <th width="20">No</th>
-                                                    <th>
-                                                        <small>Tambahkan item barang dengan klik tombol add</small>
-                                                    </th>
-                                                    <th width="30">
-                                                        x
-                                                    </th>
-                                                </tr>
-                                            </thead> -->
-                                            <tbody id="item-barang">
-                                                @!each(item in data, include = 'operational.order-pelanggan.create-item')
-                                            </tbody>
-                                           
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel panel-default">
-                            <div class="bg-inverse panel-heading">List Biaya Jasa
-                                <div class="panel-action">
-                                    <a href="#" data-perform="panel-collapse"><i class="fa fa-minus"></i></a> 
-                                </div>
-                            </div>
-                            <div class="panel-wrapper collapse" aria-expanded="true">
-                                <div class="panel-body p-t-0">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <!--
-                                            <thead>
-                                                <tr>
-                                                    <th width="20">No</th>
-                                                    <th>
-                                                        <small>Tambahkan biaya jasa dengan klik tombol add</small>
-                                                    </th>
-                                                    <th width="30">
-                                                        x
-                                                    </th>
-                                                </tr>
-                                            </thead> -->
-                                            <tbody id="item-jasa">
-                                                @!each(item in data, include = 'operational.order-pelanggan.create-jasa')
-                                            </tbody>
-                                           
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 <div class="panel-footer text-left">
                     <div class="row">
@@ -178,27 +114,6 @@
                             </li>
                             
                         </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="white-box" style="padding: 10px;">
-                        <table class="table">
-                            <tr class="">
-                                <td class="text-white">Qty</td>
-                                <td class="text-white">Nama</td>
-                                <td class="text-white text-right">Satuan</td>
-                                <td class="text-white text-right">Harga</td>
-                            </tr>
-                            <tbody id="list-details-order-pelanggan"></tbody>
-                            <tfoot>
-                                <tr class="bg-light">
-                                    <td colspan="2" style="padding: 5px 8px"><strong>Total : </strong></td>
-                                    <td class="text-right text-danger" colspan="2" id="total-belanja-barang" style="padding: 5px 8px">0.00</td>
-                                </tr>
-                            </tfoot>
-                        </table>
                     </div>
                 </div>
             </div>

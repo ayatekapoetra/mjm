@@ -9,82 +9,98 @@ const initFunc = use("App/Helpers/initFunc")
 const Barang = use("App/Models/master/Barang")
 const Gudang = use("App/Models/master/Gudang")
 const AccCoa = use("App/Models/akunting/AccCoa")
+const VBarangStok = use("App/Models/VBarangStok")
 const BarangLokasi = use("App/Models/BarangLokasi")
 const HargaJual = use("App/Models/master/HargaJual")
 const HargaBeli = use("App/Models/master/HargaBeli")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
+const BarangCategories = use("App/Models/master/BarangCategories")
 
 class persediaanBarang {
     async LIST (req, user) {
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
-        const ws = await initFunc.GET_WORKSPACE(user.id)
-        let barang = (
-            await Barang
-            .query()
-            .where( w => {
-                w.where('bisnis_id', ws.bisnis_id)
-            })
-            .orderBy('nama', 'asc')
-            .paginate(halaman, limit)
+        const ws = await initFunc.WORKSPACE(user)
+        let barangStok = (
+            await VBarangStok
+                .query()
+                .with('barang', a => {
+                    a.with('brand')
+                    a.with('kategori')
+                    a.with('qualitas')
+                    a.with('subkategori')
+                })
+                .where( w => {
+                    w.where('cabang_id', ws.cabang_id)
+                })
+                .orderBy('nm_barang', 'asc')
+                .paginate(halaman, limit)
         ).toJSON()
 
-        let arrData = []
+        
 
-        for (let obj of barang.data) {
-            const hrgJual = (
-                await HargaJual.query().where( w => {
-                    w.where('bisnis_id', ws.bisnis_id)
-                    w.where('barang_id', obj.id)
-                }).orderBy('periode', 'asc')
-                .fetch()
-            ).toJSON()
+        // console.log('====================================');
+        // console.log(JSON.stringify(barangStok, null, 2));
+        // console.log('====================================');
 
-            const hrgBeli = (
-                await HargaBeli.query().where( w => {
-                    w.where('bisnis_id', ws.bisnis_id)
-                    w.where('barang_id', obj.id)
-                }).orderBy('periode', 'asc')
-                .fetch()
-            ).toJSON()
+        return barangStok
 
-            let avgBeli = []
-            for (const num of hrgBeli) {
-                avgBeli.push(num.harga_beli)
-            }
+        // let arrData = []
 
-            const lokasi = (
-                await BarangLokasi.query().where( w => {
-                    w.where('bisnis_id', ws.bisnis_id)
-                    w.where('barang_id', obj.id)
-                }).orderBy('created_at', 'asc')
-                .fetch()
-            ).toJSON()
+        // for (let obj of barang.data) {
+        //     const hrgJual = (
+        //         await HargaJual.query().where( w => {
+        //             w.where('bisnis_id', ws.bisnis_id)
+        //             w.where('barang_id', obj.id)
+        //         }).orderBy('periode', 'asc')
+        //         .fetch()
+        //     ).toJSON()
+
+        //     const hrgBeli = (
+        //         await HargaBeli.query().where( w => {
+        //             w.where('bisnis_id', ws.bisnis_id)
+        //             w.where('barang_id', obj.id)
+        //         }).orderBy('periode', 'asc')
+        //         .fetch()
+        //     ).toJSON()
+
+        //     let avgBeli = []
+        //     for (const num of hrgBeli) {
+        //         avgBeli.push(num.harga_beli)
+        //     }
+
+        //     const lokasi = (
+        //         await BarangLokasi.query().where( w => {
+        //             w.where('bisnis_id', ws.bisnis_id)
+        //             w.where('barang_id', obj.id)
+        //         }).orderBy('created_at', 'asc')
+        //         .fetch()
+        //     ).toJSON()
             
-            let tot = []
-            for (const val of lokasi) {
-                tot.push({qty_hand: val.qty_hand, qty_rec: val.qty_rec, qty_del: val.qty_del, qty_own: val.qty_own})
-            }
-            var _avgBeli = avgBeli.reduce((a, b) => { return a + parseInt(b) }, 0)
-            var _hand = tot.reduce((a, b) => { return a + parseInt(b.qty_hand) }, 0)
-            var _rec = tot.reduce((a, b) => { return a + parseInt(b.qty_rec) }, 0)
-            var _del = tot.reduce((a, b) => { return a + parseInt(b.qty_del) }, 0)
-            var _own = (parseInt(_hand) + parseInt(_rec)) - parseInt(_del)
-            obj = {
-                ...obj, 
-                avgBeli: _avgBeli/(hrgBeli?.length || 1),
-                qty_hand: _hand,
-                qty_rec: _rec,
-                qty_del: _del,
-                qty_own: _own,
-                hrgJual, 
-                hrgBeli, 
-                lokasi
-            }
-            arrData.push(obj)
-        }
+        //     let tot = []
+        //     for (const val of lokasi) {
+        //         tot.push({qty_hand: val.qty_hand, qty_rec: val.qty_rec, qty_del: val.qty_del, qty_own: val.qty_own})
+        //     }
+        //     var _avgBeli = avgBeli.reduce((a, b) => { return a + parseInt(b) }, 0)
+        //     var _hand = tot.reduce((a, b) => { return a + parseInt(b.qty_hand) }, 0)
+        //     var _rec = tot.reduce((a, b) => { return a + parseInt(b.qty_rec) }, 0)
+        //     var _del = tot.reduce((a, b) => { return a + parseInt(b.qty_del) }, 0)
+        //     var _own = (parseInt(_hand) + parseInt(_rec)) - parseInt(_del)
+        //     obj = {
+        //         ...obj, 
+        //         avgBeli: _avgBeli/(hrgBeli?.length || 1),
+        //         qty_hand: _hand,
+        //         qty_rec: _rec,
+        //         qty_del: _del,
+        //         qty_own: _own,
+        //         hrgJual, 
+        //         hrgBeli, 
+        //         lokasi
+        //     }
+        //     arrData.push(obj)
+        // }
 
-        return {...barang, data: arrData}
+        // return {...barang, data: arrData}
     }
 
     async POST (req, user) {

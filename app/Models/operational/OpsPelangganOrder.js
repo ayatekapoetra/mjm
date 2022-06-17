@@ -23,6 +23,10 @@ class OpsPelangganOrder extends Model {
     items () {
         return this.hasMany("App/Models/operational/OpsPelangganOrderItem", "id", "order_id")
     }
+
+    jasa () {
+        return this.hasMany("App/Models/operational/OpsPelangganOrderService", "id", "order_id")
+    }
 }
 
 module.exports = OpsPelangganOrder

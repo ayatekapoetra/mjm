@@ -7,6 +7,10 @@ class VBarangStok extends Model {
     static get table(){
         return 'v_barang_stok'
     }
+
+    barang () {
+        return this.belongsTo("App/Models/master/Barang", "id", "id")
+    }
 }
 
 module.exports = VBarangStok

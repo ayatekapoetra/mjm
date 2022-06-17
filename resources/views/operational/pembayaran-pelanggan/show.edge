@@ -18,103 +18,47 @@
                                     <span class="input-group-addon">
                                         <i class="ti-calendar"></i>
                                     </span>
-                                    <input type="datetime-local" name="date" class="form-control text-right initDateTime field-form" value="" required readonly>
+                                    <input type="datetime-local" name="date" class="form-control text-right setDateTime field-form" data-tgl="{{data.date}}" required readonly>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label class="control-label">Kode</label>
+                                <label class="control-label">Invoices</label>
                                 <div class="input-group"> 
                                     <span class="input-group-addon">
                                         <i class="fa fa-qrcode"></i>
                                     </span>
-                                    <input type="text" name="date" class="form-control text-right" value="{{kode}}" readonly>
+                                    <input type="text" name="kode" class="form-control text-right" value="{{data.kdpesanan}}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Kwitansi</label>
+                                <div class="input-group"> 
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-qrcode"></i>
+                                    </span>
+                                    <input type="text" name="kode" class="form-control text-right" value="{{no_kwitansi}}" readonly>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <div class="form-group">
-                                <label class="control-label">Gudang</label>
-                                <select class="form-control selectGudang field-form" name="gudang_id" data-cabang="{{ws}}" required></select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="control-label">Pelanggan</label>
-                                <select class="form-control selectPelanggan field-form" name="pelanggan_id"></select>
+                                <label class="control-label">Type Potongan</label>
+                                <select class="form-control field-form" name="potongan_type" required>
+                                    <option value="rupiah">Rupiah</option>
+                                    <option value="persentase">Persen</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label class="control-label">Keterangan</label>
                                 <input type="text" class="form-control field-form" name="narasi" id="narasi">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="panel panel-default">
-                            <div class="bg-inverse panel-heading">List Order Barang
-                                <div class="panel-action">
-                                    <a href="#" data-perform="panel-collapse"><i class="fa fa-minus"></i></a> 
-                                </div>
-                            </div>
-                            <div class="panel-wrapper collapse in" aria-expanded="true">
-                                <div class="panel-body p-t-0">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <!--
-                                            <thead>
-                                                <tr>
-                                                    <th width="20">No</th>
-                                                    <th>
-                                                        <small>Tambahkan item barang dengan klik tombol add</small>
-                                                    </th>
-                                                    <th width="30">
-                                                        x
-                                                    </th>
-                                                </tr>
-                                            </thead> -->
-                                            <tbody id="item-barang">
-                                                @!each(item in data, include = 'operational.order-pelanggan.create-item')
-                                            </tbody>
-                                           
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="panel panel-default">
-                            <div class="bg-inverse panel-heading">List Biaya Jasa
-                                <div class="panel-action">
-                                    <a href="#" data-perform="panel-collapse"><i class="fa fa-minus"></i></a> 
-                                </div>
-                            </div>
-                            <div class="panel-wrapper collapse" aria-expanded="true">
-                                <div class="panel-body p-t-0">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <!--
-                                            <thead>
-                                                <tr>
-                                                    <th width="20">No</th>
-                                                    <th>
-                                                        <small>Tambahkan biaya jasa dengan klik tombol add</small>
-                                                    </th>
-                                                    <th width="30">
-                                                        x
-                                                    </th>
-                                                </tr>
-                                            </thead> -->
-                                            <tbody id="item-jasa">
-                                                @!each(item in data, include = 'operational.order-pelanggan.create-jasa')
-                                            </tbody>
-                                           
-                                        </table>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -133,7 +77,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="white-box" style="padding: 10px;">
-                        <h3 class="box-title">Detail Data Pelanggan</h3>
+                        <h3 class="box-title">Detail Transaksi</h3>
                         <hr class="m-0">
                         <ul class="feeds">
                             <li class="text-info" style="padding: 5px 10px;">
@@ -178,27 +122,6 @@
                             </li>
                             
                         </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="white-box" style="padding: 10px;">
-                        <table class="table">
-                            <tr class="">
-                                <td class="text-white">Qty</td>
-                                <td class="text-white">Nama</td>
-                                <td class="text-white text-right">Satuan</td>
-                                <td class="text-white text-right">Harga</td>
-                            </tr>
-                            <tbody id="list-details-order-pelanggan"></tbody>
-                            <tfoot>
-                                <tr class="bg-light">
-                                    <td colspan="2" style="padding: 5px 8px"><strong>Total : </strong></td>
-                                    <td class="text-right text-danger" colspan="2" id="total-belanja-barang" style="padding: 5px 8px">0.00</td>
-                                </tr>
-                            </tfoot>
-                        </table>
                     </div>
                 </div>
             </div>

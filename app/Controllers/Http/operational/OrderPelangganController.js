@@ -39,7 +39,8 @@ class OrderPelangganController {
         }
 
         const cabang = await initFunc.WORKSPACE(user)
-        return view.render('operational.order-pelanggan.create', {ws: cabang.cabang_id})
+        const kodeINV = await initFunc.GEN_KODE_INVOICES(user)
+        return view.render('operational.order-pelanggan.create', { ws: cabang.cabang_id, kode: kodeINV })
     }
 
     async createItems ( { auth, request, view } ) {
@@ -62,6 +63,30 @@ class OrderPelangganController {
         return view.render('operational.order-pelanggan.create-jasa')
     }
 
+    async invoice ( { auth, params, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        let data = await OrderPelangganHelpers.SHOW(params)
+        data.tot_inv = parseFloat(data.tot_order) + parseFloat(data.tot_service)
+        // console.log(data);
+        return view.render('operational.order-pelanggan.invoice', { data: data })
+    }
+
+    async show ( { auth, params, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        let data = await OrderPelangganHelpers.SHOW(params)
+        data.tot_inv = parseFloat(data.tot_order) + parseFloat(data.tot_service)
+        console.log(data);
+        return view.render('operational.order-pelanggan.show', { data: data })
+    }
+
     async store ( { auth, request } ) {
         let req = request.all()
         req.dataForm = JSON.parse(req.dataForm)
@@ -80,8 +105,6 @@ class OrderPelangganController {
 
         req.dataForm.items = arrBarang
         req.dataForm.jasa = arrJasa
-        // console.log(arrBarang);
-        // console.log(arrJasa);
         
         if(!req.pelanggan_id){
             return {

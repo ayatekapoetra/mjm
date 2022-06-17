@@ -12,9 +12,9 @@
                             <th width="150" class="bg-inverse b-all">Kode<br/>Invoice</th>
                             <th width="*" class="bg-inverse b-all">Data<br/>Pelanggan</th>
                             <th width="150" class="bg-inverse b-all text-right">Tanggal<br/>Transaksi</th>
-                            <th width="150" class="bg-inverse b-all text-right">Tot.Harga<br/>Barang</th>
-                            <th width="150" class="bg-inverse b-all text-right">Tot.Biaya<br/>Services</th>
-                            <th width="*" class="bg-inverse b-all">Status<br/>Keterangan</th>
+                            <th width="150" class="bg-inverse b-all text-right">Tot.Transaksi<br/>Pajak (Rp.)</th>
+                            <th width="150" class="bg-inverse b-all text-right">GrandTotal<br/>Potongan (Rp.)</th>
+                            <th width="*" class="bg-inverse b-all text-right">Nilai Bayar<br/>Sisa</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -24,10 +24,8 @@
                                     <td class="text-center">{{$loop.index + 1}}</td>
                                     <td>
                                         <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}">inv</button>
-                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">update</button>
-                                        @if(item.status === 'pending')
-                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">delete</button>
-                                        @endif
+                                        <button class="btn btn-outline btn-warning btn-xs bt-bayar" data-id="{{item.id}}">bayar</button><br>
+                                        <button class="btn btn-outline btn-info btn-xs bt-show m-t-5" data-id="{{item.id}}">bayar detail</button>
                                     </td>
                                     <td>
                                         <strong>{{item.kdpesanan}}</strong><br>
@@ -44,15 +42,17 @@
                                         <small class="dateFormatDef" data-tgl="{{item.date}}" data-patten="HH:mm"></small>
                                         <i class="icon-clock"></i>
                                     </td>
-                                    <td class="formatRp text-right" data-number="{{item.tot_order}}">
-                                        {{item.tot_service}}
+                                    <td class="text-right">
+                                        <span class="formatRp" data-number="{{item.total_trx}}"></span> <br>
+                                        <small class="formatRp" data-number="{{item.pajak_trx}}"></small>
                                     </td>
-                                    <td class="formatRp text-right" data-number="{{item.tot_service}}">
-                                        {{item.tot_service}}
+                                    <td class="text-right">
+                                        <span class="formatRp" data-number="{{item.grandtot_trx}}"></span> <br>
+                                        <small class="formatRp" data-number="{{item.potongan_trx}}"></small>
                                     </td>
-                                    <td>
-                                        {{item.status}} <br>
-                                        <small>{{item.narasi || ''}}</small> 
+                                    <td class="text-right">
+                                        <strong class="formatRp text-success" data-number="{{item.paid_trx}}"></strong> <br>
+                                        <small class="formatRp text-warning" data-number="{{item.sisa_trx}}"></small> 
                                     </td>
                                 </tr>
                             @endeach
@@ -86,7 +86,7 @@
 
 <style>
     td {
-        padding-bottom: 5px !important;
-        padding-top: 5px !important;
+        padding-bottom: 10px !important;
+        padding-top: 10px !important;
     }
 </style>

@@ -33,6 +33,7 @@ const TrxFakturJualBayar = use("App/Models/transaksi/TrxFakturJualBayar")
 const TrxFakturBeliBayar = use("App/Models/transaksi/TrxFakturBeliBayar")
 const OpsPurchasingOrder = use("App/Models/operational/OpsPurchasingOrder")
 const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
+const OpsPelangganBayar = use("App/Models/operational/OpsPelangganBayar")
 
 const { performance } = require('perf_hooks')
 // const RECONSILIASI_KAS_BANK = use("App/Helpers/_setKasBankValues")
@@ -175,11 +176,11 @@ class initFunc {
         }
     }
 
-    async GEN_FAKTUR_JUAL (id) {
+    async GEN_FAKTUR_JUAL (user) {
         // Invoice CVMT/No urut/bulan (angka romawi)/tahun
-        const ws = await this.GET_WORKSPACE(id)
+        const ws = await this.WORKSPACE(user)
         const trxFakturJual = await TrxFakturJual.query().where( w => {
-            w.where('bisnis_id', ws.bisnis_id)
+            w.where('cabang_id', ws.bisnis_id)
             w.where('date_trx',  '>=', moment().startOf('year').format('YYYY-MM-DD'))
             w.where('date_trx',  '<=', moment().endOf('year').format('YYYY-MM-DD'))
         }).last()
@@ -477,6 +478,22 @@ class initFunc {
 
         let cabKode = ws.cabang?.kode || "XX"
         let prefix1 = 'INV' + moment().format('YYMMDD')
+        let prefix2 = '0'.repeat(2 - `${user.id}`.length) + user.id
+        let lastNumber = nomor ? (parseInt((nomor.kdpesanan).split('.')[1]) + 1) : 1
+        lastNumber = '0'.repeat(3 - `${lastNumber}`.length) + lastNumber
+        
+        return prefix1 + cabKode + prefix2 + '.' + lastNumber
+    }
+
+    async GEN_KODE_KWITANSI (user) {
+        let ws = await this.WORKSPACE(user)
+        let nomor = await OpsPelangganBayar.query().where( w => {
+            w.where('date', '>=', moment().startOf('year').format('YYYY-MM-DD'))
+            w.where('date', '<=', moment().endOf('year').format('YYYY-MM-DD'))
+        }).last()
+
+        let cabKode = ws.cabang?.kode || "XX"
+        let prefix1 = 'PAID' + moment().format('YYMMDD')
         let prefix2 = '0'.repeat(2 - `${user.id}`.length) + user.id
         let lastNumber = nomor ? (parseInt((nomor.kdpesanan).split('.')[1]) + 1) : 1
         lastNumber = '0'.repeat(3 - `${lastNumber}`.length) + lastNumber

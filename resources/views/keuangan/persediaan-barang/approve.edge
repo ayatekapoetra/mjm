@@ -1,0 +1,79 @@
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
+{{ script('ajax/opt-pemasok') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-approved" data-id="{{data.id}}">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="control-label">Kode</label>
+                                    <input type="text" name="kode" class="form-control text-white" value="{{data.kode}}" style="font-weight: bold;" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Cabang</label>
+                                    <select class="form-control selectCabang" name="cabang_id" data-values="{{data.cabang_id}}" required></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">Gudang</label>
+                                    <select class="form-control selectGudang" data-link="cabang_id" name="gudang_id" data-values="{{data.gudang_id}}" required></select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Tanggal</label>
+                                    <input type="date" name="date" class="form-control setDate" data-tgl="{{data.date}}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Keterangan</label>
+                                    <textarea class="form-control" name="narasi" id="" rows="5">{{data.narasi || ''}}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <th class="bg-extralight" width="50">No</th>
+                                            <th class="bg-inverse">Item Details</th>
+                                            <th class="bg-title text-center" width="90">ACT</th>
+                                        </thead>
+                                        <tbody id="item-details">
+                                            @!each(item in data.items, include = 'components.items.purchasing-order.item-approve')
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <!--<button type="button" class="btn btn-danger waves-effect waves-light" id="bt-delete" data-id="{{data.id}}">Delete</button>-->
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Approved</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

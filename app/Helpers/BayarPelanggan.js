@@ -9,10 +9,9 @@ const SysConfig = use("App/Models/SysConfig")
 const VBarangStok = use("App/Models/VBarangStok")
 const BarangLokasi = use("App/Models/BarangLokasi")
 const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
-const OpsPelangganOrderItem = use("App/Models/operational/OpsPelangganOrderItem")
-const OpsPelangganOrderService = use("App/Models/operational/OpsPelangganOrderService")
+const OpsPelangganBayar = use("App/Models/operational/OpsPelangganBayar")
 
-class orderPelanggan {
+class bayarPelanggan {
     async LIST (req, user) {
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
@@ -20,10 +19,9 @@ class orderPelanggan {
         let data
         if(req.keyword){
             data = (
-                await OpsPelangganOrder
+                await OpsPelangganBayar
                 .query()
                 .with('cabang')
-                .with('pelanggan')
                 .where( w => {
                     if(req.cabang_id){
                         w.where('cabang_id', req.cabang_id)
@@ -40,10 +38,9 @@ class orderPelanggan {
             ).toJSON()
         }else{
             data = (
-                await OpsPelangganOrder
+                await OpsPelangganBayar
                 .query()
                 .with('cabang')
-                .with('pelanggan')
                 .orderBy('created_at', 'desc')
                 .paginate(halaman, limit)
             ).toJSON()
@@ -54,9 +51,8 @@ class orderPelanggan {
 
     async SHOW (params) {
         const data = (
-            await OpsPelangganOrder.query()
+            await OpsPelangganBayar.query()
             .with('cabang')
-            .with('pelanggan')
             .with('author')
             .with('items', b => b.with('barang'))
             .with('jasa', j => j.with('jasa'))
@@ -263,4 +259,4 @@ class orderPelanggan {
     }
 }
 
-module.exports = new orderPelanggan()
+module.exports = new bayarPelanggan()
