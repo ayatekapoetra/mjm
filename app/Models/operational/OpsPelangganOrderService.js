@@ -5,7 +5,7 @@ const Model = use('Model')
 
 class OpsPelangganOrderService extends Model {
     static get table(){
-        return 'ord_pelanggan_items'
+        return 'ord_pelanggan_services'
     }
 
     order () {

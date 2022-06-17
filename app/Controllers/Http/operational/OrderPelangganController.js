@@ -65,7 +65,7 @@ class OrderPelangganController {
     async store ( { auth, request } ) {
         let req = request.all()
         req.dataForm = JSON.parse(req.dataForm)
-        console.log(JSON.stringify(req, null, 2));
+        // console.log(JSON.stringify(req, null, 2));
 
         const user = await userValidate(auth)
         if(!user){
@@ -75,9 +75,13 @@ class OrderPelangganController {
             }
         }
 
-        let arrBarang = req.dataForm.items.filter( a => a.barang_id != '' || a.qty > 0)
-        let arrJasa = req.dataForm.jasa.filter( b => b.jasa_id != ''|| b.qty > 0)
+        let arrBarang = req.dataForm.items.filter( a => a.barang_id != '' || parseInt(a.qty) > 0)
+        let arrJasa = req.dataForm.jasa.filter( b => b.jasa_id != ''|| parseInt(b.qty) > 0)
 
+        req.dataForm.items = arrBarang
+        req.dataForm.jasa = arrJasa
+        // console.log(arrBarang);
+        // console.log(arrJasa);
         
         if(!req.pelanggan_id){
             return {
@@ -122,8 +126,12 @@ class OrderPelangganController {
             }
         }
 
-        console.log(arrBarang);
-        console.log(arrJasa);
+        
+        const kodeINV = await initFunc.GEN_KODE_INVOICES(user)
+        req.dataForm.kode = kodeINV
+        const result = await OrderPelangganHelpers.POST(req.dataForm, user)
+        // console.log(arrJasa);
+        return result
 
     }
 }
