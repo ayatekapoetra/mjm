@@ -200,7 +200,7 @@ class bayarPelanggan {
                 reff: orderTrx.kdpesanan,
                 narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description,
                 trx_date: req.date,
-                nilai: orderTrx.tot_order - parseFloat(req.barangdisc_rp),
+                nilai: orderTrx.tot_order,
                 dk: akun.tipe,
                 createdby: user.id
             })
@@ -228,7 +228,7 @@ class bayarPelanggan {
                 reff: orderTrx.kdpesanan,
                 narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description,
                 trx_date: req.date,
-                nilai: orderTrx.tot_service - parseFloat(req.jasadisc_rp),
+                nilai: orderTrx.tot_service,
                 dk: akun.tipe,
                 createdby: user.id
             })
