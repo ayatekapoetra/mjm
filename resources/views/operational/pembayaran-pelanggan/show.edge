@@ -3,11 +3,12 @@
 {{ script('ajax/opt-cabang') }}
 {{ script('ajax/opt-gudang') }}
 {{ script('ajax/initDate') }}
-{{ script('ajax/opt-coa') }}
+{{ script('ajax/opt-bank') }}
+{{ script('ajax/opt-kas') }}
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
-        <div class="col-sm-8 col-xs-12" style="border-right: 1px dashed #ddd;min-height: 445px;">
-            <form id="form-create">
+        <div class="col-sm-8 col-xs-12">
+            <form id="form-create" data-id="{{data.id}}">
                 {{ csrfField() }}
                 <div class="panel-body">
                     <div class="row">
@@ -18,21 +19,12 @@
                                     <span class="input-group-addon">
                                         <i class="ti-calendar"></i>
                                     </span>
-                                    <input type="datetime-local" name="date" class="form-control text-right setDateTime field-form" data-tgl="{{data.date}}" required readonly>
+                                    <input type="datetime-local" name="date" class="form-control text-right initDateTime field-form" required readonly>
+                                    <input type="hidden" name="inv" class="form-control" value="{{data.kdpesanan}}" required readonly>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label class="control-label">Invoices</label>
-                                <div class="input-group"> 
-                                    <span class="input-group-addon">
-                                        <i class="fa fa-qrcode"></i>
-                                    </span>
-                                    <input type="text" name="kode" class="form-control text-right" value="{{data.kdpesanan}}" readonly>
-                                </div>
-                            </div>
-                        </div>
+                        <!--
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="control-label">Kwitansi</label>
@@ -40,25 +32,52 @@
                                     <span class="input-group-addon">
                                         <i class="fa fa-qrcode"></i>
                                     </span>
-                                    <input type="text" name="kode" class="form-control text-right" value="{{no_kwitansi}}" readonly>
+                                    <input type="text" name="kode" class="form-control text-right" value="{{no_kwitansi}}" readonly style="color:white">
                                 </div>
+                            </div>
+                        </div>-->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Metode</label>
+                                <select class="form-control field-form" name="metode_paid" required>
+                                    <option value="tunai">Tunai</option>
+                                    <option value="transfer">Transfer</option>
+                                    <option value="debit">Debit</option>
+                                    <option value="qris">Qris</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label class="control-label">Delay Until</label>
+                                <input type="datetime-local" class="form-control initDateTime field-form" name="delay_date" />
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <label class="control-label">Keterangan</label>
+                                <input type="text" class="form-control field-form" name="narasi" id="narasi" value="{{data.narasi || ''}}">
+                            </div>
+                        </div>
+                        <div class="col-md-5" id="div-list-kas">
+                            <div class="form-group">
+                                <label class="control-label">Nama Kas</label>
+                                <select class="form-control selectKas field-form" name="kas_id" data-keyword="besar" data-values=""></select>
+                            </div>
+                        </div>
+                        <div class="col-md-5" id="div-list-bank" style="display:none">
+                            <div class="form-group">
+                                <label class="control-label">Nama Bank</label>
+                                <select class="form-control selectBank field-form" name="bank_id" id="bank_id" data-values=""></select>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label class="control-label">Type Potongan</label>
-                                <select class="form-control field-form" name="potongan_type" required>
-                                    <option value="rupiah">Rupiah</option>
-                                    <option value="persentase">Persen</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label class="control-label">Keterangan</label>
-                                <input type="text" class="form-control field-form" name="narasi" id="narasi">
+                        <div class="col-md-5 pull-right">
+                            <div class="form-group has-warning">
+                                <label class="control-label text-warning">Jumlah Bayar</label> <span><small>(Rp.)</small></span>
+                                <input type="number" class="form-control input-lg text-right field-form" name="paid_trx" id="paid_trx" step="any" value="{{data.sisa_trx}}">
                             </div>
                         </div>
                     </div>
@@ -73,55 +92,64 @@
                 </div>
             </form>
         </div>
-        <div class="col-sm-4 col-xs-12">
+        <div class="col-sm-4 col-xs-12" style="border-left: 1px dashed #ddd;min-height: 445px;">
             <div class="row">
                 <div class="col-md-12">
                     <div class="white-box" style="padding: 10px;">
-                        <h3 class="box-title">Detail Transaksi</h3>
+                        <h3 class="box-title">Detail Transaksi <span class="pull-right text-muted">{{data.kdpesanan}}</span></h3>
                         <hr class="m-0">
-                        <ul class="feeds">
-                            <li class="text-info" style="padding: 5px 10px;">
-                                <strong>Kode</strong>
-                                <span class="data-pelanggan" id="kode">...</span>
-                            </li>
-                            <li style="padding: 5px 10px;">
-                                <strong>Nama</strong>
-                                <span class="data-pelanggan" id="nama">...</span>
-                            </li>
-                            <li style="padding: 5px 10px;">
-                                <strong>Contact Person</strong>
-                                <span class="data-pelanggan" id="pic">...</span>
-                            </li>
-                            <li style="padding: 5px 10px;">
-                                <strong>NPWP</strong>
-                                <span class="data-pelanggan" id="npwp">...</span>
-                            </li>
-                            <li style="padding: 5px 10px;">
-                                <strong>Phone</strong>
-                                <span class="data-pelanggan" id="phone">...</span>
-                            </li>
-                            <li style="padding: 5px 10px;">
-                                <strong>Email</strong>
-                                <span class="data-pelanggan" id="email">...</span>
-                            </li>
-                            <li class="text-danger" style="padding: 5px 10px;">
-                                <strong>Limit Pagu</strong>
-                                <span class="data-pelanggan" id="limit_pagu">...</span>
-                            </li>
-                            <li style="padding: 5px 10px;">
-                                <strong>Alamat Tagih</strong>
-                                <span class="data-pelanggan" id="alamat_tagih">
-                                    ...
-                                </span>
-                            </li>
-                            <li style="padding: 5px 10px;">
-                                <strong>Alamat Kirim</strong>
-                                <span class="data-pelanggan" id="alamat_kirim">
-                                    ...
-                                </span>
-                            </li>
-                            
-                        </ul>
+                        <table class="table">
+                            <tr class="">
+                                <td class="text-white">Qty</td>
+                                <td class="text-white">Nama</td>
+                                <td class="text-white text-right">Harga</td>
+                                <td class="text-white text-right">Total</td>
+                            </tr>
+                            <tbody id="list-details-order-pelanggan">
+                                @each(brg in data.items)
+                                    <tr>
+                                        <td>{{brg.qty}}</td>
+                                        <td>{{brg.barang.nama}}</td>
+                                        <td class="text-right">{{brg.harga}}</td>
+                                        <td class="text-right">{{brg.total}}</td>
+                                    </tr>
+                                @endeach
+                                @each(jasa in data.jasa)
+                                    <tr>
+                                        <td>{{jasa.qty}}</td>
+                                        <td>{{jasa.jasa.nama}}</td>
+                                        <td class="text-right">{{jasa.harga}}</td>
+                                        <td class="text-right">{{jasa.total}}</td>
+                                    </tr>
+                                @endeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-light text-white">
+                                    <td colspan="2" style="padding: 5px 8px"><strong>Total </strong></td>
+                                    <td class="text-right text-white" colspan="2" id="total-belanja-barang" style="padding: 5px 8px">{{data.total_trx}}</td>
+                                </tr>
+                                <tr class="bg-light text-white">
+                                    <td colspan="2" style="padding: 5px 8px">
+                                        <strong>Potongan </strong>
+                                        (<span class="text-white type-disc">Rp.</span>)
+                                    </td>
+                                    <td class="text-right text-warning" colspan="2" id="potongan-transaksi" style="padding: 5px 8px">{{data.totdisc_rp}}</td>
+                                </tr>
+                                <tr class="bg-light text-white">
+                                    <td colspan="2" style="padding: 5px 8px">
+                                        <strong>
+                                            Pajak 
+                                        </strong>
+                                        (<span class="text-white">{{tax}}%</span>)
+                                    </td>
+                                    <td class="text-right text-info" colspan="2" id="total-pajak" style="padding: 5px 8px">{{data.pajak_trx}}</td>
+                                </tr>
+                                <tr class="bg-light text-white">
+                                    <td colspan="2" style="padding: 5px 8px"><strong>Sisa </strong></td>
+                                    <td class="text-right text-danger" colspan="2" id="total-transaksi" style="padding: 5px 8px">{{data.sisa_trx}}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -132,36 +160,61 @@
 <script>
     $(function(){
         console.log('created...');
-        $('select[name="pelanggan_id"]').on('change', function(){
-            var id = $(this).val()
-            if(id){
-                $.ajax({
-                    async: true,
-                    url: '/ajax/options/pelanggan/'+id,
-                    method: 'GET',
-                    dataType: 'json',
-                    processData: false,
-                    mimeType: "multipart/form-data",
-                    contentType: false,
-                    success: function(result){
-                        // console.log(result);
-                        $('span.data-pelanggan').each(function(){
-                            var props = $(this).attr('id')
-                            $(this).html(result[props])
-                        })
-                    },
-                    error: function(err){
-                        console.log(err)
-                    }
-                })
+        $('select[name="metode_paid"]').on('change', function(){
+            var values = $(this).val()
+            console.log(values);
+            if(values === 'tunai'){
+                $('body').find('select[name="akun_type"]').val('kas')
             }else{
-                $('span.data-pelanggan').each(function(){
-                    var props = $(this).attr('id')
-                    $(this).html('-')
-                })
+                $('body').find('select[name="akun_type"]').val('bank')
+            }
+        })
+
+        $('select[name="potongan_type"]').on('change', function(){
+            var type = $(this).val()
+            $('input[name="potongan_trx"]').val('0.00')
+            hitungTransaksi(type)
+        })
+
+        $('select[name="metode_paid"]').on('change', function(){
+            var type = $(this).val()
+            if(type == 'tunai'){
+                $('body').find('div#div-list-bank').css('display', 'none')
+                $('body').find('div#div-list-kas').css('display', 'inline')
+            }else{
+                $('body').find('div#div-list-bank').css('display', 'inline')
+                $('body').find('div#div-list-kas').css('display', 'none')
             }
         })
         
+        $('input[name="potongan_trx"]').keyup(function(e){
+            console.log('keyCode :::', e.keyCode);
+            var type = $('select[name="potongan_type"]').val()
+            hitungTransaksi(type)
+            
+        })
+
+        function hitungTransaksi(type){
+            let grandTotal = 0
+            var disc = $('input[name="potongan_trx"]').val()
+            var total = {{data.total_trx}}
+            var tax = {{tax}}
+            if(type == 'rupiah'){
+                var setelah_disc = parseFloat(total) - parseFloat(disc)
+                var values = setelah_disc + (setelah_disc * tax/100)
+                $('td#total-pajak').html(setelah_disc * tax/100)
+                $('td#potongan-transaksi').html(disc)
+                $('.type-disc').html('Rp')
+            }else{
+                var disc_rp = parseFloat(total) * (disc / 100)
+                var setelah_disc = parseFloat(total) - parseFloat(disc_rp)
+                var values = setelah_disc + (setelah_disc * tax/100)
+                $('td#total-pajak').html(setelah_disc * tax/100)
+                $('td#potongan-transaksi').html(disc_rp)
+                $('.type-disc').html('%')
+            }
+            $('td#total-transaksi').html(values)
+        }
     })
 </script>
 

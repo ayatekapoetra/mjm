@@ -4,6 +4,9 @@
 const Model = use('Model')
 
 class DefCoa extends Model {
+    static get table(){
+        return 'def_coas'
+    }
 }
 
 module.exports = DefCoa

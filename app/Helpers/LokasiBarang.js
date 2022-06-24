@@ -24,7 +24,6 @@ class stok {
             .with('gudang')
             .with('reqOrder', a => a.with('files'))
             .where( w => {
-                w.where('bisnis_id', ws.bisnis_id)
                 if(req.reff_ro){
                     w.where('reff_ro', 'like', `${req.reff_ro}%`)
                 }

@@ -60,7 +60,7 @@ class masterBarang {
             ).toJSON()
         }
 
-        console.log(data);
+        // console.log(data);
         return data
     }
 

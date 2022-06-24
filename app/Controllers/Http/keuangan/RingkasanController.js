@@ -39,16 +39,15 @@ class RingkasanController {
 
     async sumValues ( { request } ) {
         const req = request.all()
-        const { bisnis_id, kode, rangeAwal, rangeAkhir } = req
-        const data = await initFunc.GET_TOTAL_VALUE_AKUN(bisnis_id, kode, rangeAwal, rangeAkhir)
-        // console.log(data);
+        req.cabang_id = req.cabang_id != '' ? req.cabang_id : null
+        const data = await initFunc.GET_TOTAL_VALUE_AKUN(req.cabang_id, req.kode, req.rangeAwal, req.rangeAkhir)
         return data
     }
 
     async profitLoss ( { request } ) {
         const req = request.all()
-        const { bisnis_id, kode, rangeAwal, rangeAkhir } = req
-        const data = await initFunc.GET_PNL(bisnis_id, rangeAwal, rangeAkhir)
+        const { cabang_id, rangeAwal, rangeAkhir } = req
+        const data = await initFunc.GET_PNL(cabang_id, rangeAwal, rangeAkhir)
         // console.log(data);
         return data
     }

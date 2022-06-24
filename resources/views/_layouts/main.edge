@@ -235,27 +235,29 @@
 
       var js_network_monitor = new JsNetworkMonitor(options);
       js_network_monitor.on('online', function() {
-            $.toast({
-                heading: 'Okey,,,',
-                text: 'Anda sedang online.',
-                position: 'top-right',
-                loaderBg: '#FFF',
-                icon: 'info',
-                bgColor: '#5bc6f5',
-                hideAfter: 3500,
-                stack: 6
-            });
+          console.log('System online...');
+            // $.toast({
+            //     heading: 'Okey,,,',
+            //     text: 'Anda sedang online.',
+            //     position: 'top-right',
+            //     loaderBg: '#FFF',
+            //     icon: 'info',
+            //     bgColor: '#5bc6f5',
+            //     hideAfter: 3500,
+            //     stack: 6
+            // });
         });
         js_network_monitor.on('offline', function() {
-            $.toast({
-                heading: 'Peringatan',
-                text: 'Jaringan internet anda sedang offline.',
-                position: 'top-right',
-                loaderBg: '#FFF',
-                icon: 'warning',
-                hideAfter: 3500,
-                stack: 6
-            });
+            console.log('System offline...');
+            // $.toast({
+            //     heading: 'Peringatan',
+            //     text: 'Jaringan internet anda sedang offline.',
+            //     position: 'top-right',
+            //     loaderBg: '#FFF',
+            //     icon: 'warning',
+            //     hideAfter: 3500,
+            //     stack: 6
+            // });
         }
       );
       js_network_monitor.start();

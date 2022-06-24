@@ -23,10 +23,16 @@
                                 <tr>
                                     <td class="text-center">{{$loop.index + 1}}</td>
                                     <td>
-                                        <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}">inv</button>
-                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">update</button>
                                         @if(item.status === 'pending')
-                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">delete</button>
+                                            <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">update</button>
+                                            <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">cancel</button>
+                                        @endif
+                                        @if(item.status === 'ready' || item.status === 'dp')
+                                            <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}" style="width:72px">invoice</button>
+                                        @endif
+                                        
+                                        @if(item.status === 'batal')
+                                            <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}" style="width:72px">cancel</button>
                                         @endif
                                     </td>
                                     <td>
@@ -57,9 +63,9 @@
                                 </tr>
                             @endeach
                         @else
-                                <tr>
-                                    <td colspan="8">data tidak ditemukan...</td>
-                                </tr>
+                            <tr>
+                                <td colspan="8">data tidak ditemukan...</td>
+                            </tr>
                         @endif
                     </tbody>
                 </table>

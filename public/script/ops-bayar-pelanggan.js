@@ -126,28 +126,59 @@ $(function(){
     $('body').on('submit', 'form#form-create', function(e){
         e.preventDefault()
         var dataForm = new FormData(this)
-        var data = jsonData()
-        dataForm.append('dataForm', JSON.stringify(data))
-        console.log(data);
+        dataForm.append('inv_id', $(this).data('id'))
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'entry-order',
+            url: 'entry-pembayaran',
             method: 'POST',
             data: dataForm,
             dataType: 'json',
             processData: false,
             mimeType: "multipart/form-data",
             contentType: false,
-            beforeSend: function(xhr){
-                console.log('...', xhr);
-                // xhr.abort()
-            },
+            // beforeSend: function(xhr){
+            //     console.log('...', xhr);
+            //     // xhr.abort()
+            // },
             success: function(result){
-                // console.log(result);
+                console.log(result);
                 if(result.success){
                     swal('Okey', result.message, 'success')
-                    initCreate()
+                    initDefault()
+                }else{
+                    swal('Opps', result.message, 'warning')
+                }
+            },
+            error: function(err){
+                console.log('ERR ::::', err)
+            }
+        })
+    })
+
+    $('body').on('submit', 'form#form-invoicing', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        var dataForm = new FormData(this)
+        $.ajax({
+            async: true,
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: 'entry-pembayaran/'+id+'/invoicing',
+            method: 'POST',
+            data: dataForm,
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            // beforeSend: function(xhr){
+            //     console.log('...', xhr);
+            //     // xhr.abort()
+            // },
+            success: function(result){
+                console.log(result);
+                if(result.success){
+                    swal('Okey', result.message, 'success')
+                    initDefault()
                 }else{
                     swal('Opps', result.message, 'warning')
                 }
@@ -163,7 +194,7 @@ $(function(){
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'entry-order/'+id+'/inv',
+            url: 'entry-pembayaran/'+id+'/invoicing',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -201,8 +232,6 @@ $(function(){
             success: function(result){
                 body.find('div#content-form').html(result)
                 body.find('div#content-list').html('')
-                initCreateItem()
-                initCreateJasa()
             },
             error: function(err){
                 console.log(err)
@@ -217,13 +246,40 @@ $(function(){
             }
         })
     })
+    
+    $('body').on('click', 'button.bt-details', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'entry-pembayaran/'+id+'/list-bayar',
+            method: 'GET',
+            dataType: 'html',
+            contentType: false,
+            success: function(result){
+                // console.log(result);
+                body.find('div#content-list').html(result)
+                body.find('div#content-form').html('')
+            },
+            error: function(err){
+                console.log(err)
+            },
+            complete: function() {
+                body.find('button#bt-create-form').css('display', 'inline')
+                body.find('button.bt-back').css('display', 'block')
+                body.find('div#content-list').css('display', 'block')
+                body.find('div#content-form').css('display', 'none')
+                body.find('div#div-filter-limit').css('display', 'inline')
+            }
+        })
+    })
 
-    $('body').on('click', 'button#bt-delete', function(e){
+    $('body').on('click', 'button.bt-remove', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         swal({
             title: "Are you sure?",
-            text: "Your will not be able to recover this imaginary file!",
+            text: "This will affect journal transaction data...",
             type: "warning",
             showCancelButton: true,
             confirmButtonClass: "btn-danger",
@@ -234,7 +290,7 @@ $(function(){
               $.ajax({
                   async: true,
                   headers: {'x-csrf-token': $('[name=_csrf]').val()},
-                  url: 'jasa/'+id+'/destroy',
+                  url: 'entry-pembayaran/'+id+'/destroy',
                   method: 'DELETE',
                   dataType: 'json',
                   processData: false,
@@ -285,16 +341,6 @@ $(function(){
         })
     })
 
-    // function totalBelanja(){
-    //     var arr = []
-    //     body.find('tbody#list-details-order-pelanggan > tr').each(function(){
-    //         arr.push($(this).data('tothargabarang'))
-    //         arr.push($(this).data('totbiaya'))
-    //     })
-    //     var total = arr.reduce((a, b) => { return parseFloat(a) + parseFloat(b)}, 0)
-    //     body.find('td#total-belanja-barang').html(total?.toLocaleString('ID-id') || 0)
-    // }
-
     function initDefault(limit, page){
         $.ajax({
             async: true,
@@ -307,6 +353,19 @@ $(function(){
             },
             dataType: 'html',
             contentType: false,
+            beforeSend: function(){
+                $.toast({
+                    heading: 'Info',
+                    text: 'Trying to update jurnal delay',
+                    position: 'top-right',
+                    loaderBg: '#FFF',
+                    icon: 'warning',
+                    bgColor: '#707cd2',
+                    hideAfter: 3500,
+                    stack: 6
+                });
+                body.find('div#content-list').html(`<small class="m-l-20">Trying to update jurnal delay & Collecting data...<small/>`)
+            },
             success: function(result){
                 // console.log(result);
                 body.find('div#content-list').html(result)
@@ -335,8 +394,6 @@ $(function(){
             success: function(result){
                 body.find('div#content-form').html(result)
                 body.find('div#content-list').html('')
-                initCreateItem()
-                initCreateJasa()
             },
             error: function(err){
                 console.log(err)
@@ -347,52 +404,6 @@ $(function(){
                 body.find('div#content-form').css('display', 'block')
                 body.find('div#content-list').css('display', 'none')
                 body.find('div#div-filter-limit').css('display', 'none')
-            }
-        })
-    }
-
-    function initCreateItem(){
-        $.ajax({
-            async: true,
-            url: 'entry-order/create-items',
-            method: 'GET',
-            dataType: 'html',
-            contentType: false,
-            success: function(result){
-                // console.log(result);
-                body.find('tbody#item-barang').append(result)
-            },
-            error: function(err){
-                console.log(err)
-            },
-            complete: function(){
-                body.find('tbody#item-barang tr').each(function(i){
-                    $(this).find('td.urut').html(i+1)
-                    $(this).attr('data-urut', i+1)
-                })
-            }
-        })
-    }
-
-    function initCreateJasa(){
-        $.ajax({
-            async: true,
-            url: 'entry-order/create-jasa',
-            method: 'GET',
-            dataType: 'html',
-            contentType: false,
-            success: function(result){
-                // console.log(result);
-                body.find('tbody#item-jasa').append(result)
-            },
-            error: function(err){
-                console.log(err)
-            },
-            complete: function(){
-                body.find('tbody#item-jasa tr').each(function(i){
-                    $(this).find('td.urut').html(i+1)
-                    $(this).attr('data-urut', i+1)
-                })
             }
         })
     }

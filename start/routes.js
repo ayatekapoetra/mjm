@@ -69,6 +69,8 @@ Route.group(() => {
     Route.get('/options/coa-kode', 'OptionsAjaxController.coaKode').as('ajax.set.coaKode')
     Route.get('/options/coa-tipe', 'OptionsAjaxController.coaKategori').as('ajax.set.coaKategori')
     Route.get('/options/coa-group', 'OptionsAjaxController.coaGroup').as('ajax.set.coaGroup')
+    Route.get('/options/kas', 'OptionsAjaxController.listKas').as('ajax.set.listKas')
+    Route.get('/options/bank', 'OptionsAjaxController.listBank').as('ajax.set.listBank')
     Route.get('/options/coa-subgroup', 'OptionsAjaxController.coaSubGroup').as('ajax.set.coaSubGroup')
     Route.get('/options/bisnis', 'OptionsAjaxController.bisnis').as('ajax.set.bisnis')
     Route.get('/options/cabang', 'OptionsAjaxController.cabang').as('ajax.set.cabang')
@@ -409,18 +411,23 @@ Route.group(() => {
     Route.get('/entry-order/create-jasa', 'OrderPelangganController.createJasa').as('ops.entry-order.createJasa').middleware('C')
     Route.get('/entry-order/:id/inv', 'OrderPelangganController.invoice').as('ops.entry-order.invoice').middleware('R')
     Route.get('/entry-order/:id/show', 'OrderPelangganController.show').as('ops.entry-order.show').middleware('R')
+    Route.post('/entry-order/:id/update', 'OrderPelangganController.update').as('ops.entry-order.update').middleware('U')
+    Route.delete('/entry-order/:id/destroy', 'OrderPelangganController.destroy').as('ops.entry-order.destroy').middleware('D')
 
     /* PEMBAYARAN PELANGGAN */
     Route.get('/entry-pembayaran', 'PembayaranPelangganController.index').as('ops.entry-pembayaran').middleware('R')
     Route.post('/entry-pembayaran', 'PembayaranPelangganController.store').as('ops.entry-pembayaran.store').middleware('C')
-    Route.get('/entry-pembayaran/list', 'PembayaranPelangganController.list').as('ops.entry-pembayaran.list').middleware('R')
     Route.get('/entry-pembayaran/list-order', 'PembayaranPelangganController.listOrder').as('ops.entry-pembayaran.listOrder').middleware('R')
     Route.get('/entry-pembayaran/create', 'PembayaranPelangganController.create').as('ops.entry-pembayaran.create').middleware('C')
     // Route.get('/entry-pembayaran/create-items', 'PembayaranPelangganController.createItems').as('ops.entry-pembayaran.createItems').middleware('C')
     // Route.get('/entry-pembayaran/create-jasa', 'PembayaranPelangganController.createJasa').as('ops.entry-pembayaran.createJasa').middleware('C')
     // Route.get('/entry-pembayaran/:id/inv', 'PembayaranPelangganController.invoice').as('ops.entry-pembayaran.invoice').middleware('R')
+    Route.get('/entry-pembayaran/:id/invoicing', 'PembayaranPelangganController.invoicing').as('ops.entry-pembayaran.invoicing').middleware('U')
+    Route.post('/entry-pembayaran/:id/invoicing', 'PembayaranPelangganController.invoicingStore').as('ops.entry-pembayaran.invoicing').middleware('U')
     Route.get('/entry-pembayaran/:id/paid', 'PembayaranPelangganController.payment').as('ops.entry-pembayaran.payment').middleware('R')
     Route.get('/entry-pembayaran/:id/show', 'PembayaranPelangganController.show').as('ops.entry-pembayaran.show').middleware('R')
+    Route.get('/entry-pembayaran/:id/list-bayar', 'PembayaranPelangganController.listBayar').as('ops.entry-pembayaran.listBayar').middleware('R')
+    Route.delete('/entry-pembayaran/:id/destroy', 'PembayaranPelangganController.destroy').as('ops.entry-pembayaran.destroy').middleware('D')
 }).prefix('operational').namespace('operational')
 
 /*
@@ -470,3 +477,39 @@ Route.group(() => {
     Route.delete('/options/:id/destroy', 'OptionController.destroy').as('set.options.destroy').middleware('D')
 
 }).prefix('setting').namespace('setting').middleware(['MM'])
+
+/*
+*   ROUTING SETTING
+*/
+Route.group(() => {
+
+    /** LOGIN **/
+    Route.get('/signinx', 'ApiAuthController.signinx')
+
+    Route.post('/signin', 'ApiAuthController.signin')
+
+    /** BARANG **/
+    Route.get('/barang', 'ApiBarangController.index')
+    Route.get('/barang/:id/show', 'ApiBarangController.show')
+
+    /** BARANG BRAND **/
+    Route.get('/barang-brand', 'ApiBarangBrandController.index')
+    Route.get('/barang-brand/:id/show', 'ApiBarangBrandController.show')
+
+    /** BARANG CATEGORY **/
+    Route.get('/barang-kategori', 'ApiBarangCategoryController.index')
+    Route.get('/barang-kategori/:id/show', 'ApiBarangCategoryController.show')
+
+    /** BARANG SUB CATEGORY **/
+    Route.get('/barang-subkategori', 'ApiBarangSubCategoryController.index')
+    Route.get('/barang-subkategori/:id/show', 'ApiBarangSubCategoryController.show')
+
+    /** BARANG QUALITAS **/
+    Route.get('/barang-qualitas', 'ApiBarangQualitasController.index')
+    Route.get('/barang-qualitas/:id/show', 'ApiBarangQualitasController.show')
+
+    /** BARANG STOCK **/
+    Route.get('/barang-stok', 'ApiBarangStockController.index')
+    Route.get('/barang-stok/:id/show', 'ApiBarangStockController.show')
+
+}).prefix('api-v1').namespace('api')

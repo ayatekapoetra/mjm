@@ -1,4 +1,5 @@
 $(function(){
+    console.log('script/acc-ringkasan');
     var body = $('body')
 
     initDefault()
@@ -6,8 +7,23 @@ $(function(){
     $('body').on('click', 'button#apply-filter', function(){
         var rangeAwal = body.find('input[name="rangeAwal"]').val()
         var rangeAkhir = body.find('input[name="rangeAkhir"]').val()
-        getValuesAkun(rangeAwal, rangeAkhir)
-        getPnL(rangeAwal, rangeAkhir)
+        var workdir = body.find('select#cabang_id').val()
+        getValuesAkun(workdir, rangeAwal, rangeAkhir)
+        getPnL(workdir, rangeAwal, rangeAkhir)
+    })
+
+    $('body').on('change', 'select[name="cabang_id"]', function(){
+        var workdir = $(this).val()
+        var rangeAwal = body.find('input[name="rangeAwal"]').val()
+        var rangeAkhir = body.find('input[name="rangeAkhir"]').val()
+        console.log(workdir);
+        if(workdir){
+            getValuesAkun(workdir, rangeAwal, rangeAkhir)
+            getPnL(workdir, rangeAwal, rangeAkhir)
+        }else{
+            getValuesAkun(null, rangeAwal, rangeAkhir)
+            getPnL(null, rangeAwal, rangeAkhir)
+        }
     })
 
     $('body').on('click', 'input[name="hideZero"]', function(){
@@ -64,15 +80,15 @@ $(function(){
     function getValuesAkun(rangeAwal, rangeAkhir){
         $('span.count-values').each(function(){
             var elm = $(this)
-            var workdir = body.find('input#workdir').val()
+            var workdir = body.find('select#cabang_id').val()
             var kode = $(this).data('kode')
-            // console.log(kode);
+            console.log(workdir);
             $.ajax({
                 async: true,
                 url: 'ringkasan/sum-values',
                 method: 'GET',
                 data: {
-                    bisnis_id: workdir,
+                    cabang_id: workdir != '' ? workdir : null,
                     kode: kode,
                     rangeAwal: rangeAwal || moment().startOf('year').format('YYYY-MM-DD'),
                     rangeAkhir: rangeAkhir || moment().format('YYYY-MM-DD')
@@ -88,21 +104,21 @@ $(function(){
                     elm.html('Rp. '+total)
                 },
                 error: function(err){
-                    console.log(err)
+                    // console.log(err)
                 }
             })
         })
     }
 
     function getPnL(rangeAwal, rangeAkhir){
-        var workdir = body.find('input#workdir').val()
+        var workdir = body.find('select#cabang_id').val()
         var elm = body.find('div#PnL')
         $.ajax({
             async: true,
             url: 'ringkasan/profit-loss',
             method: 'GET',
             data: {
-                bisnis_id: workdir,
+                cabang_id: workdir != '' ? workdir : null,
                 rangeAwal: rangeAwal || moment().startOf('year').format('YYYY-MM-DD'),
                 rangeAkhir: rangeAkhir || moment().format('YYYY-MM-DD')
             },
@@ -131,7 +147,7 @@ $(function(){
                 }
             },
             error: function(err){
-                console.log(err)
+                // console.log(err)
             }
         })
     }

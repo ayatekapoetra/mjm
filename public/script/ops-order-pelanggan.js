@@ -218,23 +218,23 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'button#bt-delete', function(e){
+    $('body').on('click', 'button.bt-delete', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         swal({
             title: "Are you sure?",
-            text: "Your will not be able to recover this imaginary file!",
+            text: "Your will not be able to recover this order!",
             type: "warning",
             showCancelButton: true,
             confirmButtonClass: "btn-danger",
-            confirmButtonText: "Yes, delete it!",
+            confirmButtonText: "Yes, Cancel Order",
             closeOnConfirm: false
           },
           function(){
               $.ajax({
                   async: true,
                   headers: {'x-csrf-token': $('[name=_csrf]').val()},
-                  url: 'jasa/'+id+'/destroy',
+                  url: 'entry-order/'+id+'/destroy',
                   method: 'DELETE',
                   dataType: 'json',
                   processData: false,
@@ -258,14 +258,17 @@ $(function(){
 
     $('body').on('submit', 'form#form-update', function(e){
         e.preventDefault()
-        var data = new FormData(this)
         var id = $(this).data('id')
+        var dataForm = new FormData(this)
+        var data = jsonData()
+        dataForm.append('dataForm', JSON.stringify(data))
+        console.log(data);
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'jasa/'+id+'/update',
+            url: 'entry-order/'+id+'/update',
             method: 'POST',
-            data: data,
+            data: dataForm,
             dataType: 'json',
             processData: false,
             mimeType: "multipart/form-data",

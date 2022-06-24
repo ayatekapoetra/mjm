@@ -7,7 +7,7 @@
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
         <div class="col-sm-8 col-xs-12" style="border-right: 1px dashed #ddd;min-height: 445px;">
-            <form id="form-create">
+            <form id="form-update" data-id="{{data.id}}">
                 {{ csrfField() }}
                 <div class="panel-body">
                     <div class="row">
@@ -38,7 +38,7 @@
                         <div class="col-md-5">
                             <div class="form-group">
                                 <label class="control-label">Gudang</label>
-                                <select class="form-control selectGudang field-form" name="gudang_id" data-cabang="{{data.cabang_id}}" data-values="{{data.gudang_id}}" required></select>
+                                <select class="form-control selectGudang field-form" name="gudang_id" data-cabang="{{data.cabang_id}}" data-values="{{data.items[0].gudang_id}}" required></select>
                             </div>
                         </div>
                         <div class="col-md-6">

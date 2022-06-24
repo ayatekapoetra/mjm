@@ -7,6 +7,8 @@ const SysMenu = use("App/Models/SysMenu")
 const Jasa = use("App/Models/master/Jasa")
 const Gaji = use("App/Models/master/Gaji")
 const Rack = use("App/Models/master/Rack")
+const Bank = use("App/Models/akunting/Bank")
+const Kas = use("App/Models/akunting/Kas")
 const initFunc = use("App/Helpers/initFunc")
 const UsrCabang = use("App/Models/UsrCabang")
 const SysOption = use("App/Models/SysOption")
@@ -274,6 +276,56 @@ class OptionsAjaxController {
         
         return data
 
+    }
+
+    /** LIST KAS **/
+    async listKas ( { auth, request } ) {
+        var req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        const ws = await initFunc.WORKSPACE(user)
+        let data = (
+            await Kas.query().where( w => {
+                w.where('cabang_id', ws.cabang_id)
+                if(req.keyword){
+                    w.where('name', 'like', `%${req.keyword}%`)
+                }
+            }).orderBy('coa_id', 'desc').fetch()
+        ).toJSON()
+
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            data.unshift({id: '', name: 'Pilih', selected: 'selected'})
+        }
+        return data
+    }
+
+    /** LIST BANK **/
+    async listBank ( { auth, request } ) {
+        var req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        const ws = await initFunc.WORKSPACE(user)
+        let data = (
+            await Bank.query().where( w => {
+                w.where('cabang_id', ws.cabang_id)
+            }).fetch()
+        ).toJSON()
+
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            data.unshift({id: '', name: 'Pilih', selected: 'selected'})
+        }
+
+        return data
     }
 
     // async bisnis ( { request } ) {

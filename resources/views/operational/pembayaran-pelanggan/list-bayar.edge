@@ -9,12 +9,11 @@
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">No</th>
                             <th width="100" class="bg-inverse b-all">Action</th>
-                            <th width="150" class="bg-inverse b-all">Kode<br/>Invoice</th>
-                            <th width="*" class="bg-inverse b-all">Data<br/>Pelanggan</th>
-                            <th width="150" class="bg-inverse b-all text-right">Tanggal<br/>Transaksi</th>
-                            <th width="150" class="bg-inverse b-all text-right">Tot.Harga<br/>Barang</th>
-                            <th width="150" class="bg-inverse b-all text-right">Tot.Biaya<br/>Services</th>
-                            <th width="*" class="bg-inverse b-all">Status<br/>Keterangan</th>
+                            <th width="150" class="bg-inverse b-all">No Kwitansi</th>
+                            <th width="*" class="bg-inverse b-all">Descriptions</th>
+                            <th width="50" class="text-center bg-inverse b-all">Tunda</th>
+                            <th width="150" class="bg-inverse b-all text-right">Tanggal Bayar</th>
+                            <th width="150" class="bg-inverse b-all text-right">Nilai Bayar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -23,37 +22,35 @@
                                 <tr>
                                     <td class="text-center">{{$loop.index + 1}}</td>
                                     <td>
-                                        <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}">inv</button>
-                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">update</button>
-                                        @if(item.status === 'pending')
-                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">delete</button>
+                                        <button class="btn btn-outline btn-success btn-xs bt-kwitansi" data-id="{{item.id}}">kwitansi</button>
+                                        @if(['administrator', 'developer'].includes(auth.user.usertype))
+                                            <button class="btn btn-outline btn-danger btn-xs bt-remove" data-id="{{item.id}}">delete</button>
                                         @endif
                                     </td>
                                     <td>
-                                        <strong>{{item.kdpesanan}}</strong><br>
-                                        <small>{{item.cabang.nama}}</small>
+                                        <strong>{{item.no_kwitansi}}</strong><br>
+                                        <small>{{item.no_invoice}}</small>
                                     </td>
-                                    <td>
-                                        {{item.pelanggan.nama}} <br/>
-                                        <small>{{item.pelanggan.phone}}</small>
+                                    <td class="text-capitalize">
+                                        @if(item.bank_id)
+                                            <i class="icon-drawar"></i>
+                                            {{item.metode_paid}} - {{item.bank.name}}
+                                        @else
+                                            <i class="icon-wallet"></i>
+                                            {{item.metode_paid}} - {{item.kas.name}}
+                                        @endif
+                                        <br>
+                                        <small>{{item.narasi || ''}}</small>
                                     </td>
+                                    <td class="text-center">{{item.is_delay}}</td>
                                     <td class="text-right bg-primary">
-                                        <span class="dateFormatDef" data-tgl="{{item.date}}" data-patten="DD MMMM YYYY"></span>
+                                        <span class="dateFormatDef" data-tgl="{{item.date_paid}}" data-patten="DD MMMM YYYY"></span>
                                         <i class="ti-calendar"></i>
                                         <br>
-                                        <small class="dateFormatDef" data-tgl="{{item.date}}" data-patten="HH:mm"></small>
+                                        <small class="dateFormatDef" data-tgl="{{item.date_paid}}" data-patten="HH:mm"></small>
                                         <i class="icon-clock"></i>
                                     </td>
-                                    <td class="formatRp text-right" data-number="{{item.tot_order}}">
-                                        {{item.tot_service}}
-                                    </td>
-                                    <td class="formatRp text-right" data-number="{{item.tot_service}}">
-                                        {{item.tot_service}}
-                                    </td>
-                                    <td>
-                                        {{item.status}} <br>
-                                        <small>{{item.narasi || ''}}</small> 
-                                    </td>
+                                    <td class="formatRp text-right" data-number="{{item.paid_trx}}"></td>
                                 </tr>
                             @endeach
                         @else

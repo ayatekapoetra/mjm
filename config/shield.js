@@ -142,7 +142,7 @@ module.exports = {
       maxAge: 7200
     },
     enable: false,
-    filterUris: ['/api/(.*)'],
+    filterUris: ['/api-v1/(.*)'],
     methods: ['POST', 'PUT', 'DELETE']
   }
 }

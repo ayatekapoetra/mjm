@@ -157,6 +157,85 @@ class OrderPelangganController {
         return result
 
     }
+
+    async update ( { auth, params, request } ) {
+        let req = request.all()
+        req.dataForm = JSON.parse(req.dataForm)
+
+        console.log(params);
+        const user = await userValidate(auth)
+        if(!user){
+            return {
+                success: false,
+                message: 'not authorized...'
+            }
+        }
+
+        let arrBarang = req.dataForm.items.filter( a => a.barang_id != '' || parseInt(a.qty) > 0)
+        let arrJasa = req.dataForm.jasa.filter( b => b.jasa_id != ''|| parseInt(b.qty) > 0)
+
+        req.dataForm.items = arrBarang
+        req.dataForm.jasa = arrJasa
+
+        if(!req.pelanggan_id){
+            return {
+                success: false,
+                message: 'Data pelanggan belum ditentukan...'
+            }
+        }
+
+        for (const [i, item] of arrBarang.entries()) {
+            var urut = i + 1
+            if(item.qty <= 0){
+                return {
+                    success: false,
+                    urut: i,
+                    message: 'Quantity item barang No.' + urut + '\ntidak valid...'
+                }
+            }
+            if(item.hargaJual <= 0){
+                return {
+                    success: false,
+                    urut: i,
+                    message: 'Harga item barang No.' + urut + '\ntidak valid...'
+                }
+            }
+        }
+
+        for (const [i, item] of arrJasa.entries()) {
+            var urut = i + 1
+            if(item.qty <= 0){
+                return {
+                    success: false,
+                    urut: i,
+                    message: 'Quantity jasa No.' + urut + '\ntidak valid...'
+                }
+            }
+            if(item.hargaJual <= 0){
+                return {
+                    success: false,
+                    urut: i,
+                    message: 'Biaya jasa  No.' + urut + '\ntidak valid...'
+                }
+            }
+        }
+
+        // console.log(req.dataForm);
+        const result = await OrderPelangganHelpers.UPDATE(params, req.dataForm, user)
+        return result
+    }
+
+    async destroy ( { auth, params } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return {
+                success: false,
+                message: 'not authorized...'
+            }
+        }
+        const result = await OrderPelangganHelpers.DELETE(params)
+        return result
+    }
 }
 
 module.exports = OrderPelangganController

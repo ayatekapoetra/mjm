@@ -1,0 +1,305 @@
+{{ script('ajax/opt-pelanggan') }}
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-bank') }}
+{{ script('ajax/opt-kas') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-8 col-xs-12">
+            <form id="form-invoicing" data-id="{{data.id}}">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Tanggal</label>
+                                <div class="input-group"> 
+                                    <span class="input-group-addon">
+                                        <i class="ti-calendar"></i>
+                                    </span>
+                                    <input type="datetime-local" name="date" class="form-control text-right initDateTime field-form" required readonly>
+                                    <input type="hidden" name="inv" class="form-control" value="{{data.kdpesanan}}" required readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="ppn">Pajak (PPn)</label>
+                            <div class="form-group" style="margin-top: 10px">
+                                <div class="material-switch">
+                                    <input id="ppn" name="ppn" type="checkbox" value="{{ppn/100}}"/>
+                                    <label for="ppn" class="label-default"></label>
+                                    <input type="hidden" name="pajak" class="form-control" value="{{ppn/100}}" required>
+                                    <span id="txt-checkbox" class="m-l-10">Tambahkan Pajak</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">Discount</label>
+                                <select class="form-control field-form" name="potongan_type" tabindex="1" required>
+                                    <option value="rupiah">Rupiah</option>
+                                    <option value="persentase">Persen</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Disc.Barang</label> <span>(<small><span class="type-disc">Rp.</span></small>)</span>
+                                <div class="input-group"> 
+                                    <input type="number" class="form-control field-form" name="barangdisc" id="barangdisc" step="any" value="0.00" tabindex="2">
+                                    <span class="input-group-addon type-disc">
+                                        Rp
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Disc.Jasa</label> <span>(<small><span class="type-disc">Rp.</span></small>)</span>
+                                <div class="input-group"> 
+                                    <input type="number" class="form-control field-form" name="jasadisc" id="jasadisc" step="any" value="0.00" tabindex="3">
+                                    <span class="input-group-addon type-disc">
+                                        Rp
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Total</label> <span><small>(Rp.)</small></span>
+                                <input type="number" class="form-control text-right field-form" name="grandtot_trx" id="grandtot_trx" step="any" value="0.00" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Keterangan</label>
+                                <input type="text" class="form-control field-form" name="narasi" id="narasi" tabindex="4" value="{{data.narasi || ''}}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-left">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10" tabindex="5">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back" tabindex="6">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-4 col-xs-12" style="border-left: 1px dashed #ddd;min-height: 445px;">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="white-box" style="padding: 10px;">
+                        <h3 class="box-title">Detail Transaksi <span class="pull-right text-muted">{{data.kdpesanan}}</span></h3>
+                        <hr class="m-0">
+                        <table class="table">
+                            <tr class="">
+                                <td class="text-white">Qty</td>
+                                <td class="text-white">Nama</td>
+                                <td class="text-white text-right">Harga</td>
+                                <td class="text-white text-right">Total</td>
+                            </tr>
+                            <tbody id="list-details-order-pelanggan">
+                                @each(brg in data.items)
+                                    <tr>
+                                        <td>{{brg.qty}}</td>
+                                        <td>{{brg.barang.nama}}</td>
+                                        <td class="text-right">{{brg.harga}}</td>
+                                        <td class="text-right">{{brg.total}}</td>
+                                    </tr>
+                                @endeach
+                                @each(jasa in data.jasa)
+                                    <tr>
+                                        <td>{{jasa.qty}}</td>
+                                        <td>{{jasa.jasa.nama}}</td>
+                                        <td class="text-right">{{jasa.harga}}</td>
+                                        <td class="text-right">{{jasa.total}}</td>
+                                    </tr>
+                                @endeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-light text-white">
+                                    <td colspan="2" style="padding: 5px 8px"><strong>Total </strong></td>
+                                    <td class="text-right text-white" colspan="2" id="total-belanja-barang" style="padding: 5px 8px">{{(data.total_trx).toLocaleString('ID')}}</td>
+                                </tr>
+                                <tr class="bg-light text-white">
+                                    <td colspan="2" style="padding: 5px 8px">
+                                        <strong>Potongan </strong>
+                                        (<span class="text-white">Rp.</span>)
+                                    </td>
+                                    <td class="text-right text-warning" colspan="2" id="potongan-transaksi" style="padding: 5px 8px">{{data.totdisc_rp}}</td>
+                                </tr>
+                                <tr class="bg-light text-white">
+                                    <td colspan="2" style="padding: 5px 8px">
+                                        <strong>
+                                            Pajak 
+                                        </strong> (Rp.)
+                                    </td>
+                                    <td class="text-right text-info" colspan="2" id="total-pajak" style="padding: 5px 8px">{{(data.pajak_trx).toLocaleString('ID')}}</td>
+                                </tr>
+                                <tr class="bg-light text-white">
+                                    <td colspan="2" style="padding: 5px 8px"><strong>Tot.Transaksi </strong></td>
+                                    <td class="text-right text-danger text-bold" colspan="2" id="total-transaksi" style="padding: 5px 8px">{{data.sisa_trx}}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function(){
+        console.log('created...');
+        $('select[name="potongan_type"]').focus()
+        hitungJumlahBayar()
+        $('input[name="ppn"]').on('click', function(){
+            var elm = $('span#txt-checkbox')
+            var isPPn = $(this).is(':checked') ? elm.html('Tanpa Pajak') : elm.html('Tambahkan Pajak')
+            var valuePPn = $(this).is(':checked') ? $('input[name="pajak"]').val('0') : $('input[name="pajak"]').val({{ppn/100}})
+            hitungJumlahBayar()
+        })
+
+        $('select[name="potongan_type"]').on('change', function(){
+            let values = $(this).val()
+            let elm = $(this).parents('div.row').find('span.type-disc')
+            values === 'rupiah' ? elm.html('Rp.') : elm.html('%')
+            hitungJumlahBayar()
+        })
+
+        $('input[name="barangdisc"], input[name="jasadisc"]').on('keyup', function(){
+            hitungJumlahBayar()
+        })
+
+        function hitungJumlahBayar(){
+            var total = {{data.total_trx}}
+            var invBarang = {{data.tot_order}}
+            var invJasa = {{data.tot_service}}
+            var ppn = $('input[name="pajak"]').val()
+            var type = $('select[name="potongan_type"]').val()
+            var discBarang = $('input[name="barangdisc"]').val()
+            var discJasa = $('input[name="jasadisc"]').val()
+            var disc = parseFloat(discBarang) + parseFloat(discJasa)
+            var isPPN = parseFloat(ppn) > 0
+            var isRP = type === 'rupiah'
+            
+            if(isPPN){
+                IncludePPN()
+            }else{
+                ExcludePPN()
+            }
+            
+            function IncludePPN(){
+                if(isRP){
+                    var totBarang = parseFloat(invBarang) - parseFloat(discBarang)
+                    var totJasa = parseFloat(invJasa) - parseFloat(discJasa)
+                    var pajak_rp = (totBarang + totJasa) * parseFloat(ppn)
+                    var totInv = (totBarang + totJasa) + pajak_rp
+                    $('td[id="potongan-transaksi"]').html(disc)
+                    $('td[id="total-pajak"]').html(pajak_rp)
+                    $('input[name="grandtot_trx"]').val(totInv)
+                    $('td[id="total-transaksi"]').html(totInv.toLocaleString('ID'))
+                }else{
+                    var discBarang_rp = parseFloat(invBarang) * (parseFloat(discBarang)/100)
+                    var discJasa_rp = parseFloat(invJasa) * (parseFloat(discJasa)/100)
+
+                    var totBarang = parseFloat(invBarang) - parseFloat(discBarang_rp)
+                    var totJasa = parseFloat(invJasa) - parseFloat(discJasa_rp)
+                    var pajak_rp = (totBarang + totJasa) * parseFloat(ppn)
+                    var totInv = (totBarang + totJasa) + pajak_rp
+
+                    $('td[id="potongan-transaksi"]').html((discBarang_rp + discJasa_rp)?.toFixed(0)||0)
+                    $('td[id="total-pajak"]').html((pajak_rp)?.toFixed(0)||0)
+                    $('input[name="grandtot_trx"]').val((totInv)?.toFixed(0)||0)
+                    $('td[id="total-transaksi"]').html(totInv.toLocaleString('ID'))
+                }
+            }
+
+            function ExcludePPN(){
+                var pajak_rp = 0
+                if(isRP){
+                    var totBarang = parseFloat(invBarang) - parseFloat(discBarang)
+                    var totJasa = parseFloat(invJasa) - parseFloat(discJasa)
+                    var totInv = (totBarang + totJasa) + parseFloat(pajak_rp)
+                    $('td[id="potongan-transaksi"]').html(disc)
+                    $('td[id="total-pajak"]').html(pajak_rp)
+                    $('input[name="grandtot_trx"]').val(totInv)
+                    $('td[id="total-transaksi"]').html(totInv.toLocaleString('ID'))
+                }else{
+                    var discBarang_rp = parseFloat(invBarang) * (parseFloat(discBarang)/100)
+                    var discJasa_rp = parseFloat(invJasa) * (parseFloat(discJasa)/100)
+
+                    var totBarang = parseFloat(invBarang) - parseFloat(discBarang_rp)
+                    var totJasa = parseFloat(invJasa) - parseFloat(discJasa_rp)
+                    var pajak_rp = (totBarang + totJasa) * parseFloat(pajak_rp)
+                    var totInv = (totBarang + totJasa) + pajak_rp
+                    
+                    $('td[id="potongan-transaksi"]').html((discBarang_rp + discJasa_rp)?.toFixed(0)||0)
+                    $('td[id="total-pajak"]').html((pajak_rp)?.toFixed(0)||0)
+                    $('input[name="grandtot_trx"]').val((totInv)?.toFixed(0)||0)
+                    $('td[id="total-transaksi"]').html(totInv.toLocaleString('ID'))
+                }
+            }
+        }
+    })
+</script>
+
+<style>
+    .text-bold {
+        font-weight: bold
+    }
+    .material-switch > input[type="checkbox"] {
+        display: none;   
+    }
+    
+    .material-switch > label {
+        cursor: pointer;
+        height: 0px;
+        position: relative; 
+        width: 40px;  
+    }
+    
+    .material-switch > label::before {
+        background: rgb(0, 0, 0);
+        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        content: '';
+        height: 16px;
+        margin-top: -8px;
+        position:absolute;
+        opacity: 0.3;
+        transition: all 0.4s ease-in-out;
+        width: 40px;
+    }
+    .material-switch > label::after {
+        background: rgb(83 230 157);
+        border-radius: 16px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        content: '';
+        height: 24px;
+        left: -4px;
+        margin-top: -8px;
+        position: absolute;
+        top: -4px;
+        transition: all 0.3s ease-in-out;
+        width: 24px;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::before {
+        background: inherit;
+        opacity: 0.5;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::after {
+        background: inherit;
+        left: 20px;
+    }
+    </style>

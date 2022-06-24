@@ -17,6 +17,7 @@ const BarangConfig = use("App/Models/master/BarangConfig")
 const BarangQualities = use("App/Models/master/BarangQualities")
 const BisnisUnit = use("App/Models/BisnisUnit")
 const AccCoa = use("App/Models/akunting/AccCoa")
+const Bank = use("App/Models/akunting/Bank")
 const Karyawan = use("App/Models/master/Karyawan")
 const AccCoaTipe = use("App/Models/akunting/AccCoaTipe")
 const AccCoaGroup = use("App/Models/akunting/AccCoaGroup")
@@ -73,6 +74,12 @@ class initFunc {
         }
     }
 
+    async RUPIAH_TAX (values) {
+        const tax_ = await SysConfig.query().last()
+        const tax_persen = tax_.pajak / 100
+        return parseFloat(values) * tax_persen
+    }
+
     async POST_ACCESS_MENU (iduser) {
         let userMenu = (
             await UsrMenu.query().where('user_id', iduser).fetch()
@@ -107,6 +114,64 @@ class initFunc {
             console.log(error);
             return null
         }
+    }
+
+    async UPDATE_JURNAL_DELAY(){
+        console.log('trying to update jurnal delay...');
+        const trx = await DB.beginTransaction()
+        let jurnal = await TrxJurnal.query().where( w => {
+            w.where('is_delay', 'Y')
+            w.where('delay_date', '>=', moment().format('YYYY-MM-DD HH:mm:ss'))
+        }).fetch()
+
+        jurnal = jurnal.toJSON()
+        for (const obj of jurnal) {
+            const updJurnal = await TrxJurnal.query().where('id', obj.id).last()
+            updJurnal.merge({
+                is_delay: 'N'
+            })
+            try {
+                await updJurnal.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Gagal update jurnal DELAY transaction....'
+                }
+            }
+            
+
+            /* UPDATE SALDO BANK */
+            if(obj.bank_id){
+                const bank = await Bank.query().where('id', obj.bank_id).last()
+                if(obj.dk === 'd'){
+                    bank.merge({
+                        saldo_net: bank.saldo_net + obj.nilai,
+                        setor_tunda: bank.setor_tunda - obj.nilai
+                    })
+                }
+                if(obj.dk === 'k'){
+                    bank.merge({
+                        saldo_net: bank.saldo_net - obj.nilai,
+                        tarik_tunda: bank.tarik_tunda - obj.nilai
+                    })
+                }
+                try {
+                    await bank.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Gagal update jurnal DELAY transaction....'
+                    }
+                }
+                
+            }
+        }
+
+        await trx.commit()
     }
 
     async GET_COA_ID (bisnis, kode) {
@@ -488,14 +553,14 @@ class initFunc {
     async GEN_KODE_KWITANSI (user) {
         let ws = await this.WORKSPACE(user)
         let nomor = await OpsPelangganBayar.query().where( w => {
-            w.where('date', '>=', moment().startOf('year').format('YYYY-MM-DD'))
-            w.where('date', '<=', moment().endOf('year').format('YYYY-MM-DD'))
+            w.where('date_paid', '>=', moment().startOf('year').format('YYYY-MM-DD'))
+            w.where('date_paid', '<=', moment().endOf('year').format('YYYY-MM-DD'))
         }).last()
 
         let cabKode = ws.cabang?.kode || "XX"
         let prefix1 = 'PAID' + moment().format('YYMMDD')
         let prefix2 = '0'.repeat(2 - `${user.id}`.length) + user.id
-        let lastNumber = nomor ? (parseInt((nomor.kdpesanan).split('.')[1]) + 1) : 1
+        let lastNumber = nomor ? (parseInt((nomor.no_kwitansi).split('.')[1]) + 1) : 1
         lastNumber = '0'.repeat(3 - `${lastNumber}`.length) + lastNumber
         
         return prefix1 + cabKode + prefix2 + '.' + lastNumber
@@ -631,61 +696,90 @@ class initFunc {
         }
     }
 
-    async GET_TOTAL_VALUE_AKUN (bisnis_id, kode, rangeAwal, rangeAkhir) {
+    async GET_TOTAL_VALUE_AKUN (cabang_id, kode, rangeAwal, rangeAkhir) {
         const dk = await AccCoa.query().where( w => {
-            w.where('bisnis_id', bisnis_id)
             w.where('kode', 'like', `${kode}%`)
-        }).last()
+        }).first()
+        console.log('DK :::', dk.id, dk.coa_name);
 
-        const data = (
-            await TrxJurnal.query().where( w => {
-                w.where('bisnis_id', bisnis_id)
-                w.where('kode', 'like', `${kode}%`)
-                w.where('trx_date', '>=', rangeAwal)
-                w.where('trx_date', '<=', rangeAkhir)
-            }).fetch()
-        ).toJSON()
+        if(dk){
+            const data = (
+                await TrxJurnal.query().where( w => {
+                    if(cabang_id){
+                        w.where('cabang_id', cabang_id)
+                    }
+                    w.where('coa_id', `${kode}%`)
+                    w.where('is_delay', 'N')
+                    w.where('trx_date', '>=', rangeAwal)
+                    w.where('trx_date', '<=', rangeAkhir)
+                }).fetch()
+            )?.toJSON()
+    
+            let arrDebit = []
+            let arrKredit = []
+    
+            if(data.length > 0){
+                arrDebit = data.filter(el => el.dk === 'd')
+                arrKredit = data.filter(el => el.dk === 'k')
+                let sumDebit = arrDebit.reduce((a, b) => {
+                    return  a + b.nilai
+                }, 0)
+                let sumKredit = arrKredit.reduce((a, b) => {
+                    return  a + b.nilai
+                }, 0)
+                let sum 
+                if(dk.dk === 'd'){
+                    sum = parseFloat(sumDebit) - parseFloat(sumKredit)
+                }else{
+                    sum = parseFloat(sumKredit) - parseFloat(sumDebit)
+                }
+                
+        
+                return {
+                    dk: dk.dk,
+                    name: dk.coa_name,
+                    kredit: sumKredit,
+                    debit: sumDebit,
+                    total: sum
+                }
+            }else{
+                return {
+                    dk: dk.dk,
+                    name: dk.coa_name,
+                    kredit: 0,
+                    debit: 0,
+                    total: 0
+                }
+            }
 
-        let arrDebit = data.filter(el => el.dk === 'd')
-        let arrKredit = data.filter(el => el.dk === 'k')
-        
-        let sumDebit = arrDebit.reduce((a, b) => {
-            return  a + b.nilai
-        }, 0)
-        let sumKredit = arrKredit.reduce((a, b) => {
-            return  a + b.nilai
-        }, 0)
-        
-        let sum 
-        if(dk.dk === 'd'){
-            sum = parseFloat(sumDebit) - parseFloat(sumKredit)
         }else{
-            sum = parseFloat(sumKredit) - parseFloat(sumDebit)
-        }
-        
-
-        return {
-            dk: dk.dk,
-            name: dk.coa_name,
-            kredit: sumKredit,
-            debit: sumDebit,
-            total: sum
+            return {
+                dk: '',
+                name: '',
+                kredit: 0,
+                debit: 0,
+                total: 0
+            }
         }
     }
 
-    async GET_PNL(bisnis_id, rangeAwal, rangeAkhir){
+    async GET_PNL(cabang_id, rangeAwal, rangeAkhir){
         const dataProfit = 
             await TrxJurnal.query().where( w => {
-                w.where('bisnis_id', bisnis_id)
-                w.where('kode', 'like', `400.%`)
+                if(cabang_id){
+                    w.where('cabang_id', cabang_id)
+                }
+                w.where('coa_id', 'like', `4%`)
                 w.where('trx_date', '>=', rangeAwal)
                 w.where('trx_date', '<=', rangeAkhir)
             }).getSum('nilai') || 0
 
         const dataLoss = 
             await TrxJurnal.query().where( w => {
-                w.where('bisnis_id', bisnis_id)
-                w.where('kode', 'like', `500.%`)
+                if(cabang_id){
+                    w.where('cabang_id', cabang_id)
+                }
+                w.where('coa_id', 'like', `5%`)
                 w.where('trx_date', '>=', rangeAwal)
                 w.where('trx_date', '<=', rangeAkhir)
             }).getSum('nilai') || 0
