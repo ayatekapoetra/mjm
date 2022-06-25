@@ -23,12 +23,10 @@
                                 <tr>
                                     <td class="text-center">{{$loop.index + 1}}</td>
                                     <td>
+                                        <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}" style="width:72px">purchasing</button>
                                         @if(item.status === 'pending')
                                             <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">update</button>
                                             <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">cancel</button>
-                                        @endif
-                                        @if(item.status === 'ready' || item.status === 'dp')
-                                            <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}" style="width:72px">invoice</button>
                                         @endif
                                         
                                         @if(item.status === 'batal')
@@ -57,7 +55,12 @@
                                         {{item.tot_service}}
                                     </td>
                                     <td>
-                                        {{item.status}} <br>
+                                        @if(item.status === 'lunas')
+                                            <span class="text-uppercase text-success"><small>Paid</small></span>
+                                        @else
+                                            {{item.status}} 
+                                        @endif
+                                        <br>
                                         <small>{{item.narasi || ''}}</small> 
                                     </td>
                                 </tr>

@@ -15,6 +15,10 @@ class Rack extends Model {
     gudang(){
         return this.belongsTo("App/Models/master/Gudang", "gudang_id", "id")
     }
+
+    bin(){
+        return this.hasMany("App/Models/master/Bin", "id", "rack_id")
+    }
 }
 
 module.exports = Rack

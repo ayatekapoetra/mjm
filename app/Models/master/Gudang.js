@@ -11,6 +11,10 @@ class Gudang extends Model {
     cabang () {
         return this.belongsTo("App/Models/master/Cabang", "cabang_id", "id")
     }
+
+    rack () {
+        return this.hasMany("App/Models/master/rack", "id", "gudang_id")
+    }
 }
 
 module.exports = Gudang

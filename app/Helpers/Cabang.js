@@ -15,6 +15,7 @@ class masterCabang {
             data = (
                 await Cabang
                 .query()
+                .with('gudang', r => r.with('rack', b => b.with('bin')))
                 .where( w => {
                     if(req.kode){
                         w.where('kode', 'like', `%${req.kode}%`)
@@ -39,7 +40,7 @@ class masterCabang {
             data = (
                 await Cabang
                 .query()
-                .with('bisnis')
+                .with('gudang', r => r.with('rack', b => b.with('bin')))
                 .where( w => {
                     w.where('aktif', 'Y')
                 })
@@ -87,7 +88,7 @@ class masterCabang {
         const data = (
             await Cabang
             .query()
-            .with('bisnis')
+            .with('gudang', r => r.with('rack', b => b.with('bin')))
             .where('id', params.id)
             .last()
         ).toJSON()

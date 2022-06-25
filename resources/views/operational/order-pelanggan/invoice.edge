@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-sm-12 col-xs-12">
             <div class="white-box printableArea">
-                <h3><b>INVOICE</b> <span class="pull-right">#{{data.kdpesanan}}</span></h3>
+                <h3><b>PURCHASING ORDER</b> <span class="pull-right">#{{data.kdpesanan}}</span></h3>
                 <hr>
                 <div class="row">
                     <div class="col-md-12">
@@ -45,9 +45,8 @@
                                     <tr>
                                         <th class="text-white">#</th>
                                         <th class="text-white">Description</th>
+                                        <th class="text-white text-right">Satuan</th>
                                         <th class="text-white text-right">Quantity</th>
-                                        <th class="text-white text-right">Unit Cost</th>
-                                        <th class="text-white text-right">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody id="list-details-transaksi">
@@ -55,9 +54,8 @@
                                         <tr>
                                             <td class="urut"></td>
                                             <td>{{elm.barang.nama}}</td>
+                                            <td class="text-right">{{elm.barang.satuan}}</td>
                                             <td class="text-right">{{elm.qty}}</td>
-                                            <td class="formatRp text-right" data-number="{{elm.harga}}">{{elm.harga}}</td>
-                                            <td class="formatRp text-right" data-number="{{elm.total}}">{{elm.total}}</td>
                                         </tr>
                                     @endeach
                                     @each(val in data.jasa)
@@ -67,18 +65,11 @@
                                                 {{val.jasa.nama}} <br>
                                                 <small>{{val.jasa.narasi}}</small>
                                             </td>
+                                            <td class="text-right">-</td>
                                             <td class="text-right">{{val.qty}}</td>
-                                            <td class="formatRp text-right" data-number="{{val.harga}}">{{val.harga}}</td>
-                                            <td class="formatRp text-right" data-number="{{val.total}}">{{val.total}}</td>
                                         </tr>
                                     @endeach
                                 </tbody>
-                                <tfoot>
-                                    <tr class="bg-inverse" style="font-size: 20px;color: white;font-weight: 500;">
-                                        <td colspan="3" class="text-right">Total</td>
-                                        <td colspan="2" class="formatRp text-right" data-number="{{data.tot_inv}}"></td>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </div>
                     </div>

@@ -130,12 +130,11 @@ class bayarPelanggan {
                 success: false,
                 message: 'Failed generate invoice \n'+ JSON.stringify(error)
             }
-        }
-        /* END UPDATE ORDER PELANGGAN */
+        }/* END UPDATE ORDER PELANGGAN */
 
-        /* START INSERT JURNAL POTONGAN */
-        const arrPotonganCoa = (await DefCoa.query().where({group: 'invoicing-discount', tipe: 'd'}).fetch())?.toJSON()
-        for (const akun of arrPotonganCoa) {
+        /* START INSERT JURNAL POTONGAN BARANG */
+        const arrPotonganBarangCoa = (await DefCoa.query().where({group: 'invoicing-discount-barang'}).fetch())?.toJSON()
+        for (const akun of arrPotonganBarangCoa) {
             const trxJurnalDebit = new TrxJurnal()
             trxJurnalDebit.fill({
                 cabang_id: ws.cabang_id,
@@ -144,9 +143,9 @@ class bayarPelanggan {
                 reff: orderTrx.kdpesanan,
                 narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description,
                 trx_date: req.date,
-                nilai: totdisc_rp,
+                nilai: req.barangdisc_rp,
                 createdby: user.id,
-                dk: 'd'
+                dk: akun.tipe
             })
             try {
                 await trxJurnalDebit.save(trx)
@@ -158,8 +157,34 @@ class bayarPelanggan {
                     message: 'Failed jurnal debit \n'+ JSON.stringify(error)
                 }
             }
-        }
-        /* END INSERT JURNAL POTONGAN */
+        }/* END INSERT JURNAL POTONGAN BARANG */
+
+        /* START INSERT JURNAL POTONGAN JASA */
+        const arrPotonganJasaCoa = (await DefCoa.query().where({group: 'invoicing-discount-jasa'}).fetch())?.toJSON()
+        for (const akun of arrPotonganJasaCoa) {
+            const trxJurnalDebit = new TrxJurnal()
+            trxJurnalDebit.fill({
+                cabang_id: ws.cabang_id,
+                trx_jual: params.id,
+                coa_id: akun.coa_id,
+                reff: orderTrx.kdpesanan,
+                narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description,
+                trx_date: req.date,
+                nilai: req.jasadisc_rp,
+                createdby: user.id,
+                dk: akun.tipe
+            })
+            try {
+                await trxJurnalDebit.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed jurnal debit \n'+ JSON.stringify(error)
+                }
+            }
+        }/* END INSERT JURNAL POTONGAN JASA */
 
         /* START INSERT JURNAL PAJAK */
         const arrPajakCoa = (await DefCoa.query().where({group: 'invoicing-pajak', tipe: 'k'}).fetch())?.toJSON()
@@ -186,8 +211,7 @@ class bayarPelanggan {
                     message: 'Failed jurnal debit \n'+ JSON.stringify(error)
                 }
             }
-        }
-        /* END INSERT JURNAL PAJAK */
+        }/* END INSERT JURNAL PAJAK */
 
         /* START INSERT JURNAL PENDAPATAN BARANG */
         const arrPendapatanBarangCoa = (await DefCoa.query().where({group: 'invoicing-barang'}).fetch())?.toJSON()
@@ -214,8 +238,7 @@ class bayarPelanggan {
                     message: 'Failed jurnal debit \n'+ JSON.stringify(error)
                 }
             }
-        }
-        /* END INSERT JURNAL PENDAPATAN BARANG */
+        }/* END INSERT JURNAL PENDAPATAN BARANG */
 
         /* START INSERT JURNAL PENDAPATAN JASA */
         const arrPendapatanJasaCoa = (await DefCoa.query().where({group: 'invoicing-jasa'}).fetch())?.toJSON()
@@ -242,8 +265,7 @@ class bayarPelanggan {
                     message: 'Failed jurnal debit \n'+ JSON.stringify(error)
                 }
             }
-        }
-        /* END INSERT JURNAL PENDAPATAN JASA */
+        } /* END INSERT JURNAL PENDAPATAN JASA */
 
         /* START INSERT JURNAL PIUTANG DAGANG */
         const arrPiutangCoa = (await DefCoa.query().where({group: 'invoicing-piutang'}).fetch())?.toJSON()
@@ -304,6 +326,7 @@ class bayarPelanggan {
             const arrHppCoa = (await DefCoa.query().where({group: 'invoicing-hpp'}).fetch()).toJSON()
             
             for (const akun of arrHppCoa) {
+                console.log('HPP :::: ', barang.nama);
                 const hargaBeli = await HargaBeli.query().where('barang_id', brg.barang_id).getAvg('harga_beli') || 0
     
                 const trxJurnalHppDebit = new TrxJurnal()

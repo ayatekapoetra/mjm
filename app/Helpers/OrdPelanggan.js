@@ -44,7 +44,7 @@ class orderPelanggan {
                 .query()
                 .with('cabang')
                 .with('pelanggan')
-                .where('status', '!=', 'lunas')
+                // .where('status', '!=', 'lunas')
                 .orderBy('created_at', 'desc')
                 .paginate(halaman, limit)
             ).toJSON()

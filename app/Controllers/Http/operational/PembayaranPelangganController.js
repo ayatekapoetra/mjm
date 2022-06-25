@@ -136,7 +136,7 @@ class PembayaranPelangganController {
             req.kas_id = null
             req.bank = bank
             req.coa_id = bank.coa_id
-            req.date = req.delay_date
+            // req.date = req.delay_date
         }
 
         const data = await BayarPelangganHelpers.POST(req, user)

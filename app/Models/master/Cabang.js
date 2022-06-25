@@ -8,8 +8,8 @@ class Cabang extends Model {
         return 'mas_cabangs'
     }
 
-    bisnis () {
-        return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
+    gudang () {
+        return this.hasMany("App/Models/master/gudang", "id", "cabang_id")
     }
 }
 

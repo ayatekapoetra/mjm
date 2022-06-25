@@ -512,4 +512,20 @@ Route.group(() => {
     Route.get('/barang-stok', 'ApiBarangStockController.index')
     Route.get('/barang-stok/:id/show', 'ApiBarangStockController.show')
 
+    /** CABANG **/
+    Route.get('/cabang', 'ApiCabangController.index')
+    Route.get('/cabang/:id/show', 'ApiCabangController.show')
+
+    /** GUDANG **/
+    Route.get('/gudang', 'ApiGudangController.index')
+    Route.get('/gudang/:id/show', 'ApiGudangController.show')
+
+    /** RAK **/
+    Route.get('/rak', 'ApiRakController.index')
+    Route.get('/rak/:id/show', 'ApiRakController.show')
+
+    /** BIN **/
+    Route.get('/bin', 'ApiBinController.index')
+    Route.get('/bin/:id/show', 'ApiBinController.show')
+
 }).prefix('api-v1').namespace('api')

@@ -18,6 +18,7 @@ class masterGudang {
                 await Gudang
                 .query()
                 .with('cabang')
+                .with('rack', b => b.with('bin'))
                 .where( w => {
                     if(req.cabang_id){
                         w.where('cabang_id', req.cabang_id)
@@ -46,6 +47,7 @@ class masterGudang {
                 await Gudang
                 .query()
                 .with('cabang')
+                .with('rack', b => b.with('bin'))
                 .where( w => {
                     w.where('aktif', 'Y')
                 })
@@ -94,6 +96,7 @@ class masterGudang {
             await Gudang
             .query()
             .with('cabang')
+            .with('rack', b => b.with('bin'))
             .where('id', params.id)
             .last()
         ).toJSON()
