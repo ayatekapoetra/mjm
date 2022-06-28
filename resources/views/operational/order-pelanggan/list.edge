@@ -22,8 +22,10 @@
                             @each(item in list.data)
                                 <tr>
                                     <td class="text-center">{{$loop.index + 1}}</td>
-                                    <td>
-                                        <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}" style="width:72px">purchasing</button>
+                                    <td style="vertical-align: middle;">
+                                        <button class="btn btn-outline btn-{{item.status === 'lunas' ? 'default':'success'}} btn-xs m-b-5 bt-inv" data-id="{{item.id}}" style="width:104px">
+                                            <small>Purchasing Order</small>
+                                        </button> <br>
                                         @if(item.status === 'pending')
                                             <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">update</button>
                                             <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">cancel</button>

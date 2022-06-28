@@ -1,0 +1,168 @@
+{{ script('ajax/opt-pelanggan') }}
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-coa') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-8 col-xs-12" style="border-right: 1px dashed #ddd;min-height: 445px;">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Tanggal</label>
+                                <div class="input-group"> 
+                                    <span class="input-group-addon">
+                                        <i class="ti-calendar"></i>
+                                    </span>
+                                    <input type="datetime-local" name="date" class="form-control text-right initDateTime field-form" value="" required readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Kode</label>
+                                <div class="input-group"> 
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-qrcode"></i>
+                                    </span>
+                                    <input type="text" name="date" class="form-control text-right" value="{{kode}}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label class="control-label">Gudang</label>
+                                <select class="form-control selectGudang field-form" name="gudang_id" data-cabang="{{ws}}" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Pelanggan</label>
+                                <select class="form-control selectPelanggan field-form" name="pelanggan_id"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Keterangan</label>
+                                <input type="text" class="form-control field-form" name="narasi" id="narasi">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-left">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-4 col-xs-12">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="white-box" style="padding: 10px;">
+                        <h3 class="box-title">Detail Data Pelanggan</h3>
+                        <hr class="m-0">
+                        <ul class="feeds">
+                            <li class="text-info" style="padding: 5px 10px;">
+                                <strong>Kode</strong>
+                                <span class="data-pelanggan" id="kode">...</span>
+                            </li>
+                            <li style="padding: 5px 10px;">
+                                <strong>Nama</strong>
+                                <span class="data-pelanggan" id="nama">...</span>
+                            </li>
+                            <li style="padding: 5px 10px;">
+                                <strong>Contact Person</strong>
+                                <span class="data-pelanggan" id="pic">...</span>
+                            </li>
+                            <li style="padding: 5px 10px;">
+                                <strong>NPWP</strong>
+                                <span class="data-pelanggan" id="npwp">...</span>
+                            </li>
+                            <li style="padding: 5px 10px;">
+                                <strong>Phone</strong>
+                                <span class="data-pelanggan" id="phone">...</span>
+                            </li>
+                            <li style="padding: 5px 10px;">
+                                <strong>Email</strong>
+                                <span class="data-pelanggan" id="email">...</span>
+                            </li>
+                            <li class="text-danger" style="padding: 5px 10px;">
+                                <strong>Limit Pagu</strong>
+                                <span class="data-pelanggan" id="limit_pagu">...</span>
+                            </li>
+                            <li style="padding: 5px 10px;">
+                                <strong>Alamat Tagih</strong>
+                                <span class="data-pelanggan" id="alamat_tagih">
+                                    ...
+                                </span>
+                            </li>
+                            <li style="padding: 5px 10px;">
+                                <strong>Alamat Kirim</strong>
+                                <span class="data-pelanggan" id="alamat_kirim">
+                                    ...
+                                </span>
+                            </li>
+                            
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function(){
+        console.log('created...');
+        $('select[name="pelanggan_id"]').on('change', function(){
+            var id = $(this).val()
+            if(id){
+                $.ajax({
+                    async: true,
+                    url: '/ajax/options/pelanggan/'+id,
+                    method: 'GET',
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    success: function(result){
+                        // console.log(result);
+                        $('span.data-pelanggan').each(function(){
+                            var props = $(this).attr('id')
+                            $(this).html(result[props])
+                        })
+                    },
+                    error: function(err){
+                        console.log(err)
+                    }
+                })
+            }else{
+                $('span.data-pelanggan').each(function(){
+                    var props = $(this).attr('id')
+                    $(this).html('-')
+                })
+            }
+        })
+        
+    })
+</script>
+
+<style>
+    div.sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        background-color: yellow;
+        padding: 10px 25px;
+        font-size: 20px;
+    }
+</style>

@@ -1,12 +1,28 @@
 # Changelog
 
+## 0.2.5 - 2022-04-01
+
+- Support passing headers to request for loading font files and images via URL adresses
+
+## 0.2.4 - 2021-11-10
+
+- Fixed destination path argument in VFS build script.
+- Fixed error "Object.isExtensible is not a function" (bug is in core-js version 3.19.1).
+
+## 0.2.3 - 2021-11-06
+
+- Updated [@foliojs-fork/pdfkit](https://github.com/foliojs-fork/pdfkit) to version 0.13.0.
+- Tiling pattern support.
+- svg-to-pdfkit package moved as built-in. Solve not used installation of pdfkit.
+- Fixed passing document metadata.
+
 ## 0.2.2 - 2021-08-02
 
-- Fixed compatibility with Internet Explorer 11
+- Fixed compatibility with Internet Explorer 11.
 
 ## 0.2.1 - 2021-08-02
 
-- Upgrade Unicode Line Breaking Algorithm (UAX #14) to Unicode 13.0.0
+- Upgrade Unicode Line Breaking Algorithm (UAX #14) to Unicode 13.0.0.
 - Updated [@foliojs-fork/pdfkit](https://github.com/foliojs-fork/pdfkit) to version 0.12.3.
 - Updated [@foliojs-fork/linebreak](https://github.com/foliojs-fork/linebreak) to version 1.11.1.
 

@@ -9,7 +9,7 @@
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
         <div class="col-sm-8 col-xs-12">
-            <form id="form-create" data-id="{{data.id}}">
+            <form id="{{form}}" data-id="{{data.id}}">
                 {{ csrfField() }}
                 <div class="panel-body">
                     <div class="row">
@@ -20,8 +20,7 @@
                                     <span class="input-group-addon">
                                         <i class="ti-calendar"></i>
                                     </span>
-                                    <input type="datetime-local" name="date" class="form-control text-right initDateTime field-form" required readonly>
-                                    <input type="hidden" name="inv" class="form-control" value="{{data.kdpesanan}}" required readonly>
+                                    <input type="datetime-local" name="date" class="form-control text-right setDateTime field-form" data-tgl="{{data.date_paid}}" required readonly>
                                 </div>
                             </div>
                         </div>
@@ -29,18 +28,18 @@
                             <div class="form-group">
                                 <label class="control-label">Metode</label>
                                 <select class="form-control field-form" name="metode_paid" required>
-                                    <option value="tunai">Tunai</option>
-                                    <option value="transfer">Transfer</option>
-                                    <option value="debit">Debit</option>
-                                    <option value="qris">Qris</option>
+                                    <option value="tunai" {{data.metode_paid === 'tunai'?'selected':''}}>Tunai</option>
+                                    <option value="transfer" {{data.metode_paid === 'transfer'?'selected':''}}>Transfer</option>
+                                    <option value="debit" {{data.metode_paid === 'debit'?'selected':''}}>Debit</option>
+                                    <option value="qris" {{data.metode_paid === 'qris'?'selected':''}}>Qris</option>
                                 </select>
                             </div>
                         </div>
                         
-                        <div class="col-md-5">
+                        <div class="col-md-5 non-tunai" style="display: {{data.metode_paid === 'tunai'?'none':'block'}}">
                             <div class="form-group">
                                 <label class="control-label">Delay Until</label>
-                                <input type="datetime-local" class="form-control initDateTime field-form" name="delay_date" />
+                                <input type="datetime-local" class="form-control setDateTime field-form" data-tgl="{{data.delay_date || data.date_paid}}" name="delay_date" />
                             </div>
                         </div>
                         <div class="col-md-7">
@@ -49,20 +48,20 @@
                                 <input type="text" class="form-control field-form" name="narasi" id="narasi" value="{{data.narasi || ''}}">
                             </div>
                         </div>
-                        <div class="col-md-5" id="div-list-kas">
+                        <div class="col-md-5" id="div-list-kas" style="display:{{data.kas_id ? 'inline':'none'}}">
                             <div class="form-group">
                                 <label class="control-label">Nama Kas</label>
                                 <select class="form-control selectKas field-form" name="kas_id" data-keyword="besar" data-values=""></select>
                             </div>
                         </div>
-                        <div class="col-md-5" id="div-list-bank" style="display:none">
+                        <div class="col-md-5" id="div-list-bank" style="display:{{data.bank_id ? 'inline':'none'}}">
                             <div class="form-group">
                                 <label class="control-label">Nama Bank</label>
-                                <select class="form-control selectBank field-form" name="bank_id" id="bank_id" data-values=""></select>
+                                <select class="form-control selectBank field-form" name="bank_id" id="bank_id" data-values="{{data.bank_id}}"></select>
                             </div>
                         </div>
                     </div>
-                    <div class="row non-tunai" style="display: none;">
+                    <div class="row non-tunai" style="display: {{data.metode_paid === 'tunai'?'none':'block'}}">
                         <div class="col-md-9">
                             <div class="form-group">
                                 <label class="control-label">Akun</label>
@@ -80,7 +79,7 @@
                         <div class="col-md-5 pull-right">
                             <div class="form-group has-warning">
                                 <label class="control-label text-warning">Jumlah Bayar</label> <span><small>(Rp.)</small></span>
-                                <input type="number" class="form-control input-lg text-right field-form" name="paid_trx" id="paid_trx" step="any" value="{{data.sisa_trx}}">
+                                <input type="number" class="form-control input-lg text-right field-form" name="paid_trx" id="paid_trx" step="any" value="{{data.paid_trx}}">
                             </div>
                         </div>
                     </div>
@@ -99,7 +98,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="white-box" style="padding: 10px;">
-                        <h3 class="box-title">Detail Transaksi <span class="pull-right text-muted">{{data.kdpesanan}}</span></h3>
+                        <h3 class="box-title">Detail Transaksi <span class="pull-right text-muted">{{data.no_invoice}}</span></h3>
                         <hr class="m-0">
                         <table class="table">
                             <tr class="">
@@ -109,7 +108,7 @@
                                 <td class="text-white text-right">Total</td>
                             </tr>
                             <tbody id="list-details-order-pelanggan">
-                                @each(brg in data.items)
+                                @each(brg in data.order.items)
                                     <tr>
                                         <td>{{brg.qty}}</td>
                                         <td>{{brg.barang.nama}}</td>
@@ -117,7 +116,7 @@
                                         <td class="text-right">{{brg.total}}</td>
                                     </tr>
                                 @endeach
-                                @each(jasa in data.jasa)
+                                @each(jasa in data.order.jasa)
                                     <tr>
                                         <td>{{jasa.qty}}</td>
                                         <td>{{jasa.jasa.nama}}</td>
@@ -129,14 +128,14 @@
                             <tfoot>
                                 <tr class="bg-light text-white">
                                     <td colspan="2" style="padding: 5px 8px"><strong>Total </strong></td>
-                                    <td class="text-right text-white" colspan="2" id="total-belanja-barang" style="padding: 5px 8px">{{data.total_trx}}</td>
+                                    <td class="text-right text-white" colspan="2" id="total-belanja-barang" style="padding: 5px 8px">{{data.order.total_trx}}</td>
                                 </tr>
                                 <tr class="bg-light text-white">
                                     <td colspan="2" style="padding: 5px 8px">
                                         <strong>Potongan </strong>
                                         (<span class="text-white type-disc">Rp.</span>)
                                     </td>
-                                    <td class="text-right text-warning" colspan="2" id="potongan-transaksi" style="padding: 5px 8px">{{data.totdisc_rp}}</td>
+                                    <td class="text-right text-warning" colspan="2" id="potongan-transaksi" style="padding: 5px 8px">{{data.order.totdisc_rp}}</td>
                                 </tr>
                                 <tr class="bg-light text-white">
                                     <td colspan="2" style="padding: 5px 8px">
@@ -145,11 +144,11 @@
                                         </strong>
                                         (<span class="text-white">{{tax}}%</span>)
                                     </td>
-                                    <td class="text-right text-info" colspan="2" id="total-pajak" style="padding: 5px 8px">{{data.pajak_trx}}</td>
+                                    <td class="text-right text-info" colspan="2" id="total-pajak" style="padding: 5px 8px">{{data.order.pajak_trx}}</td>
                                 </tr>
                                 <tr class="bg-light text-white">
                                     <td colspan="2" style="padding: 5px 8px"><strong>Sisa </strong></td>
-                                    <td class="text-right text-danger" colspan="2" id="total-transaksi" style="padding: 5px 8px">{{data.sisa_trx}}</td>
+                                    <td class="text-right text-danger" colspan="2" id="total-transaksi" style="padding: 5px 8px">{{data.order.sisa_trx}}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -197,7 +196,7 @@
         $('input[name="akun_nilai"]').on('keyup', function(){
             var values = $(this).val()
             var akun = $('select[name="akun"]').val()
-            var bayar = {{data.sisa_trx}}
+            var bayar = {{data.paid_trx}}
             
             if(values){
                 var sum = parseFloat(bayar) + parseFloat(values)
@@ -206,6 +205,52 @@
                 $('input[name="paid_trx"]').val(bayar)
             }
         })
+
+        // $('select[name="potongan_type"]').on('change', function(){
+        //     var type = $(this).val()
+        //     $('input[name="potongan_trx"]').val('0.00')
+        //     hitungTransaksi(type)
+        // })
+
+        // $('select[name="metode_paid"]').on('change', function(){
+        //     var type = $(this).val()
+        //     if(type == 'tunai'){
+        //         $('body').find('div#div-list-bank').css('display', 'none')
+        //         $('body').find('div#div-list-kas').css('display', 'inline')
+        //     }else{
+        //         $('body').find('div#div-list-bank').css('display', 'inline')
+        //         $('body').find('div#div-list-kas').css('display', 'none')
+        //     }
+        // })
+        
+        // $('input[name="potongan_trx"]').keyup(function(e){
+        //     console.log('keyCode :::', e.keyCode);
+        //     var type = $('select[name="potongan_type"]').val()
+        //     hitungTransaksi(type)
+            
+        // })
+
+        // function hitungTransaksi(type){
+        //     let grandTotal = 0
+        //     var disc = $('input[name="potongan_trx"]').val()
+        //     var total = {{data.total_trx}}
+        //     var tax = {{tax}}
+        //     if(type == 'rupiah'){
+        //         var setelah_disc = parseFloat(total) - parseFloat(disc)
+        //         var values = setelah_disc + (setelah_disc * tax/100)
+        //         $('td#total-pajak').html(setelah_disc * tax/100)
+        //         $('td#potongan-transaksi').html(disc)
+        //         $('.type-disc').html('Rp')
+        //     }else{
+        //         var disc_rp = parseFloat(total) * (disc / 100)
+        //         var setelah_disc = parseFloat(total) - parseFloat(disc_rp)
+        //         var values = setelah_disc + (setelah_disc * tax/100)
+        //         $('td#total-pajak').html(setelah_disc * tax/100)
+        //         $('td#potongan-transaksi').html(disc_rp)
+        //         $('.type-disc').html('%')
+        //     }
+        //     $('td#total-transaksi').html(values)
+        // }
     })
 </script>
 

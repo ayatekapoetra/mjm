@@ -7,8 +7,8 @@
                 <table class="table table-hover manage-u-table">
                     <thead>
                         <tr>
-                            <th width="70" class="text-center bg-inverse b-all">No</th>
-                            <th width="100" class="bg-inverse b-all">Action</th>
+                            <th width="70" class="items-vcenter text-center bg-inverse b-all">No</th>
+                            <th width="100" class="items-vcenter text-center bg-inverse b-all">Action</th>
                             <th width="150" class="bg-inverse b-all">Kode<br/>Invoice</th>
                             <th width="*" class="bg-inverse b-all">Data<br/>Pelanggan</th>
                             <th width="150" class="bg-inverse b-all text-right">Tanggal<br/>Transaksi</th>
@@ -21,43 +21,56 @@
                         @if(list.total > 0)
                             @each(item in list.data)
                                 <tr>
-                                    <td class="text-center">{{$loop.index + 1}}</td>
-                                    <td>
+                                    <td class="text-center items-vcenter">{{$loop.index + 1}}</td>
+                                    <td class="items-vcenter">
                                         @if(item.status === 'pending')
-                                            <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}" style="padding:9px">invoicing</button>
+                                            <button class="btn btn-outline btn-success btn-xs bt-inv" data-id="{{item.id}}" style="padding:9px 19px">invoicing</button> <br>
+                                            <button class="btn btn-outline btn-primary btn-xs bt-print-inv m-t-5" data-id="{{item.id}}" style="width:90px">
+                                                <i class="fa fa-print"></i> print
+                                            </button>
                                         @endif
                                         @if(item.status === 'ready' || item.status === 'dp')
-                                            <button class="btn btn-outline btn-warning btn-xs p-r-10 p-l-10 bt-bayar" data-id="{{item.id}}" style="padding: 1px 9px;">payment</button><br>
-                                            <button class="btn btn-outline btn-info btn-xs bt-details m-t-5" data-id="{{item.id}}" style="width:72px">paid detail</button>
+                                            <button class="btn btn-outline btn-warning btn-xs p-r-10 p-l-10 bt-bayar" data-id="{{item.id}}" style="width:90px">payment</button><br>
+                                            <button class="btn btn-outline btn-primary btn-xs bt-print-inv m-t-5" data-id="{{item.id}}" style="width:90px">
+                                                <i class="fa fa-print"></i> print
+                                            </button>
                                         @endif
                                         @if(item.status === 'lunas')
-                                            <button class="btn btn-outline btn-info btn-xs bt-details m-t-5" data-id="{{item.id}}" style="width:72px">paid detail</button>
+                                            <button class="btn btn-outline btn-info btn-xs" data-id="{{item.id}}" style="padding:9px 27px" disabled>Lunas</button>
                                         @endif
+                                        
                                     </td>
-                                    <td>
+                                    <td class="items-vcenter">
                                         <strong>{{item.kdpesanan}}</strong><br>
                                         <small>{{item.cabang.nama}}</small>
+                                        @if(item.status === 'ready' || item.status === 'dp' || item.status === 'lunas')
+                                            <br>
+                                            <a href="#" data-id="{{item.id}}" class="bt-details">
+                                                <small>Show Details Payment</small>
+                                            </a>
+                                        @endif
                                     </td>
-                                    <td>
+                                    <td class="items-vcenter">
                                         {{item.pelanggan.nama}} <br/>
+                                        <small class="">{{item.pelanggan.kode}}</small> <br>
                                         <small>{{item.pelanggan.phone}}</small>
                                     </td>
-                                    <td class="text-right bg-primary">
+                                    <td class="items-vcenter text-right bg-primary">
                                         <span class="dateFormatDef" data-tgl="{{item.date}}" data-patten="DD MMMM YYYY"></span>
                                         <i class="ti-calendar"></i>
                                         <br>
                                         <small class="dateFormatDef" data-tgl="{{item.date}}" data-patten="HH:mm"></small>
                                         <i class="icon-clock"></i>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="items-vcenter text-right">
                                         <span class="formatRp" data-number="{{item.total_trx}}"></span> <br>
                                         <small class="formatRp" data-number="{{item.pajak_trx}}"></small>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="items-vcenter text-right">
                                         <span class="formatRp" data-number="{{item.grandtot_trx}}"></span> <br>
                                         <small class="formatRp" data-number="{{item.totdisc_rp}}"></small>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="items-vcenter text-right">
                                         <strong class="formatRp text-success" data-number="{{item.paid_trx}}"></strong> <br>
                                         @if(item.status === 'lunas')
                                             <small class="text-success">Lunas</small> 

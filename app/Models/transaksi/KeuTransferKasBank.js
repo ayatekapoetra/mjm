@@ -5,11 +5,7 @@ const Model = use('Model')
 
 class TrxTransferKasBank extends Model {
     static get table(){
-        return 'trx_transfer_kasbanks'
-    }
-
-    bisnis () {
-        return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
+        return 'keu_transfer_kasbanks'
     }
 
     cabang () {

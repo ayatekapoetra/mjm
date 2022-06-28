@@ -1,0 +1,78 @@
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="50" class="text-center bg-inverse b-all">ACT</th>
+                            <th class="bg-inverse b-all">Kode<br/>Nama</th>
+                            <th class="bg-inverse b-all">Category<br/>Brand</th>
+                            <th class="bg-inverse b-all">PartNumber<br/>Qualitas</th>
+                            <th class="bg-inverse b-all">Satuan<br/>MinStok</th>
+                            <th width="150" class="text-center bg-inverse b-all">Images</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td>
+                                    <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                </td>
+                                <td>
+                                    <small>{{item.kode}}</small><br>
+                                    <strong>{{item.nama}}</strong>
+                                </td>
+                                <td>
+                                    <small>{{item.kategori_id?item.kategori.nama: ''}}</small>
+                                    @if(item.subkategori_id)
+                                        <small class="text-success">-> {{item.subkategori_id?item.subkategori.nama: ''}} </small>
+                                    @endif
+                                    <br>
+                                    <strong>{{item.brand_id?item.brand.nama:''}}</strong>
+                                </td>
+                                <td class="text-warning">
+                                    {{item.num_part || ''}}<br>
+                                    {{item.qualitas_id?item.qualitas.nama:''}} 
+                                </td>
+                                <td class="text-right">
+                                    {{item.min_stok}}<br>
+                                    {{item.satuan}} 
+                                </td>
+                                <td class="text-center">
+                                    @if(item.photo)
+                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl(item.photo) }}" title="{{item.nama}}">
+                                            <img class="img-rounded" src="{{ assetsUrl(item.photo) }}" width="50" height="50"/>
+                                        </a>
+                                    @else
+                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl('images/ximg_not_found.jpeg') }}" title="{{item.nama}}">
+                                            <img class="img-rounded" src="{{ assetsUrl('images/ximg_not_found.jpeg') }}" width="50"/>
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

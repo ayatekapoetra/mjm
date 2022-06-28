@@ -5,6 +5,17 @@ $(function(){
 
     initDefault()
 
+    // body.on('keypress', function(e){
+    //     // if ( e.ctrlKey && ( e.which === 102 ) ) {
+    //     //     // e.preventDefault()
+    //     //     console.log( "You pressed CTRL + B untuk payment" );
+    //     // }
+    //     console.log(e.which);
+    //     if ( e.keyCode === 112 ) {
+    //         console.log( "You pressed F1" );
+    //     }
+    // })
+
     $('body').on('click', 'button#bt-create-form', function(){
         initCreate()
     })
@@ -17,6 +28,10 @@ $(function(){
         var limit = $(this).val()
         initDefault(limit, null)
     })
+
+    $('body').on("click", 'input[type="number"]', function () {
+        $(this).select();
+    });
 
     // $('body').on('click', 'button.bt-add-barang', function(){
     //     initCreateItem()
@@ -156,6 +171,72 @@ $(function(){
         })
     })
 
+    $('body').on('submit', 'form#form-create-multipayment', function(e){
+        e.preventDefault()
+        var dataForm = new FormData(this)
+        $.ajax({
+            async: true,
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: 'entry-pembayaran/multipayment',
+            method: 'POST',
+            data: dataForm,
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            // beforeSend: function(xhr){
+            //     console.log('...', xhr);
+            //     // xhr.abort()
+            // },
+            success: function(result){
+                console.log(result);
+                if(result.success){
+                    swal('Okey', result.message, 'success')
+                    initDefault()
+                }else{
+                    swal('Opps', result.message, 'warning')
+                }
+            },
+            error: function(err){
+                console.log('ERR ::::', err)
+            }
+        })
+    })
+
+    $('body').on('submit', 'form#form-update', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        var dataForm = new FormData(this)
+        // console.log('entry-pembayaran/' + id + '/update');
+        $.ajax({
+            async: true,
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: 'entry-pembayaran/' + id + '/update',
+            method: 'POST',
+            data: dataForm,
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            // beforeSend: function(xhr){
+            //     console.log('...', xhr);
+            //     // xhr.abort()
+            // },
+            success: function(result){
+                console.log(result);
+                if(result.success){
+                    swal('Okey', result.message, 'success')
+                    initDefault()
+                }else{
+                    swal('Opps', result.message, 'warning')
+                }
+            },
+            error: function(err){
+                console.log('ERR ::::', err)
+            }
+        })
+    })
+
     $('body').on('submit', 'form#form-invoicing', function(e){
         e.preventDefault()
         var id = $(this).data('id')
@@ -218,6 +299,57 @@ $(function(){
         })
     })
 
+    $('body').on('click', 'button.bt-print-inv', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        console.log(id);
+        $.ajax({
+            async: true,
+            url: 'entry-pembayaran/'+id+'/print-invoice',
+            method: 'GET',
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                console.log(result);
+                let data = result
+                pdfMake.createPdf(data).print();
+                // body.find('div#content-form').html(result)
+                // body.find('div#content-list').html('')
+            },
+            error: function(err){
+                console.log(err)
+                // body.find('div#content-form').css('display', 'none')
+            }
+        })
+    })
+
+    $('body').on('click', 'button.bt-kwitansi', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        console.log(id);
+        $.ajax({
+            async: true,
+            url: 'entry-pembayaran/'+id+'/print-kwitansi',
+            method: 'GET',
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                console.log(result);
+                pdfMake.createPdf(result).print();
+                // body.find('div#content-form').html(result)
+                // body.find('div#content-list').html('')
+            },
+            error: function(err){
+                console.log(err)
+                // body.find('div#content-form').css('display', 'none')
+            }
+        })
+    })
+
     $('body').on('click', 'button.bt-bayar', function(e){
         e.preventDefault()
         var id = $(this).data('id')
@@ -247,7 +379,7 @@ $(function(){
         })
     })
     
-    $('body').on('click', 'button.bt-details', function(e){
+    $('body').on('click', 'a.bt-details', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         $.ajax({
@@ -265,11 +397,34 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
-                body.find('button#bt-create-form').css('display', 'inline')
+                body.find('button#bt-create-form').css('display', 'none')
                 body.find('button.bt-back').css('display', 'block')
                 body.find('div#content-list').css('display', 'block')
                 body.find('div#content-form').css('display', 'none')
                 body.find('div#div-filter-limit').css('display', 'inline')
+            }
+        })
+    })
+
+    $('body').on('click', 'button.bt-update-kwitansi', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: 'entry-pembayaran/'+id+'/show',
+            method: 'GET',
+            dataType: 'html',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                body.find('div#content-list').html(result)
+                body.find('div#content-form').html('')
+            },
+            error: function(err){
+                console.log(err);
+                swal("Opps,,,!", 'Server Error', "error")
             }
         })
     })
@@ -312,34 +467,6 @@ $(function(){
           });
     })
 
-    $('body').on('submit', 'form#form-update', function(e){
-        e.preventDefault()
-        var data = new FormData(this)
-        var id = $(this).data('id')
-        $.ajax({
-            async: true,
-            headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'jasa/'+id+'/update',
-            method: 'POST',
-            data: data,
-            dataType: 'json',
-            processData: false,
-            mimeType: "multipart/form-data",
-            contentType: false,
-            success: function(result){
-                if(result.success){
-                    swal("Okey,,,!", result.message, "success")
-                    initDefault()
-                }else{
-                    swal("Opps,,,!", result.message, "warning")
-                }
-            },
-            error: function(err){
-                console.log(err);
-                swal("Opps,,,!", 'Server Error', "error")
-            }
-        })
-    })
 
     function initDefault(limit, page){
         $.ajax({

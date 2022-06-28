@@ -23,8 +23,6 @@ $(function(){
     $('input[type="datetime-local"].setDateTime').each(function(){
         var data = $(this).data('tgl')
         var now = new Date(data)
-        // console.log('DATA ::', data != 'undefined' || data != 'null');
-        console.log('now ::', now);
         if(data != 'undefined' || data){
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
             $(this).val(now.toISOString().slice(0,16))

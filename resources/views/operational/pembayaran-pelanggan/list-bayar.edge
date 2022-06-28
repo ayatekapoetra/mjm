@@ -20,18 +20,25 @@
                         @if(list.total > 0)
                             @each(item in list.data)
                                 <tr>
-                                    <td class="text-center">{{$loop.index + 1}}</td>
-                                    <td>
-                                        <button class="btn btn-outline btn-success btn-xs bt-kwitansi" data-id="{{item.id}}">kwitansi</button>
+                                    <td class="items-vcenter text-center">{{$loop.index + 1}}</td>
+                                    <td class="items-vcenter">
+                                        <button class="btn btn-outline btn-success btn-xs bt-kwitansi" data-id="{{item.id}}">
+                                            <i class="ti-printer"></i>
+                                        </button>
+                                        <button class="btn btn-outline btn-warning btn-xs bt-update-kwitansi" data-id="{{item.id}}">
+                                            <i class="ti-pencil-alt"></i>
+                                        </button>
                                         @if(['administrator', 'developer'].includes(auth.user.usertype))
-                                            <button class="btn btn-outline btn-danger btn-xs bt-remove" data-id="{{item.id}}">delete</button>
+                                            <button class="btn btn-outline btn-danger btn-xs bt-remove" data-id="{{item.id}}">
+                                                <i class="ti-trash"></i>
+                                            </button>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td class="items-vcenter">
                                         <strong>{{item.no_kwitansi}}</strong><br>
                                         <small>{{item.no_invoice}}</small>
                                     </td>
-                                    <td class="text-capitalize">
+                                    <td class="items-vcenter text-capitalize">
                                         @if(item.bank_id)
                                             <i class="icon-drawar"></i>
                                             {{item.metode_paid}} - {{item.bank.name}}
@@ -42,15 +49,15 @@
                                         <br>
                                         <small>{{item.narasi || ''}}</small>
                                     </td>
-                                    <td class="text-center">{{item.is_delay}}</td>
-                                    <td class="text-right bg-primary">
+                                    <td class="items-vcenter text-center">{{item.is_delay}}</td>
+                                    <td class="items-vcenter text-right bg-primary">
                                         <span class="dateFormatDef" data-tgl="{{item.date_paid}}" data-patten="DD MMMM YYYY"></span>
                                         <i class="ti-calendar"></i>
                                         <br>
                                         <small class="dateFormatDef" data-tgl="{{item.date_paid}}" data-patten="HH:mm"></small>
                                         <i class="icon-clock"></i>
                                     </td>
-                                    <td class="formatRp text-right" data-number="{{item.paid_trx}}"></td>
+                                    <td class="formatRp items-vcenter text-right" data-number="{{item.paid_trx}}"></td>
                                 </tr>
                             @endeach
                         @else

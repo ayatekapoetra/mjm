@@ -59,7 +59,9 @@ class orderPelanggan {
             .with('cabang')
             .with('pelanggan')
             .with('author')
-            .with('items', b => b.with('barang'))
+            .with('items', b => b.with('barang', a => {
+                a.with('qualitas')
+            }))
             .with('jasa', j => j.with('jasa'))
             .where('id', params.id).last()
             ).toJSON()

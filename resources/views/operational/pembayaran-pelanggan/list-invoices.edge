@@ -1,0 +1,49 @@
+<div class="col-xs-12">
+    <table class="table table-hover manage-u-table" width="100%">
+        <tr>
+            <td class="bg-inverse text-white" width="30">#</td>
+            <td class="bg-inverse text-white" width="*">Invoices Panding Payment</td>
+        </tr>
+        @if(list.length > 0)
+            @each(item in list)
+            <tr class="invoices-pending">
+                <td class="" style="padding: 5px">{{$loop.index + 1}}</td>
+                <td class="items-vcenter text-white" style="padding: 0px">
+                    <div class="col-md-4" style="padding: 5px 5px;">
+                        <i class="ti-receipt"></i> {{item.kdpesanan}}
+                        <input type="hidden" name="order_id" value="{{item.id}}">
+                    </div>
+                    <div class="col-md-2" style="padding: 5px 5px;">
+                        <i class="ti-calendar"></i> {{item.date}}
+                    </div>
+                    <div class="col-md-2" style="padding: 5px 5px;">
+                        {{item.status}}
+                    </div>
+                    <div class="col-md-4" style="padding: 5px 5px;">
+                        <!--<input type="text" class="form-control input-sm text-right text-white field-form" name="paid_trx" value="{{item.sisa_trx}}" />-->
+                        <div class="input-group">
+                            <span class="input-group-addon">Sisa</span>
+                            <input type="number" class="form-control input-sm jumlah-bayar" name="paid_trx" value="{{item.sisa_trx}}" required>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            @endeach
+        @else
+            <tr>
+                <td colspan="2">
+                    <code>Pelanggan ini tidak memiliki invoice pending...</code>
+                </td>
+            </tr>
+        @endif
+        
+    </table>
+</div>
+
+<script>
+    $(function(){
+        // $('body').on("click", 'input[type="number"]', function () {
+        //     $(this).select();
+        // });
+    })
+</script>

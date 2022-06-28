@@ -1653,8 +1653,8 @@ pre {
 }
 
 .btn-primary.btn-outline {
-	color: #707cd2;
-	background-color: #fff
+	color: #fff;
+	background-color: #2f323e
 }
 
 .btn-primary.btn-outline.focus,

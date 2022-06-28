@@ -36,15 +36,15 @@
     ".github",
     "build-examples.js"
   ],
-  "version": "0.2.2",
-  "_release": "0.2.2",
+  "version": "0.2.5",
+  "_release": "0.2.5",
   "_resolution": {
     "type": "version",
-    "tag": "0.2.2",
-    "commit": "7f5412468e532226671483d62a2b4cc06b65f97c"
+    "tag": "0.2.5",
+    "commit": "819ea22b71953a862cb4eb68be090ec4606f63f0"
   },
   "_source": "https://github.com/bpampuch/pdfmake.git",
-  "_target": "^0.2.2",
+  "_target": "^0.2.5",
   "_originalSource": "pdfmake",
   "_direct": true
 }

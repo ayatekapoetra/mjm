@@ -24,6 +24,10 @@ class KasBankController {
 
     async list ( { auth, request, view } ) {
         const req = request.all()
+
+        await initFunc.SUM_MUTASI_KAS()
+        await initFunc.SUM_MUTASI_BANK()
+
         const user = await userValidate(auth)
         if(!user){
             return view.render('401')

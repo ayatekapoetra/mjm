@@ -10,7 +10,7 @@ const TrxBank = use("App/Models/transaksi/TrxBank")
 const LampiranFile = use("App/Models/LampiranFile")
 const TrxKases = use("App/Models/transaksi/TrxKase")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
-const TrxTransferKasBank = use("App/Models/transaksi/TrxTransferKasBank")
+const KeuTransferKasBank = use("App/Models/transaksi/TrxTransferKasBank")
 
 class transferKasBank {
     async LIST (req, user) {

@@ -3,14 +3,22 @@
 {{ script('ajax/opt-cabang') }}
 {{ script('ajax/opt-gudang') }}
 {{ script('ajax/initDate') }}
+{{ script('ajax/opt-bank') }}
+{{ script('ajax/opt-kas') }}
 {{ script('ajax/opt-coa') }}
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
-        <div class="col-sm-8 col-xs-12" style="border-right: 1px dashed #ddd;min-height: 445px;">
-            <form id="form-create">
+        <div class="col-sm-8 col-xs-12">
+            <form id="form-create-multipayment">
                 {{ csrfField() }}
-                <div class="panel-body">
+                <div class="panel-body p-b-0">
                     <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Pelanggan</label>
+                                <select class="form-control selectPelanggan field-form" name="pelanggan_id"></select>
+                            </div>
+                        </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="control-label">Tanggal</label>
@@ -18,42 +26,76 @@
                                     <span class="input-group-addon">
                                         <i class="ti-calendar"></i>
                                     </span>
-                                    <input type="datetime-local" name="date" class="form-control text-right initDateTime field-form" value="" required readonly>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label class="control-label">Kode</label>
-                                <div class="input-group"> 
-                                    <span class="input-group-addon">
-                                        <i class="fa fa-qrcode"></i>
-                                    </span>
-                                    <input type="text" name="date" class="form-control text-right" value="{{kode}}" readonly>
+                                    <input type="datetime-local" name="date" class="form-control text-right initDateTime field-form" required readonly>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-5">
+                        <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Gudang</label>
-                                <select class="form-control selectGudang field-form" name="gudang_id" data-cabang="{{ws}}" required></select>
+                                <label class="control-label">Metode</label>
+                                <select class="form-control field-form" name="metode_paid" required>
+                                    <option value="tunai">Tunai</option>
+                                    <option value="transfer">Transfer</option>
+                                    <option value="debit">Debit</option>
+                                    <option value="qris">Qris</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        
+                        <div class="col-md-3 non-tunai" style="display: none;">
                             <div class="form-group">
-                                <label class="control-label">Pelanggan</label>
-                                <select class="form-control selectPelanggan field-form" name="pelanggan_id"></select>
+                                <label class="control-label">Delay Until</label>
+                                <input type="datetime-local" class="form-control initDateTime field-form" name="delay_date" />
                             </div>
                         </div>
-                        <div class="col-md-12">
+                        
+                        <div class="col-md-9" id="div-list-kas" style="display: block">
                             <div class="form-group">
-                                <label class="control-label">Keterangan</label>
-                                <input type="text" class="form-control field-form" name="narasi" id="narasi">
+                                <label class="control-label">Nama Kas</label>
+                                <select class="form-control selectKas field-form" name="kas_id" data-keyword="besar" data-values=""></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="div-list-bank" style="display:{{data.bank_id ? 'inline':'none'}}">
+                            <div class="form-group">
+                                <label class="control-label">Nama Bank</label>
+                                <select class="form-control selectBank field-form" name="bank_id" id="bank_id" data-values="{{data.bank_id}}"></select>
                             </div>
                         </div>
                     </div>
+                    <div class="row non-tunai" style="display: none">
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label class="control-label">Akun</label>
+                                <select class="form-control selectCoa" name="akun" id="akun" data-values="{{data.add_coa || ''}}"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Adm.Biaya</label>
+                                <input type="number" class="form-control field-form" name="akun_nilai" id="akun_nilai" step="any" value="{{data.adm_bank}}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Keterangan</label>
+                                <input type="text" class="form-control field-form" name="narasi" id="narasi" value="{{data.narasi || ''}}">
+                            </div>
+                        </div>
+                        <!--
+                        <div class="col-md-5 pull-right">
+                            <div class="form-group has-warning">
+                                <label class="control-label text-warning">Jumlah Bayar</label> <span><small>(Rp.)</small></span>
+                                <input type="number" class="form-control input-lg text-right field-form" name="paid_trx" id="paid_trx" step="any" value="{{data.paid_trx}}">
+                            </div>
+                        </div>-->
+                    </div>
+                </div>
+                <div class="panel-body p-t-5">
+                    <div class="row" id="list-invoices"></div>
                 </div>
                 <div class="panel-footer text-left">
                     <div class="row">
@@ -65,7 +107,7 @@
                 </div>
             </form>
         </div>
-        <div class="col-sm-4 col-xs-12">
+        <div class="col-sm-4 col-xs-12" style="position:sticky; top:80px">
             <div class="row">
                 <div class="col-md-12">
                     <div class="white-box" style="padding: 10px;">
@@ -116,6 +158,11 @@
                         </ul>
                     </div>
                 </div>
+                <div class="col-md-12">
+                    <div class="white-box bg-danger" style="padding: 10px;">
+                        <h3 class="text-white" style="font-weight: 500;">Total : <span class="pull-right" id="total-bayar">Rp. 0</span></h3>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -127,33 +174,107 @@
         $('select[name="pelanggan_id"]').on('change', function(){
             var id = $(this).val()
             if(id){
-                $.ajax({
-                    async: true,
-                    url: '/ajax/options/pelanggan/'+id,
-                    method: 'GET',
-                    dataType: 'json',
-                    processData: false,
-                    mimeType: "multipart/form-data",
-                    contentType: false,
-                    success: function(result){
-                        // console.log(result);
-                        $('span.data-pelanggan').each(function(){
-                            var props = $(this).attr('id')
-                            $(this).html(result[props])
-                        })
-                    },
-                    error: function(err){
-                        console.log(err)
-                    }
-                })
+                SET_PELANGGAN(id)
+                SEARCH_INVOICE(id)
             }else{
                 $('span.data-pelanggan').each(function(){
                     var props = $(this).attr('id')
                     $(this).html('-')
                 })
+                $('body').find('div#list-invoices').html('')
             }
         })
-        
+
+        $('select[name="metode_paid"]').on('change', function(){
+            var values = $(this).val()
+            console.log(values);
+            if(values === 'tunai'){
+                $('body').find('select[name="akun_type"]').val('kas')
+                $('body').find('div#div-list-bank').css('display', 'none')
+                $('body').find('div#div-list-kas').css('display', 'inline')
+                $('body').find('div.non-tunai').css('display', 'none')
+                $('body').find('select[name="akun"]').val('').trigger('change')
+                $('body').find('input[name="akun_nilai"]').val('')
+            }else{
+                $('body').find('select[name="akun_type"]').val('bank')
+                $('body').find('div#div-list-bank').css('display', 'inline')
+                $('body').find('div#div-list-kas').css('display', 'none')
+                $('body').find('div.non-tunai').css('display', 'block')
+            }
+        })
+
+        $('select[name="akun"]').on('change', function(){
+            var values = $(this).val()
+            var admBank = {{data.adm_bank}}
+            var bayar = {{data.paid_trx}}
+            console.log(values);
+            if(values){
+                $('input[name="akun_nilai"]').removeAttr('disabled')
+                $('input[name="akun_nilai"]').val(admBank || '0.00')
+            }else{
+                $('input[name="akun_nilai"]').attr('disabled', 'true')
+                $('input[name="akun_nilai"]').val('')
+                $('input[name="paid_trx"]').val(bayar)
+            }
+        })
+
+        function HitungTotalBayar(){
+            var admBank = $('body').find('input[name="akun_nilai"]').val() || 0
+            var arr = []
+            $('input.jumlah-bayar').each(function(){
+                var values = $(this).val()
+                arr.push(parseFloat(values))
+            })
+            arr.push(parseFloat(admBank))
+            $('body').find('span#total-bayar').html('Rp. ' + (arr.reduce((a, b) => {return a + b}, 0)).toLocaleString('ID'))
+        }
+
+        $('body').on('keyup', 'input[name="paid_trx"]', function(){
+            HitungTotalBayar()
+        })
+
+        function SEARCH_INVOICE(id){
+            $.ajax({
+                async: true,
+                url: '/operational/entry-pembayaran/'+id+'/pending-payment',
+                method: 'GET',
+                dataType: 'html',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    $('body').find('div#list-invoices').html(result)
+                },
+                error: function(err){
+                    console.log(err)
+                },
+                complete: function(){
+                    HitungTotalBayar()
+                }
+            })
+        }
+
+        function SET_PELANGGAN(id){
+            $.ajax({
+                async: true,
+                url: '/ajax/options/pelanggan/'+id,
+                method: 'GET',
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    $('span.data-pelanggan').each(function(){
+                        var props = $(this).attr('id')
+                        $(this).html(result[props])
+                    })
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
     })
 </script>
 
