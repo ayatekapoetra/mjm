@@ -8,9 +8,10 @@ $(function(){
     $('body td.long-text').each(function(){
         var elm = $(this)
         var text = elm.data('text')
+        var len = elm.data('len') || 100
         var tag = elm.data('elm')
-        if(text.length > 100)
-        elm.find(tag).html(text.slice(0, 100) + '<br/><a class="more-text text-info">show more...</a>')
+        if(text.length > parseInt(len))
+        elm.find(tag).html(text.slice(0, parseInt(len)) + '<br/><a class="more-text text-info">show more...</a>')
         else
         elm.find(tag).html(text)
     })
@@ -18,24 +19,27 @@ $(function(){
     $('body').on('click', 'a.more-text', function(){
         var elm = $(this)
         var text = elm.parents('td').data('text')
+        var lenx = elm.parents('td').data('len') || 100
         var tag = elm.parents('td').data('elm')
+        console.log(text);
         if(text){
-            var len = Math.ceil(text.length / 100)
-            for (let i = 0; i < len; i++) {
-                let end = parseInt(i + 100)
+            var len = Math.ceil(text.length / parseInt(lenx))
+            for (let i = 0; i <= len; i++) {
+                let end = parseInt(i + parseInt(lenx))
                 elm.parents('td').find(tag).html((text.slice(i, end) + 
                 '<br/>' + 
-                text.slice(i+100, end+100) + '<br/><a class="less-text text-primary">show less...</a>'))
+                text.slice(i+parseInt(lenx), end+parseInt(lenx)) + '<br/><a class="less-text text-primary">show less...</a>'))
             }
         }
     })
 
     $('body').on('click', 'a.less-text', function(){
         var elm = $(this)
+        var len = elm.parents('td').data('len') || 100
         var text = elm.parents('td').data('text')
         var tag = elm.parents('td').data('elm')
         if(text)
-        elm.parents('td').find(tag).html((text.slice(0, 100) + '<br/><a class="more-text text-info">show more...</a>'))
+        elm.parents('td').find(tag).html((text.slice(0, parseInt(len)) + '<br/><a class="more-text text-info">show more...</a>'))
     })
 
     /** LIST NAMA COA **/

@@ -11,18 +11,18 @@ $(function(){
         var values = $(this).data('values') || elm.val()
         $.ajax({
             async: true,
-            url: '/ajax/options?group='+group+'&selected='+values,
+            url: '/ajax/options',
             method: 'GET',
+            data: {
+                group: group,
+                selected: values
+            },
             dataType: 'json',
-            processData: false,
-            mimeType: "multipart/form-data",
             contentType: false,
             success: function(result){
                 // console.log(result);
                 if(result.length > 0){
-                    setSelected(result, values)
                     elm.html(result.map( v => '<option value="'+v.nilai+'" '+v.selected+'>'+v.teks+'</option>'))
-                    initSelected(result, elm)
                     elm.trigger('change');
                 }else{
                     elm.html('<option value="" selected>Blum ada data...</option>')

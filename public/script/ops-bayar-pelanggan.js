@@ -5,17 +5,6 @@ $(function(){
 
     initDefault()
 
-    // body.on('keypress', function(e){
-    //     // if ( e.ctrlKey && ( e.which === 102 ) ) {
-    //     //     // e.preventDefault()
-    //     //     console.log( "You pressed CTRL + B untuk payment" );
-    //     // }
-    //     console.log(e.which);
-    //     if ( e.keyCode === 112 ) {
-    //         console.log( "You pressed F1" );
-    //     }
-    // })
-
     $('body').on('click', 'button#bt-create-form', function(){
         initCreate()
     })
@@ -33,110 +22,64 @@ $(function(){
         $(this).select();
     });
 
-    // $('body').on('click', 'button.bt-add-barang', function(){
-    //     initCreateItem()
-    //     var elm = $(this)
-    //     var urut = elm.parents('tr').data('urut')
-    //     var dataBarang = elm.parents('tr').data('barang')
-    //     var qty = elm.parents('tr').find('input[name="qty"]').val()
-    //     var hargaJual = elm.parents('tr').find('input[name="hargaJual"]').val()
-    //     var tothargabarang = parseFloat(qty) * parseFloat(hargaJual)
-    //     elm.parents('tr').find('input, select').attr('readonly', 'readonly')
-    //     elm.parents('td').find('button.bt-add-barang').css('display', 'none')
-    //     elm.parents('td').find('button.bt-del-barang').css('display', 'block')
-    //     /* Tambah Data Details Barang */
-    //     body.find('tbody#list-details-order-pelanggan').append(
-    //         '<tr id="B'+urut+'" data-tothargabarang="'+tothargabarang+'" data-totbiaya="0">'+
-    //         '<td>'+qty+'</td>'+
-    //         '<td>'+dataBarang.nama+'</td>'+
-    //         '<td class="text-right">'+dataBarang.satuan+'</td>'+
-    //         '<td class="text-right">'+hargaJual+'</td>'+
-    //         '</tr>'
-    //     )
-    //     totalBelanja()
-    // })
+    $('body').on('click', 'button#reset-filter', function(){
+        initDefault()
+    })
 
-    // $('body').on('click', 'button.bt-del-barang', function(){
-    //     var elm = $(this)
-    //     var urut = elm.parents('tr').data('urut')
-    //     body.find('tbody#list-details-order-pelanggan tr#B'+urut).remove()
-    //     elm.parents('tr').remove()
-    //     body.find('tbody#item-barang tr').each(function(i){
-    //         $(this).find('td.urut').html(i+1)
-    //     })
-    //     totalBelanja()
-    // })
-
-    // $('body').on('click', 'button.bt-add-jasa', function(){
-    //     initCreateJasa()
-    //     var elm = $(this)
-    //     var urut = elm.parents('tr').data('urut')
-    //     var qty = elm.parents('tr').find('input[name="qty"]').val()
-    //     var biaya = elm.parents('tr').find('input[name="biaya"]').val()
-    //     var totbiaya = parseFloat(qty) * parseFloat(biaya)
-    //     var nama = elm.parents('tr').find('input[name="nama"]').val()
-    //     elm.parents('td').find('button.bt-add-jasa').css('display', 'none')
-    //     elm.parents('td').find('button.bt-del-jasa').css('display', 'block')
-    //     /* Tambah Data Details Barang */
-    //     body.find('tbody#list-details-order-pelanggan').append(
-    //         '<tr id="J'+urut+'" data-tothargabarang="0" data-totbiaya="'+totbiaya+'">'+
-    //         '<td>'+qty+'</td>'+
-    //         '<td>'+nama+'</td>'+
-    //         '<td class="text-right">-</td>'+
-    //         '<td class="text-right">'+biaya+'</td>'+
-    //         '</tr>'
-    //     )
-    //     totalBelanja()
-    // })
-
-    // $('body').on('click', 'button.bt-del-jasa', function(){
-    //     var elm = $(this)
-    //     var urut = elm.parents('tr').data('urut')
-    //     body.find('tbody#list-details-order-pelanggan tr#J'+urut).remove()
-    //     elm.parents('tr').remove()
-    //     body.find('tbody#item-jasa tr').each(function(i){
-    //         console.log($(this).find('td.urut').html(i+1));
-    //     })
-    //     totalBelanja()
-    // })
-
-    // $('body').on('click', '#apply-filter', function(){
-    //     var limit = $('input[name="limit"]').val()
-    //     var kode = $('input[name="kode"]').val() && '&kode=' + $('input[name="kode"]').val()
-    //     var nama = $('input[name="nama"]').val() && '&nama=' + $('input[name="nama"]').val()
-    //     var email = $('input[name="email"]').val() && '&email=' + $('input[name="email"]').val()
-    //     var phone = $('input[name="phone"]').val() && '&phone=' + $('input[name="phone').val()
-    //     var cabang_id = $('select[name="cabang_id"]').val()  && '&cabang_id=' + $('select[name="cabang_id"]').val()
-    //     var url = `jasa/list?keyword=true&limit=${limit}${kode}${nama}${email}${phone}${cabang_id}`
-    //     $.ajax({
-    //         async: true,
-    //         url: url,
-    //         method: 'GET',
-    //         dataType: 'html',
-    //         contentType: false,
-    //         success: function(result){
-    //             body.find('div#content-list').html(result)
-    //             body.find('div#content-form').html('')
-    //         },
-    //         error: function(err){
-    //             console.log(err)
-    //         },
-    //         complete: function() {
-    //             body.find('button#bt-create-form').css('display', 'inline')
-    //             body.find('button.bt-back').css('display', 'none')
-    //             body.find('div#content-list').css('display', 'block')
-    //             body.find('div#content-form').css('display', 'none')
-    //             body.find('div#div-filter-limit').css('display', 'inline')
-    //         }
-    //     })
-    // })
-
-    // $('body').on('click', '#reset-filter', function(){
-    //     var limit = $('input[name="limit"]').val()
-    //     initDefault(limit)
-    //     $('div#filtermodal').find('input').val('')
-    //     $('div#filtermodal').find('select').val(null).trigger('change')
-    // })
+    $('body').on('click', 'button#apply-filter', function(){
+        var keyword = body.find('input[name="keyword"]').val() || 'INV'
+        var limit = body.find('input[name="limit"]').val() || null
+        var pelanggan_id = body.find('select[name="pelanggan_id"]').val() || null
+        var cabang_id = body.find('select[name="cabang_id"]').val() || null
+        var status = body.find('select[name="status"]').val() || null
+        var beginDate = body.find('input[name="begin_date"]').val() || null
+        var endDate = body.find('input[name="end_date"]').val() || null
+        $.ajax({
+            async: true,
+            url: 'entry-pembayaran/list-order',
+            method: 'GET',
+            data: {
+                limit: limit || 100,
+                // page: page || 1,
+                keyword: keyword,
+                pelanggan_id: pelanggan_id,
+                cabang_id: cabang_id,
+                status: status,
+                beginDate: beginDate,
+                endDate: endDate
+            },
+            dataType: 'html',
+            contentType: false,
+            beforeSend: function(){
+                $.toast({
+                    heading: 'Info',
+                    text: 'Trying to update jurnal delay',
+                    position: 'top-right',
+                    loaderBg: '#FFF',
+                    icon: 'warning',
+                    bgColor: '#707cd2',
+                    hideAfter: 3500,
+                    stack: 6
+                });
+                body.find('div#content-list').html(`<small class="m-l-20">Trying to update jurnal delay & Collecting data...<small/>`)
+            },
+            success: function(result){
+                // console.log(result);
+                body.find('div#content-list').html(result)
+                body.find('div#content-form').html('')
+            },
+            error: function(err){
+                console.log(err)
+            },
+            complete: function() {
+                body.find('button#bt-create-form').css('display', 'inline')
+                body.find('button.bt-back').css('display', 'none')
+                body.find('div#content-list').css('display', 'block')
+                body.find('div#content-form').css('display', 'none')
+                body.find('div#div-filter-limit').css('display', 'inline')
+            }
+        })
+    })
 
     $('body').on('submit', 'form#form-create', function(e){
         e.preventDefault()

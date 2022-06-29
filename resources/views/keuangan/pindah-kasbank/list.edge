@@ -1,3 +1,5 @@
+{{ script('ajax/initDate') }}
+{{ script('ajax/initNumber') }}
 <div class="panel-wrapper collapse in">
     <div class="panel-body">
         <div class="row">
@@ -7,11 +9,11 @@
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">No</th>
                             <th width="50" class="text-center bg-inverse b-all">ACT</th>
-                            <th class="bg-inverse b-all">Kode<br/>Nama</th>
-                            <th class="bg-inverse b-all">Category<br/>Brand</th>
-                            <th class="bg-inverse b-all">PartNumber<br/>Qualitas</th>
-                            <th class="bg-inverse b-all">Satuan<br/>MinStok</th>
-                            <th width="150" class="text-center bg-inverse b-all">Images</th>
+                            <th width="30" class="text-center bg-inverse b-all">#</th>
+                            <th class="bg-inverse b-all">Tanggal</th>
+                            <th class="bg-inverse b-all">Dibayarkan Dari</th>
+                            <th class="bg-inverse b-all">Dana Masuk Ke</th>
+                            <th class="text-right bg-inverse b-all">Jumlah</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -20,37 +22,49 @@
                                 <td class="text-center">{{$loop.index + 1}}</td>
                                 <td>
                                     <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
-                                </td>
-                                <td>
-                                    <small>{{item.kode}}</small><br>
-                                    <strong>{{item.nama}}</strong>
-                                </td>
-                                <td>
-                                    <small>{{item.kategori_id?item.kategori.nama: ''}}</small>
-                                    @if(item.subkategori_id)
-                                        <small class="text-success">-> {{item.subkategori_id?item.subkategori.nama: ''}} </small>
+                                    @if(['administrator', 'developer', 'keuangan'].includes(auth.user.usertype))
+                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">
+                                            <i class="ti-trash"></i>
+                                        </button>
                                     @endif
-                                    <br>
-                                    <strong>{{item.brand_id?item.brand.nama:''}}</strong>
+                                </td>
+                                <td>
+                                    @if(item.files.length > 0)
+                                        @each(file in item.files)
+                                            <a href="../..{{file.url}}" target="_blank">
+                                                <i class="ti-clip"></i> File
+                                            </a> <br>
+                                        @endeach
+                                    @else
+                                        -NoFile-
+                                    @endif
+                                </td>
+                                <td class="dateFormatDef" data-format="DD MMMM YYYY" data-tgl="{{item.trx_date}}" data-elm="strong">
+                                    <strong></strong><br>
+                                    <small>{{item.createdby.nama_lengkap}}</small>
+                                </td>
+                                <td>
+                                    @if(item.bankSrc)
+                                        {{item.bankSrc.name}} <br>
+                                        <small>{{item.bankSrc.cabang.nama}}</small>
+                                    @endif
+                                    @if(item.kasSrc)
+                                        {{item.kasSrc.name}} <br>
+                                        <small>{{item.kasSrc.cabang.nama}}</small>
+                                    @endif
                                 </td>
                                 <td class="text-warning">
-                                    {{item.num_part || ''}}<br>
-                                    {{item.qualitas_id?item.qualitas.nama:''}} 
-                                </td>
-                                <td class="text-right">
-                                    {{item.min_stok}}<br>
-                                    {{item.satuan}} 
-                                </td>
-                                <td class="text-center">
-                                    @if(item.photo)
-                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl(item.photo) }}" title="{{item.nama}}">
-                                            <img class="img-rounded" src="{{ assetsUrl(item.photo) }}" width="50" height="50"/>
-                                        </a>
-                                    @else
-                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl('images/ximg_not_found.jpeg') }}" title="{{item.nama}}">
-                                            <img class="img-rounded" src="{{ assetsUrl('images/ximg_not_found.jpeg') }}" width="50"/>
-                                        </a>
+                                    @if(item.bankTarget)
+                                        {{item.bankTarget.name}} <br>
+                                        <small>{{item.bankTarget.cabang.nama}}</small>
                                     @endif
+                                    @if(item.kasTarget)
+                                        {{item.kasTarget.name}} <br>
+                                        <small>{{item.kasTarget.cabang.nama}}</small>
+                                    @endif
+                                </td>
+                                <td class="text-right text-white formatIDR" data-number="{{item.total}}" data-elm="span">
+                                    <span style="font-size:large"></span>
                                 </td>
                             </tr>
                         @endeach

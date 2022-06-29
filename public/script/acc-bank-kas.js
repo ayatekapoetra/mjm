@@ -41,7 +41,7 @@ $(function(){
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'bank-kas/bank',
+            url: 'kas-bank/bank',
             method: 'POST',
             data: data,
             dataType: 'json',
@@ -69,7 +69,7 @@ $(function(){
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'bank-kas/kas',
+            url: 'kas-bank/kas',
             method: 'POST',
             data: data,
             dataType: 'json',
@@ -96,7 +96,7 @@ $(function(){
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'bank-kas/bank/'+id+'/show',
+            url: 'kas-bank/bank/'+id+'/show',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -125,7 +125,7 @@ $(function(){
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'bank-kas/bank/'+id+'/details',
+            url: 'kas-bank/bank/'+id+'/details',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -154,7 +154,7 @@ $(function(){
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'bank-kas/kas/'+id+'/show',
+            url: 'kas-bank/kas/'+id+'/show',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -183,7 +183,7 @@ $(function(){
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'bank-kas/kas/'+id+'/details',
+            url: 'kas-bank/kas/'+id+'/details',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -253,7 +253,7 @@ $(function(){
     //     $.ajax({
     //         async: true,
     //         headers: {'x-csrf-token': $('[name=_csrf]').val()},
-    //         url: 'bank-kas/bank/'+id+'/update',
+    //         url: 'kas-bank/bank/'+id+'/update',
     //         method: 'POST',
     //         data: data,
     //         dataType: 'json',
@@ -282,7 +282,7 @@ $(function(){
     //     $.ajax({
     //         async: true,
     //         headers: {'x-csrf-token': $('[name=_csrf]').val()},
-    //         url: 'bank-kas/kas/'+id+'/update',
+    //         url: 'kas-bank/kas/'+id+'/update',
     //         method: 'POST',
     //         data: data,
     //         dataType: 'json',
@@ -307,7 +307,7 @@ $(function(){
     function initDefault(limit, page){
         $.ajax({
             async: true,
-            url: 'bank-kas/list',
+            url: 'kas-bank/list',
             method: 'GET',
             dataType: 'html',
             contentType: false,
@@ -331,7 +331,7 @@ $(function(){
     function initBankCreate(){
         $.ajax({
             async: true,
-            url: 'bank-kas/bank/create',
+            url: 'kas-bank/bank/create',
             method: 'GET',
             dataType: 'html',
             contentType: false,
@@ -355,7 +355,7 @@ $(function(){
     function initKasCreate(){
         $.ajax({
             async: true,
-            url: 'bank-kas/kas/create',
+            url: 'kas-bank/kas/create',
             method: 'GET',
             dataType: 'html',
             contentType: false,

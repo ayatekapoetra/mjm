@@ -1,8 +1,8 @@
 {{ script('ajax/opt-coa') }}
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-kas') }}
+{{ script('ajax/opt-bank') }}
 {{ script('ajax/opt-options') }}
-{{ script('ajax/opt-barang-brand') }}
-{{ script('ajax/opt-barang-kategori') }}
-{{ script('ajax/opt-barang-qualitas') }}
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
         <div class="col-sm-12 col-xs-12">
@@ -10,71 +10,93 @@
                 {{ csrfField() }}
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="form-group">
-                                <label class="control-label">Part Number</label>
-                                <input type="text" name="num_part" class="form-control" placeholder="Input part number disini..." value="" required>
+                                <label class="control-label">Tanggal</label>
+                                <input type="date" name="trx_date" class="form-control initDate" value="" required>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-10">
                             <div class="form-group">
-                                <label class="control-label">Nama</label>
-                                <input type="text" name="nama" class="form-control" placeholder="Input nama barang disini..." value="" required>
+                                <label class="control-label">Keterangan</label>
+                                <input type="text" name="narasi" class="form-control" placeholder="Input keterangan disini..." value="">
                             </div>
                         </div>
                         <div class="col-md-2">
+                            <label for="ppn">Sumber</label>
+                            <div class="form-group" style="margin-top: 10px">
+                                <div class="material-switch">
+                                    <input id="isBankScr" name="isBankScr" type="checkbox"/>
+                                    <label for="isBankScr" class="label-default"></label>
+                                    <span id="txt-checkbox-source" class="m-l-10"> Sumber Bank</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="bank-source">
                             <div class="form-group">
-                                <label class="control-label">Min. Stock</label>
-                                <input type="number" name="min_stok" class="form-control text-right" value="0" required>
+                                <label class="control-label">Dibayarkan Dari</label>
+                                <select class="form-control" name="bank_src" data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="kas-source" style="display: none;">
+                            <div class="form-group">
+                                <label class="control-label">Dibayarkan Dari</label>
+                                <select class="form-control" name="kas_src" data-values=""></select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Kategori</label>
-                                <select class="form-control selectBarangKategori" name="kategori_id" data-values="" required></select>
+                                <label class="control-label">Jumlah</label>
+                                <input type="number" name="total" class="form-control text-right" value="0" required>
                             </div>
                         </div>
-                        <div class="div-subkategori col-md-3" style="display:none;">
-                            <div class="form-group">
-                                <label class="control-label">SubKategori</label>
-                                <select class="form-control selectBarangSubKategori" name="subkategori_id" data-values="" required></select>
-                            </div>
+                        <div class="col-md-2">
+                            <label for="ppn">Status</label>
+                            <select class="form-control selectOptions" name="status_out" data-group="mutasi-status" data-values="sesuai"></select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="form-group">
-                                <label class="control-label">Brand</label>
-                                <select class="form-control selectBarangBrand" name="brand_id" data-values="" required></select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Qualitas</label>
-                                <select class="form-control selectBarangQualitas" name="qualitas_id" data-values="" required></select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Satuan</label>
-                                <select class="form-control selectOptions" name="satuan" data-group="satuan" required></select>
+                                <label class="control-label">Tanggal Delay</label>
+                                <input type="date" name="delay_out" class="form-control text-right initDate" readonly>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Kategori COA Debit</label>
-                                <select class="form-control selectCoa" name="coa_in" data-values=""></select>
+                        <div class="col-md-2">
+                            <label for="ppn">Tujuan</label>
+                            <div class="form-group" style="margin-top: 10px">
+                                <div class="material-switch">
+                                    <input id="isBankTarget" name="isBankTarget" type="checkbox"/>
+                                    <label for="isBankTarget" class="label-default"></label>
+                                    <span id="txt-checkbox-target" class="m-l-10"> Sumber Bank</span>
+                                </div>
                             </div>
+                        </div>
+                        <div class="col-md-3" id="bank-target">
+                            <div class="form-group">
+                                <label class="control-label">Dana Masuk</label>
+                                <select class="form-control" name="bank_target" data-values="" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="kas-target" style="display: none;">
+                            <div class="form-group">
+                                <label class="control-label">Dana Masuk</label>
+                                <select class="form-control" name="kas_target" data-values=""></select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="ppn">Status</label>
+                            <select class="form-control selectOptions" name="status_in" data-group="mutasi-status" data-values="sesuai"></select>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Kategori COA Kredit</label>
-                                <select class="form-control selectCoa" name="coa_out" data-values=""></select>
+                                <label class="control-label">Tanggal Delay</label>
+                                <input type="date" name="delay_in" class="form-control text-right initDate" readonly>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="control-label">Photo</label>
+                                <label class="control-label">Bukti Photo</label>
                                 <input type="file" name="photo" class="form-control text-right">
                             </div>
                         </div>
@@ -93,3 +115,101 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(function(){
+        $('input[name="isBankScr"]').on('click', function(){
+            var isBank = $(this).is(':checked')
+            if(isBank){
+                $('span#txt-checkbox-source').html('Sumber Kas')
+                $('select[name="bank_src"]').removeAttr('required').val('').trigger('change')
+                $('select[name="kas_src"]').attr('required', 'required')
+                $('div#bank-source').css('display', 'none')
+                $('div#kas-source').css('display', 'block')
+            }else{
+                $('span#txt-checkbox-source').html('Sumber Bank')
+                $('select[name="kas_src"]').removeAttr('required').val('').trigger('change')
+                $('select[name="bank_src"]').attr('required', 'required')
+                $('div#bank-source').css('display', 'block')
+                $('div#kas-source').css('display', 'none')
+            }
+        })
+
+        $('input[name="isBankTarget"]').on('click', function(){
+            var isBank = $(this).is(':checked')
+            if(isBank){
+                $('span#txt-checkbox-target').html('Sumber Kas')
+                $('select[name="bank_target"]').removeAttr('required').val('').trigger('change')
+                $('select[name="kas_target"]').attr('required', 'required')
+                $('div#bank-target').css('display', 'none')
+                $('div#kas-target').css('display', 'block')
+            }else{
+                $('span#txt-checkbox-target').html('Sumber Bank')
+                $('select[name="kas_target"]').removeAttr('required').val('').trigger('change')
+                $('select[name="bank_target"]').attr('required', 'required')
+                $('div#bank-target').css('display', 'block')
+                $('div#kas-target').css('display', 'none')
+            }
+        })
+
+        $('select[name="status_out"]').on('change', function(){
+            $(this).val() === 'sesuai' ? $('input[name="delay_out"]').attr('readonly', 'true') : $('input[name="delay_out"]').removeAttr('readonly')
+            $('input[name="delay_out"]').val(moment().format('YYYY-MM-DD'))
+        })
+
+        $('select[name="status_in"]').on('change', function(){
+            $(this).val() === 'sesuai' ? $('input[name="delay_in"]').attr('readonly', 'true') : $('input[name="delay_in"]').removeAttr('readonly')
+            $('input[name="delay_in"]').val(moment().format('YYYY-MM-DD'))
+        })
+    })
+</script>
+
+<style>
+    .text-bold {
+        font-weight: bold
+    }
+    .material-switch > input[type="checkbox"] {
+        display: none;   
+    }
+    
+    .material-switch > label {
+        cursor: pointer;
+        height: 0px;
+        position: relative; 
+        width: 40px;  
+    }
+    
+    .material-switch > label::before {
+        background: rgb(0, 0, 0);
+        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        content: '';
+        height: 16px;
+        margin-top: -8px;
+        position:absolute;
+        opacity: 0.3;
+        transition: all 0.4s ease-in-out;
+        width: 40px;
+    }
+    .material-switch > label::after {
+        background: rgb(83 230 157);
+        border-radius: 16px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        content: '';
+        height: 24px;
+        left: -4px;
+        margin-top: -8px;
+        position: absolute;
+        top: -4px;
+        transition: all 0.3s ease-in-out;
+        width: 24px;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::before {
+        background: inherit;
+        opacity: 0.5;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::after {
+        background: inherit;
+        left: 20px;
+    }
+</style>

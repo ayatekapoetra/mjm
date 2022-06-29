@@ -38,7 +38,9 @@ class bayarPelanggan {
     }
 
     async LIST_ORDER (req, user) {
+        console.log(req);
         const limit = req.limit || 25;
+        const ws = await initFunc.WORKSPACE(user)
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
         let data
         if(req.keyword){
@@ -52,12 +54,18 @@ class bayarPelanggan {
                     if(req.cabang_id){
                         w.where('cabang_id', req.cabang_id)
                     }
-                    if(req.kode){
-                        w.where('kode', 'like', `%${req.kode}%`)
+                    if(req.pelanggan_id){
+                        w.where('pelanggan_id', req.pelanggan_id)
                     }
                     if(req.status){
-                        w.where('nama', 'like', `%${req.status}%`)
+                        w.where('status', req.status)
                     }
+                    if (req.beginDate && req.endDate) {
+                        w.where('date', '>=', moment(req.beginDate).startOf('day').format('YYYY-MM-DD HH:mm'))
+                        w.where('date', '<=', moment(req.endDate).endOf('day').format('YYYY-MM-DD HH:mm'))
+                    }
+                    w.where('kdpesanan', 'like', `%${req.keyword}%`)
+                    w.orWhere('narasi', 'like', `%${req.keyword}%`)
                 })
                 .orderBy('created_at', 'desc')
                 .paginate(halaman, limit)
@@ -69,6 +77,11 @@ class bayarPelanggan {
                 .with('cabang')
                 .with('pelanggan')
                 .with('payment', w => w.where('aktif', 'Y'))
+                .where( w => {
+                    if(!['administrator', 'developer', 'keuangan'].includes(user.usertype)){
+                        w.where('cabang_id', ws.cabang_id)
+                    }
+                })
                 .orderBy('created_at', 'desc')
                 .paginate(halaman, limit)
             ).toJSON()
@@ -394,7 +407,8 @@ class bayarPelanggan {
                 barang_id: brg.barang_id,
                 gudang_id: brg.gudang_id,
                 cabang_id: ws.cabang_id,
-                qty_del: parseFloat(brg.qty),
+                qty_hand: parseFloat(brg.qty) * -1,
+                qty_del: parseFloat(brg.qty) * -1,
                 createdby: user.id
             })
 
@@ -424,34 +438,34 @@ class bayarPelanggan {
         const ws = await initFunc.WORKSPACE(user)
         const uniqKey = req.uniqKey || moment().format('DDMMYYHHmmss')
         
-        /* FIRST PAYMENT UPDATE STOK BARANG */
-        const lenBayar = await OpsPelangganBayar.query().where('order_id', req.inv_id).last()
-        if(!lenBayar){
-            const listBarang = (await OpsPelangganOrderItem.query().where('order_id', req.inv_id).fetch()).toJSON()
-            // console.log(listBarang);
-            for (const brg of listBarang) {
-                const barangLokasi = new BarangLokasi()
-                barangLokasi.fill({
-                    trx_inv: brg.id,
-                    barang_id: brg.barang_id,
-                    gudang_id: brg.gudang_id,
-                    cabang_id: ws.cabang_id,
-                    qty_del: parseFloat(brg.qty) * -1,
-                    qty_hand: parseFloat(brg.qty) * -1,
-                    createdby: user.id
-                })
-                try {
-                    await barangLokasi.save(trx)
-                } catch (error) {
-                    console.log(error);
-                    await trx.rollback()
-                    return {
-                        success: false,
-                        message: 'Failed update stok \n'+ JSON.stringify(error)
-                    }
-                }
-            }
-        }/* FIRST PAYMENT UPDATE STOK BARANG */
+        // /* FIRST PAYMENT UPDATE STOK BARANG */
+        // const lenBayar = await OpsPelangganBayar.query().where('order_id', req.inv_id).last()
+        // if(!lenBayar){
+        //     const listBarang = (await OpsPelangganOrderItem.query().where('order_id', req.inv_id).fetch()).toJSON()
+        //     // console.log(listBarang);
+        //     for (const brg of listBarang) {
+        //         const barangLokasi = new BarangLokasi()
+        //         barangLokasi.fill({
+        //             trx_inv: brg.id,
+        //             barang_id: brg.barang_id,
+        //             gudang_id: brg.gudang_id,
+        //             cabang_id: ws.cabang_id,
+        //             qty_del: parseFloat(brg.qty) * -1,
+        //             qty_hand: parseFloat(brg.qty) * -1,
+        //             createdby: user.id
+        //         })
+        //         try {
+        //             await barangLokasi.save(trx)
+        //         } catch (error) {
+        //             console.log(error);
+        //             await trx.rollback()
+        //             return {
+        //                 success: false,
+        //                 message: 'Failed update stok \n'+ JSON.stringify(error)
+        //             }
+        //         }
+        //     }
+        // }/* FIRST PAYMENT UPDATE STOK BARANG */
 
         const kodeKwitansi = await initFunc.GEN_KODE_KWITANSI(user)
         const orderData = await OpsPelangganOrder.query().where('id', req.inv_id).last()

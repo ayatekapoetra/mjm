@@ -9,7 +9,7 @@ class UserMenuController {
         let usr
         try {
             usr = await auth.getUser()
-            const workdir = await initFunc.GET_WORKSPACE(usr.id)
+            const workdir = await initFunc.WORKSPACE(usr)
             const sideMenu = await initMenu.SIDEBAR(usr.id)
             return view.render('setting.user-menus.index', {
                 menu: sideMenu,
@@ -36,7 +36,7 @@ class UserMenuController {
 
     async create ( { auth, view } ) {
         const user = await userValidate(auth)
-        const ws = await initFunc.GET_WORKSPACE(user.id)
+        const ws = await initFunc.WORKSPACE(user)
         if(!user){
             return view.render('401')
         }

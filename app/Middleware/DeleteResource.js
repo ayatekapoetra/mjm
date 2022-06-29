@@ -33,7 +33,7 @@ class DeleteResource {
         await next()
       }else{
         console.log('Failed create middlewere authorization...');
-        return
+        throw new Error('You user not authorized to delete data...')
       }
     }
   }

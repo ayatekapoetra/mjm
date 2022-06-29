@@ -13,19 +13,19 @@ class TrxTransferKasBank extends Model {
     }
 
     bankSrc () {
-        return this.belongsTo("App/Models/master/Bank", "bank_src", "id")
+        return this.belongsTo("App/Models/akunting/Bank", "bank_src", "id")
     }
 
     kasSrc () {
-        return this.belongsTo("App/Models/master/Kas", "kas_src", "id")
+        return this.belongsTo("App/Models/akunting/Kas", "kas_src", "id")
     }
     
     bankTarget () {
-        return this.belongsTo("App/Models/master/Bank", "bank_target", "id")
+        return this.belongsTo("App/Models/akunting/Bank", "bank_target", "id")
     }
 
     kasTarget () {
-        return this.belongsTo("App/Models/master/Kas", "kas_target", "id")
+        return this.belongsTo("App/Models/akunting/Kas", "kas_target", "id")
     }
 
     coaScr () {
@@ -41,7 +41,7 @@ class TrxTransferKasBank extends Model {
     }
 
     files () {
-        return this.hasOne("App/Models/LampiranFile", "id", "trf_id")
+        return this.hasMany("App/Models/transaksi/KeuTransferKasBankAttach", "id", "transfer_id")
     }
 }
 

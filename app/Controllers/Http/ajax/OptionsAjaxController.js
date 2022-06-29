@@ -49,8 +49,13 @@ class OptionsAjaxController {
             .fetch()
         ).toJSON()
 
-        options = options.map(obj => obj.nilai === req.selected ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+        // options = options.map(obj => obj.nilai === req.selected ? {...obj, selected: 'selected'} : {...obj, selected: ''})
 
+        if(req.selected){
+            options = options.map(el => el.nilai === req.selected ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            options.unshift({nilai: '', teks: 'Pilih', selected: 'selected'})
+        }
         
         return options
 
@@ -286,21 +291,36 @@ class OptionsAjaxController {
             return
         }
 
-        const ws = await initFunc.WORKSPACE(user)
-        let data = (
-            await Kas.query().where( w => {
-                w.where('cabang_id', ws.cabang_id)
-                if(req.keyword){
-                    w.where('name', 'like', `%${req.keyword}%`)
-                }
-            }).orderBy('coa_id', 'desc').fetch()
-        ).toJSON()
+        var pusat = ['administrator', 'developer', 'keuangan'].includes(user.usertype)
+
+        let data
+        if(pusat){
+            data = (
+                await Kas.query().where( w => {
+                    if(req.keyword){
+                        w.where('name', 'like', `%${req.keyword}%`)
+                    }
+                }).orderBy('coa_id', 'desc').fetch()
+            ).toJSON()
+        }else{
+            const ws = await initFunc.WORKSPACE(user)
+            data = (
+                await Kas.query().where( w => {
+                    w.where('cabang_id', ws.cabang_id)
+                    if(req.keyword){
+                        w.where('name', 'like', `%${req.keyword}%`)
+                    }
+                }).orderBy('coa_id', 'desc').fetch()
+            ).toJSON()
+        }
+
 
         if(req.selected){
             data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
         }else{
             data.unshift({id: '', name: 'Pilih', selected: 'selected'})
         }
+
         return data
     }
 
@@ -312,12 +332,22 @@ class OptionsAjaxController {
             return
         }
 
-        const ws = await initFunc.WORKSPACE(user)
-        let data = (
-            await Bank.query().where( w => {
-                w.where('cabang_id', ws.cabang_id)
-            }).fetch()
-        ).toJSON()
+        var pusat = ['administrator', 'developer', 'keuangan'].includes(user.usertype)
+        let data
+        if(pusat){
+            data = (
+                await Bank.query().where( w => {
+                    w.where('aktif', 'Y')
+                }).fetch()
+            ).toJSON()
+        }else{
+            const ws = await initFunc.WORKSPACE(user)
+            data = (
+                await Bank.query().where( w => {
+                    w.where('cabang_id', ws.cabang_id)
+                }).fetch()
+            ).toJSON()
+        }
 
         if(req.selected){
             data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
@@ -342,11 +372,18 @@ class OptionsAjaxController {
 
     // }
 
-    async cabang ( { request } ) {
+    async cabang ( { auth, request } ) {
         const req = request.all()
+        const user = await userValidate(auth)
+        const ws = await initFunc.WORKSPACE(user)
         req.selected = req.selected === 'null' ? null : req.selected
+
+        var pusat = ['administrator', 'developer', 'keuangan'].includes(user.usertype)
         let data = (
                 await Cabang.query().where( w => {
+                    if(!pusat){
+                        w.where('cabang_id', ws.cabang_id)
+                    }
                 w.where('aktif', 'Y')
             }).orderBy('tipe', 'desc')
             .fetch()

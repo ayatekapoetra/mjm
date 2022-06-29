@@ -4,6 +4,8 @@
 {{ script('script/ops-bayar-pelanggan') }}
 {{ script('plugins/bower_components/pdfmake/build/pdfmake.min') }}
 {{ script('plugins/bower_components/pdfmake/build/vfs_fonts') }}
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/pdfmake.min.js" integrity="sha512-rDbVu5s98lzXZsmJoMa0DjHNE+RwPJACogUCLyq3Xxm2kJO6qsQwjbE5NDk2DqmlKcxDirCnU1wAzVLe12IM3w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.5/vfs_fonts.js" integrity="sha512-cktKDgjEiIkPVHYbn8bh/FEyYxmt4JDJJjOCu5/FQAkW4bc911XtKYValiyzBiJigjVEvrIAyQFEbRJZyDA1wQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
 <div class="container-fluid">
     <div class="row bg-title">
         <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
@@ -21,7 +23,7 @@
                         <div class="col-xs-10">
                             <button class="btn btn-info" id="bt-create-form">
                                 <i class="ti-plus"></i>
-                                Pembayaran Baru
+                                Multi Payment
                             </button>
                             <button class="btn btn-default bt-back" id="bt-back" style="display:none;">
                                 <i class="ti-arrow-left"></i>
@@ -38,7 +40,7 @@
                         </div>
                     </div>
                 </div>
-                @include('operational.order-pelanggan.filter')
+                @include('operational.pembayaran-pelanggan.filter')
                 <div id="content-list" style="display:none;"></div>
                 <div id="content-form" style="display:none;"></div>
             </div>
@@ -46,4 +48,10 @@
     </div>
 </div>
 <div class="init-form"></div>
+<style>
+    .font100Italic {
+        font-weight: 100 !important;
+        font-style: italic !important;
+    }
+</style>
 @endsection

@@ -38,7 +38,7 @@ class PembayaranPelangganController {
             return view.render('401')
         }
 
-        const data = await BayarPelangganHelpers.LIST_ORDER(req)
+        const data = await BayarPelangganHelpers.LIST_ORDER(req, user)
         // console.log('...', data);
         return view.render('operational.pembayaran-pelanggan.list-order', {list: data})
     }
@@ -235,10 +235,18 @@ class PembayaranPelangganController {
                 subject: 'Makassar Jaya Marine Personal license',
                 keywords: 'invoice MJM',
             },
-            // footer: { text: 'Right part', alignment: 'left', margin: [10, 20, 15, 10] },
+            // footer: { text: 'Right part', alignment: 'left', margin: [10, 20, 15, 10], fontSize: 20, color: 'red' },
             footer: function (currentPage, pageCount) {
-                return { text: 'Page ' + currentPage.toString() + ' of ' + pageCount, alignment: 'center' }
+                return { text: 'Page  of ', fontSize: 20, color: 'red', alignment: 'center', margin: [10, 20, 15, 10] }
             },
+            // footer: function(currentPage, pageCount) { return currentPage.toString() + ' of ' + pageCount; },
+            // header: function(currentPage, pageCount, pageSize) {
+            //     console.log('HEADER :::', currentPage, pageSize);
+            //     return [
+            //     { text: 'simple text', alignment: (currentPage % 2) ? 'left' : 'right' },
+            //     { canvas: [ { type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 40 } ] }
+            //     ]
+            // },
             content: [
                 {
                     alignment: 'justify',

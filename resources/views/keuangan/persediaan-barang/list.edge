@@ -9,7 +9,7 @@
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">#</th>
                             <th width="200" class="bg-inverse b-all">Cabang <br>Gudang</th>
-                            <th width="*" class="bg-inverse b-all">Desciptions <br>Barang</th>
+                            <th width="300" class="bg-inverse b-all">Desciptions <br>Barang</th>
                             <th width="*" class="bg-inverse b-all">Brand <br>Qualitas</th>
                             <th width="*" class="bg-inverse b-all">Kategori <br>Subkategori</th>
                             <th width="100" class="text-right bg-inverse b-all">Barang <br>onHand</th>
@@ -26,13 +26,14 @@
                                     <small>{{item.kd_cabang}} - {{item.nm_cabang}}</small> <br>
                                     [{{item.kd_gudang}}] - {{item.nm_gudang}}
                                 </td>
-                                <td>
+                                <td class="long-text" data-text="{{item.nm_barang}}" data-elm="span" data-len="50">
                                     <small>{{item.kd_barang}}</small> <br>
-                                    <strong>{{item.nm_barang}}</strong>
+                                    <span class="text-white">{{item.nm_barang}}</span>
                                 </td>
                                 <td>
-                                    {{item.barang.brand.nama}} <br>
-                                    <small>{{item.barang.qualitas.nama}}</small>
+                                    {{item.barang.brand?item.barang.brand.nama:''}} 
+                                    <br>
+                                    <small>{{item.barang.qualitas?item.barang.qualitas.nama:''}}</small>
                                 </td>
                                 <td>
                                     {{item.barang.kategori.nama}} <br>

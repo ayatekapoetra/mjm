@@ -31,17 +31,13 @@ class persediaanBarang {
                     a.with('subkategori')
                 })
                 .where( w => {
-                    w.where('cabang_id', ws.cabang_id)
+                    if(!['administrator', 'developer', 'keuangan'].includes(user.usertype)){
+                        w.where('cabang_id', ws.cabang_id)
+                    }
                 })
                 .orderBy('nm_barang', 'asc')
                 .paginate(halaman, limit)
         ).toJSON()
-
-        
-
-        // console.log('====================================');
-        // console.log(JSON.stringify(barangStok, null, 2));
-        // console.log('====================================');
 
         return barangStok
 

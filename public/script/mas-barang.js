@@ -184,7 +184,7 @@ $(function(){
             url: 'barang/list',
             method: 'GET',
             data: {
-                limit: limit || 100,
+                limit: limit || 50,
                 page: page || 1,
                 keyword: null
             },

@@ -27,7 +27,7 @@ class settingPrivilages {
     }
 
     async POST (req, user) {
-        const ws = await initFunc.GET_WORKSPACE(user.id)
+        const ws = await initFunc.WORKSPACE(user)
         const trx = await DB.beginTransaction()
 
         

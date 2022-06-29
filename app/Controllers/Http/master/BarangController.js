@@ -27,7 +27,7 @@ class BarangController {
         }
 
         const data = await BarangHelpers.LIST(req, user)
-        
+        console.log(data);
         return view.render('master.barang.list', { list: data })
     }
     

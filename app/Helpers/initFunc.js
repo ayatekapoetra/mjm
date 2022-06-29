@@ -38,6 +38,7 @@ const TrxFakturBeliBayar = use("App/Models/transaksi/TrxFakturBeliBayar")
 const OpsPurchasingOrder = use("App/Models/operational/OpsPurchasingOrder")
 const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
 const OpsPelangganBayar = use("App/Models/operational/OpsPelangganBayar")
+const KeuTransferKasBank = use("App/Models/transaksi/KeuTransferKasBank")
 
 const { performance } = require('perf_hooks')
 // const RECONSILIASI_KAS_BANK = use("App/Helpers/_setKasBankValues")
@@ -584,6 +585,17 @@ class initFunc {
         return patten
     }
 
+    async GEN_KODE_MUTASI (id) {
+        const data = await KeuTransferKasBank.query().orderBy('id', 'asc').last()
+        let str 
+        if(id){
+            str = '0'.repeat(8 - `${id}`.length) + id
+        }else{
+            str = '0'.repeat(8 - `${(data.id) + 1}`.length) + (data.id + 1)
+        }
+        return 'MUT' + moment().format('YYYY') + str
+    }
+
     async POST_INIT_BARANG(data) {
         for (const obj of data) {
             const genKode = await this.GEN_KODE_BARANG(obj.bisnis_id)
@@ -799,6 +811,7 @@ class initFunc {
         const kas = (await Kas.query().where('aktif', 'Y').fetch()).toJSON()
         for (const obj of kas) {
             const sumPaidOnBank_RILL = await TrxKas.query().where( w => {
+                w.where('kas_id', obj.id)
                 w.where('aktif', 'Y')
             }).getSum('saldo_rill') || 0
 
@@ -808,10 +821,6 @@ class initFunc {
                 .update({ 
                     saldo_rill: sumPaidOnBank_RILL
                 })
-                return {
-                    success: true,
-                    message: 'success menghitung akumulasi saldo kas....'
-                }
             } catch (error) {
                 console.log(error);
                 return {
@@ -826,14 +835,17 @@ class initFunc {
         const bank = (await Bank.query().where('aktif', 'Y').fetch()).toJSON()
         for (const obj of bank) {
             const sumPaidOnBank_NET = await TrxBank.query().where( w => {
+                w.where('bank_id', obj.id)
                 w.where('aktif', 'Y')
             }).getSum('saldo_net') || 0
 
             const sumPaidOnBank_SETOR = await TrxBank.query().where( w => {
+                w.where('bank_id', obj.id)
                 w.where('aktif', 'Y')
             }).getSum('setor_tunda') || 0
 
             const sumPaidOnBank_TARIK = await TrxBank.query().where( w => {
+                w.where('bank_id', obj.id)
                 w.where('aktif', 'Y')
             }).getSum('tarik_tunda') || 0
 
@@ -846,10 +858,7 @@ class initFunc {
                     tarik_tunda:  sumPaidOnBank_TARIK,
                     saldo_rill: (sumPaidOnBank_NET + sumPaidOnBank_SETOR) - sumPaidOnBank_TARIK
                 })
-                return {
-                    success: true,
-                    message: 'success menghitung akumulasi saldo bank....'
-                }
+                
             } catch (error) {
                 console.log(error);
                 return {
@@ -857,6 +866,10 @@ class initFunc {
                     message: 'gagal menghitung akumulasi saldo bank....'
                 }
             }
+        }
+        return {
+            success: true,
+            message: 'success menghitung akumulasi saldo bank....'
         }
     }
 

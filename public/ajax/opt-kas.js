@@ -11,11 +11,38 @@ $(function(){
         var values = $(this).data('values') || elm.val()
         $.ajax({
             async: true,
-            url: '/ajax/options/kas?keyword='+keyword+'&selected='+values,
+            url: '/ajax/options/kas',
             method: 'GET',
+            data: {
+                keyword: keyword || null,
+                selected: values || null
+            },
             dataType: 'json',
-            processData: false,
-            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                console.log(result);
+                elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.name+'</option>'))
+                elm.trigger('change');
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    })
+
+    $('select[name="kas_src"], select[name="kas_target"]').each(function(){
+        var elm = $(this)
+        var keyword = $(this).data('keyword') || ''
+        var values = $(this).data('values') || elm.val()
+        $.ajax({
+            async: true,
+            url: '/ajax/options/kas',
+            method: 'GET',
+            data: {
+                keyword: keyword || null,
+                selected: values || null
+            },
+            dataType: 'json',
             contentType: false,
             success: function(result){
                 console.log(result);

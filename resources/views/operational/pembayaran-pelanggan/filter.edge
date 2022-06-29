@@ -1,4 +1,6 @@
 {{ script('ajax/opt-options') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-pelanggan') }}
 <div class="modal fade" id="filtermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -7,10 +9,45 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-4">
-                        <label for="">Kode Barang</label>
+                    <div class="col-md-12">
+                        <label for="">Keyword</label>
                         <div class="form-group">
-                            <input type="text" class="form-control inp-filter input-sm" name="kode">
+                            <input type="text" class="form-control" name="keyword" placeholder="Input keyword kode invoices atau keterangan...">
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="">Pelanggan</label>
+                        <div class="form-group">
+                            <select class="form-control selectPelanggan" name="pelanggan_id"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Status</label>
+                        <div class="form-group">
+                            <select class="form-control" name="status">
+                                <option value="">Pilih</option>
+                                <option value="ready">Invoicing</option>
+                                <option value="dp">Down Payment</option>
+                                <option value="lunas">Lunas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Mulai Tanggal</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control" name="begin_date">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Hingga Tanggal</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control" name="end_date">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Cabang</label>
+                        <div class="form-group">
+                            <select class="form-control selectCabang" name="cabang_id"></select>
                         </div>
                     </div>
                 </div>
