@@ -9,8 +9,8 @@ const UsrWorkspace = use("App/Models/UsrWorkspace")
 
 class RingkasanController {
     async index ( { auth, view } ) {
-        console.log('xxxx');
         let usr
+        await initFunc.UPDATE_JURNAL_DELAY()
         try {
             usr = await auth.getUser()
             const sideMenu = await initMenu.SIDEBAR(usr.id)

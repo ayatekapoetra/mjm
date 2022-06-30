@@ -141,17 +141,12 @@ $(function(){
     
     $('body').on('submit', 'form#form-update', function(e){
         e.preventDefault()
-        var data = getDataForm()
-        var formdata = new FormData()
-        formdata.append('items', JSON.stringify(data))
-        formdata.append('lampiran', $('input#lampiran')[0].files[0])
+        var formdata = new FormData(this)
         var id = $(this).data('id')
-
-        console.log(data);
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'kas-bank/'+id+'/update',
+            url: 'transfer-kasbank/'+id+'/update',
             method: 'POST',
             data: formdata,
             dataType: 'json',
@@ -192,7 +187,7 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
-                body.find('button.create-form').css('display', 'inline')
+                body.find('button.create-form, div#div-filter-limit').css('display', 'inline')
                 body.find('button.bt-back').css('display', 'none')
                 body.find('div#content-list').css('display', 'block')
                 body.find('div#content-form').css('display', 'none')

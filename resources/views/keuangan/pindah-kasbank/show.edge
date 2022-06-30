@@ -65,12 +65,12 @@
                         </div>
                         <div class="col-md-2">
                             <label for="ppn">Status</label>
-                            <select class="form-control selectOptions" name="status_out" data-group="mutasi-status" data-values="sesuai"></select>
+                            <select class="form-control selectOptions" name="status_out" data-group="mutasi-status" data-values="{{data.status_out}}"></select>
                         </div>
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label class="control-label">Tanggal Delay</label>
-                                <input type="date" name="delay_out" class="form-control text-right initDate" readonly>
+                                <input type="date" name="delay_out" class="form-control text-right setDate" data-tgl="{{data.out_date}}" readonly>
                             </div>
                         </div>
                     </div>
@@ -102,18 +102,18 @@
                         <div class="col-md-3" id="bank-target" style="display: {{data.bank_target?'block':'none'}}">
                             <div class="form-group">
                                 <label class="control-label">Dana Masuk</label>
-                                <select class="form-control" name="bank_target" data-values="{{data.bank_target}}" required></select>
+                                <select class="form-control" name="bank_target" data-values="{{data.bank_target}}" {{data.bank_target?'required':''}}></select>
                             </div>
                         </div>
                         <div class="col-md-3" id="kas-target" style="display: {{data.kas_target?'block':'none'}}">
                             <div class="form-group">
                                 <label class="control-label">Dana Masuk</label>
-                                <select class="form-control" name="kas_target" data-values="{{data.kas_target}}"></select>
+                                <select class="form-control" name="kas_target" data-values="{{data.kas_target}}" {{data.kas_target?'required':''}}></select>
                             </div>
                         </div>
                         <div class="col-md-2">
                             <label for="ppn">Status</label>
-                            <select class="form-control selectOptions" name="status_in" data-group="mutasi-status" data-values="sesuai"></select>
+                            <select class="form-control selectOptions" name="status_in" data-group="mutasi-status" data-values="{{data.status_in}}"></select>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">

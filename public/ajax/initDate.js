@@ -12,6 +12,7 @@ $(function(){
     $('input[type="date"].setDate').each(function(){
         var tgl = $(this).data('tgl')
         $(this).val(moment(tgl).format('YYYY-MM-DD'))
+        // console.log(moment(tgl).format('YYYY-MM-DD'));
     })
 
     $('input[type="datetime-local"].initDateTime').each(function(){

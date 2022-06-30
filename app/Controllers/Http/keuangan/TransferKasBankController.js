@@ -48,9 +48,13 @@ class TransferKasBankController {
             return view.render('401')
         }
         
-        const data = await KeuTransferAntarKasBankHelpers.SHOW(params)
-        console.log(data);
-        return view.render('keuangan.pindah-kasbank.show', {data: data})
+        let data = await KeuTransferAntarKasBankHelpers.SHOW(params)
+        data = {
+            ...data, 
+            status_out: moment(data.trx_date).format('YYYY-MM-DD') != moment(data.out_date).format('YYYY-MM-DD') ? 'tunda':'sesuai',
+            status_in: moment(data.trx_date).format('YYYY-MM-DD') != moment(data.in_date).format('YYYY-MM-DD') ? 'tunda':'sesuai'
+        }
+        return view.render('keuangan.pindah-kasbank.show', { data })
     }
 
     async store ( { auth, request } ) {
@@ -78,9 +82,40 @@ class TransferKasBankController {
             req.isDelayIn = 'N'
         }
 
-
+        
         const attchment = request.file('photo', validateFile)
         const data = await KeuTransferAntarKasBankHelpers.POST(req, user, attchment)
+        return data
+    }
+
+    async update ( { auth, params, request } ) {
+        const req = request.all()
+
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+        const validateFile = {
+            types: ['image'],
+            size: '10mb',
+            extnames: ['png', 'bmp', 'jpg', 'jpeg', 'pdf']
+        }
+
+        if(req.trx_date != req.delay_out){
+            req.isDelayOut = 'Y'
+        }else{
+            req.isDelayOut = 'N'
+        }
+
+        if(req.trx_date != req.delay_in){
+            req.isDelayIn = 'Y'
+        }else{
+            req.isDelayIn = 'N'
+        }
+
+        // console.log(req);
+        const attchment = request.file('photo', validateFile)
+        const data = await KeuTransferAntarKasBankHelpers.UPDATE(params, req, user, attchment)
         return data
     }
 

@@ -125,7 +125,7 @@ class initFunc {
         const trx = await DB.beginTransaction()
         let jurnal = await TrxJurnal.query().where( w => {
             w.where('is_delay', 'Y')
-            w.where('delay_date', '>=', moment().format('YYYY-MM-DD HH:mm:ss'))
+            w.where('delay_date', '>=', moment().startOf('day').format('YYYY-MM-DD'))
         }).fetch()
 
         jurnal = jurnal.toJSON()
