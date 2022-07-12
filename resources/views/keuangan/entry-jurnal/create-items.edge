@@ -1,0 +1,142 @@
+
+<tr class="item-rows">
+    <td class="urut"><h4 class="urut-rows"></h4></td>
+    <td style="vertical-align: middle;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group m-b-10">
+                    <span class="input-group-btn"> 
+                        <button class="btn btn-danger bt-remove-item" type="button">
+                            <i class="ti-trash"></i>
+                        </button> 
+                    </span>
+                    <select class="form-control item-data-details" name="coa_id" required>
+                        <option value="">Pilih...</option>
+                        @each(item in akun)
+                            <optgroup label="{{item.tipe}}" style="color:white">
+                                @each(coa in item.items)
+                                    <option value="{{coa.id}}">
+                                        @if(coa.coa_grp_nm)
+                                            {{coa.coa_grp_nm}} --> 
+                                        @endif
+                                        @if(coa.coa_subgrp_nm)
+                                            {{coa.coa_subgrp_nm}} --> 
+                                        @endif
+                                        {{coa.coa_name}}
+                                    </option>
+                                @endeach
+                            </optgroup>
+                        @endeach
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group has-warning m-b-10">
+                    <span class="input-group-addon border-all">Debit</span>
+                    <input type="number" step="any" class="form-control item-data-details" name="debit" value="0.00" required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group has-success m-b-10">
+                    <span class="input-group-addon border-all">Kredit</span>
+                    <input type="number" step="any" class="form-control item-data-details" name="kredit" value="0.00" required>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!--
+            <div class="col-md-6 entri-details visible-entri-jurnal-kas" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Kas</span>
+                    <select class="form-control entri-items selectKas item-data-details" name="kas_id"></select>
+                </div>
+            </div>
+            <div class="col-md-6 entri-details visible-entri-jurnal-bank" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Bank</span>
+                    <select class="form-control entri-items selectBank item-data-details" name="bank_id"></select>
+                </div>
+            </div>
+            -->
+            <div class="col-md-6 entri-details visible-entri-jurnal-pemasok" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Pemasok</span>
+                    <select class="form-control entri-items selectPemasok item-data-details" name="pemasok_id"></select>
+                </div>
+            </div>
+            <div class="col-md-6 entri-details visible-entri-jurnal-pemasok" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Faktur Hutang</span>
+                    <select class="form-control entri-items item-data-details" name="faktur_id"></select>
+                </div>
+            </div>
+            <div class="col-md-6 entri-details visible-entri-jurnal-pelanggan" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Pelanggan</span>
+                    <select class="form-control entri-items selectPelanggan item-data-details" name="pelanggan_id"></select>
+                </div>
+            </div>
+            <div class="col-md-6 entri-details visible-entri-jurnal-pelanggan" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Invoice</span>
+                    <select class="form-control entri-items item-data-details" name="order_id"></select>
+                </div>
+            </div>
+            <div class="col-md-6 entri-details visible-entri-jurnal-persediaan" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Barang</span>
+                    <select class="form-control entri-items selectBarang item-data-details" name="barang_id"></select>
+                </div>
+            </div>
+            <div class="col-md-6 entri-details visible-entri-jurnal-persediaan" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Gudang</span>
+                    <select class="form-control entri-items selectGudang item-data-details" name="gudang_id" data-values=""></select>
+                </div>
+            </div>
+            <div class="col-md-9 entri-details visible-entri-jurnal-persediaan" style="display:none;">
+                <span>
+                    <small>
+                        Note: <br>
+                        Untuk menambahkan jumlah barang ke stok persediaan, 
+                        klik tombol <code><i class="icon-basket-loaded"></i></code> hingga berganti warna, ini akan mempengaruhi stok barang pada gudang
+                    </small>
+                </span>
+            </div>
+            <div class="col-md-3 pull-right entri-details visible-entri-jurnal-persediaan" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">Qty</span>
+                    <input type="number" class="form-control entri-items item-data-details" name="qty">
+                    <span class="input-group-addon" name="btn-isStock">
+                        <i class="icon-basket-loaded"></i>
+                        <input type="hidden" class="form-control entri-items item-data-details" name="isStok" value="">
+                    </span>
+                </div>
+            </div>
+        </div>
+    </td>
+    <td style="vertical-align: middle;border-left:1px dashed">
+        <button type="button" class="btn btn-warning btn-circle bt-add-jurnal">
+            <i class="fa fa-plus"></i> 
+        </button>
+    </td>
+</tr>
+{{ script('ajax/opt-pelanggan') }}
+{{ script('ajax/opt-pemasok') }}
+{{ script('ajax/opt-gudang') }}
+{{ script('ajax/opt-barang') }}
+{{ script('ajax/opt-kas') }}
+{{ script('ajax/opt-bank') }}
+<script>
+    $(function(){
+        $('select').select2({
+            placeholder: "Pilih...",
+            allowClear: true
+        })
+    })
+</script>
+<style>
+    .border-all {
+        border: 1px solid #ddd !important;
+    }
+</style>

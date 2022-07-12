@@ -11,7 +11,7 @@ class HomeController {
             const usr = await auth.getUser()
             const sideMenu = await initMenu.SIDEBAR(usr.id)
 
-            // console.log(sideMenu);
+            console.log('----', usr);
              /** ADD USER MENU **/
              await initFunc.POST_ACCESS_MENU(usr.id)
              
@@ -27,6 +27,7 @@ class HomeController {
              })
             return view.render('welcome', {
                 bisnis : user,
+                user: usr.email,
                 menu: sideMenu
             })
         } catch (error) {

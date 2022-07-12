@@ -1,0 +1,87 @@
+{{ script('ajax/initDate') }}
+{{ script('ajax/initNumber') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="50" class="text-center bg-inverse b-all">ACT</th>
+                            <th width="80" class="text-center bg-inverse b-all">#</th>
+                            <th width="150" class="bg-inverse b-all">Tanggal</th>
+                            <th width="*" class="bg-inverse b-all">Narasi</th>
+                            <th width="150" class="text-right bg-inverse b-all">Debit</th>
+                            <th width="150" class="text-right bg-inverse b-all">Kredit</th>
+                            <th width="150" class="text-center bg-inverse b-all">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td>
+                                    <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                    @if(['administrator', 'developer', 'keuangan'].includes(auth.user.usertype))
+                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">
+                                            <i class="ti-trash"></i>
+                                        </button>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if(item.attach.length > 0)
+                                        @each(file in item.attach)
+                                            <a href="../..{{file.url}}" target="_blank">
+                                                <i class="ti-clip"></i> File
+                                            </a> <br>
+                                        @endeach
+                                    @else
+                                        -NoFile-
+                                    @endif
+                                </td>
+                                <td class="dateFormatDef" data-format="DD MMMM YYYY" data-tgl="{{item.trx_date}}" data-elm="strong">
+                                    <strong></strong><br>
+                                    <small>{{item.createdby.nama_lengkap}}</small>
+                                </td>
+                                <td>
+                                    {{item.narasi}} <br>
+                                    <small class="text-info">[ {{item.items.length}} Items Entries ]</small>
+                                </td>
+                                <td class="text-right text-white formatIDR" data-number="{{item.debit}}" data-elm="span">
+                                    <span style="font-size:large"></span>
+                                </td>
+                                <td class="text-right text-white formatIDR" data-number="{{item.kredit}}" data-elm="span">
+                                    <span style="font-size:large"></span>
+                                </td>
+                                <td class="text-center">
+                                    @if(item.debit != item.kredit)
+                                        <span class="text-danger">Tidak sesuai</span>
+                                    @else
+                                        <span class="text-success">Sesuai</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

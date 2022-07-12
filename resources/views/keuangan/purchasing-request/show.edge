@@ -2,73 +2,156 @@
 {{ script('ajax/opt-options') }}
 {{ script('ajax/opt-cabang') }}
 {{ script('ajax/opt-gudang') }}
-{{ script('ajax/opt-pemasok') }}
+{{ script('ajax/opt-coa') }}
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">            
+                        <div class="form-group">                
+                            <label for="">Kode Barang</label>                
+                            <input type="text" class="form-control barang-values" id="kodebarang" disabled>
+                        </div>        
+                    </div>
+                    <div class="col-md-8">            
+                        <div class="form-group">                
+                            <label for="">Nama Barang</label>                
+                            <input type="text" class="form-control barang-values" id="namabarang" disabled>
+                        </div>        
+                    </div>
+                    <div class="col-md-4">            
+                        <div class="form-group">                
+                            <label for="">Kategori</label>                
+                            <input type="text" class="form-control barang-values" id="kategori" disabled>
+                        </div>        
+                    </div>
+                    <div class="col-md-8">            
+                        <div class="form-group">                
+                            <label for="">Sub Kategori</label>                
+                            <input type="text" class="form-control barang-values" id="subkategori" disabled>
+                        </div>        
+                    </div>
+                    <div class="col-md-4">            
+                        <div class="form-group">                
+                            <label for="">Brand</label>                
+                            <input type="text" class="form-control barang-values" id="brand" disabled>
+                        </div>        
+                    </div>
+                    <div class="col-md-2">            
+                        <div class="form-group">                
+                            <label for="">Kwalitas</label>                
+                            <input type="text" class="form-control barang-values" id="kwalitas" disabled>
+                        </div>        
+                    </div>
+                    <div class="col-md-3">            
+                        <div class="form-group">                
+                            <label for="">Satuan</label>                
+                            <input type="text" class="form-control barang-values" id="satuan" disabled>
+                        </div>        
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
         <div class="col-sm-12 col-xs-12">
-            <form id="form-update" data-id="{{data.id}}">
+            <form id="form-create">
                 {{ csrfField() }}
                 <div class="panel-body">
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label class="control-label">Kode</label>
-                                    <input type="text" name="kode" class="form-control text-white" value="{{data.kode}}" style="font-weight: bold;" disabled>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="control-label">Cabang</label>
-                                    <select class="form-control selectCabang" name="cabang_id" data-values="{{data.cabang_id}}" required></select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="control-label">Gudang</label>
-                                    <select class="form-control selectGudang" data-link="cabang_id" name="gudang_id" data-values="{{data.gudang_id}}" required></select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="control-label">Tanggal</label>
-                                    <input type="date" name="date" class="form-control setDate" data-tgl="{{data.date}}" required>
-                                </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Kode</label>
+                                <input type="text" name="kode" class="form-control text-white item-data" value="{{kode_PR}}" style="font-weight: bold;" disabled>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label class="control-label">Keterangan</label>
-                                    <textarea class="form-control" name="keterangan" id="" rows="5">{{data.narasi || ''}}</textarea>
-                                </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Priotitas</label>
+                                <select class="form-control selectOptions item-data" name="priority" data-group="prioritas"></select>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <th class="bg-extralight" width="50">No</th>
-                                            <th class="bg-inverse">Item Details</th>
-                                            <th class="bg-title text-center" width="90">ACT</th>
-                                        </thead>
-                                        <tbody id="item-details">
-                                            @!each(item in data.items, include = 'components.items.purchasing-order.item-update')
-                                        </tbody>
-                                    </table>
-                                </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">Tanggal</label>
+                                <input type="date" name="date" class="form-control initDate item-data">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Cabang</label>
+                                <select class="form-control selectCabang item-data" name="cabang_id" data-values=""></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Gudang</label>
+                                <select class="form-control selectGudang item-data" data-link="cabang_id" name="gudang_id"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label class="control-label">Keterangan</label>
+                                <input type="text" name="narasi" class="form-control item-data" value="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <th class="bg-extralight" width="50">No</th>
+                                        <th class="bg-inverse">Item Details</th>
+                                        <th class="bg-title text-center" width="80">ACT</th>
+                                    </thead>
+                                    <tbody id="item-details"></tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="row">
+                                                    <div class="col-sm-9">
+                                                        <!--
+                                                        <div class="col-sm-12">
+                                                            <div class="input-group">
+                                                                <input class="form-control item-data" type="file" id="lampiran" name="lampiran">
+                                                            </div>
+                                                        </div>
+                                                        -->
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="input-group text-right">
+                                                            <input class="form-control" type="number" id="row-number" name="row-number" value="1">
+                                                            <div class="input-group-addon" id="bt-add-rows"><i class="ti-plus"></i> ADD</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="panel-footer">
                     <div class="row">
-                        <div class="col-sm-6">
-                            <button type="button" class="btn btn-danger waves-effect waves-light" id="bt-delete" data-id="{{data.id}}">Delete</button>
-                        </div>
+                        <div class="col-sm-6"></div>
                         <div class="col-sm-6 text-right">
-                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Update</button>
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
                             <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
                         </div>
                     </div>

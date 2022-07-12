@@ -24,6 +24,54 @@ $(function(){
         removeItems(id)
     })
 
+    $('body').on('click', 'button#details-barang', function(){
+        var elm = $(this).parents('tr.item-rows')
+        var values = elm.find('select[name="barang_id"]').val()
+        if(values){
+            $.ajax({
+                async: true,
+                url: '/ajax/options/barang/show/'+values,
+                dataType: 'json',
+                contentType: false,
+                success: function(result){
+                    console.log(result);
+                    elm.find('input[id="num_part"]').val(result.num_part)
+                    setDataModal(elm, result)
+                    
+                },
+                error: function(err){
+                    console.log(err)
+                    elm.find('.barang-values').val('')
+                }
+            })
+        }else{
+            elm.parents('div[id="content-form"]').find('.barang-values').val('')
+        }
+    })
+
+    $('body').on('change', 'select[name="barang_id"]', function(){
+        var elm = $(this).parents('tr.item-rows')
+        var values = $(this).val()
+        if(values){
+            $.ajax({
+                async: true,
+                url: '/ajax/options/barang/show/'+values,
+                dataType: 'json',
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    elm.find('input[id="num_part"]').val(result.num_part)
+                    setDataModal(elm, result)
+                    
+                },
+                error: function(err){
+                    console.log(err)
+                    elm.parents('div[id="content-form"]').find('.barang-values').val('')
+                }
+            })
+        }
+    })
+
     $('body').on('click', '#apply-filter', function(){
         var limit = $('input[name="limit"]').val()
         var kode = $('input[name="kode"]').val() && '&kode=' + $('input[name="kode"]').val()
@@ -163,6 +211,36 @@ $(function(){
             contentType: false,
             success: function(result){
                 body.find('div#content-form').html(result)
+                body.find('div#content-list').html('')
+            },
+            error: function(err){
+                console.log(err)
+                body.find('div#content-form').css('display', 'none')
+            },
+            complete: function() {
+                body.find('div#div-filter-limit').toggleClass('hidden')
+                body.find('button#bt-create-form').css('display', 'none')
+                body.find('button.bt-back').css('display', 'inline')
+                body.find('div#content-list').css('display', 'none')
+                body.find('div#content-form').css('display', 'inline')
+            }
+        })
+    })
+
+    $('body').on('click', 'button.bt-view', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'purchasing-request/'+id+'/view',
+            method: 'GET',
+            dataType: 'html',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                console.log(result);
+                body.find('div#content-form').html(result).css('display', 'block')
                 body.find('div#content-list').html('')
             },
             error: function(err){
@@ -404,6 +482,16 @@ $(function(){
             var urut = i + 1
             $(this).attr('data-id', urut)
         })
+    }
+
+    function setDataModal(elm, data){
+        elm.parents('div[id="content-form"]').find('input[id="kodebarang"]').val(data.kode)
+        elm.parents('div[id="content-form"]').find('input[id="namabarang"]').val(data.nama)
+        elm.parents('div[id="content-form"]').find('input[id="satuan"]').val(data.satuan)
+        elm.parents('div[id="content-form"]').find('input[id="subkategori"]').val(data.subkategori?.nama)
+        elm.parents('div[id="content-form"]').find('input[id="kategori"]').val(data.kategori?.nama)
+        elm.parents('div[id="content-form"]').find('input[id="brand"]').val(data.brand?.nama)
+        elm.parents('div[id="content-form"]').find('input[id="kwalitas"]').val(data.qualitas?.nama)
     }
 
     function getDataForm(){

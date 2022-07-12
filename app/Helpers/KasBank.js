@@ -42,6 +42,7 @@ class keuKasBank {
         const trx = await DB.beginTransaction()
         const masKas = new Kass()
         masKas.fill({
+            id: req.coa_id,
             createdby: user.id,
             coa_id: req.coa_id,
             cabang_id: req.cabang_id,
@@ -74,6 +75,7 @@ class keuKasBank {
         const trx = await DB.beginTransaction()
         const masBank = new Bank()
         masBank.fill({
+            id: req.coa_id,
             createdby: user.id,
             coa_id: req.coa_id,
             cabang_id: req.cabang_id,

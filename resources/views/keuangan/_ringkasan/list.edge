@@ -10,7 +10,7 @@
                         @each(obj in neraca)
                             <div class="panel">
                                 <div class="panel-heading bg-warning" style="color: #2f323e"> 
-                                    {{obj.name}}
+                                    {{obj.name}} xx
                                     <div class="pull-left p-r-10">
                                         <a href="#" data-perform="panel-collapse">
                                             <i class="ti-folder" style="color:black"></i>
@@ -24,21 +24,21 @@
                                             @if(obj.group.length > 0)
                                                 @each(grp in obj.group)
                                                     <li class="b-b item-coa">
-                                                        {{grp.grp_name}}
+                                                        {{grp.grp_name}} grp
                                                         <span class="pull-left m-r-10">
                                                             <i class="ti-folder" style="color:white"></i>
                                                         </span>
-                                                        <span class="pull-right count-values" data-kode="{{grp.kode}}">Rp. 0</span>
+                                                        <span class="pull-right count-values group-values" data-kode="{{grp.kode}}">Rp. 0</span>
                                                     </li>
                                                     <ul class="feeds" style="margin-left: 20px">
                                                         
                                                         @each(val in grp.subgroup)
                                                             <li class="b-b item-coa">
-                                                                {{val.subgrp_name}} 
+                                                                {{val.subgrp_name}} sub
                                                                 <span class="pull-left m-r-10">
                                                                     <i class="ti-folder" style="color:white"></i>
                                                                 </span>
-                                                                <span class="pull-right count-values" data-kode="{{val.id}}">Rp. 0</span>
+                                                                <span class="pull-right count-values subgroup-values" data-kode="{{val.id}}">Rp. 0</span>
                                                                 <ul class="feeds text-white">
                                                                     @if(val.akun)
                                                                         @each(item in val.akun)

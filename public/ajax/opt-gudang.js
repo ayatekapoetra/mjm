@@ -11,7 +11,7 @@ $(function(){
         var relation = body.find('#'+link).data('values') || ''
         var values = $(this).data('values') || elm.val()
         var cabang = $(this).data('cabang') && '&cabang_id='+$(this).data('cabang')
-        console.log('relation ::', link);
+        console.log('values ::', values);
         $.ajax({
             async: true,
             url: '/ajax/options/gudang?selected='+values + cabang +'&'+link+'='+relation,

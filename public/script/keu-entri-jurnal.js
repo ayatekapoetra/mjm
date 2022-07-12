@@ -13,22 +13,14 @@ $(function(){
         initDefault()
     })
 
-    $('body').on('click', 'div#bt-add-rows', function(){
-        var tambahRows = body.find('input#row-number').val() || 1
-        addItems(tambahRows)
+    $('body').on('click', 'button.bt-add-jurnal', function(){
+        initCreateItem()
+        $(this).removeClass('btn-warning').addClass('btn-default').attr('disabled', 'disabled')
     })
 
     $('body').on('click', 'button.bt-remove-item', function(){
         $(this).parents('tr.item-rows').remove()
-        hitungDebitKredit()
         setUrut()
-    })
-
-    $('body').on('change', 'select[name="coa_id"]', function(e){
-        e.preventDefault()
-        var elm = $(this)
-        var value = elm.val()
-        setCoaRalation(elm, value)
     })
 
     $('body').on('keyup', 'input[name="d"], input[name="k"]', function(){
@@ -37,11 +29,11 @@ $(function(){
 
     $('body').on('submit', 'form#form-create', function(e){
         e.preventDefault()
+        var formdata = new FormData(this)
         var data = getDataForm()
         console.log(data);
-        var formdata = new FormData()
         formdata.append('dataForm', JSON.stringify(data))
-        formdata.append('lampiran', $('input#lampiran')[0].files[0])
+        formdata.append('file', $('input[name="attach"]').get(0).files)
         // $('body').find('button[type="submit"]').attr('disabled', true)
         $.ajax({
             async: true,
@@ -200,6 +192,10 @@ $(function(){
             },
             dataType: 'html',
             contentType: false,
+            beforeSend: function(){
+                body.find('div#content-list').css('display', 'block')
+                body.find('div#content-list').html('Loading Data....')
+            },
             success: function(result){
                 body.find('div#content-list').html(result)
                 body.find('div#content-form').html('')
@@ -208,7 +204,7 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
-                body.find('button#bt-create-form').css('display', 'inline')
+                body.find('button#bt-create-form, div#div-filter-limit').css('display', 'inline')
                 body.find('button.bt-back').css('display', 'none')
                 body.find('div#content-list').css('display', 'block')
                 body.find('div#content-form').css('display', 'none')
@@ -231,91 +227,38 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
-                body.find('button#bt-create-form').css('display', 'none')
+                body.find('button#bt-create-form, div#div-filter-limit').css('display', 'none')
                 body.find('button.bt-back').css('display', 'inline')
                 body.find('div#content-form').css('display', 'block')
                 body.find('div#content-list').css('display', 'none')
-                var tambahRows = body.find('input#row-number').val() || 1
-                addItems(tambahRows)
+                initCreateItem()
             }
         })
     }
 
-    function setCoaRalation(elm, value) {
-        var persediaan = $('input#coa_persediaan').val()
-        var hutangdagang = $('input#coa_hutangdagang').val()
-        var piutangdagang = $('input#coa_piutangdagang').val()
-        if(value){
-            var elmCoa = elm.parents('tr').find('select[name="coa_id"]')
-            var elmCoaID = elmCoa.find('option[value="'+value+'"]').attr('kode')
-            var rootTr = elm.parents('tr.item-rows')
-            if (elmCoaID === piutangdagang) {
-                rootTr.find('div.piutangdagang').css('display', 'inline')
-                rootTr.find('div.hutangdagang').css('display', 'none')
-                rootTr.find('div.persediaan').css('display', 'none')
-                rootTr.find('select[name="trx_jual"]').attr('required', true)
-                rootTr.find('select[name="trx_beli"]').removeAttr('required', true)
-                rootTr.find('select[name="gudang_id"]').removeAttr('required', true)
-                rootTr.find('select[name="barang_id"]').removeAttr('required', true)
-                rootTr.find('select[name="gudang_id"]').val(null)
-                rootTr.find('select[name="barang_id"]').val(null)
-                rootTr.find('select[name="trx_beli"]').val(null)
-                rootTr.find('input[name="qty"]').val(0)
-            } else if(elmCoaID === hutangdagang) {
-                rootTr.find('div.hutangdagang').css('display', 'inline')
-                rootTr.find('div.piutangdagang').css('display', 'none')
-                rootTr.find('div.persediaan').css('display', 'none')
-                rootTr.find('select[name="trx_beli"]').attr('required', true)
-                rootTr.find('select[name="trx_jual"]').removeAttr('required', true)
-                rootTr.find('select[name="gudang_id"]').removeAttr('required', true)
-                rootTr.find('select[name="barang_id"]').removeAttr('required', true)
-                rootTr.find('select[name="gudang_id"]').val(null)
-                rootTr.find('select[name="barang_id"]').val(null)
-                rootTr.find('select[name="trx_jual"]').val(null)
-                rootTr.find('input[name="qty"]').val(0)
-            }else if(elmCoaID === persediaan){
-                rootTr.find('div.persediaan').css('display', 'inline')
-                rootTr.find('div.hutangdagang').css('display', 'none')
-                rootTr.find('div.piutangdagang').css('display', 'none')
-                rootTr.find('select[name="gudang_id"]').attr('required', true)
-                rootTr.find('select[name="barang_id"]').attr('required', true)
-                rootTr.find('select[name="trx_beli"]').removeAttr('required', true)
-                rootTr.find('select[name="trx_jual"]').removeAttr('required', true)
-                rootTr.find('select[name="trx_jual"]').val(null)
-                rootTr.find('select[name="trx_beli"]').val(null)
-            }else{
-                rootTr.find('div.div-relation').css('display', 'none')
+    function initCreateItem(){
+        $.ajax({
+            async: true,
+            url: 'entri-jurnal/create/add-item',
+            method: 'GET',
+            dataType: 'html',
+            contentType: false,
+            success: function(result){
+                // console.log(result);
+                body.find('tbody#item-akun').append(result)
+                setUrut()
+            },
+            error: function(err){
+                console.log(err)
             }
-        }
-
-        // console.log(persediaan);
-    }
-
-    function addItems(len){
-        for (let index = 0; index < len; index++) {
-            $.ajax({
-                async: true,
-                url: 'entri-jurnal/create/add-item',
-                method: 'GET',
-                dataType: 'html',
-                contentType: false,
-                success: function(result){
-                    body.find('tbody#item-details').append(result)
-                    setUrut()
-                },
-                error: function(err){
-                    console.log(err)
-                }
-            })
-            
-        }
+        })
     }
 
     function setUrut(){
         $('tr.item-rows').each(function(i, e){
             var urut = i + 1
             $(this).attr('data-urut', urut)
-            $(this).find('td').first().find('h3.urut-rows').html(urut)
+            $(this).find('td').first().find('h4.urut-rows').html(urut)
         })
 
         $('button.bt-remove-item').each(function(i, e){
@@ -362,8 +305,6 @@ $(function(){
                     vals.push($(this).val())
                 })
 
-                // console.log(props);
-                // console.log(vals);
                 items.push(_.object(props, vals))
             })
             return items

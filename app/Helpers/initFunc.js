@@ -27,15 +27,20 @@ const UsrPrivilage = use("App/Models/UsrPrivilage")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
 const TrxBank = use("App/Models/transaksi/TrxBank")
 const TrxKas = use("App/Models/transaksi/TrxKase")
+const Notification = use("App/Models/Notification")
 // const TrxOrderBeli = use("App/Models/transaksi/TrxOrderBeli")
-const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
+// const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
 const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
 const TrxJurnalSaldo = use("App/Models/transaksi/TrxJurnalSaldo")
 const TrxTerimaBarang = use("App/Models/transaksi/TrxTerimaBarang")
 // const TrxOrderBeliItem = use("App/Models/transaksi/TrxOrderBeliItem")
-const TrxFakturJualBayar = use("App/Models/transaksi/TrxFakturJualBayar")
+// const TrxFakturJualBayar = use("App/Models/transaksi/TrxFakturJualBayar")
 const TrxFakturBeliBayar = use("App/Models/transaksi/TrxFakturBeliBayar")
-const OpsPurchasingOrder = use("App/Models/operational/OpsPurchasingOrder")
+
+const KeuPurchasingRequest = use("App/Models/transaksi/KeuPurchasingRequest")
+const KeuPurchasingRequestItems = use("App/Models/transaksi/KeuPurchasingRequestItems")
+const KeuPurchasingRequestAttach = use("App/Models/transaksi/KeuPurchasingRequestAttach")
+
 const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
 const OpsPelangganBayar = use("App/Models/operational/OpsPelangganBayar")
 const KeuTransferKasBank = use("App/Models/transaksi/KeuTransferKasBank")
@@ -117,6 +122,32 @@ class initFunc {
         } catch (error) {
             console.log(error);
             return null
+        }
+    }
+
+    async SEND_NOTIFICATION(sender, receiver, body){
+        const users = (await User.query().where( w => {
+            w.where('aktif', 'Y')
+            w.whereIn('usertype', receiver)
+        }).fetch()).toJSON()
+
+        for (const user of users) {
+            const notif = new Notification()
+            notif.fill({
+                header: body.header,
+                title: body.title,
+                subtitle: body.subtitle || null,
+                content: body.content || null,
+                link: body.link || null,
+                sender: sender.id,
+                receiver: user.id,
+            })
+            try {
+                await notif.save()
+            } catch (error) {
+                console.log(error);
+                throw new Error('Failed save notification...')
+            }
         }
     }
 
@@ -245,134 +276,134 @@ class initFunc {
         }
     }
 
-    async GEN_FAKTUR_JUAL (user) {
-        // Invoice CVMT/No urut/bulan (angka romawi)/tahun
-        const ws = await this.WORKSPACE(user)
-        const trxFakturJual = await TrxFakturJual.query().where( w => {
-            w.where('cabang_id', ws.bisnis_id)
-            w.where('date_trx',  '>=', moment().startOf('year').format('YYYY-MM-DD'))
-            w.where('date_trx',  '<=', moment().endOf('year').format('YYYY-MM-DD'))
-        }).last()
+    // async GEN_FAKTUR_JUAL (user) {
+    //     // Invoice CVMT/No urut/bulan (angka romawi)/tahun
+    //     const ws = await this.WORKSPACE(user)
+    //     const trxFakturJual = await TrxFakturJual.query().where( w => {
+    //         w.where('cabang_id', ws.bisnis_id)
+    //         w.where('date_trx',  '>=', moment().startOf('year').format('YYYY-MM-DD'))
+    //         w.where('date_trx',  '<=', moment().endOf('year').format('YYYY-MM-DD'))
+    //     }).last()
 
-        const bulan = moment().format('MM')
-        const tahun = moment().format('YYYY')
+    //     const bulan = moment().format('MM')
+    //     const tahun = moment().format('YYYY')
 
-        const bisnis = await BisnisUnit.find(ws.bisnis_id)
+    //     const bisnis = await BisnisUnit.find(ws.bisnis_id)
 
-        const urutFaktur = parseInt((trxFakturJual?.no_faktur || 'XXX/00000/I/YYYY').split('/')[1])
-        const strUrut = '0'.repeat(5 - `${urutFaktur}`.length) 
-        const incUrut = strUrut + (urutFaktur + 1)
+    //     const urutFaktur = parseInt((trxFakturJual?.no_faktur || 'XXX/00000/I/YYYY').split('/')[1])
+    //     const strUrut = '0'.repeat(5 - `${urutFaktur}`.length) 
+    //     const incUrut = strUrut + (urutFaktur + 1)
 
-        console.log((trxFakturJual?.no_faktur || 'XXX/00000/I/YYYY').split('/'));
+    //     console.log((trxFakturJual?.no_faktur || 'XXX/00000/I/YYYY').split('/'));
 
-        let romanString
-        switch (bulan) {
-            case '01':
-                romanString = 'I'
-                break;
-            case '02':
-                romanString = 'II'
-                break;
-            case '03':
-                romanString = 'III'
-                break;
-            case '04':
-                romanString = 'IV'
-                break;
-            case '05':
-                romanString = 'V'
-                break;
-            case '06':
-                romanString = 'VI'
-                break;
-            case '07':
-                romanString = 'VII'
-                break;
-            case '08':
-                romanString = 'VIII'
-                break;
-            case '09':
-                romanString = 'IX'
-                break;
-            case '10':
-                romanString = 'X'
-                break;
-            case '11':
-                romanString = 'XI'
-                break;
-            case '12':
-                romanString = 'XII'
-                break;
-        }
+    //     let romanString
+    //     switch (bulan) {
+    //         case '01':
+    //             romanString = 'I'
+    //             break;
+    //         case '02':
+    //             romanString = 'II'
+    //             break;
+    //         case '03':
+    //             romanString = 'III'
+    //             break;
+    //         case '04':
+    //             romanString = 'IV'
+    //             break;
+    //         case '05':
+    //             romanString = 'V'
+    //             break;
+    //         case '06':
+    //             romanString = 'VI'
+    //             break;
+    //         case '07':
+    //             romanString = 'VII'
+    //             break;
+    //         case '08':
+    //             romanString = 'VIII'
+    //             break;
+    //         case '09':
+    //             romanString = 'IX'
+    //             break;
+    //         case '10':
+    //             romanString = 'X'
+    //             break;
+    //         case '11':
+    //             romanString = 'XI'
+    //             break;
+    //         case '12':
+    //             romanString = 'XII'
+    //             break;
+    //     }
 
-        const patten = bisnis.initial + '/' + incUrut + '/' + romanString + '/' + tahun
+    //     const patten = bisnis.initial + '/' + incUrut + '/' + romanString + '/' + tahun
 
-        return patten
-    }
+    //     return patten
+    // }
 
-    async GEN_KODE_TERIMA (id) {
-        // Invoice CVMT/No urut/bulan (angka romawi)/tahun
-        const ws = await this.GET_WORKSPACE(id)
-        const trxFakturJualBayar = await TrxFakturJualBayar.query().where( w => {
-            w.where('bisnis_id', ws.bisnis_id)
-            w.where('date_paid',  '>=', moment().startOf('year').format('YYYY-MM-DD'))
-            w.where('date_paid',  '<=', moment().endOf('year').format('YYYY-MM-DD'))
-        }).last()
+    // async GEN_KODE_TERIMA (id) {
+    //     // Invoice CVMT/No urut/bulan (angka romawi)/tahun
+    //     const ws = await this.GET_WORKSPACE(id)
+    //     const trxFakturJualBayar = await TrxFakturJualBayar.query().where( w => {
+    //         w.where('bisnis_id', ws.bisnis_id)
+    //         w.where('date_paid',  '>=', moment().startOf('year').format('YYYY-MM-DD'))
+    //         w.where('date_paid',  '<=', moment().endOf('year').format('YYYY-MM-DD'))
+    //     }).last()
         
-        const bulan = moment().format('MM')
-        const tahun = moment().format('YYYY')
+    //     const bulan = moment().format('MM')
+    //     const tahun = moment().format('YYYY')
 
-        const bisnis = await BisnisUnit.find(ws.bisnis_id)
+    //     const bisnis = await BisnisUnit.find(ws.bisnis_id)
 
-        const urutPaid = parseInt((trxFakturJualBayar?.no_paid || 'TT/'+ws.bisnis_id+'/00000/I/YYYY').split('/')[2])
-        const strUrut = '0'.repeat(5 - `${urutPaid}`.length) 
-        const incUrut = strUrut + (urutPaid + 1)
+    //     const urutPaid = parseInt((trxFakturJualBayar?.no_paid || 'TT/'+ws.bisnis_id+'/00000/I/YYYY').split('/')[2])
+    //     const strUrut = '0'.repeat(5 - `${urutPaid}`.length) 
+    //     const incUrut = strUrut + (urutPaid + 1)
 
 
-        let romanString
-        switch (bulan) {
-            case '01':
-                romanString = 'I'
-                break;
-            case '02':
-                romanString = 'II'
-                break;
-            case '03':
-                romanString = 'III'
-                break;
-            case '04':
-                romanString = 'IV'
-                break;
-            case '05':
-                romanString = 'V'
-                break;
-            case '06':
-                romanString = 'VI'
-                break;
-            case '07':
-                romanString = 'VII'
-                break;
-            case '08':
-                romanString = 'VIII'
-                break;
-            case '09':
-                romanString = 'IX'
-                break;
-            case '10':
-                romanString = 'X'
-                break;
-            case '11':
-                romanString = 'XI'
-                break;
-            case '12':
-                romanString = 'XII'
-                break;
-        }
+    //     let romanString
+    //     switch (bulan) {
+    //         case '01':
+    //             romanString = 'I'
+    //             break;
+    //         case '02':
+    //             romanString = 'II'
+    //             break;
+    //         case '03':
+    //             romanString = 'III'
+    //             break;
+    //         case '04':
+    //             romanString = 'IV'
+    //             break;
+    //         case '05':
+    //             romanString = 'V'
+    //             break;
+    //         case '06':
+    //             romanString = 'VI'
+    //             break;
+    //         case '07':
+    //             romanString = 'VII'
+    //             break;
+    //         case '08':
+    //             romanString = 'VIII'
+    //             break;
+    //         case '09':
+    //             romanString = 'IX'
+    //             break;
+    //         case '10':
+    //             romanString = 'X'
+    //             break;
+    //         case '11':
+    //             romanString = 'XI'
+    //             break;
+    //         case '12':
+    //             romanString = 'XII'
+    //             break;
+    //     }
 
-        const patten = 'TT/' + bisnis.id + '/' + incUrut + '/' + romanString + '/' + tahun
+    //     const patten = 'TT/' + bisnis.id + '/' + incUrut + '/' + romanString + '/' + tahun
 
-        return patten
-    }
+    //     return patten
+    // }
 
     async GEN_KODE_PAID_OUT (id) {
         // Invoice CVMT/No urut/bulan (angka romawi)/tahun
@@ -513,8 +544,10 @@ class initFunc {
         return patten
     }
 
-    async GEN_KODE_PR () {
-        let nomor = await OpsPurchasingOrder.query().where( w => {
+    async GEN_KODE_PR (user) {
+        const ws = await this.WORKSPACE(user)
+        let nomor = await KeuPurchasingRequest.query().where( w => {
+            w.where('cabang_id', ws.cabang_id)
             w.where('date', '>=', moment().startOf('year').format('YYYY-MM-DD'))
             w.where('date', '<=', moment().endOf('year').format('YYYY-MM-DD'))
         }).last()
@@ -523,18 +556,59 @@ class initFunc {
         let lastNumber
         
         if(nomor){
-            lastNumber = (nomor.kode).split('.')
-            lastNumber = parseInt(lastNumber[1]) + 1 // PRYYMMDD.00001
+            lastNumber = (nomor.kode).split('-')
+            lastNumber = parseInt(lastNumber[1]) + 1 // PR/YYMM/C1.00001
         }else{
             lastNumber = 1
         }
         
-        let strDate = moment().format('YYMMDD')
-        
-        
-        let strPrefix = '0'.repeat(5 - `${lastNumber}`.length) + lastNumber
+        let strYear = moment().format('YYYY')
+        const bulan = moment().format('MM')
 
-        return 'PR' + strDate + '.' + strPrefix
+        let romanString
+        switch (bulan) {
+            case '01':
+                romanString = 'I'
+                break;
+            case '02':
+                romanString = 'II'
+                break;
+            case '03':
+                romanString = 'III'
+                break;
+            case '04':
+                romanString = 'IV'
+                break;
+            case '05':
+                romanString = 'V'
+                break;
+            case '06':
+                romanString = 'VI'
+                break;
+            case '07':
+                romanString = 'VII'
+                break;
+            case '08':
+                romanString = 'VIII'
+                break;
+            case '09':
+                romanString = 'IX'
+                break;
+            case '10':
+                romanString = 'X'
+                break;
+            case '11':
+                romanString = 'XI'
+                break;
+            case '12':
+                romanString = 'XII'
+                break;
+        }
+        
+        
+        let strPrefix = '0'.repeat(3 - `${lastNumber}`.length) + lastNumber
+
+        return 'PR/' + strYear + '/' + romanString + '/' + ws.cabang.kode +'-' + strPrefix
     }
 
     async GEN_KODE_INVOICES (user) {
@@ -557,6 +631,7 @@ class initFunc {
     async GEN_KODE_KWITANSI (user) {
         let ws = await this.WORKSPACE(user)
         let nomor = await OpsPelangganBayar.query().where( w => {
+            w.where('no_kwitansi', 'like', `PAID%`)
             w.where('date_paid', '>=', moment().startOf('year').format('YYYY-MM-DD'))
             w.where('date_paid', '<=', moment().endOf('year').format('YYYY-MM-DD'))
         }).last()
@@ -959,21 +1034,21 @@ class initFunc {
         }
     }
 
-    async KALIBRASI_SISA_FAKTUR_JUAL(){
-        const trxFakturJual = (await TrxFakturJual.query().where('status', 'bersisa').fetch()).toJSON()
-        for (const obj of trxFakturJual) {
-            const totBayarJual = await TrxFakturJualBayar.query().where('trx_jual', obj.id).getSum('nilai_paid') || 0
-            console.log('totBayarJual :::', totBayarJual);
-            const fakturJual = await TrxFakturJual.query().where('id', obj.id).last()
-            const status_trx = totBayarJual >= fakturJual.grandtotal ? 'lunas':'bersisa'
-            fakturJual.merge({
-                bayar: totBayarJual, 
-                sisa: fakturJual.grandtotal - totBayarJual,
-                status: status_trx
-            })
-            await fakturJual.save()
-        }
-    }
+    // async KALIBRASI_SISA_FAKTUR_JUAL(){
+    //     const trxFakturJual = (await TrxFakturJual.query().where('status', 'bersisa').fetch()).toJSON()
+    //     for (const obj of trxFakturJual) {
+    //         const totBayarJual = await TrxFakturJualBayar.query().where('trx_jual', obj.id).getSum('nilai_paid') || 0
+    //         console.log('totBayarJual :::', totBayarJual);
+    //         const fakturJual = await TrxFakturJual.query().where('id', obj.id).last()
+    //         const status_trx = totBayarJual >= fakturJual.grandtotal ? 'lunas':'bersisa'
+    //         fakturJual.merge({
+    //             bayar: totBayarJual, 
+    //             sisa: fakturJual.grandtotal - totBayarJual,
+    //             status: status_trx
+    //         })
+    //         await fakturJual.save()
+    //     }
+    // }
 
     async KALIBRASI_SISA_FAKTUR_BELI(){
         const trxFakturBeli = (await TrxFakturBeli.query().where('sts_paid', 'bersisa').fetch()).toJSON()

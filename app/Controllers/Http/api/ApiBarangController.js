@@ -86,6 +86,45 @@ class ApiBarangController {
             })
         }
     }
+
+    async showByKode ( { auth, params, response } ) {
+        let durasi
+        var t0 = performance.now()
+
+        const user = await userValidate(auth)
+        if(!user){
+            return response.status(403).json({
+                diagnostic: {
+                    ver: version,
+                    error: true,
+                    message: 'not authorized...'
+                }
+            })
+        }
+
+        try {
+            const data = await BarangHelpers.SHOW_BY_KODE(params)
+            durasi = await initFunc.durasi(t0)
+            return response.status(200).json({
+                diagnostic: {
+                    ver: version,
+                    times: durasi, 
+                    error: false
+                },
+                data: data
+            })
+        } catch (error) {
+            durasi = await initFunc.durasi(t0)
+            return response.status(403).json({
+                diagnostic: {
+                    ver: version,
+                    times: durasi, 
+                    error: true
+                },
+                data: error
+            })
+        }
+    }
     
 }
 

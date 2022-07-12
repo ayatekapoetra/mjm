@@ -2,7 +2,7 @@
     <div class="navbar-header">
         <div class="top-left-part">
             <!-- Logo -->
-            <a class="logo" href="/home">
+            <a class="logo" href="/">
                 <!-- Logo icon image, you can use font-icon also -->
                 <b>
                 <!--This is dark logo icon-->
@@ -24,47 +24,22 @@
         <!-- Search input and Toggle icon -->
         <ul class="nav navbar-top-links navbar-left">
             <li><a href="javascript:void(0)" class="open-close waves-effect waves-light visible-xs"><i class="ti-close ti-menu"></i></a></li>
+            <li>
+                <a href="/profile" class="">
+                    <i class="fa fa-certificate text-success"></i> <span id="ws-cabang">{{user}}</span>
+                </a>
+            </li>
         </ul>
         <ul class="nav navbar-top-links navbar-right pull-right">
             <li class="dropdown">
                 <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#"> <i class="mdi mdi-gmail"></i>
                     <div class="notify"> <span class="heartbit"></span> <span class="point"></span> </div>
                 </a>
-                <ul class="dropdown-menu mailbox animated bounceInDown">
-                    <li>
-                        <div class="drop-title">You have 4 new messages</div>
-                    </li>
-                    <li>
-                        <div class="message-center">
-                            <a href="#">
-                                <div class="user-img"> <img src="{{ assetsUrl('plugins/images/users/default-usr.png') }}" alt="user" class="img-circle"> <span class="profile-status online pull-right"></span> </div>
-                                <div class="mail-contnet">
-                                    <h5>Pavan kumar</h5> <span class="mail-desc">Just see the my admin!</span> <span class="time">9:30 AM</span> </div>
-                            </a>
-                            <a href="#">
-                                <div class="user-img"> <img src="{{ assetsUrl('plugins/images/users/sonu.jpg') }}" alt="user" class="img-circle"> <span class="profile-status busy pull-right"></span> </div>
-                                <div class="mail-contnet">
-                                    <h5>Sonu Nigam</h5> <span class="mail-desc">I've sung a song! See you at</span> <span class="time">9:10 AM</span> </div>
-                            </a>
-                            <a href="#">
-                                <div class="user-img"> <img src="{{ assetsUrl('plugins/images/users/arijit.jpg') }}" alt="user" class="img-circle"> <span class="profile-status away pull-right"></span> </div>
-                                <div class="mail-contnet">
-                                    <h5>Arijit Sinh</h5> <span class="mail-desc">I am a singer!</span> <span class="time">9:08 AM</span> </div>
-                            </a>
-                            <a href="#">
-                                <div class="user-img"> <img src="{{ assetsUrl('plugins/images/users/pawandeep.jpg') }}" alt="user" class="img-circle"> <span class="profile-status offline pull-right"></span> </div>
-                                <div class="mail-contnet">
-                                    <h5>Pavan kumar</h5> <span class="mail-desc">Just see the my admin!</span> <span class="time">9:02 AM</span> </div>
-                            </a>
-                        </div>
-                    </li>
-                    <li>
-                        <a class="text-center" href="javascript:void(0);"> <strong>See all notifications</strong> <i class="fa fa-angle-right"></i> </a>
-                    </li>
-                </ul>
+                <ul class="dropdown-menu mailbox animated bounceInDown" id="div-notifications"></ul>
                 <!-- /.dropdown-messages -->
             </li>
             <!-- .Task dropdown -->
+            <!--
             <li class="dropdown">
                 <a class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown" href="#"> <i class="mdi mdi-check-circle"></i>
                     <div class="notify"><span class="heartbit"></span><span class="point"></span></div>
@@ -118,7 +93,7 @@
                         <a class="text-center" href="#"> <strong>See All Tasks</strong> <i class="fa fa-angle-right"></i> </a>
                     </li>
                 </ul>
-            </li>
+            </li> -->
             <li class="dropdown">
                 <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#"> 
                     @if(auth.user.avatar)
@@ -160,3 +135,47 @@
     <!-- /.navbar-top-links -->
     <!-- /.navbar-static-side -->
 </nav>
+
+<script>
+    $(function(){
+        var body = $('body')
+        var host = document.location.hostname
+        var port = ':' + document.location.port
+        
+        VIEW_WORKSPACE()
+        function VIEW_WORKSPACE(){
+            $.ajax({
+                async: true,
+                url: 'http://' + host + (port||'') + '/ajax/options/cabang/{{auth.user.cabang_id}}/show',
+                method: 'GET',
+                dataType: 'json',
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    body.find('span#ws-cabang').html(result.nama)
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+
+        GET_NOTIFICATION()
+        function GET_NOTIFICATION(){
+            $.ajax({
+                async: true,
+                url: 'http://' + host + (port||'') + '/ajax/options/notification',
+                method: 'GET',
+                dataType: 'html',
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    body.find('ul#div-notifications').html(result)
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+    })
+</script>

@@ -8,8 +8,8 @@ const Gudang = use("App/Models/master/Gudang")
 const Pelanggan = use("App/Models/master/Pelanggan")
 const Pemasok = use("App/Models/master/Pemasok")
 const AccCoa = use("App/Models/akunting/AccCoa")
-const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
-const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
+// const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
+// const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
 const UsrWorkspace = use("App/Models/UsrWorkspace")
 
 class CoaAjaxController {

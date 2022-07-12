@@ -22,7 +22,6 @@ class masterBarang {
                 .with('kategori')
                 .with('subkategori')
                 .with('qualitas')
-                .with('brand')
                 .where( w => {
                     if(req.kode){
                         w.where('kode', 'like', `%${req.kode}%`)
@@ -51,7 +50,6 @@ class masterBarang {
                 .with('kategori')
                 .with('subkategori')
                 .with('qualitas')
-                .with('brand')
                 .where( w => {
                     w.where('aktif', 'Y')
                 })
@@ -125,9 +123,29 @@ class masterBarang {
         const data = (
             await Barang
             .query()
+            .with('brand')
+            .with('kategori')
+            .with('subkategori')
+            .with('qualitas')
             .with('coaIn')
             .with('coaOut')
             .where('id', params.id)
+            .last()
+        ).toJSON()
+        return data
+    }
+
+    async SHOW_BY_KODE (params) {
+        const data = (
+            await Barang
+            .query()
+            .with('brand')
+            .with('kategori')
+            .with('subkategori')
+            .with('qualitas')
+            .with('coaIn')
+            .with('coaOut')
+            .where('kode', params.kode)
             .last()
         ).toJSON()
         return data

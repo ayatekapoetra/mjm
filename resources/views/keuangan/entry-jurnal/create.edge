@@ -1,0 +1,188 @@
+{{ script('ajax/opt-coa') }}
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-kas') }}
+{{ script('ajax/opt-bank') }}
+{{ script('ajax/opt-options') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="control-label">Tanggal</label>
+                                <input type="date" name="trx_date" class="form-control initDate item-data" value="" required>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                <label class="control-label">Narasi</label>
+                                <input type="text" name="narasi" class="form-control item-data" placeholder="Input keterangan disini..." value="">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Attachment Files</label>
+                                <input type="file" name="attach" class="form-control" multiple>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="panel panel-default">
+                            <div class="bg-inverse panel-heading">List Akun
+                                <div class="panel-action">
+                                    <a href="#" data-perform="panel-collapse"><i class="fa fa-minus"></i></a> 
+                                </div>
+                            </div>
+                            <div class="panel-wrapper collapse in" aria-expanded="true">
+                                <div class="panel-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <tbody id="item-akun">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6"></div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    .bg-black {
+        background-color: black !important;
+    }
+</style>
+<script>
+    $(function(){
+        $('body').on('click', 'span[name="btn-isStock"]', function(e){
+            e.preventDefault()
+            $(this).toggleClass('bg-black')
+            $(this).find('i').toggleClass('text-success')
+            $(this).find('input[name="isStok"]').val() === '' ? $(this).find('input[name="isStok"]').val('Y') : $(this).find('input[name="isStok"]').val('')
+        })
+
+        $('body').on('change', 'select[name="coa_id"]', function(e){
+            e.preventDefault()
+            var elm = $(this)
+            var value = elm.val()
+            setRelationEntry(elm, value)
+        })
+
+        $('body').on('change', 'select[name="pemasok_id"]', function(e){
+            e.preventDefault()
+            var elm = $(this)
+            var value = elm.val()
+        })
+
+        $('body').on('change', 'select[name="pelanggan_id"]', function(e){
+            e.preventDefault()
+            var elm = $(this)
+            var value = elm.val()
+            console.log(value);
+            if(value){
+                optionInvoices(elm, value)
+            }
+            elm.parents('tr.item-rows').find('select[name="order_id"]').val(null).trigger('change')
+        })
+
+        $('body').on('change', 'select[name="barang_id"]', function(e){
+            e.preventDefault()
+            var elm = $(this)
+            var value = elm.val()
+            elm.parents('tr.item-rows').find('select[name="gudang_id"]').val('').trigger('change')
+            if(value){
+                optionGudang(elm)
+            }
+        })
+
+        function setRelationEntry(elm, coa){
+            elm.parents('tr.item-rows').find('div.entri-details').css('display', 'none')
+            elm.parents('tr.item-rows').find('select.entri-items, input.entri-items').val('').trigger('change')
+            $.ajax({
+                async: true,
+                url: 'entri-jurnal/create/' + coa + '/select-relation',
+                method: 'GET',
+                dataType: 'json',
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    if(result.group){
+                        elm.parents('tr.item-rows').find('div.'+result.group).css('display', 'block')
+                        elm.parents('tr.item-rows').find('select[name="order_id"]').html('<option value="">Pilih...</option>')
+                    }
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+
+        function optionGudang(elm){
+            $.ajax({
+                async: true,
+                url: 'entri-jurnal/create/select-gudang',
+                method: 'GET',
+                dataType: 'json',
+                contentType: false,
+                beforeSend: function(){
+                    console.log('beforeSend...', elm.parents('tr.item-rows').find('select[name="gudang_id"]'));
+                    elm.parents('tr.item-rows').find('select[name="gudang_id"]').val('').trigger('change')
+                },
+                success: function(result){
+                    console.log('optionGudang :::', result);
+                    if(result.length > 0){
+                        let data = result.map( o => '<option value="'+o.id+'">[ ' + o.kode + ' ] ' + o.nama + '</option>')
+                        elm.parents('tr.item-rows').find('select[name="gudang_id"]').html(data)
+                    }else{
+                        elm.parents('tr.item-rows').find('select[name="gudang_id"]').val('').trigger('change')
+                    }
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+
+        function optionInvoices(elm, pelanggan){
+            elm.parents('tr.item-rows').find('select[name="order_id"]').val('').trigger('change')
+            $.ajax({
+                async: true,
+                url: 'entri-jurnal/create/' + pelanggan + '/select-invoice',
+                method: 'GET',
+                dataType: 'json',
+                contentType: false,
+                success: function(result){
+                    console.log('optionInvoices :::', result);
+                    if(result.length > 0){
+                        let data = result.map( o =>
+                            '<optgroup label="Tanggal : '+o.date+'">'+
+                                o.items?.map( i => '<option value="'+i.id+'">'+i.invoices+'</option>')+
+                            '<optgroup>'
+                        )
+                        elm.parents('tr.item-rows').find('select[name="order_id"]').html(data)
+                    }else{
+                        elm.parents('tr.item-rows').find('select[name="order_id"]').val('').trigger('change')
+                    }
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+    })
+</script>

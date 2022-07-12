@@ -4,7 +4,7 @@ const DB = use('Database')
 const initMenu = use("App/Helpers/_sidebar")
 const initFunc = use("App/Helpers/initFunc")
 const moment = require('moment')
-const TrxOrderBeliHelpers = use("App/Helpers/TrxOrderBeli")
+const KeuPurchasingOrderHelpers = use("App/Helpers/KeuPurchasingOrder")
 
 class PurchasingRequestController {
     async index ( { auth, view } ) {
@@ -28,7 +28,7 @@ class PurchasingRequestController {
             return view.render('401')
         }
 
-        const data = await TrxOrderBeliHelpers.LIST(req, user)
+        const data = await KeuPurchasingOrderHelpers.LIST(req, user)
         return view.render('keuangan.purchasing-request.list', { list: data })
     }
 
@@ -37,8 +37,18 @@ class PurchasingRequestController {
         if(!user){
             return view.render('401')
         }
-        const kode = await initFunc.GEN_KODE_PR()
+        const kode = await initFunc.GEN_KODE_PR(user)
         return view.render('keuangan.purchasing-request.create', { kode_PR: kode })
+    }
+
+    async view ( { auth, params, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        const data = await KeuPurchasingOrderHelpers.SHOW(params)
+        return view.render('keuangan.purchasing-request.view', { data: data })
     }
 
     async approve ( { auth, params, view } ) {
@@ -62,7 +72,7 @@ class PurchasingRequestController {
                 message: 'Error sys_config_documents...'
             }
         }
-        const data = await TrxOrderBeliHelpers.SHOW(params)
+        const data = await KeuPurchasingOrderHelpers.SHOW(params)
         return view.render('keuangan.purchasing-request.approve', { data: data })
     }
 
@@ -71,7 +81,7 @@ class PurchasingRequestController {
         if(!user){
             return view.render('401')
         }
-        const data = await TrxOrderBeliHelpers.SHOW(params)
+        const data = await KeuPurchasingOrderHelpers.SHOW(params)
         return view.render('keuangan.purchasing-request.show', { data: data })
     }
 
@@ -84,7 +94,48 @@ class PurchasingRequestController {
         }
 
         console.log(req);
-        const data = await TrxOrderBeliHelpers.POST(req, user)
+        if(!req.cabang_id){
+            return {
+                success: false,
+                message: 'Tentukan cabang lebih dulu...'
+            }
+        }
+        if(!req.gudang_id){
+            return {
+                success: false,
+                message: 'Tentukan gudang lebih dulu...'
+            }
+        }
+        if(!req.priority){
+            return {
+                success: false,
+                message: 'Tentukan prioritas lebih dulu...'
+            }
+        }
+        if(!req.date){
+            return {
+                success: false,
+                message: 'Tentukan tanggal lebih dulu...'
+            }
+        }
+
+        for (const [i, obj] of (req.items).entries()) {
+            var urut = i + 1
+            if(!obj.barang_id){
+                return {
+                    success: false,
+                    message: 'Barang pada list ke-'+urut+' harus ditentukan...'
+                }
+            }
+            if(!obj.qty || obj.qty <= 0){
+                return {
+                    success: false,
+                    message: 'Jumlah barang pada list ke-'+urut+' harus lebih dari kosong...'
+                }
+            }
+        }
+        
+        const data = await KeuPurchasingOrderHelpers.POST(req, user)
         return data
     }
 
@@ -97,7 +148,7 @@ class PurchasingRequestController {
         }
 
         console.log(req);
-        const data = await TrxOrderBeliHelpers.APPROVE(params, req, user)
+        const data = await KeuPurchasingOrderHelpers.APPROVE(params, req, user)
         return data
     }
 

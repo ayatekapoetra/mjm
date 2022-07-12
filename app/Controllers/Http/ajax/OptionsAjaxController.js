@@ -1,6 +1,8 @@
 'use strict'
 
 const _ = require('underscore')
+const moment = require('moment')
+require('moment/locale/id')
 const VUser = use("App/Models/VUser")
 const UsrMenu = use("App/Models/UsrMenu")
 const SysMenu = use("App/Models/SysMenu")
@@ -20,6 +22,7 @@ const Pemasok = use("App/Models/master/Pemasok")
 const AccCoa = use("App/Models/akunting/AccCoa")
 const Karyawan = use("App/Models/master/Karyawan")
 const UsrWorkspace = use("App/Models/UsrWorkspace")
+const Notification = use("App/Models/Notification")
 const Equipment = use("App/Models/master/Equipment")
 const Pelanggan = use("App/Models/master/Pelanggan")
 const Department = use("App/Models/master/Department")
@@ -30,13 +33,15 @@ const AccCoaGroup = use("App/Models/akunting/AccCoaGroup")
 const AccCoaSubGroup = use("App/Models/akunting/AccCoaSubGroup")
 const HargaJualBarang = use("App/Models/master/HargaJual")
 const GajiComponent = use("App/Models/master/GajiComponent")
-const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
-const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
+// const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
+// const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
 const BarangQualities = use("App/Models/master/BarangQualities")
 const BarangCategories = use("App/Models/master/BarangCategories")
 const BarangSubCategories = use("App/Models/master/BarangSubCategories")
 
 // const jsonData = use("App/Helpers/JSON/barang_sewas")
+
+moment.locale('id');
 
 class OptionsAjaxController {
     async index ( { request } ) {
@@ -181,6 +186,33 @@ class OptionsAjaxController {
         
         return data
 
+    }
+
+    async notification ( { auth, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+        const notif = (
+            await Notification.
+            query().
+            with('pengirim').
+            where( w => {
+                w.where('status', 'unread')
+                w.where('receiver', user.id)
+            }).
+            orderBy('created_at', 'desc').
+            fetch()
+        ).toJSON()
+
+        let data = notif.map(el => {
+            return {
+                ...el,
+                created_at: moment(el.created_at, "YYYYMMDD HH:mm").fromNow()
+            }
+        })
+        // console.log(data);
+        return view.render('components.notification.list', {list: data})
     }
 
     async coa ( { request } ) {
@@ -399,6 +431,18 @@ class OptionsAjaxController {
 
     }
 
+    async cabangShow ( { params } ) {
+        let data = (
+            await Cabang
+                .query()
+                .where('id', params.id)
+                .orderBy('tipe', 'desc')
+                .last()
+        ).toJSON()
+        return data
+
+    }
+
     async workspace ( { request } ) {
         const req = request.all()
         req.selected = req.selected === 'null' ? null : req.selected
@@ -430,8 +474,10 @@ class OptionsAjaxController {
 
     async gudang ( { request } ) {
         const req = request.all()
-        console.log(req);
-        req.selected = req.selected === 'null' ? null : req.selected
+        if(!req.selected || req.selected === 'null' || req.selected === 'nullundefined'){
+            req.selected = null
+        }
+
         let data = (
                 await Gudang.query().where( w => {
                     if (req.cabang_id) {
@@ -855,26 +901,26 @@ class OptionsAjaxController {
         }
     }
 
-    async fakturJual ( { request } ) {
-        const req = request.all()
-        try {
-            let data = (
-                    await TrxFakturJual.query()
-                    .with('pelanggan')
-                    .where( w => {
-                    w.where('bisnis_id', req.bisnis_id)
-                    w.where('status', 'bersisa')
-                })
-                .fetch() 
-            ).toJSON() 
-            const result = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
-            console.log(req);
-            return result
+    // async fakturJual ( { request } ) {
+    //     const req = request.all()
+    //     try {
+    //         let data = (
+    //                 await TrxFakturJual.query()
+    //                 .with('pelanggan')
+    //                 .where( w => {
+    //                 w.where('bisnis_id', req.bisnis_id)
+    //                 w.where('status', 'bersisa')
+    //             })
+    //             .fetch() 
+    //         ).toJSON() 
+    //         const result = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+    //         console.log(req);
+    //         return result
             
-        } catch (error) {
-            return []
-        }
-    }
+    //     } catch (error) {
+    //         return []
+    //     }
+    // }
 }
 
 module.exports = OptionsAjaxController

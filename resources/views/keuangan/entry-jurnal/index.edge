@@ -1,13 +1,14 @@
 @layout('_layouts.main')
 @section('content')
 {{ script('ajax/index') }}
-{{ script('script/acc-bank-kas') }}
+{{ script('script/keu-entri-jurnal') }}
 <div class="container-fluid">
     <div class="row bg-title">
         <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-            <h4 class="page-title">KAS & BANK</h4> 
+            <h4 class="page-title">Entry Jurnal</h4> 
         </div>
         <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 text-right">
+            <input type="number" id="workdir" class="hidden">
         </div>
     </div>
     <div class="row">
@@ -16,13 +17,9 @@
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-10">
-                            <button class="btn btn-info create-form" id="bt-create-kas-form">
+                            <button class="btn btn-info create-form" id="bt-create-form">
                                 <i class="ti-plus"></i>
-                                Add Kas
-                            </button>
-                            <button class="btn btn-info create-form" id="bt-create-bank-form">
-                                <i class="ti-plus"></i>
-                                Add Bank
+                                Add Jurnal
                             </button>
                             <button class="btn btn-default bt-back" id="bt-back" style="display:none;">
                                 <i class="ti-arrow-left"></i>
@@ -39,7 +36,7 @@
                         </div>
                     </div>
                 </div>
-                @include('keuangan.kas-bank.filter')
+                @include('master.barang.filter')
                 <div id="content-list" style="display:none;"></div>
                 <div id="content-form" style="display:none;"></div>
             </div>

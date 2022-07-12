@@ -74,7 +74,9 @@ Route.group(() => {
     Route.get('/options/coa-subgroup', 'OptionsAjaxController.coaSubGroup').as('ajax.set.coaSubGroup')
     Route.get('/options/bisnis', 'OptionsAjaxController.bisnis').as('ajax.set.bisnis')
     Route.get('/options/cabang', 'OptionsAjaxController.cabang').as('ajax.set.cabang')
+    Route.get('/options/cabang/:id/show', 'OptionsAjaxController.cabangShow').as('ajax.set.cabangShow')
     Route.get('/options/workspace', 'OptionsAjaxController.workspace').as('ajax.set.workspace')
+    Route.get('/options/notification', 'OptionsAjaxController.notification').as('ajax.set.notification')
     Route.get('/options/gudang', 'OptionsAjaxController.gudang').as('ajax.set.gudang')
     Route.get('/options/department', 'OptionsAjaxController.department').as('ajax.set.department')
     Route.get('/options/rack', 'OptionsAjaxController.rack').as('ajax.set.rack')
@@ -273,9 +275,9 @@ Route.group(() => {
     Route.post('/purchasing-request', 'PurchasingRequestController.store').as('acc.purchasing-request.store').middleware('C')
     Route.get('/purchasing-request/list', 'PurchasingRequestController.list').as('acc.purchasing-request.list').middleware('R')
     Route.get('/purchasing-request/create', 'PurchasingRequestController.create').as('acc.purchasing-request.create').middleware('C')
-    Route.get('/purchasing-request/:id/show', 'PurchasingRequestController.show').as('acc.show').middleware('U')
-    Route.post('/purchasing-request/:id/update', 'PurchasingRequestController.update').as('acc.update').middleware('U')
-    // Route.get('/purchasing-request/:id/validate', 'PurchasingRequestController.validate').as('acc.validate').middleware('U')
+    Route.get('/purchasing-request/:id/show', 'PurchasingRequestController.show').as('acc.purchasing-request.show').middleware('U')
+    Route.post('/purchasing-request/:id/update', 'PurchasingRequestController.update').as('acc.purchasing-request.update').middleware('U')
+    Route.get('/purchasing-request/:id/view', 'PurchasingRequestController.view').as('acc.purchasing-request.view').middleware('R')
     // Route.post('/purchasing-request/:id/validate', 'PurchasingRequestController.validateStore').as('acc.validate.store').middleware('U')
     Route.get('/purchasing-request/:id/approve', 'PurchasingRequestController.approve').as('acc.approve').middleware('U')
     Route.post('/purchasing-request/:id/approve', 'PurchasingRequestController.approveStore').as('acc.approve.store').middleware('U')
@@ -374,6 +376,10 @@ Route.group(() => {
     Route.post('/entri-jurnal/:id/update', 'EntriJurnalController.update').as('acc.entri-jurnal.update').middleware('U')
     Route.delete('/entri-jurnal/:id/destroy', 'EntriJurnalController.destroy').as('acc.entri-jurnal.destroy').middleware('D')
     Route.get('/entri-jurnal/create/add-item', 'EntriJurnalController.addItem').as('acc.entri-jurnal.addItem')
+    Route.get('/entri-jurnal/create/select-gudang', 'EntriJurnalController.selectGudang').as('acc.entri-jurnal.selectGudang')
+    Route.get('/entri-jurnal/create/:coa/select-relation', 'EntriJurnalController.selectRelation').as('acc.entri-jurnal.selectRelation')
+    Route.get('/entri-jurnal/create/:pemasok/select-faktur', 'EntriJurnalController.selectFaktur').as('acc.entri-jurnal.selectFaktur')
+    Route.get('/entri-jurnal/create/:pelanggan/select-invoice', 'EntriJurnalController.selectInvoice').as('acc.entri-jurnal.selectInvoice')
 
     /* TRANSFER AKUN KAS & BANK */
     Route.get('/transfer-kasbank', 'TransferKasBankController.index').as('acc.transfer-kasbank').middleware('R')
@@ -493,6 +499,7 @@ Route.group(() => {
     /** BARANG **/
     Route.get('/barang', 'ApiBarangController.index')
     Route.get('/barang/:id/show', 'ApiBarangController.show')
+    Route.get('/barang/:kode/show-kode', 'ApiBarangController.showByKode')
 
     /** BARANG BRAND **/
     Route.get('/barang-brand', 'ApiBarangBrandController.index')

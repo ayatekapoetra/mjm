@@ -1,0 +1,83 @@
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="white-box">
+                <h3 class="box-title">
+                    @if(data.priority === 'P1')
+                        <span class="text-danger">Priority Urgent</span>
+                    @elseif(data.priority === 'P2')
+                        <span class="text-warning">Priority Medium</span>
+                    @else
+                        <span class="text-info">Priority Normal</span>
+                    @endif
+                    <span class="pull-right">{{data.kode}}</span>
+                </h3>
+                <div class="row sales-report">
+                    <div class="col-md-3" style="border-right: 1px dashed;">
+                        <h3 class="m-b-0">Tanggal</h3>
+                        <strong class="dateFormatDef" data-elm="" data-patten="DD MMM YYYY" data-tgl="{{data.date}}"></strong>
+                    </div>
+                    <div class="col-md-3" style="border-right: 1px dashed;">
+                        <h3 class="m-b-0">Cabang</h3>
+                        <strong>[{{data.cabang.kode}}] - {{data.cabang.nama}}</strong>
+                    </div>
+                    <div class="col-md-3" style="border-right: 1px dashed;">
+                        <h3 class="m-b-0">Gudang</h3>
+                        <strong>[{{data.gudang.kode}}] - {{data.gudang.nama}}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="m-b-0">
+                            Approved 
+                            @if(data.approvedby)
+                                <small class="dateFormatDef" data-elm="" data-patten="DD MMM YYYY HH:mm" data-tgl="{{data.approved_at}}"></small>
+                            @endif
+                        </h3>
+                        @if(data.approvedby)
+                            <strong class="text-uppercase">{{data.approved.nama_lengkap}}</strong>
+                        @else
+                            waiting...
+                        @endif
+                        <strong></strong>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="bg-inverse">
+                            <tr>
+                                <th>#</th>
+                                <th width="200">Kode</th>
+                                <th>Barang</th>
+                                <th>NumberPart</th>
+                                <th>Satuan</th>
+                                <th>Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @each(item in data.items)
+                                <tr>
+                                    <td>{{$loop.index + 1}}</td>
+                                    <td class="txt-oflo">
+                                        {{item.barang.kode}}
+                                    </td>
+                                    <td class="txt-oflo">
+                                        {{item.barang.nama}}
+                                    </td>
+                                    <td class="txt-oflo">
+                                        {{item.barang.num_part || ''}}
+                                    </td>
+                                    <td>
+                                        {{item.barang.satuan || ''}}
+                                    </td>
+                                    <td class="txt-oflo">
+                                        {{item.qty}}
+                                    </td>
+                                </tr>
+                            @endeach
+                        </tbody>
+                    </table> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
