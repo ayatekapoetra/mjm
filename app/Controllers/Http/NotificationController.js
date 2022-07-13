@@ -53,7 +53,7 @@ class NotificationController {
             }
         })
         data.data = notif
-        console.log(data);
+        // console.log(data);
         return view.render('notification.list', { list: data })
     }
 

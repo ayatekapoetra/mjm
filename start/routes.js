@@ -29,6 +29,7 @@ Route.post('/profile/update-workspace', 'AuthentifikasiController.updateWorkspac
 /* NOTIFICATION */
 Route.get('/notification', 'NotificationController.index').as('notification')
 Route.get('/notification/list', 'NotificationController.list').as('notification.list')
+// Route.get('/notification/count', 'NotificationController.count').as('notification.count')
 Route.post('/notification/:id/update', 'NotificationController.update').as('notification.update')
 Route.post('/notification/:id/delete', 'NotificationController.delete').as('notification.delete')
 
@@ -83,6 +84,7 @@ Route.group(() => {
     Route.get('/options/cabang/:id/show', 'OptionsAjaxController.cabangShow').as('ajax.set.cabangShow')
     Route.get('/options/workspace', 'OptionsAjaxController.workspace').as('ajax.set.workspace')
     Route.get('/options/notification', 'OptionsAjaxController.notification').as('ajax.set.notification')
+    Route.get('/options/notification/count', 'OptionsAjaxController.notificationCount').as('ajax.set.notification.count')
     Route.get('/options/gudang', 'OptionsAjaxController.gudang').as('ajax.set.gudang')
     Route.get('/options/department', 'OptionsAjaxController.department').as('ajax.set.department')
     Route.get('/options/rack', 'OptionsAjaxController.rack').as('ajax.set.rack')

@@ -226,6 +226,24 @@ class OptionsAjaxController {
         return view.render('components.notification.list', {list: data, count: countMessage})
     }
 
+    async notificationCount ( { auth } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+        const countMessage = await Notification.
+            query().
+            with('pengirim').
+            where( w => {
+                w.where('status', 'unread')
+                w.where('receiver', user.id)
+            }).
+            orderBy('created_at', 'desc').
+            getCount()
+        // console.log(data);
+        return countMessage
+    }
+
     async coa ( { request } ) {
         const req = request.all()
         req.selected = req.selected === 'null' ? null : req.selected

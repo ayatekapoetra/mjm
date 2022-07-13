@@ -1,5 +1,5 @@
 <li>
-    <div class="drop-title text-white">You have {{count}} new messages</div>
+    <div id="count-notif" class="drop-title text-white" data-count="{{count}}">You have {{count}} new messages</div>
 </li>
 
 @each(item in list)
@@ -30,3 +30,15 @@
 <li>
     <a class="text-center" href="{{ route('notification') }}"> <strong>See all notifications</strong> <i class="fa fa-angle-right"></i> </a>
 </li>
+
+<script>
+    var body = $('body')
+    $(function(){
+        function newMessage(){
+            var len = body.find('div#count-notif').data('count')
+            console.log('====================================');
+            console.log(len);
+            console.log('====================================');
+        }
+    })
+</script>
