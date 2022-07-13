@@ -425,6 +425,18 @@ class bayarPelanggan {
         }
         /* END INSERT JURNAL HPP BARANG */
 
+        /* SEND NOTIFICATION */
+        let arrUserTipe = ['administrator', 'developer', 'keuangan']
+        await initFunc.SEND_NOTIFICATION(
+            user, 
+            arrUserTipe, 
+            {
+                header: "Invoicing",
+                title: orderTrx.kdpesanan,
+                link: '/operational/entry-pembayaran',
+                content: user.nama_lengkap + " telah membuat invoice dengan kode "+orderTrx.kdpesanan,
+            }
+        )
 
         await trx.commit()
         return {
@@ -437,35 +449,6 @@ class bayarPelanggan {
         const trx = await DB.beginTransaction()
         const ws = await initFunc.WORKSPACE(user)
         const uniqKey = req.uniqKey || moment().format('DDMMYYHHmmss')
-        
-        // /* FIRST PAYMENT UPDATE STOK BARANG */
-        // const lenBayar = await OpsPelangganBayar.query().where('order_id', req.inv_id).last()
-        // if(!lenBayar){
-        //     const listBarang = (await OpsPelangganOrderItem.query().where('order_id', req.inv_id).fetch()).toJSON()
-        //     // console.log(listBarang);
-        //     for (const brg of listBarang) {
-        //         const barangLokasi = new BarangLokasi()
-        //         barangLokasi.fill({
-        //             trx_inv: brg.id,
-        //             barang_id: brg.barang_id,
-        //             gudang_id: brg.gudang_id,
-        //             cabang_id: ws.cabang_id,
-        //             qty_del: parseFloat(brg.qty) * -1,
-        //             qty_hand: parseFloat(brg.qty) * -1,
-        //             createdby: user.id
-        //         })
-        //         try {
-        //             await barangLokasi.save(trx)
-        //         } catch (error) {
-        //             console.log(error);
-        //             await trx.rollback()
-        //             return {
-        //                 success: false,
-        //                 message: 'Failed update stok \n'+ JSON.stringify(error)
-        //             }
-        //         }
-        //     }
-        // }/* FIRST PAYMENT UPDATE STOK BARANG */
 
         const kodeKwitansi = await initFunc.GEN_KODE_KWITANSI(user)
         const orderData = await OpsPelangganOrder.query().where('id', req.inv_id).last()
@@ -727,6 +710,19 @@ class bayarPelanggan {
                 }
             }
         }
+
+        /* SEND NOTIFICATION */
+        let arrUserTipe = ['administrator', 'developer', 'keuangan']
+        await initFunc.SEND_NOTIFICATION(
+            user, 
+            arrUserTipe, 
+            {
+                header: "Pembayaran Pelanggan",
+                title: kodeKwitansi,
+                link: '/operational/entry-pembayaran',
+                content: user.nama_lengkap + " developer telah melakukan input pembayaran dengan kode "+kodeKwitansi,
+            }
+        )
 
         await trx.commit()
         return {

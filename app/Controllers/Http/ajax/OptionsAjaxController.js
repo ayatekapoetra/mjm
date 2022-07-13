@@ -193,6 +193,16 @@ class OptionsAjaxController {
         if(!user){
             return
         }
+        const countMessage = await Notification.
+            query().
+            with('pengirim').
+            where( w => {
+                w.where('status', 'unread')
+                w.where('receiver', user.id)
+            }).
+            orderBy('created_at', 'desc').
+            getCount()
+
         const notif = (
             await Notification.
             query().
@@ -202,6 +212,7 @@ class OptionsAjaxController {
                 w.where('receiver', user.id)
             }).
             orderBy('created_at', 'desc').
+            limit(5).
             fetch()
         ).toJSON()
 
@@ -212,7 +223,7 @@ class OptionsAjaxController {
             }
         })
         // console.log(data);
-        return view.render('components.notification.list', {list: data})
+        return view.render('components.notification.list', {list: data, count: countMessage})
     }
 
     async coa ( { request } ) {
@@ -497,7 +508,9 @@ class OptionsAjaxController {
                 data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: ''})
             }
         }
-        
+        console.log('====================================');
+        console.log(data);
+        console.log('====================================');
         return data
     }
 
@@ -562,7 +575,6 @@ class OptionsAjaxController {
         }
         
         const ws = await initFunc.WORKSPACE(user)
-        console.log('PARAMS ::', params, ws);
         let data = (
                 await Barang.query()
                 .with('brand')
@@ -615,7 +627,6 @@ class OptionsAjaxController {
         }
         
         const ws = await initFunc.WORKSPACE(user)
-        console.log('PARAMS ::', params, ws);
         let data = (
                 await Jasa.query()
                 .with('cabang')

@@ -365,7 +365,6 @@ $(function(){
         var data = getDataForm()
         var formdata = new FormData()
         formdata.append('items', JSON.stringify(data))
-        formdata.append('lampiran', $('input#lampiran')[0].files[0])
         var id = $(this).data('id')
 
         console.log(data);

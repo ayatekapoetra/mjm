@@ -1,0 +1,113 @@
+@layout('_layouts.main')
+@section('content')
+{{ script('ajax/index') }}
+<div class="container-fluid">
+    <div class="row bg-title">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+            <h4 class="page-title">Notification</h4> 
+        </div>
+        <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 text-right">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div id="content-list" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="init-form"></div>
+
+<script>
+    $(function(){
+        var body = $('body')
+
+        initDefault()
+
+        $('body').on('click', 'button.bt-read', function(e){
+            e.preventDefault()
+            var id = $(this).data('id')
+            var status = $(this).data('status')
+            var data = new FormData()
+            data.append('status', status)
+            console.log(id);
+            $.ajax({
+                async: true,
+                headers: {'x-csrf-token': $('[name=_csrf]').val()},
+                url: 'notification/'+id+'/update',
+                method: 'POST',
+                data: data,
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    if(result.success){
+                        swal("Okey,,,!", result.message, "success")
+                        initDefault()
+                    }else{
+                        swal("Opps,,,!", result.message, "warning")
+                    }
+                },
+                error: function(err){
+                    console.log(err);
+                    swal("Opps,,,!", 'Server Error', "error")
+                }
+            })
+        })
+
+        $('body').on('click', 'button.bt-removed', function(e){
+            e.preventDefault()
+            var id = $(this).data('id')
+            var status = $(this).data('status')
+            var data = new FormData()
+            data.append('status', status)
+            console.log(id);
+            $.ajax({
+                async: true,
+                headers: {'x-csrf-token': $('[name=_csrf]').val()},
+                url: 'notification/'+id+'/delete',
+                method: 'POST',
+                data: data,
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    if(result.success){
+                        swal("Okey,,,!", result.message, "success")
+                        initDefault()
+                    }else{
+                        swal("Opps,,,!", result.message, "warning")
+                    }
+                },
+                error: function(err){
+                    console.log(err);
+                    swal("Opps,,,!", 'Server Error', "error")
+                }
+            })
+        })
+
+        function initDefault(limit, page){
+            $.ajax({
+                async: true,
+                url: 'notification/list',
+                method: 'GET',
+                data: {
+                    limit: limit,
+                    page: page || 1
+                },
+                dataType: 'html',
+                contentType: false,
+                success: function(result){
+                    body.find('div#content-list').html(result).css('display', 'block')
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+    })
+</script>
+@endsection

@@ -210,6 +210,18 @@ class orderPelanggan {
             }
         }
 
+        /* SEND NOTIFICATION */
+        let arrUserTipe = ['administrator', 'developer', 'keuangan', 'kasir']
+        await initFunc.SEND_NOTIFICATION(
+            user, 
+            arrUserTipe, 
+            {
+                header: "Customer Order",
+                title: req.kode,
+                link: '/operational/entry-pembayaran',
+                content: user.nama_lengkap + " telah membuat order dengan kode "+req.kode,
+            }
+        )
 
         await trx.commit()
         return {

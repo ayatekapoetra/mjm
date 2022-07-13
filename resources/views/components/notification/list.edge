@@ -1,5 +1,5 @@
 <li>
-    <div class="drop-title">You have {{list.length}} new messages</div>
+    <div class="drop-title text-white">You have {{count}} new messages</div>
 </li>
 
 @each(item in list)
@@ -17,7 +17,7 @@
                 <div class="mail-contnet">
                     <h5>{{item.title}}</h5>
                     <span class="mail-desc">
-                        <small>{{item.header}}</small> <br>
+                        <small class="text-success">{{item.header}}</small> <br>
                         {{item.content}}
                     </span> 
                     <span class="time text-white">{{item.created_at}} <span class="pull-right text-warning">{{item.pengirim.nama_lengkap}}</span></span> 
@@ -28,5 +28,5 @@
 @endeach
 
 <li>
-    <a class="text-center" href="javascript:void(0);"> <strong>See all notifications</strong> <i class="fa fa-angle-right"></i> </a>
+    <a class="text-center" href="{{ route('notification') }}"> <strong>See all notifications</strong> <i class="fa fa-angle-right"></i> </a>
 </li>

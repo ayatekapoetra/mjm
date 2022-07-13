@@ -20,10 +20,6 @@ $(function(){
                 // console.log(result);
                 elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>['+v.kode+']  '+v.nama+'</option>'))
                 elm.trigger('change');
-                // if(result.length > 0){
-                // }else{
-                //     elm.html('<option value="" selected>Blum ada data...</option>')
-                // }
             },
             error: function(err){
                 console.log(err)

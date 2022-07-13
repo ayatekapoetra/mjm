@@ -85,6 +85,17 @@ class PurchasingRequestController {
         return view.render('keuangan.purchasing-request.show', { data: data })
     }
 
+    async update ( { auth, params, request } ) {
+        let req = request.all()
+        req = JSON.parse(req.items)
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+        const data = await KeuPurchasingOrderHelpers.UPDATE(params, req, user)
+        return data
+    }
+
     async store ( { auth, request } ){
         let req = request.all()
         req = JSON.parse(req.data)

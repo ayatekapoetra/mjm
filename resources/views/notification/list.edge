@@ -1,0 +1,73 @@
+{{ script('ajax/index') }}
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="70" class="bg-inverse b-all">ACT</th>
+                            <th width="120" class="bg-inverse b-all">Date</th>
+                            <th width="150" class="bg-inverse b-all">Header</th>
+                            <th width="400" class="bg-inverse b-all">Content</th>
+                            <th width="150" class="bg-inverse b-all">Sender</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="v-middle text-center">
+                                    {{ csrfField() }}
+                                    <button class="btn btn-inverse btn-xs bt-read" data-id="{{item.id}}" data-status="{{item.status}}">
+                                        @if(item.status === 'unread')
+                                            <i class="mdi mdi-email"></i>
+                                        @else
+                                            <i class="mdi mdi-email-open"></i>
+                                        @endif
+                                    </button>
+                                    <button class="btn btn-danger btn-xs bt-removed" data-id="{{item.id}}">
+                                        <i class="mdi mdi-delete"></i>
+                                    </button>
+                                </td>
+                                <td class="bg-light">
+                                    {{item.date}} <br>
+                                    <small class="text-white">{{item.datetime}}</small>
+                                </td>
+                                <td>
+                                    {{item.header}} <br>
+                                    {{item.title}}
+                                </td>
+                                <td>
+                                    @if(item.subtitle)
+                                        <small class="text-info">{{item.subtitle}}</small> <br>
+                                    @endif
+                                    {{item.content}}
+                                </td>
+                                <td>
+                                    {{item.pengirim.nama_lengkap}}
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>

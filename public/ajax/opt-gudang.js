@@ -11,7 +11,6 @@ $(function(){
         var relation = body.find('#'+link).data('values') || ''
         var values = $(this).data('values') || elm.val()
         var cabang = $(this).data('cabang') && '&cabang_id='+$(this).data('cabang')
-        console.log('values ::', values);
         $.ajax({
             async: true,
             url: '/ajax/options/gudang?selected='+values + cabang +'&'+link+'='+relation,
@@ -48,7 +47,6 @@ $(function(){
                 mimeType: "multipart/form-data",
                 contentType: false,
                 success: function(result){
-                    console.log(result);
                     body.find('.div-rack').css('display','inline')
                     if(result.length > 0){
                         body.find('select[name="rack_id"]').html(result.map( v => '<option gudang="'+v.gudang_id+'" value="'+v.id+'" '+v.selected+'>['+v.kode+']  '+v.nama+'</option>'))

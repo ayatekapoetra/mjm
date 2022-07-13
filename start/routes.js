@@ -26,6 +26,12 @@ Route.get('/profile', 'AuthentifikasiController.profile').as('auth.profile')
 Route.post('/profile/update-password', 'AuthentifikasiController.updatePassword').as('auth.updatePassword')
 Route.post('/profile/update-workspace', 'AuthentifikasiController.updateWorkspace').as('auth.updateWorkspace')
 
+/* NOTIFICATION */
+Route.get('/notification', 'NotificationController.index').as('notification')
+Route.get('/notification/list', 'NotificationController.list').as('notification.list')
+Route.post('/notification/:id/update', 'NotificationController.update').as('notification.update')
+Route.post('/notification/:id/delete', 'NotificationController.delete').as('notification.delete')
+
 /*
 *   ROUTING AJAX OPTIONS
 */

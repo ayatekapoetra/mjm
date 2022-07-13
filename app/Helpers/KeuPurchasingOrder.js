@@ -301,6 +301,7 @@ class PurchaseReq {
         .with('items', a => {
             a.with('barang')
             a.with('pemasok')
+            a.where('aktif', 'Y')
         })
         .where('id', params.id)
         .last()
@@ -313,213 +314,279 @@ class PurchaseReq {
     }
 
     async UPDATE (params, req, user) {
-        let trxOrderBeli
-        let trxOrderBeliItem
+        const trx = await DB.beginTransaction()
+        await DB.table('keu_request_orders_items').where('purchasing_id', params.id).update({ aktif: 'N' })
+
+        const trxOrderBeli = await KeuPurchasingRequest.query().where('id', params.id).last()
+        trxOrderBeli.merge({
+            priority: req.priority,
+            date: req.date,
+            cabang_id: req.cabang_id,
+            gudang_id: req.gudang_id,
+            narasi: req.narasi
+        })
+
         try {
-            for (const obj of req.items.items) {
-                let dataItem
-                if(req.action === 'validated'){
-                    dataItem = {
-                        barang_id: obj.barang_id,
-                        description: obj.description,
-                        equipment_id: obj.equipment_id || null,
-                        pemasok_id: obj.pemasok_id,
-                        metode: obj.metode,
-                        prioritas: obj.prioritas,
-                        qty_req: obj.qty_req,
-                        qty_acc: obj.qty_acc,
-                        stn: obj.satuan,
-                        user_validated: user.id,
-                        date_validated: new Date()
-                    }
-
-                    trxOrderBeliItem = await TrxOrderBeliItem.query().where('id', obj.id).last()
-                    trxOrderBeliItem.merge(dataItem)
-                    await trxOrderBeliItem.save()
-
-                    trxOrderBeli = await TrxOrderBeli.query().where('id', params.id).last()
-                    trxOrderBeli.merge({
-                        description: req.items.description,
-                        date_ro: req.items.date_ro,
-                        cabang_id: req.items.cabang_id,
-                        gudang_id: req.items.gudang_id,
-                        status: 'approved'
-                    })
-    
-                    await trxOrderBeli.save()
-    
-                }else if(req.action === 'approved'){
-                    dataItem = {
-                        barang_id: obj.barang_id,
-                        description: obj.description,
-                        equipment_id: obj.equipment_id || null,
-                        pemasok_id: obj.pemasok_id,
-                        metode: obj.metode,
-                        prioritas: obj.prioritas,
-                        qty_req: obj.qty_req,
-                        qty_acc: obj.qty_acc,
-                        stn: obj.satuan,
-                        user_validated: user.id,
-                        user_approved: user.id,
-                        date_validated: new Date(),
-                        date_approved: new Date()
-                    }
-
-                    trxOrderBeliItem = await TrxOrderBeliItem.query().where('id', obj.id).last()
-                    trxOrderBeliItem.merge(dataItem)
-                    await trxOrderBeliItem.save()
-
-                    trxOrderBeli = await TrxOrderBeli.query().where('id', params.id).last()
-                    trxOrderBeli.merge({
-                        description: req.items.description,
-                        date_ro: req.items.date_ro,
-                        cabang_id: req.items.cabang_id,
-                        gudang_id: req.items.gudang_id,
-                        status: 'finish'
-                    })
-
-                    await trxOrderBeli.save()
-                }
-                
-            }
-
-            const tempFaktur = (
-                await TrxOrderBeli
-                .query()
-                .with('items')
-                .where('id', params.id)
-                .last()
-            ).toJSON()
-
-
-            /** JIKA STATUS FINISH
-             * INSERT DATA KE FAKTUR PEMBELIAN JIKA METODE KREDIT
-             * ATAU INSERT DATA KE PENERIMAAN BARANG JIKA METODE TUNAI **/
-
-            if(tempFaktur.status === 'finish'){
-                /** GROUP DATA DENGAN METODE **/
-                let itemKredit = (
-                    await TrxOrderBeliItem.query().where( w => {
-                        w.where('ro_id', tempFaktur.id)
-                        w.where('metode', 'kredit')
-                    }).fetch()
-                ).toJSON()
-    
-                let itemTunai = (
-                    await TrxOrderBeliItem.query().where( w => {
-                        w.where('ro_id', tempFaktur.id)
-                        w.where('metode', 'tunai')
-                    }).fetch()
-                ).toJSON()
-
-                /** GROUPING PEMASOK METODE KREDIT **/
-                if(itemKredit.length > 0){
-                    let groupPemasok = _.groupBy(itemKredit, 'pemasok_id')
-                    groupPemasok = Object.keys(groupPemasok).map(key => {
-                        return {
-                            pemasok_id: key,
-                            items: groupPemasok[key]
-                        }
-                    })
-    
-                    
-                    for (const obj of groupPemasok) {
-                        let items = []
-                        for (const elm of obj.items) {
-                            const barang = await Barang.query().where('id', elm.barang_id).last()
-                            items.push({
-                                barang_id: elm.barang_id,
-                                equipment_id: elm.equipment_id,
-                                coa_id: barang.coa_in,
-                                qty: elm.qty_acc,
-                                stn: elm.stn,
-                                harga_stn: 0.00,
-                                subtotal: 0.00
-                            })
-                        }
-    
-                        let data = {
-                            bisnis_id: tempFaktur.bisnis_id,
-                            cabang_id: tempFaktur.cabang_id,
-                            gudang_id: tempFaktur.gudang_id,
-                            pemasok_id: obj.pemasok_id,
-                            reff_ro: tempFaktur.kode,
-                            items: items
-                        }
-                        console.log('====================================');
-                        console.log(data);
-                        console.log('====================================');
-                        await TrxFakturBeliHelpers.POST(data, user)
-                    }
-
-                }
-    
-                /** GROUPING PEMASOK METODE TUNAI **/
-                if(itemTunai.length > 0){
-                    let groupPemasok = _.groupBy(itemTunai, 'pemasok_id')
-                    groupPemasok = Object.keys(groupPemasok).map(key => {
-                        return {
-                            pemasok_id: key,
-                            items: groupPemasok[key]
-                        }
-                    })
-    
-                    for (const obj of groupPemasok) {
-                        let items = []
-                        for (const elm of obj.items) {
-                            items.push({
-                                barang_id: elm.barang_id,
-                                description: null,
-                                qty: elm.qty_acc
-                            })
-
-                            /** INSERT BARANG SESUAI LOKASI **/
-                            const barangLokasi = new BarangLokasi()
-                            barangLokasi.fill({
-                                ro_id: params.id,
-                                bisnis_id: tempFaktur.bisnis_id,
-                                cabang_id: tempFaktur.cabang_id,
-                                gudang_id: tempFaktur.gudang_id,
-                                barang_id: elm.barang_id,
-                                qty_rec: elm.qty_acc,
-                                createdby: user.id
-                            })
-                            await barangLokasi.save()
-                        }
-                        /** GENERATE KODE TERIMA BARANG **/
-                        const kode_rcp = await initFunc.GEN_KODE_TERIMA_BRG(tempFaktur.bisnis_id)
-                        let data = {
-                            ro_id: params.id,
-                            bisnis_id: tempFaktur.bisnis_id,
-                            reff_fb: null,
-                            reff_ro: tempFaktur.kode,
-                            reff_rcp: kode_rcp,
-                            pemasok_id: obj.pemasok_id,
-                            gudang_id: tempFaktur.gudang_id,
-                            narasi: null,
-                            items: items
-                        }
-                        
-                        await TrxTerimaBarangHelpers.POST(data, user)
-                    }
-                }
-
-                
-            }
-
-            
-            return {
-                success: true,
-                message: 'Success save data...'
-            }
+            await trxOrderBeli.save(trx)
         } catch (error) {
             console.log(error);
+            await trx.rollback()
             return {
                 success: false,
-                message: 'Failed save data...'+JSON.stringify(error)
+                message: 'Failed save data '+ JSON.stringify(error)
             }
         }
+
+        for (const obj of req.items) {
+            const barang = await Barang.query().where('id', obj.barang_id).last()
+            const trxOrderBeliItem = new KeuPurchasingRequestItems()
+            trxOrderBeliItem.fill({
+                purchasing_id: trxOrderBeli.id,
+                barang_id: obj.barang_id,
+                qty: obj.qty,
+                stn: barang.satuan
+            })
+            try {
+                await trxOrderBeliItem.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save details '+ JSON.stringify(error)
+                }
+            }
+        }
+
+        // SEND NOTIFICATION REQUEST APPROVAL DOCUMENT
+        let arrUserTipe = ['administrator', 'developer', 'keuangan', 'direktur', 'logistik']
+        await initFunc.SEND_NOTIFICATION(
+            user, 
+            arrUserTipe, 
+            {
+                header: "Edit Purchasing Request",
+                title: trxOrderBeli.kode,
+                link: '/acc/purchasing-request',
+                content: user.nama_lengkap + " melakukan update & meminta persetujuan untuk order barang dengan kode Purchasing "+trxOrderBeli.kode,
+            }
+        )
+        
+        await trx.commit()
+        return {
+            success: true,
+            message: 'Success save data...'
+        }
+        
     }
+
+    // async UPDATE (params, req, user) {
+    //     let trxOrderBeli
+    //     let trxOrderBeliItem
+    //     try {
+    //         for (const obj of req.items.items) {
+    //             let dataItem
+    //             if(req.action === 'validated'){
+    //                 dataItem = {
+    //                     barang_id: obj.barang_id,
+    //                     description: obj.description,
+    //                     equipment_id: obj.equipment_id || null,
+    //                     pemasok_id: obj.pemasok_id,
+    //                     metode: obj.metode,
+    //                     prioritas: obj.prioritas,
+    //                     qty_req: obj.qty_req,
+    //                     qty_acc: obj.qty_acc,
+    //                     stn: obj.satuan,
+    //                     user_validated: user.id,
+    //                     date_validated: new Date()
+    //                 }
+
+    //                 trxOrderBeliItem = await TrxOrderBeliItem.query().where('id', obj.id).last()
+    //                 trxOrderBeliItem.merge(dataItem)
+    //                 await trxOrderBeliItem.save()
+
+    //                 trxOrderBeli = await TrxOrderBeli.query().where('id', params.id).last()
+    //                 trxOrderBeli.merge({
+    //                     description: req.items.description,
+    //                     date_ro: req.items.date_ro,
+    //                     cabang_id: req.items.cabang_id,
+    //                     gudang_id: req.items.gudang_id,
+    //                     status: 'approved'
+    //                 })
+    
+    //                 await trxOrderBeli.save()
+    
+    //             }else if(req.action === 'approved'){
+    //                 dataItem = {
+    //                     barang_id: obj.barang_id,
+    //                     description: obj.description,
+    //                     equipment_id: obj.equipment_id || null,
+    //                     pemasok_id: obj.pemasok_id,
+    //                     metode: obj.metode,
+    //                     prioritas: obj.prioritas,
+    //                     qty_req: obj.qty_req,
+    //                     qty_acc: obj.qty_acc,
+    //                     stn: obj.satuan,
+    //                     user_validated: user.id,
+    //                     user_approved: user.id,
+    //                     date_validated: new Date(),
+    //                     date_approved: new Date()
+    //                 }
+
+    //                 trxOrderBeliItem = await TrxOrderBeliItem.query().where('id', obj.id).last()
+    //                 trxOrderBeliItem.merge(dataItem)
+    //                 await trxOrderBeliItem.save()
+
+    //                 trxOrderBeli = await TrxOrderBeli.query().where('id', params.id).last()
+    //                 trxOrderBeli.merge({
+    //                     description: req.items.description,
+    //                     date_ro: req.items.date_ro,
+    //                     cabang_id: req.items.cabang_id,
+    //                     gudang_id: req.items.gudang_id,
+    //                     status: 'finish'
+    //                 })
+
+    //                 await trxOrderBeli.save()
+    //             }
+                
+    //         }
+
+    //         const tempFaktur = (
+    //             await TrxOrderBeli
+    //             .query()
+    //             .with('items')
+    //             .where('id', params.id)
+    //             .last()
+    //         ).toJSON()
+
+
+    //         /** JIKA STATUS FINISH
+    //          * INSERT DATA KE FAKTUR PEMBELIAN JIKA METODE KREDIT
+    //          * ATAU INSERT DATA KE PENERIMAAN BARANG JIKA METODE TUNAI **/
+
+    //         if(tempFaktur.status === 'finish'){
+    //             /** GROUP DATA DENGAN METODE **/
+    //             let itemKredit = (
+    //                 await TrxOrderBeliItem.query().where( w => {
+    //                     w.where('ro_id', tempFaktur.id)
+    //                     w.where('metode', 'kredit')
+    //                 }).fetch()
+    //             ).toJSON()
+    
+    //             let itemTunai = (
+    //                 await TrxOrderBeliItem.query().where( w => {
+    //                     w.where('ro_id', tempFaktur.id)
+    //                     w.where('metode', 'tunai')
+    //                 }).fetch()
+    //             ).toJSON()
+
+    //             /** GROUPING PEMASOK METODE KREDIT **/
+    //             if(itemKredit.length > 0){
+    //                 let groupPemasok = _.groupBy(itemKredit, 'pemasok_id')
+    //                 groupPemasok = Object.keys(groupPemasok).map(key => {
+    //                     return {
+    //                         pemasok_id: key,
+    //                         items: groupPemasok[key]
+    //                     }
+    //                 })
+    
+                    
+    //                 for (const obj of groupPemasok) {
+    //                     let items = []
+    //                     for (const elm of obj.items) {
+    //                         const barang = await Barang.query().where('id', elm.barang_id).last()
+    //                         items.push({
+    //                             barang_id: elm.barang_id,
+    //                             equipment_id: elm.equipment_id,
+    //                             coa_id: barang.coa_in,
+    //                             qty: elm.qty_acc,
+    //                             stn: elm.stn,
+    //                             harga_stn: 0.00,
+    //                             subtotal: 0.00
+    //                         })
+    //                     }
+    
+    //                     let data = {
+    //                         bisnis_id: tempFaktur.bisnis_id,
+    //                         cabang_id: tempFaktur.cabang_id,
+    //                         gudang_id: tempFaktur.gudang_id,
+    //                         pemasok_id: obj.pemasok_id,
+    //                         reff_ro: tempFaktur.kode,
+    //                         items: items
+    //                     }
+    //                     console.log('====================================');
+    //                     console.log(data);
+    //                     console.log('====================================');
+    //                     await TrxFakturBeliHelpers.POST(data, user)
+    //                 }
+
+    //             }
+    
+    //             /** GROUPING PEMASOK METODE TUNAI **/
+    //             if(itemTunai.length > 0){
+    //                 let groupPemasok = _.groupBy(itemTunai, 'pemasok_id')
+    //                 groupPemasok = Object.keys(groupPemasok).map(key => {
+    //                     return {
+    //                         pemasok_id: key,
+    //                         items: groupPemasok[key]
+    //                     }
+    //                 })
+    
+    //                 for (const obj of groupPemasok) {
+    //                     let items = []
+    //                     for (const elm of obj.items) {
+    //                         items.push({
+    //                             barang_id: elm.barang_id,
+    //                             description: null,
+    //                             qty: elm.qty_acc
+    //                         })
+
+    //                         /** INSERT BARANG SESUAI LOKASI **/
+    //                         const barangLokasi = new BarangLokasi()
+    //                         barangLokasi.fill({
+    //                             ro_id: params.id,
+    //                             bisnis_id: tempFaktur.bisnis_id,
+    //                             cabang_id: tempFaktur.cabang_id,
+    //                             gudang_id: tempFaktur.gudang_id,
+    //                             barang_id: elm.barang_id,
+    //                             qty_rec: elm.qty_acc,
+    //                             createdby: user.id
+    //                         })
+    //                         await barangLokasi.save()
+    //                     }
+    //                     /** GENERATE KODE TERIMA BARANG **/
+    //                     const kode_rcp = await initFunc.GEN_KODE_TERIMA_BRG(tempFaktur.bisnis_id)
+    //                     let data = {
+    //                         ro_id: params.id,
+    //                         bisnis_id: tempFaktur.bisnis_id,
+    //                         reff_fb: null,
+    //                         reff_ro: tempFaktur.kode,
+    //                         reff_rcp: kode_rcp,
+    //                         pemasok_id: obj.pemasok_id,
+    //                         gudang_id: tempFaktur.gudang_id,
+    //                         narasi: null,
+    //                         items: items
+    //                     }
+                        
+    //                     await TrxTerimaBarangHelpers.POST(data, user)
+    //                 }
+    //             }
+
+                
+    //         }
+
+            
+    //         return {
+    //             success: true,
+    //             message: 'Success save data...'
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //         return {
+    //             success: false,
+    //             message: 'Failed save data...'+JSON.stringify(error)
+    //         }
+    //     }
+    // }
 
     async DELETE (params) {
         
