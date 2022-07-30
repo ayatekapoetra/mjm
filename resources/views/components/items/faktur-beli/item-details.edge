@@ -1,0 +1,80 @@
+
+<tr class="item-rows">
+    <td>
+        <h3 class="urut-rows"></h3>
+        <input type="hidden" class="" name="id" value="{{data.id ? data.id : ''}}">   
+    </td>
+    <td class="b-all">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="">Barang</label>                
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <button class="btn btn-danger bt-remove-item" type="button">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </span>
+                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="" id=""></select>
+                    <span class="input-group-addon satuan"></span>
+                </div>
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Qty <span class="text-danger">*</span></label>                
+                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="1" required>
+                </div>        
+            </div>
+            <div class="col-md-4">            
+                <div class="form-group">                
+                    <label for="">Harga Stn <span class="text-danger">*</span></label>                
+                    <input type="number" class="form-control item-data-details item-details" name="harga_stn" id="" value="0" required>
+                </div>        
+            </div>
+            <div class="col-md-2">            
+                <label for="">Discount</label>                
+                <div class="input-group">
+                    <input type="number" class="form-control item-data-details item-details" name="discount" id="" value="0">
+                    <input type="hidden" class="form-control item-data-details item-details" name="type-discount" value="persen">
+                    <span class="input-group-addon" name="icon-discount">%</span>
+                </div>   
+            </div>
+            <div class="col-md-4">            
+                <div class="form-group">                
+                    <label for="">Harga Total</label>                
+                    <input type="number" class="form-control text-right item-data-details item-details" name="subtotal" id="" value="0" readonly>
+                </div>        
+            </div>
+            <div class="col-md-6">            
+                <div class="form-group">                
+                    <label for="">Akun</label>                
+                    <select class="form-control item-data-details selectCoa" name="coa_id" data-values="" id="">
+                        <option value="">Pilih...</option>
+                        @each(item in akun)
+                            <optgroup label="{{item.tipe}}" style="color:white">
+                                @each(coa in item.items)
+                                    <option value="{{coa.id}}">
+                                        @if(coa.coa_grp_nm)
+                                            {{coa.coa_grp_nm}} --> 
+                                        @endif
+                                        @if(coa.coa_subgrp_nm)
+                                            {{coa.coa_subgrp_nm}} --> 
+                                        @endif
+                                        {{coa.coa_name}}
+                                    </option>
+                                @endeach
+                            </optgroup>
+                        @endeach
+                    </select>
+                </div>        
+            </div>
+        </div>
+    </td>
+</tr>
+{{ script('ajax/opt-barang') }}
+{{ script('ajax/opt-options') }}
+<script>
+    $(function(){
+        var body = $('body')
+        body.find('select[name="coa_id"]').select2()
+    })
+</script>

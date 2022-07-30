@@ -30,17 +30,5 @@ $(function(){
             }
         })
     })
-
-    function setSelected(list, value){
-        let data = list.map(elm => elm.id === value ? {...elm, selected: 'selected'} : {...elm, selected: ''})
-        return data
-    }
-    
-    function initSelected(data, elm){
-        var lenSelected = data.filter( a => a.selected === 'selected')
-        if(!lenSelected.length > 0){
-            elm.prepend('<option value="" selected>Pilih</option>')
-        }
-    }
 })
 

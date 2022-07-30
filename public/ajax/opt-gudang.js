@@ -63,5 +63,6 @@ $(function(){
             body.find('.div-rack').css('display','none')
         }
     })
+    
 })
 

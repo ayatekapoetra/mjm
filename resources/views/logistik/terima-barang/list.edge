@@ -1,0 +1,69 @@
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="70" class="bg-inverse b-all">Action</th>
+                            <th width="70" class="bg-inverse b-all">Lampiran</th>
+                            <th width="120"class="bg-inverse b-all">Tanggal</th>
+                            <th width="150"class="bg-inverse b-all">Kode Terima</th>
+                            <th width="150"class="bg-inverse b-all">Pemasok</th>
+                            <th width="150"class="bg-inverse b-all">Gudang</th>
+                            <th width="*" class="bg-inverse b-all">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(list.data.length > 0)
+                            @each(item in list.data)
+                                <tr>
+                                    <td class="text-center">{{$loop.index + 1}}</td>
+                                    <td>
+                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                        <button class="btn btn-outline btn-default btn-xs bt-print" data-id="{{item.id}}">
+                                            <i class="fa fa-print"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        @if(item.files)
+                                            <a href="{{item.files.url}}" target="_blank">
+                                                <i class="ti-file"></i> open
+                                            </a>
+                                        @endif
+                                    </td>
+                                    <td class="dateFormatDef" data-patten="YYYY-MM-DD" data-tgl="{{item.received_at}}">
+                                        <strong></strong>
+                                    </td>
+                                    <td>
+                                        {{item.reff_rcp}}
+                                    </td>
+                                    <td>
+                                        {{item.pemasok.nama}}
+                                    </td>
+                                    <td>
+                                        {{item.gudang.nama}}
+                                    </td>
+                                    <td class="">
+                                        {{item.narasi ? item.narasi : '-'}}
+                                    </td>
+                                </tr>
+                            @endeach
+                        @else
+                            <tr>
+                                <td colspan="10">Data tdk ditemukan...</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>

@@ -2,60 +2,47 @@
 <tr class="item-rows">
     <td class="items-vcenter b-all">
         <h3 class="urut-rows"></h3>
-        <input type="hidden" class="item-data-details" name="id" value="{{item.id ? item.id : ''}}">   
+        <input type="hidden" class="item-data-details" name="id" value="{{data.id ? data.id : ''}}">   
     </td>
     <td class="b-all">
         <div class="row">
-            <div class="col-md-5">            
+            <div class="col-md-6">            
                 <div class="form-group">                
                     <label for="">Barang</label>                
-                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="{{item.barang_id ? item.barang_id : ''}}" id=""></select>
+                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="{{item.barang_id ? item.barang_id : ''}}" id="" disabled></select>
                 </div>        
             </div>
-            <div class="col-md-3">            
-                <div class="form-group">                
-                    <label for="">Satuan</label>                
-                    <select class="form-control item-data-details selectOptions" name="satuan" data-values="{{item.stn ? item.stn : ''}}" id="" data-group="satuan"></select>
-                </div>        
+            <div class="col-md-4">    
+                <label for="">Number Part</label>                
+                <div class="input-group">
+                    <input type="text" class="form-control barang-values" id="num_part" disabled>
+                    <span class="input-group-btn"> 
+                        <button class="btn btn-default" id="details-barang" type="button" data-toggle="modal" data-target="#myModal">Details</button> 
+                    </span>
+                </div> 
             </div>
             <div class="col-md-2">            
                 <div class="form-group">                
                     <label for="">Qty</label>                
-                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty}}">
+                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty}}" disabled>
                 </div>        
             </div>
-            <div class="col-md-2">            
-                <div class="form-group">                
-                    <label for="">Prioritas</label>                
-                    <select class="form-control item-data-details selectOptions" name="prioritas" data-values="{{item.prioritas ? item.prioritas : ''}}" id="" data-group="prioritas"></select>
-                </div>        
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-5">            
+            <div class="col-md-6">            
                 <div class="form-group">                
                     <label for="">Pemasok</label>                
-                    <select class="form-control item-data-details selectPemasok" name="pemasok_id" data-values="{{item.pemasok_id ? item.pemasok_id : ''}}" id=""></select>
+                    <select class="form-control item-data-details selectPemasok" name="pemasok_id" data-values="{{item.pemasok_id ? item.pemasok_id : ''}}" id="" disabled></select>
                 </div>        
             </div>
-            <div class="col-md-3">            
+            <div class="col-md-4">            
                 <div class="form-group">                
                     <label for="">Metode Bayar</label>                
-                    <select class="form-control item-data-details selectOptions" name="metode" data-values="{{item.metode ? item.metode : ''}}" id="" data-group="metode-bayar"></select>
+                    <select class="form-control item-data-details selectOptions" name="metode" data-values="{{item.metode ? item.metode : ''}}" id="" data-group="metode-bayar" disabled></select>
                 </div>        
             </div>
-            <!--
-            <div class="col-md-3">
-                <div style="margin-top: 24px;">
-                    <button class="fcbtn btn btn-primary btn-outline btn-1b bt-">
-                        <i class="mdi mdi-checkbox-blank-outline"></i> Pending
-                    </button>
-                </div>                   
-            </div>-->
         </div>
     </td>
     <td class="text-center items-vcenter b-all">
-        <button type="button" class="btn btn-danger btn-circle bt-remove-item">
+        <button type="button" class="btn btn-default btn-circle" disabled>
             <i class="fa fa-trash"></i> 
         </button>
     </td>

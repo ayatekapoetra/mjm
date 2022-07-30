@@ -3,13 +3,9 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class TrxFakturBeli extends Model {
+class KeuFakturPembelian extends Model {
     static get table(){
-        return 'trx_faktur_belis'
-    }
-
-    bisnis () {
-        return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
+        return 'keu_faktur_pembelians'
     }
 
     cabang () {
@@ -24,17 +20,21 @@ class TrxFakturBeli extends Model {
         return this.belongsTo("App/Models/master/Gudang", "gudang_id", "id")
     }
 
+    order () {
+        return this.belongsTo("App/Models/transaksi/KeuPurchasingRequest", "reff_order", "id")
+    }
+
     author () {
         return this.belongsTo("App/Models/User", "createdby", "id")
     }
 
     items () {
-        return this.hasMany("App/Models/transaksi/TrxFakturBeliItem", "id", "fakturbeli_id")
+        return this.hasMany("App/Models/transaksi/KeuFakturPembelianItem", "id", "fakturbeli_id")
     }
 
     files () {
-        return this.hasOne("App/Models/LampiranFile", "id", "fb_id")
+        return this.hasMany("App/Models/transaksi/KeuPindahPersediaanAttach", "id", "fakturbeli_id")
     }
 }
 
-module.exports = TrxFakturBeli
+module.exports = KeuFakturPembelian

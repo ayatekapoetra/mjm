@@ -1,0 +1,31 @@
+
+<tr class="item-rows">
+    <td>
+        <h3 class="urut-rows">{{$loop.index + 1}}</h3>
+        <input type="hidden" class="" name="id" value="{{data.id ? data.id : ''}}">   
+    </td>
+    <td class="b-all">
+        <div class="row">
+            <div class="col-md-4">            
+                <div class="form-group">                
+                    <label for="">Barang <span class="text-danger">*</span></label>                
+                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="{{data.barang_id}}" id="" disabled></select>
+                </div>        
+            </div>
+            <div class="col-md-6">            
+                <div class="form-group">                
+                    <label for="">Keterangan</label>                
+                    <input type="text" class="form-control item-data-details" name="description" data-id="" value="{{data.description ? data.description : ''}}" disabled>
+                </div>        
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Qty <span class="text-danger">*</span></label>                
+                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{data.qty ? data.qty : '0'}}">
+                </div>        
+            </div>
+        </div>
+    </td>
+</tr>
+{{ script('ajax/opt-barang') }}
+{{ script('ajax/opt-options') }}

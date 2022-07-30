@@ -3,13 +3,9 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class TrxTransferPersediaan extends Model {
+class KeuPindahPersediaan extends Model {
     static get table(){
-        return 'trx_transfer_persediaans'
-    }
-
-    bisnis () {
-        return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
+        return 'keu_pindah_persediaans'
     }
 
     cabang () {
@@ -29,9 +25,9 @@ class TrxTransferPersediaan extends Model {
     }
 
     items () {
-        return this.hasMany("App/Models/transaksi/TrxTransferPersediaanItem", "id", "pindah_id")
+        return this.hasMany("App/Models/transaksi/KeuPindahPersediaanItem", "id", "pindah_id")
     }
 
 }
 
-module.exports = TrxTransferPersediaan
+module.exports = KeuPindahPersediaan

@@ -8,21 +8,19 @@ const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
 const AccCoa = use("App/Models/akunting/AccCoa")
 const BarangLokasi = use("App/Models/BarangLokasi")
-const LampiranFile = use("App/Models/LampiranFile")
 const HargaBeli = use("App/Models/master/HargaBeli")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
-const TrxOrderBeli = use("App/Models/transaksi/TrxOrderBeli")
-const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
-const TrxTerimaBarangHelpers = use("App/Helpers/TrxTerimaBarang")
-const TrxFakturBeliItem = use("App/Models/transaksi/TrxFakturBeliItem")
+const LampiranFile = use("App/Models/transaksi/KeuFakturPembelianAttach")
+const KeuFakturPembelian = use("App/Models/transaksi/KeuFakturPembelian")
+const KeuFakturPembelianItem = use("App/Models/transaksi/KeuFakturPembelianItem")
 
 class fakturBeli {
     async LIST (req, user) {
-        const ws = await initFunc.GET_WORKSPACE(user.id)
+        const ws = await initFunc.WORKSPACE(user)
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
 
-        let data = (await TrxFakturBeli
+        let data = (await KeuFakturPembelian
             .query()
             .with('files')
             .with('bisnis')
@@ -42,10 +40,8 @@ class fakturBeli {
     }
 
     async POST (req, user, filex) {
-        const ws = await initFunc.GET_WORKSPACE(user.id)
         const trx = await DB.beginTransaction()
         const {
-            bisnis_id, 
             cabang_id, 
             gudang_id, 
             pemasok_id, 

@@ -10,35 +10,35 @@
                         @each(obj in neraca)
                             <div class="panel">
                                 <div class="panel-heading bg-warning" style="color: #2f323e"> 
-                                    {{obj.name}} xx
+                                    {{obj.name}}
                                     <div class="pull-left p-r-10">
                                         <a href="#" data-perform="panel-collapse">
                                             <i class="ti-folder" style="color:black"></i>
                                         </a>
                                     </div>
-                                    <span class="pull-right count-values" data-kode="{{obj.urut}}">Rp. 0</span>
+                                    <span class="pull-right" data-kode="{{obj.urut}}">Rp. {{obj.total}}</span>
                                 </div>
                                 <div class="panel-wrapper collapse in" aria-expanded="true">
                                     <div class="panel-body">
                                         <ul class="feeds text-white">
                                             @if(obj.group.length > 0)
                                                 @each(grp in obj.group)
-                                                    <li class="b-b item-coa">
-                                                        {{grp.grp_name}} grp
+                                                    <li class="b-b item-coa" style="font-weight: 700;font-size:13px">
+                                                        {{grp.grp_name}}
                                                         <span class="pull-left m-r-10">
                                                             <i class="ti-folder" style="color:white"></i>
                                                         </span>
-                                                        <span class="pull-right count-values group-values" data-kode="{{grp.kode}}">Rp. 0</span>
+                                                        <span class="pull-right" data-kode="{{grp.kode}}" style="font-weight: 700;font-size:13px">Rp. {{grp.total}}</span>
                                                     </li>
                                                     <ul class="feeds" style="margin-left: 20px">
                                                         
                                                         @each(val in grp.subgroup)
                                                             <li class="b-b item-coa">
-                                                                {{val.subgrp_name}} sub
+                                                                {{val.subgrp_name}}
                                                                 <span class="pull-left m-r-10">
                                                                     <i class="ti-folder" style="color:white"></i>
                                                                 </span>
-                                                                <span class="pull-right count-values subgroup-values" data-kode="{{val.id}}">Rp. 0</span>
+                                                                <span class="pull-right" data-kode="{{val.id}}" style="font-weight: 500;font-size:12px">Rp. {{val.total}}</span>
                                                                 <ul class="feeds text-white">
                                                                     @if(val.akun)
                                                                         @each(item in val.akun)
@@ -47,7 +47,9 @@
                                                                             <span class="pull-left m-r-10">
                                                                                 <i class="ti-control-forward" style="color:white"></i>
                                                                             </span>
-                                                                            <span class="pull-right count-values" data-kode="{{item.id}}">Rp. 0</span>
+                                                                            <span class="pull-right count-values" data-kode="{{item.id}}">
+                                                                                <i class="fa fa-spin fa-spinner"></i>
+                                                                            </span>
                                                                         </li>
                                                                         @endeach
                                                                     @endif
@@ -62,7 +64,9 @@
                                                                     <span class="pull-left m-r-10">
                                                                         <i class="ti-control-forward" style="color:white"></i>
                                                                     </span>
-                                                                    <span class="pull-right count-values" data-kode="{{elm.id}}">Rp. 0</span>
+                                                                    <span class="pull-right count-values" data-kode="{{elm.id}}">
+                                                                        <i class="fa fa-spin fa-spinner"></i>
+                                                                    </span>
                                                                 </li>
                                                             @endeach
                                                         @endif
@@ -76,7 +80,9 @@
                                                         <span class="pull-left m-r-10">
                                                             <i class="ti-control-forward" style="color:white"></i>
                                                         </span>
-                                                        <span class="pull-right count-values" data-kode="{{elm.kode}}">Rp. 0</span>
+                                                        <span class="pull-right count-values" data-kode="{{elm.kode}}">
+                                                            <i class="fa fa-spin fa-spinner"></i>
+                                                        </span>
                                                     </li>
                                                 @endeach
                                             @endif
@@ -105,19 +111,19 @@
                                         <i class="ti-folder" style="color:black"></i>
                                     </a>
                                 </div>
-                                <span class="pull-right count-values" data-kode="{{obj.kode}}">Rp. 0</span>
+                                <span class="pull-right" data-kode="{{obj.kode}}">Rp. {{obj.total}}</span>
                             </div>
                             <div class="panel-wrapper collapse in" aria-expanded="true">
                                 <div class="panel-body">
                                     <ul class="feeds text-white">
                                         @if(obj.group.length > 0)
                                             @each(grp in obj.group)
-                                                <li class="b-b item-coa">
+                                                <li class="b-b item-coa" style="font-weight: 700;font-size:13px">
                                                     {{grp.grp_name}}
                                                     <span class="pull-left m-r-10">
                                                         <i class="ti-folder" style="color:white"></i>
                                                     </span>
-                                                    <span class="pull-right count-values" data-kode="{{grp.kode}}">Rp. 0</span>
+                                                    <span class="pull-right" data-kode="{{grp.kode}}" style="font-weight: 700;font-size:13px">Rp. {{grp.total}}</span>
                                                 </li>
                                                 <ul class="feeds" style="margin-left: 20px">
                                                     @each(val in grp.subgroup)
@@ -126,7 +132,7 @@
                                                             <span class="pull-left m-r-10">
                                                                 <i class="ti-folder" style="color:white"></i>
                                                             </span>
-                                                            <span class="pull-right count-values" data-kode="{{grp.kode}}">Rp. 0</span>
+                                                            <span class="pull-right" data-kode="{{grp.kode}}" style="font-weight: 500;font-size:12px">Rp. {{val.total}}</span>
                                                             
                                                             <ul class="feeds text-white">
                                                                 @if(val.akun)
@@ -140,7 +146,9 @@
                                                                                 <i class="ti-control-forward" style="color:white"></i>
                                                                             @endif
                                                                         </span>
-                                                                        <span class="pull-right count-values" data-kode="{{val.kode}}">Rp. 0</span>
+                                                                        <span class="pull-right count-values" data-kode="{{val.kode}}">
+                                                                            <i class="fa fa-spin fa-spinner"></i>
+                                                                        </span>
                                                                     </li>
                                                                     @endeach
                                                                 @endif
@@ -156,7 +164,9 @@
                                                                 <span class="pull-left m-r-10">
                                                                     <i class="ti-control-forward" style="color:white"></i>
                                                                 </span>
-                                                                <span class="pull-right count-values" data-kode="{{elm.kode}}">Rp. 0</span>
+                                                                <span class="pull-right count-values" data-kode="{{elm.kode}}">
+                                                                    <i class="fa fa-spin fa-spinner"></i>
+                                                                </span>
                                                             </li>
                                                         @endeach
                                                     @endif
@@ -170,7 +180,9 @@
                                                     <span class="pull-left m-r-10">
                                                         <i class="ti-control-forward" style="color:white"></i>
                                                     </span>
-                                                    <span class="pull-right count-values" data-kode="{{elm.kode}}">Rp. 0</span>
+                                                    <span class="pull-right count-values" data-kode="{{elm.kode}}">
+                                                        <i class="fa fa-spin fa-spinner"></i>
+                                                    </span>
                                                 </li>
                                             @endeach
                                         @endif
@@ -187,7 +199,10 @@
                     <div class="col-sm-12">
                         <div class="panel" id="PnL">
                             <div class="panel-heading bg-inverse" style="color: #2f323e">
-                                LABA <span class="pull-right">Rp. 11111111</span>
+                                LABA 
+                                <span class="pull-right">
+                                    <i class="fa fa-spin fa-spinner fa-2x"></i>
+                                </span>
                             </div>
                         </div>
                     </div>

@@ -30,9 +30,9 @@ const TrxKas = use("App/Models/transaksi/TrxKase")
 const Notification = use("App/Models/Notification")
 // const TrxOrderBeli = use("App/Models/transaksi/TrxOrderBeli")
 // const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
-const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
+const TrxFakturBeli = use("App/Models/transaksi/KeuFakturPembelian")
 const TrxJurnalSaldo = use("App/Models/transaksi/TrxJurnalSaldo")
-const TrxTerimaBarang = use("App/Models/transaksi/TrxTerimaBarang")
+const LogistikTerimaBarang = use("App/Models/logistik/LogistikTerimaBarang")
 // const TrxOrderBeliItem = use("App/Models/transaksi/TrxOrderBeliItem")
 // const TrxFakturJualBayar = use("App/Models/transaksi/TrxFakturJualBayar")
 const TrxFakturBeliBayar = use("App/Models/transaksi/TrxFakturBeliBayar")
@@ -126,13 +126,33 @@ class initFunc {
     }
 
     async SEND_NOTIFICATION(sender, receiver, body){
-        const users = (await User.query().where( w => {
-            w.where('aktif', 'Y')
-            w.whereIn('usertype', receiver)
-        }).fetch()).toJSON()
-
-        for (const user of users) {
-            const notif = new Notification()
+        let notif
+        if(_.isArray(receiver)){
+            const users = (await User.query().where( w => {
+                w.where('aktif', 'Y')
+                w.whereIn('usertype', receiver)
+            }).fetch()).toJSON()
+    
+            for (const user of users) {
+                notif = new Notification()
+                notif.fill({
+                    header: body.header,
+                    title: body.title,
+                    subtitle: body.subtitle || null,
+                    content: body.content || null,
+                    link: body.link || null,
+                    sender: sender.id,
+                    receiver: user.id,
+                })
+                try {
+                    await notif.save()
+                } catch (error) {
+                    console.log(error);
+                    throw new Error('Failed save notification...')
+                }
+            }
+        }else{
+            notif = new Notification()
             notif.fill({
                 header: body.header,
                 title: body.title,
@@ -140,7 +160,7 @@ class initFunc {
                 content: body.content || null,
                 link: body.link || null,
                 sender: sender.id,
-                receiver: user.id,
+                receiver: receiver,
             })
             try {
                 await notif.save()
@@ -645,18 +665,20 @@ class initFunc {
         return prefix1 + cabKode + prefix2 + '.' + lastNumber
     }
 
-    async GEN_KODE_TERIMA_BRG (bisnis_id) {
+    async GEN_KODE_TERIMA_BRG (cabangID) {
         const conf = (await SysConfig.find(1)).toJSON()
-        let strBisnis = '0'.repeat(2 - `${bisnis_id}`.length) + bisnis_id
-        let nomor = await TrxTerimaBarang.query().where( w => {
-            w.where('bisnis_id', bisnis_id)
+        const romanNumber = romawiNumber(moment().format('MM'))
+        let strCabang = '0'.repeat(2 - `${cabangID}`.length) + cabangID
+        let nomor = await LogistikTerimaBarang.query().where( w => {
+            w.where('cabang_id', cabangID)
         }).last()
 
-        let strDate = moment().format('YYMMDD')
-        
-        let patten = `${conf.prefix_init_receipt_brg}${strBisnis}.${strDate}.${nomor?.id + 1 || 1}`
+        nomor = '0'.repeat(4 - `${nomor?.id + 1 || 1}`.length) + (nomor?.id + 1 || 1)
 
-        console.log('GEN_KODE_TERIMA_BRG ::', patten);
+        let strDate = moment().format('YYYY')
+        
+        let patten = `${conf.prefix_init_receipt_brg}${strCabang}/${strDate}/${romanNumber}-${nomor}`
+
         return patten
     }
 
@@ -780,6 +802,7 @@ class initFunc {
             obj.group = arrAkunGrp
             akun.push(obj)
         }
+
         return {
             neraca : akun.filter(el => el.id <= 3),
             labarugi : akun.filter(el => el.id > 3),
@@ -790,7 +813,7 @@ class initFunc {
         const dk = await AccCoa.query().where( w => {
             w.where('kode', 'like', `${kode}%`)
         }).first()
-        console.log('DK :::', dk.id, dk.coa_name);
+        // console.log('DK :::', dk.id, dk.coa_name);
 
         if(dk){
             const data = (
@@ -1069,3 +1092,47 @@ class initFunc {
 }
 
 module.exports = new initFunc()
+
+
+function romawiNumber (values) {
+    let romanString
+    switch (values) {
+        case '01':
+            romanString = 'I'
+            break;
+        case '02':
+            romanString = 'II'
+            break;
+        case '03':
+            romanString = 'III'
+            break;
+        case '04':
+            romanString = 'IV'
+            break;
+        case '05':
+            romanString = 'V'
+            break;
+        case '06':
+            romanString = 'VI'
+            break;
+        case '07':
+            romanString = 'VII'
+            break;
+        case '08':
+            romanString = 'VIII'
+            break;
+        case '09':
+            romanString = 'IX'
+            break;
+        case '10':
+            romanString = 'X'
+            break;
+        case '11':
+            romanString = 'XI'
+            break;
+        case '12':
+            romanString = 'XII'
+            break;
+    }
+    return romanString
+}

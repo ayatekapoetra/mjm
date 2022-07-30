@@ -1,0 +1,39 @@
+<tr class="item-rows">
+    <td style="vertical-align: middle;">
+        <h3 class="urut-rows"></h3>
+        <input type="hidden" class="" name="id" value="{{data.id ? data.id : ''}}">   
+    </td>
+    <td class="b-all">
+        <div class="row">
+            {{ script('ajax/opt-barang') }}
+            <div class="col-md-8">
+                <div class="form-group">
+                    <label for="">Items Barang</label>
+                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="{{item.barang_id}}"></select>
+                </div> 
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="">Satuan</label>
+                    <input type="text" class="form-control item-data-details item-details" name="satuan" value="{{item.satuan}}" readonly>
+                </div> 
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Qty <span class="text-danger">*</span></label>                
+                    <input type="number" class="form-control item-data-details item-details" name="qty" value="{{item.qty}}" required>
+                </div>        
+            </div>
+        </div>
+    </td>
+    <td class="text-center">
+        <button type="button" class="btn btn-danger btn-circle m-t-30 bt-remove-item">
+            <i class="fa fa-trash"></i> 
+        </button>
+    </td>
+</tr>
+<script>
+    $(function(){
+        $('select').select2()
+    })
+</script>

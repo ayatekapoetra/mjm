@@ -165,6 +165,50 @@ $(function(){
         })
     })
 
+    $('body').on('click', 'button.bt-print-request', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'purchasing-request/'+id+'/print-request',
+            method: 'GET',
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                console.log(result);
+                pdfMake.createPdf(result).print();
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    })
+
+    $('body').on('click', 'button.bt-print-order', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'purchasing-request/'+id+'/print-order',
+            method: 'GET',
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                console.log(result);
+                for (const data of result) {
+                    pdfMake.createPdf(data).print();
+                }
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    })
+
     $('body').on('submit', 'form#form-approved', function(e){
         e.preventDefault()
         var data = getDataForm()
@@ -239,7 +283,7 @@ $(function(){
             mimeType: "multipart/form-data",
             contentType: false,
             success: function(result){
-                console.log(result);
+                // console.log(result);
                 body.find('div#content-form').html(result).css('display', 'block')
                 body.find('div#content-list').html('')
             },
@@ -324,41 +368,39 @@ $(function(){
           });
     })
 
-    
+    $('body').on('submit', 'form#form-approved', function(e){
+        e.preventDefault()
+        var data = getDataForm()
+        var formdata = new FormData()
+        formdata.append('items', JSON.stringify(data))
+        formdata.append('action', 'approved')
+        var id = $(this).data('id')
 
-    // $('body').on('submit', 'form#form-update-approved', function(e){
-    //     e.preventDefault()
-    //     var data = getDataForm()
-    //     var formdata = new FormData()
-    //     formdata.append('items', JSON.stringify(data))
-    //     formdata.append('action', 'approved')
-    //     var id = $(this).data('id')
-
-    //     console.log(data);
-    //     $.ajax({
-    //         async: true,
-    //         headers: {'x-csrf-token': $('[name=_csrf]').val()},
-    //         url: 'purchasing-request/'+id+'/approve',
-    //         method: 'POST',
-    //         data: formdata,
-    //         dataType: 'json',
-    //         processData: false,
-    //         mimeType: "multipart/form-data",
-    //         contentType: false,
-    //         success: function(result){
-    //             if(result.success){
-    //                 swal("Okey,,,!", result.message, "success")
-    //                 initDefault()
-    //             }else{
-    //                 swal("Opps,,,!", result.message, "warning")
-    //             }
-    //         },
-    //         error: function(err){
-    //             console.log(err);
-    //             swal("Opps,,,!", 'Server Error', "error")
-    //         }
-    //     })
-    // })
+        console.log(data);
+        $.ajax({
+            async: true,
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: 'purchasing-request/'+id+'/approve',
+            method: 'POST',
+            data: formdata,
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                if(result.success){
+                    swal("Okey,,,!", result.message, "success")
+                    initDefault()
+                }else{
+                    swal("Opps,,,!", result.message, "warning")
+                }
+            },
+            error: function(err){
+                console.log(err);
+                swal("Opps,,,!", 'Server Error', "error")
+            }
+        })
+    })
     
     $('body').on('submit', 'form#form-update', function(e){
         e.preventDefault()

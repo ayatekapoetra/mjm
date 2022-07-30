@@ -104,7 +104,7 @@ $(function(){
                     elm.html('Rp. '+total)
                 },
                 error: function(err){
-                    // console.log(err)
+                    console.log(err)
                 }
             })
         })

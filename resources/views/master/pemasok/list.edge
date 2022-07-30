@@ -7,7 +7,7 @@
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">No</th>
                             <th width="50" class="bg-inverse b-all">ACT</th>
-                            <th width="70" class="bg-inverse b-all">Cabang</th>
+                            <!--<th width="70" class="bg-inverse b-all">Cabang</th>-->
                             <th width="250" class="bg-inverse b-all">Kode/Nama</th>
                             <th width="150" class="bg-inverse b-all">Email/Phone</th>
                             <th width="*" class="bg-inverse b-all">Alamat</th>
@@ -20,9 +20,11 @@
                                 <td>
                                     <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
                                 </td>
+                                <!--
                                 <td>
                                     <strong>{{item.cabang_id?item.cabang.nama:''}}</strong>
                                 </td> 
+                                -->
                                 <td>
                                     <small>{{item.kode}}</small><br>
                                     <strong>{{item.nama}}</strong>

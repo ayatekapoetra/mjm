@@ -37,7 +37,10 @@ const GajiComponent = use("App/Models/master/GajiComponent")
 // const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
 const BarangQualities = use("App/Models/master/BarangQualities")
 const BarangCategories = use("App/Models/master/BarangCategories")
+const LogTerimaBarang = use("App/Models/logistik/LogistikTerimaBarang")
 const BarangSubCategories = use("App/Models/master/BarangSubCategories")
+const KeuPurchasingRequest = use("App/Models/transaksi/KeuPurchasingRequest")
+const KeuPurchasingRequestItems = use("App/Models/transaksi/KeuPurchasingRequestItems")
 
 // const jsonData = use("App/Helpers/JSON/barang_sewas")
 
@@ -526,10 +529,41 @@ class OptionsAjaxController {
                 data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: ''})
             }
         }
-        console.log('====================================');
-        console.log(data);
-        console.log('====================================');
         return data
+    }
+
+    async gudangGroupCabang ( { request } ) {
+        const req = request.all()
+        if(!req.selected || req.selected === 'null' || req.selected === 'nullundefined'){
+            req.selected = null
+        }
+
+        let data = (
+                await Gudang.query().where( w => {
+                w.where('aktif', 'Y')
+            }).orderBy('nama', 'asc')
+            .fetch()
+        ).toJSON()
+
+        data = _.groupBy(data, 'cabang_id')
+        data = Object.keys(data).map(key => {
+            return {
+                cabang_id: key,
+                items: data[key]
+            }
+        })
+
+        let result = []
+        for (const obj of data) {
+            const cabang = await Cabang.query().where('id', obj.cabang_id).last()
+            result.push({
+                cabang_id: obj.cabang_id,
+                nm_cabang: cabang.nama,
+                items: obj.items?.map(val => val.id === parseInt(req.selected) ? {...val, selected: 'selected'}:{...val, selected: ''})
+            })
+        }
+        
+        return result
     }
 
     async department ( { request } ) {
@@ -928,6 +962,53 @@ class OptionsAjaxController {
         } catch (error) {
             return []
         }
+    }
+
+    async purchasingOrder ( { auth, request } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        let data = (await KeuPurchasingRequest.query().where( w => {
+            if(user.cabang_id){
+                w.where('cabang_id', user.cabang_id)
+            }
+            w.where('status', 'approved')
+        }).fetch()).toJSON()
+
+        if(req.purchasing_id){
+            data = data.map(el => el.id === parseInt(req.purchasing_id) ? {...el, name: `[${el.kode}] ${el.narasi}`, selected: 'selected'}:{...el, name: `[${el.kode}] ${el.narasi}`, selected: ''})
+        }else{
+            data = data.map(el => ({...el, name: `[${el.kode}] ${el.narasi}`, selected: 'selected'}))
+            data.unshift({id: '', name: 'Pilih...', selected: 'selected'})
+        }
+
+        return data
+    }
+
+    async purchasingOrderDetails ( { auth, request, view } ) {
+        const req = request.all()
+        console.log(req);
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        let data = (await KeuPurchasingRequest.query()
+        .with('items', i => {
+            i.where('pemasok_id', req.pemasok_id)
+            i.where('has_received', 'N')
+            i.where('aktif', 'Y')
+        })
+        .where( w => {
+            w.where('id', req.order_id)
+            w.where('gudang_id', req.gudang_id)
+        }).last()).toJSON()
+
+        console.log(data);
+        return view.render('logistik.terima-barang.items-purchasing-order', {list: data})
     }
 
     // async fakturJual ( { request } ) {

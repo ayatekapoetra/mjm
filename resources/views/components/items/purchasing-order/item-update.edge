@@ -28,7 +28,18 @@
                     <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty}}">
                 </div>        
             </div>
-            
+            <div class="col-md-6">            
+                <div class="form-group">                
+                    <label for="">Pemasok</label>                
+                    <select class="form-control item-data-details selectPemasok" name="pemasok_id" data-values="{{item.pemasok_id ? item.pemasok_id : ''}}" id=""></select>
+                </div>        
+            </div>
+            <div class="col-md-4">            
+                <div class="form-group">                
+                    <label for="">Metode Bayar</label>                
+                    <select class="form-control item-data-details selectOptions" name="metode" data-values="{{item.metode ? item.metode : ''}}" id="" data-group="metode-bayar"></select>
+                </div>        
+            </div>
         </div>
     </td>
     <td class="text-center items-vcenter b-all">
@@ -39,6 +50,7 @@
 </tr>
 {{ script('ajax/opt-barang') }}
 {{ script('ajax/opt-options') }}
+{{ script('ajax/opt-pemasok') }}
 
 <script>
     $(function(){

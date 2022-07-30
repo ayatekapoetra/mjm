@@ -1,0 +1,81 @@
+{{ script('ajax/initDate') }}
+{{ script('ajax/initNumber') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="100" class="bg-inverse b-all">Action</th>
+                            <th width="70" class="bg-inverse b-all">Lampiran<br/>Files</th>
+                            <th width="120"class="bg-inverse b-all">Date Faktur<br>Due Date</th>
+                            <th width="150"class="bg-inverse b-all">No.Pesanan<br/>No.Faktur</th>
+                            <th width="*" class="bg-inverse b-all">Cabang<br/>Gudang</th>
+                            <th width="*" class="bg-inverse b-all">Kode<br/>Faktur</th>
+                            <th width="*" class="bg-inverse b-all">Total<br/>Faktur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(list.data.length > 0)
+                            @each(item in list.data)
+                                <tr>
+                                    <td class="text-center">{{$loop.index + 1}}</td>
+                                    <td>
+                                        <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button>
+                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
+                                    </td>
+                                    <td>
+                                        @if(item.files)
+                                            <a href="{{item.files.url}}" target="_blank">
+                                                <i class="ti-file"></i> open
+                                            </a>
+                                        @endif
+                                        @if(item.fbfiles)
+                                            <a href="{{item.files.url}}" target="_blank">
+                                                <i class="ti-file"></i> open
+                                            </a>
+                                        @endif
+                                    </td>
+                                    <td class="dateFormatDef" data-elm="strong" data-patten="YYYY-MM-DD" data-tgl="{{item.date_faktur}}">
+                                        <strong></strong><br>
+                                        <span class="dateFormatDef" data-elm="span" data-patten="YYYY-MM-DD" data-tgl="{{item.due_date}}">
+                                            <span class="text-danger" style="font-weight: 600;"></span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>{{item.reff_ro ? item.reff_ro : '-'}}</small><br>
+                                        <span>{{item.kode ? item.kode : '-'}}</span>
+                                        
+                                    </td>
+                                    <td class="">
+                                        <span>{{item.cabang.kode}}-{{item.cabang.nama}}</span>
+                                        <small class="pull-right text-white">{{item.bisnis.initial}}</small><br>
+                                        <small>{{item.gudang.nama}}</small>
+                                    </td>
+                                    <td class="">
+                                        <small>Author: {{item.author ? item.author.profile.nama_lengkap : ''}}</small><br>
+                                        <span>{{item.kode ? item.kode : ''}}</span>
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="formatRp" data-number="{{item.total}}" data-elm="h3">
+                                            <h3>{{item.total}}</h3>
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endeach
+                        @else
+                            <tr>
+                                <td colspan="10">Data tdk ditemukan...</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>

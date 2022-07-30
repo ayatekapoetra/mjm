@@ -135,7 +135,6 @@
                 dataType: 'html',
                 contentType: false,
                 success: function(result){
-                    console.log('xxxxx', result);
                     if(result > 0){
                         body.find('div#count-notif').html("You have "+result+" new messages")
                         body.find('div.notify').css('display', 'block')

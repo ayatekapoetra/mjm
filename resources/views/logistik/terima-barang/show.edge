@@ -1,0 +1,91 @@
+{{ script('ajax/index') }}
+{{ script('ajax/opt-pemasok') }}
+{{ script('ajax/opt-gudang') }}
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-update">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Tanggal <span class="text-danger">*</span></label>
+                            <input type="date" name="received_at" class="form-control item-data setDate" data-tgl="{{data.received_at}}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">No.Faktur/Nota</label>
+                            <input type="text" name="reff_rcp" class="form-control item-data" placeholder="e.g : {{kode}}" value="{{data.reff_rcp}}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">No.Request <span class="text-danger">*</span></label>
+                            <input type="text" name="kode" class="form-control item-data" placeholder="Input No.Pesanan" value="{{data.reff_ro}}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Pemasok <span class="text-danger">*</span></label>
+                            <select name="pemasok_id" class="form-control item-data selectPemasok" data-values="{{data.pemasok_id}}" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Gudang <span class="text-danger">*</span></label>
+                            <select name="gudang_id" class="form-control item-data selectGudang" data-values="{{data.gudang_id}}" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-group">
+                            <label class="control-label">Narasi</label>
+                            <input type="text" name="description" class="form-control item-data" value="{{data.narasi ? data.narasi : ''}}"> 
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <th class="bg-extralight" width="50">No</th>
+                                        <th class="bg-inverse">Item Details</th>
+                                    </thead>
+                                    <tbody id="item-details">
+                                        @!each(data in data.items, include = 'components.terima-barang.item-update')
+                                    </tbody>
+                                    <!--
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="row">
+                                                    <div class="col-sm-9">
+                                                        <div class="col-sm-12">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="input-group text-right">
+                                                            <input class="form-control" type="number" id="row-number" name="row-number" value="1">
+                                                            <div class="input-group-addon" id="bt-add-rows"><i class="ti-plus"></i> ADD</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tfoot>-->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <!--<button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>-->
+                    <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

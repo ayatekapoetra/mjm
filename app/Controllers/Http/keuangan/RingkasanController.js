@@ -6,6 +6,7 @@ const initFunc = use("App/Helpers/initFunc")
 const initMenu = use("App/Helpers/_sidebar")
 const AccCoa = use("App/Models/akunting/AccCoa")
 const UsrWorkspace = use("App/Models/UsrWorkspace")
+const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
 
 class RingkasanController {
     async index ( { auth, view } ) {
@@ -32,8 +33,154 @@ class RingkasanController {
         }
 
         let data = await initFunc.RINGKASAN(user)
+        
 
-        // console.log(JSON.stringify(data, null, 2))
+        for (let nrc of data.neraca) {
+            var firstCode = parseInt(nrc.kode)
+            var lastCode = firstCode + 9999
+
+            const sumDebit = await TrxJurnal.query().where( w => {
+                w.where('is_delay', 'N')
+                w.where('aktif', 'Y')
+                w.where('dk', 'd')
+                w.where('coa_id', '>=', firstCode)
+                w.where('coa_id', '<=', lastCode)
+            }).getSum('nilai')
+
+            const sumKredit = await TrxJurnal.query().where( w => {
+                w.where('is_delay', 'N')
+                w.where('aktif', 'Y')
+                w.where('dk', 'k')
+                w.where('coa_id', '>=', firstCode)
+                w.where('coa_id', '<=', lastCode)
+            }).getSum('nilai')
+
+            if(nrc.dk === 'd'){
+                nrc.total = (sumDebit - sumKredit).toLocaleString('id')
+            }else{
+                nrc.total = (sumKredit - sumDebit).toLocaleString('id')
+            }
+
+            // Looping Group Neraca
+            for (let grp of nrc.group) {
+                const sumDebitGrp = await TrxJurnal.query().where( w => {
+                    w.where('is_delay', 'N')
+                    w.where('aktif', 'Y')
+                    w.where('dk', 'd')
+                    w.where('coa_id', 'like', `${grp.kode}%`)
+                }).getSum('nilai')
+    
+                const sumKreditGrp = await TrxJurnal.query().where( w => {
+                    w.where('is_delay', 'N')
+                    w.where('aktif', 'Y')
+                    w.where('dk', 'k')
+                    w.where('coa_id', 'like', `${grp.kode}%`)
+                }).getSum('nilai')
+    
+                if(nrc.dk === 'd'){
+                    grp.total = (sumDebitGrp - sumKreditGrp).toLocaleString('id')
+                }else{
+                    grp.total = (sumKreditGrp - sumDebitGrp).toLocaleString('id')
+                }
+
+                // Looping SubGroup
+                for (let sub of grp.subgroup) {
+                    const sumDebitSubGrp = await TrxJurnal.query().where( w => {
+                        w.where('is_delay', 'N')
+                        w.where('aktif', 'Y')
+                        w.where('dk', 'd')
+                        w.where('coa_id', 'like', `${sub.kode}%`)
+                    }).getSum('nilai')
+        
+                    const sumKreditSubGrp = await TrxJurnal.query().where( w => {
+                        w.where('is_delay', 'N')
+                        w.where('aktif', 'Y')
+                        w.where('dk', 'k')
+                        w.where('coa_id', 'like', `${sub.kode}%`)
+                    }).getSum('nilai')
+        
+                    if(nrc.dk === 'd'){
+                        sub.total = (sumDebitSubGrp - sumKreditSubGrp).toLocaleString('id')
+                    }else{
+                        sub.total = (sumKreditSubGrp - sumDebitSubGrp).toLocaleString('id')
+                    }
+                }
+            }
+        }
+
+        for (let lbr of data.labarugi) {
+            var firstCode = parseInt(lbr.kode)
+            var lastCode = firstCode + 9999
+
+            const sumDebit = await TrxJurnal.query().where( w => {
+                w.where('is_delay', 'N')
+                w.where('aktif', 'Y')
+                w.where('dk', 'd')
+                w.where('coa_id', '>=', firstCode)
+                w.where('coa_id', '<=', lastCode)
+            }).getSum('nilai')
+
+            const sumKredit = await TrxJurnal.query().where( w => {
+                w.where('is_delay', 'N')
+                w.where('aktif', 'Y')
+                w.where('dk', 'k')
+                w.where('coa_id', '>=', firstCode)
+                w.where('coa_id', '<=', lastCode)
+            }).getSum('nilai')
+
+            if(lbr.dk === 'd'){
+                lbr.total = (sumDebit - sumKredit).toLocaleString('id')
+            }else{
+                lbr.total = (sumKredit - sumDebit).toLocaleString('id')
+            }
+
+            // Looping Group LabaRugi
+            for (let grp of lbr.group) {
+                const sumDebitGrp = await TrxJurnal.query().where( w => {
+                    w.where('is_delay', 'N')
+                    w.where('aktif', 'Y')
+                    w.where('dk', 'd')
+                    w.where('coa_id', 'like', `${grp.kode}%`)
+                }).getSum('nilai')
+    
+                const sumKreditGrp = await TrxJurnal.query().where( w => {
+                    w.where('is_delay', 'N')
+                    w.where('aktif', 'Y')
+                    w.where('dk', 'k')
+                    w.where('coa_id', 'like', `${grp.kode}%`)
+                }).getSum('nilai')
+    
+                if(lbr.dk === 'd'){
+                    grp.total = (sumDebitGrp - sumKreditGrp).toLocaleString('id')
+                }else{
+                    grp.total = (sumKreditGrp - sumDebitGrp).toLocaleString('id')
+                }
+
+                // Looping SubGroup
+                for (let sub of grp.subgroup) {
+                    const sumDebitSubGrp = await TrxJurnal.query().where( w => {
+                        w.where('is_delay', 'N')
+                        w.where('aktif', 'Y')
+                        w.where('dk', 'd')
+                        w.where('coa_id', 'like', `${sub.kode}%`)
+                    }).getSum('nilai')
+        
+                    const sumKreditSubGrp = await TrxJurnal.query().where( w => {
+                        w.where('is_delay', 'N')
+                        w.where('aktif', 'Y')
+                        w.where('dk', 'k')
+                        w.where('coa_id', 'like', `${sub.kode}%`)
+                    }).getSum('nilai')
+        
+                    if(lbr.dk === 'd'){
+                        sub.total = (sumDebitSubGrp - sumKreditSubGrp).toLocaleString('id')
+                    }else{
+                        sub.total = (sumKreditSubGrp - sumDebitSubGrp).toLocaleString('id')
+                    }
+                }
+            }
+        }
+
         return view.render('keuangan._ringkasan.list', data)
     }
 

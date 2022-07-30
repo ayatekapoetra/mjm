@@ -48,8 +48,7 @@
                                 <th>#</th>
                                 <th width="200">Kode</th>
                                 <th>Barang</th>
-                                <th>NumberPart</th>
-                                <th>Satuan</th>
+                                <th>Pemasok</th>
                                 <th>Qty</th>
                             </tr>
                         </thead>
@@ -58,16 +57,22 @@
                                 <tr>
                                     <td>{{$loop.index + 1}}</td>
                                     <td class="txt-oflo">
-                                        {{item.barang.kode}}
+                                        {{item.barang.kode}} <br>
+                                        <small class="text-uppercase">
+                                            {{item.barang.satuan || ''}} - {{item.barang.num_part || ''}}
+                                        </small>
                                     </td>
                                     <td class="txt-oflo">
-                                        {{item.barang.nama}}
+                                        {{item.barang.nama}} <br>
+                                        @if(item.metode === 'kredit')
+                                            <small class="text-uppercase text-warning">kredit</small>
+                                        @else
+                                            <small class="text-uppercase text-success">tunai</small>
+                                        @endif
                                     </td>
                                     <td class="txt-oflo">
-                                        {{item.barang.num_part || ''}}
-                                    </td>
-                                    <td>
-                                        {{item.barang.satuan || ''}}
+                                        <small>{{item.pemasok.kode}}</small> <br>
+                                        {{item.pemasok.nama}}
                                     </td>
                                     <td class="txt-oflo">
                                         {{item.qty}}
@@ -75,6 +80,15 @@
                                 </tr>
                             @endeach
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5">
+                                    <button class="btn btn-outline btn-warning btn-xs bt-print-request" data-id="{{data.id}}">
+                                        <i class="fa fa-print"></i> Print Request
+                                    </button>
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table> 
                 </div>
             </div>

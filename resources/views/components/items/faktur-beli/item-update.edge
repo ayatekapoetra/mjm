@@ -1,0 +1,68 @@
+
+<tr class="item-rows">
+    <td>
+        <h3 class="urut-rows"></h3>
+        <input type="hidden" class="item-data-details" name="id" value="{{item.id ? item.id : ''}}">   
+    </td>
+    <td class="b-all">
+        <div class="row">
+            <div class="col-md-4">            
+                <div class="form-group">                
+                    <label for="">Barang</label>                
+                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="{{item.barang_id ? item.barang_id : ''}}" value=""></select>
+                </div>        
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Satuan <span class="text-danger">*</span></label>                
+                    <select class="form-control item-data-details selectOptions" name="satuan" data-values="{{item.stn ? item.stn : ''}}" id="" data-group="satuan" required></select>
+                </div>        
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Qty <span class="text-danger">*</span></label>                
+                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="{{item.qty ? item.qty : '0.00'}}" required>
+                </div>        
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Harga Stn <span class="text-danger">*</span></label>                
+                    <input type="number" class="form-control item-data-details item-details" name="harga_stn" id="" value="{{item.harga_stn ? item.harga_stn : '0.00'}}" required>
+                </div>        
+            </div>
+            <div class="col-md-2">            
+                <div class="form-group">                
+                    <label for="">Harga Total</label>                
+                    <input type="number" class="form-control item-data-details item-details" name="subtotal" id="" value="{{item.subtotal ? item.subtotal : ''}}" readonly>
+                </div>        
+            </div>
+            <div class="col-md-4">            
+                <div class="form-group">                
+                    <label for="">Akun</label>                
+                    <select class="form-control item-data-details selectCoa" name="coa_id" data-values="{{item.coa_id ? item.coa_id : ''}}" id=""></select>
+                </div>        
+            </div>
+            <div class="col-md-4">            
+                <div class="form-group">                
+                    <label for="">Equipment Unit</label>                
+                    <select class="form-control item-data-details selectEquipment" name="equipment_id" data-values="{{item.equipment_id ? item.equipment_id : ''}}" id=""></select>
+                </div>        
+            </div>
+            <div class="col-md-4">            
+                <div class="form-group">                
+                    <label for="">Keterangan</label>                
+                    <input type="text" class="form-control item-data-details" name="description" data-id="" value="{{item.description ? item.description : ''}}">
+                </div>        
+            </div>
+        </div>
+    </td>
+    <td class="text-center">
+        <button type="button" class="btn btn-danger btn-circle m-t-30 bt-remove-item">
+            <i class="fa fa-trash"></i> 
+        </button>
+    </td>
+</tr>
+{{ script('ajax/opt-coa') }}
+{{ script('ajax/opt-barang') }}
+{{ script('ajax/opt-equipment') }}
+{{ script('ajax/opt-options') }}

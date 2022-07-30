@@ -3,9 +3,9 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class TrxFakturBeliItem extends Model {
+class KeuFakturPembelianItem extends Model {
     static get table(){
-        return 'trx_faktur_belis_items'
+        return 'keu_faktur_pembelian_items'
     }
 
     barang () {
@@ -13,4 +13,4 @@ class TrxFakturBeliItem extends Model {
     }
 }
 
-module.exports = TrxFakturBeliItem
+module.exports = KeuFakturPembelianItem
