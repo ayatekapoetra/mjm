@@ -13,8 +13,8 @@
                             <th width="120"class="bg-inverse b-all">Date Faktur<br>Due Date</th>
                             <th width="150"class="bg-inverse b-all">No.Pesanan<br/>No.Faktur</th>
                             <th width="*" class="bg-inverse b-all">Cabang<br/>Gudang</th>
-                            <th width="*" class="bg-inverse b-all">Kode<br/>Faktur</th>
-                            <th width="*" class="bg-inverse b-all">Total<br/>Faktur</th>
+                            <th width="*" class="bg-inverse b-all text-right">PPn<br/><small>PPn (Rp.)</small></th>
+                            <th width="*" class="bg-inverse b-all text-right">Total Faktur<br/><small>Sisa Faktur</small></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -23,44 +23,47 @@
                                 <tr>
                                     <td class="text-center">{{$loop.index + 1}}</td>
                                     <td>
-                                        <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button>
-                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
+                                        <p>
+                                            <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button>
+                                        </p>
+                                        <p>
+                                            <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
+                                        </p>
                                     </td>
                                     <td>
                                         @if(item.files)
-                                            <a href="{{item.files.url}}" target="_blank">
-                                                <i class="ti-file"></i> open
-                                            </a>
-                                        @endif
-                                        @if(item.fbfiles)
-                                            <a href="{{item.files.url}}" target="_blank">
-                                                <i class="ti-file"></i> open
-                                            </a>
+                                            @each(val in item.files)
+                                                <a href="{{val.url}}" target="_blank">
+                                                    <i class="ti-clip"></i>file
+                                                </a> <br>
+                                            @endeach
                                         @endif
                                     </td>
-                                    <td class="dateFormatDef" data-elm="strong" data-patten="YYYY-MM-DD" data-tgl="{{item.date_faktur}}">
+                                    <td class="dateFormatDef" data-elm="strong" data-patten="YYYY-MM-DD" data-tgl="{{item.trx_date}}">
                                         <strong></strong><br>
                                         <span class="dateFormatDef" data-elm="span" data-patten="YYYY-MM-DD" data-tgl="{{item.due_date}}">
                                             <span class="text-danger" style="font-weight: 600;"></span>
-                                        </span>
+                                        </span> 
                                     </td>
                                     <td>
-                                        <small>{{item.reff_ro ? item.reff_ro : '-'}}</small><br>
-                                        <span>{{item.kode ? item.kode : '-'}}</span>
+                                        <small>{{item.kode ? item.kode : '-'}}</small><br>
+                                        <small class="text-white">{{item.author.profile.nama_lengkap}}</small>
                                         
                                     </td>
                                     <td class="">
-                                        <span>{{item.cabang.kode}}-{{item.cabang.nama}}</span>
-                                        <small class="pull-right text-white">{{item.bisnis.initial}}</small><br>
-                                        <small>{{item.gudang.nama}}</small>
-                                    </td>
-                                    <td class="">
-                                        <small>Author: {{item.author ? item.author.profile.nama_lengkap : ''}}</small><br>
-                                        <span>{{item.kode ? item.kode : ''}}</span>
+                                        <h3 class="m-b-0">{{item.cabang.kode}} - {{item.cabang.nama}}</h3>
+                                        <small>[{{item.gudang.kode}}] - {{item.gudang.nama}}</small>
                                     </td>
                                     <td class="text-right">
-                                        <span class="formatRp" data-number="{{item.total}}" data-elm="h3">
-                                            <h3>{{item.total}}</h3>
+                                        <small>{{item.ppn}}%</small><br>
+                                        <span class="formatRp" data-number="{{item.ppn_rp}}">{{item.ppn_rp}}</span>
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="formatRp" data-number="{{item.grandtot}}" data-elm="p">
+                                            <p>{{item.grandtot}}</p>
+                                        </span>
+                                        <span class="formatRp" data-number="{{item.sisa}}" data-elm="small">
+                                            <small class="text-warning">{{item.grandtot}}</small>
                                         </span>
                                     </td>
                                 </tr>

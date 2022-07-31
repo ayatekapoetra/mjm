@@ -5,13 +5,16 @@ const DB = use('Database')
 const Helpers = use('Helpers')
 const _ = require('underscore')
 const moment = require('moment')
+const DefCoa = use("App/Models/DefCoa")
 const initFunc = use("App/Helpers/initFunc")
+const Barang = use("App/Models/master/Barang")
 const AccCoa = use("App/Models/akunting/AccCoa")
 const BarangLokasi = use("App/Models/BarangLokasi")
 const HargaBeli = use("App/Models/master/HargaBeli")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
 const LampiranFile = use("App/Models/transaksi/KeuFakturPembelianAttach")
 const KeuFakturPembelian = use("App/Models/transaksi/KeuFakturPembelian")
+const KeuPurchasingRequest = use("App/Models/transaksi/KeuPurchasingRequest")
 const KeuFakturPembelianItem = use("App/Models/transaksi/KeuFakturPembelianItem")
 
 class fakturBeli {
@@ -23,16 +26,15 @@ class fakturBeli {
         let data = (await KeuFakturPembelian
             .query()
             .with('files')
-            .with('bisnis')
             .with('cabang')
             .with('pemasok')
             .with('gudang')
             .with('author', a => a.with('profile'))
             .with('items')
             .where( w => {
-                w.where('bisnis_id', ws.bisnis_id)
+                w.where('cabang_id', user.cabang_id)
             })
-            .orderBy('date_faktur', 'desc')
+            .orderBy('trx_date', 'desc')
             .paginate(halaman, limit)
         ).toJSON()
         
@@ -40,187 +42,230 @@ class fakturBeli {
     }
 
     async POST (req, user, filex) {
+        console.log(req);
         const trx = await DB.beginTransaction()
-        const {
-            cabang_id, 
-            gudang_id, 
-            pemasok_id, 
-            reff_ro, 
-            kode, 
-            total, 
-            date_faktur, 
-            due_date, 
-            title, 
-            items
-        } = req
-
+        const keuPurchasingRequest = await KeuPurchasingRequest.query().where('kode', req.kode).last()
+        
+        const trxFakturBeli = new KeuFakturPembelian()
+        trxFakturBeli.fill({
+            cabang_id: req.cabang_id, 
+            gudang_id: req.gudang_id, 
+            pemasok_id: req.pemasok_id, 
+            reff_order: keuPurchasingRequest?.id || null, 
+            kode: req.kode || null, 
+            grandtot: req.itemsTotal, 
+            sisa: req.itemsTotal,
+            ppn: req.ppn || 0,
+            ppn_rp: req.ppn_rp || 0,
+            trx_date: req.date_faktur,
+            due_date: req.due_date, 
+            createdby: user.id,
+        })
         try {
-            const trxFakturBeli = new TrxFakturBeli()
-            trxFakturBeli.fill({
-                bisnis_id: ws.bisnis_id, 
-                cabang_id: cabang_id, 
-                gudang_id: gudang_id, 
-                pemasok_id: pemasok_id, 
-                reff_ro: reff_ro, 
-                kode: kode, 
-                total: total, 
-                sisa: total,
-                date_faktur: date_faktur, 
-                due_date: due_date, 
-                title: title,
-                createdby: user.id,
-            })
             await trxFakturBeli.save(trx)
-
-            if(filex){
-                const randURL = moment().format('YYYYMMDDHHmmss')
-                const aliasName = `FB-${randURL}.${filex.extname}`
-                var uriLampiran = '/upload/'+aliasName
-                await filex.move(Helpers.publicPath(`upload`), {
-                    name: aliasName,
-                    overwrite: true,
-                })
-
-                const lampiranFile = new LampiranFile()
-                lampiranFile.fill({
-                    fb_id: trxFakturBeli.id,
-                    datatype: filex.extname,
-                    url: uriLampiran
-                })
-
-                await lampiranFile.save(trx)
-            }
-
-            for (const obj of req.items) {
-                
-                /** CHECK COA IS EXSIST **/
-                let coaDebit
-                let coaKredit
-
-                if(obj.coa_id){
-
-                    /** INSERT DATA TRX-JURNAL DEBIT **/
-                    coaDebit = await AccCoa.query().where('id', obj.coa_id).last()
-
-                    const trxJurnalDebit = new TrxJurnal()
-                    trxJurnalDebit.fill({
-                        createdby: user.id,
-                        bisnis_id: ws.bisnis_id, 
-                        trx_beli: trxFakturBeli.id,
-                        coa_id: obj.coa_id,
-                        kode: coaDebit.kode,
-                        reff: reff_ro,
-                        kode_faktur: kode,
-                        narasi: obj.description,
-                        trx_date: date_faktur || new Date(),
-                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
-                        dk: 'd',
-                        // dk: coa.dk,
-                        is_delay: 'N'
-                    })
-
-                    await trxJurnalDebit.save(trx)
-
-                    // if(){
-
-                    // }
-                    /** INSERT DATA TRX-JURNAL KREDIT HUTANG DAGANG **/
-                    coaKredit = await AccCoa.query().where( w => {
-                        w.where('kode', '200.1.1')
-                        w.where('bisnis_id', ws.bisnis_id)
-                    }).last()
-
-                    const trxJurnalKredit = new TrxJurnal()
-                    trxJurnalKredit.fill({
-                        createdby: user.id,
-                        bisnis_id: ws.bisnis_id, 
-                        trx_beli: trxFakturBeli.id,
-                        coa_id: coaKredit.id,
-                        kode: coaKredit.kode,
-                        reff: reff_ro,
-                        kode_faktur: kode,
-                        narasi: obj.description,
-                        trx_date: date_faktur || new Date(),
-                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
-                        dk: 'k',
-                        // dk: coa.dk,
-                        is_delay: 'N'
-                    })
-
-                    await trxJurnalKredit.save(trx)
-
-                    /** INSERT STOK PERSEDIAAN JIKA ITEM BERUPA BARANG **/
-                    if(obj.barang_id){
-                        const pr_id = await TrxOrderBeli.query().where('kode', reff_ro).last()
-                        const barangLokasi = new BarangLokasi()
-                        barangLokasi.fill({
-                            ro_id: pr_id?.id || null,
-                            trx_fb: trxFakturBeli.id,
-                            bisnis_id: ws.bisnis_id, 
-                            cabang_id: cabang_id,
-                            gudang_id: gudang_id,
-                            barang_id: obj.barang_id,
-                            qty_rec: obj.qty,
-                            createdby: user.id
-                        })
-    
-                        await barangLokasi.save(trx)
-
-                        /** INSERT HARGA BELI BARU **/
-                        let hrgBeli = await HargaBeli.query().where( w => {
-                            w.where('barang_id', obj.barang_id)
-                            w.where('harga_beli', obj.harga_stn)
-                            w.where('periode', moment().format('YYYY-MM'))
-                        }).last()
-
-                        if(!hrgBeli){
-                            hrgBeli = new HargaBeli()
-                            hrgBeli.fill({
-                                barang_id: obj.barang_id,
-                                bisnis_id: ws.bisnis_id, 
-                                gudang_id: gudang_id,
-                                trx_fb: trxFakturBeli.id,
-                                periode: moment().format('YYYY-MM'),
-                                narasi: req.kode,
-                                harga_beli: parseFloat(obj.harga_stn),
-                                created_by: user.id
-                            })
-                            await hrgBeli.save(trx)
-                        }
-                    }
-                }
-
-                coaDebit = await AccCoa.query().where('id', obj.coa_id).last()
-
-                const trxFakturBeliItem = new TrxFakturBeliItem()
-                trxFakturBeliItem.fill({
-                    fakturbeli_id: trxFakturBeli.id,
-                    barang_id: obj.barang_id || null,
-                    coa_id: obj.coa_id || null,
-                    kode_coa: coaDebit?.kode || null,
-                    equipment_id: obj.equipment_id || null,
-                    description: obj.description,
-                    qty: obj.qty,
-                    stn: obj.satuan,
-                    harga_stn: obj.harga_stn,
-                    subtotal: parseFloat(obj.qty) * parseFloat(obj.harga_stn)
-                })
-
-                await trxFakturBeliItem.save(trx)
-
-            }
-            await trx.commit()
-            return {
-                success: true,
-                message: 'Success save data...'
-            }
         } catch (error) {
             console.log(error);
             await trx.rollback()
             return {
                 success: false,
-                message: 'Failed save data...'+JSON.stringify(error)
+                message: 'Failed save data faktur pembelian...'+JSON.stringify(error)
             }
+        }
+        console.log('end KeuFakturPembelian');
+
+        if(filex){
+            for (const [i, objFile] of (filex._files).entries()) {
+                const randURL = moment().format('YYYYMMDDHHmmss') + '-' + i
+                const aliasName = `FB-${randURL}.${objFile.extname}`
+                var uriLampiran = '/upload/'+aliasName
+                await objFile.move(Helpers.publicPath(`upload`), {
+                    name: aliasName,
+                    overwrite: true,
+                })
+
+                if (!objFile.moved()) {
+                    return objFile.error()
+                }
+
+                const lampiranFile = new LampiranFile()
+                lampiranFile.fill({
+                    fakturbeli_id: trxFakturBeli.id,
+                    size: objFile.size,
+                    filetype: objFile.extname,
+                    url: uriLampiran
+                })
+
+                try {
+                    await lampiranFile.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed save data attachment...'+JSON.stringify(error)
+                    }
+                }
+            }
+            console.log('end lampiranFile');
+        }
+
+        const defCoaPajak = (await DefCoa.query().where('group', 'faktur-pembelian-pajak').fetch()).toJSON()
+        for (const val of defCoaPajak) {
+            const trxJurnalTax = new TrxJurnal()
+            trxJurnalTax.fill({
+                createdby: user.id,
+                cabang_id: req.cabang_id, 
+                trx_beli: trxFakturBeli.id,
+                coa_id: val.coa_id,
+                reff: req.kode,
+                narasi: `[ ${req.kode} ] ${val.description}`,
+                trx_date: req.date_faktur || new Date(),
+                nilai: req.ppn_rp || 0,
+                dk: val.tipe,
+                is_delay: 'N'
+            })
+            try {
+                await trxJurnalTax.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save data trx jurnal pajak...'+JSON.stringify(error)
+                }
+            }
+            console.log('end faktur-pembelian-pajak');
+        }
+
+        for (const obj of req.data.items) {
+            // console.log(obj);
+            if(obj.coa_id){
+                const barang = await Barang.query().where('id', obj.barang_id).last()
+
+                const trxFakturBeliItem = new KeuFakturPembelianItem()
+                trxFakturBeliItem.fill({
+                    fakturbeli_id: trxFakturBeli.id,
+                    barang_id: obj.barang_id || null,
+                    coa_id: obj.coa_id || null,
+                    qty: obj.qty,
+                    discount: obj.discount_rp,
+                    stn: barang.satuan,
+                    harga_stn: obj.harga_stn,
+                    subtotal: parseFloat(obj.qty) * parseFloat(obj.harga_stn)
+                })
+
+                try {
+                    await trxFakturBeliItem.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed save data faktur pembelian item...'+JSON.stringify(error)
+                    }
+                }
+                console.log('end trxFakturBeliItem');
+
+                /** INSERT DATA TRX-JURNAL **/
+                const defCoa = (await DefCoa.query().where('group', 'faktur-pembelian').fetch()).toJSON()
+
+                for (const val of defCoa) {
+                    const trxJurnalFB = new TrxJurnal()
+                    trxJurnalFB.fill({
+                        createdby: user.id,
+                        cabang_id: req.cabang_id, 
+                        trx_beli: trxFakturBeli.id,
+                        coa_id: val.coa_id,
+                        reff: req.kode,
+                        narasi: `[ ${req.kode} ] ${barang.nama}`,
+                        trx_date: req.date_faktur || new Date(),
+                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
+                        dk: val.tipe,
+                        is_delay: 'N'
+                    })
+
+                    try {
+                        await trxJurnalFB.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: 'Failed save data trx jurnal...'+JSON.stringify(error)
+                        }
+                    }
+                    console.log('end trxJurnal', req.ppn_rp);
+                }
+
+                const defCoaDiscount = (await DefCoa.query().where('group', 'faktur-pembelian-discount-barang').fetch()).toJSON()
+                for (const val of defCoaDiscount) {
+                    const trxJurnalDisc = new TrxJurnal()
+                    trxJurnalDisc.fill({
+                        createdby: user.id,
+                        cabang_id: req.cabang_id, 
+                        trx_beli: trxFakturBeli.id,
+                        coa_id: val.coa_id,
+                        reff: req.kode,
+                        narasi: `[ ${req.kode} ] ${val.description}`,
+                        trx_date: req.date_faktur || new Date(),
+                        nilai: parseFloat(obj.discount),
+                        dk: val.tipe,
+                        is_delay: 'N'
+                    })
+
+                    try {
+                        await trxJurnalDisc.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: 'Failed save data trx jurnal discount...'+JSON.stringify(error)
+                        }
+                    }
+                    console.log('end faktur-pembelian-discount-barang');
+                }
+
+                if(obj.barang_id){
+                    /** INSERT HARGA BELI BARU **/
+                    let hrgBeli = await HargaBeli.query().where( w => {
+                        w.where('barang_id', obj.barang_id)
+                        w.where('harga_beli', obj.harga_stn)
+                        w.where('periode', moment().format('YYYY-MM'))
+                    }).last()
+
+                    if(!hrgBeli){
+                        hrgBeli = new HargaBeli()
+                        hrgBeli.fill({
+                            barang_id: obj.barang_id,
+                            cabang_id: req.cabang_id,
+                            gudang_id: req.gudang_id,
+                            trxbeli_item: trxFakturBeliItem.id,
+                            periode: moment().format('YYYY-MM'),
+                            narasi: req.kode,
+                            harga_beli: parseFloat(obj.harga_stn),
+                            created_by: user.id
+                        })
+                        try {
+                            await hrgBeli.save(trx)
+                        } catch (error) {
+                            console.log(error);
+                            await trx.rollback()
+                            return {
+                                success: false,
+                                message: 'Failed save data harga beli...'+JSON.stringify(error)
+                            }
+                        }
+                    }
+                    console.log('end hrgBeli');
+                }
+            }
+        }
+
+        await trx.commit()
+        return {
+            success: true,
+            message: 'Success save data...'
         }
     }
 

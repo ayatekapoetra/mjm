@@ -33,7 +33,7 @@ class KeuFakturPembelian extends Model {
     }
 
     files () {
-        return this.hasMany("App/Models/transaksi/KeuPindahPersediaanAttach", "id", "fakturbeli_id")
+        return this.hasMany("App/Models/transaksi/KeuFakturPembelianAttach", "id", "fakturbeli_id")
     }
 }
 

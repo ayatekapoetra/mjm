@@ -91,26 +91,84 @@ class ApiPurchasingRequestController {
         }
     }
 
-    async approveStore ( { auth, params, view } ){
+    async approveStore ( { auth, params, response } ){
+        let durasi
+        var t0 = performance.now()
+
         const user = await userValidate(auth)
 
         if(!user){
-            return view.render('401')
+            return response.status(403).json({
+                diagnostic: {
+                    ver: version,
+                    error: true,
+                    message: 'not authorized...'
+                }
+            })
         }
 
         const data = await KeuPurchasingOrderHelpers.APPROVE(params, user)
-        return data
+        if(data.success){
+            durasi = await initFunc.durasi(t0)
+            return response.status(200).json({
+                diagnostic: {
+                    ver: version,
+                    times: durasi, 
+                    error: false
+                },
+                data: data
+            })
+        }else{
+            durasi = await initFunc.durasi(t0)
+            return response.status(403).json({
+                diagnostic: {
+                    ver: version,
+                    times: durasi, 
+                    error: true
+                },
+                data: data.message
+            })
+        }
     }
 
-    async rejectStore ( { auth, params, view } ){
+    async rejectStore ( { auth, params, response } ){
+        let durasi
+        var t0 = performance.now()
+
         const user = await userValidate(auth)
 
         if(!user){
-            return view.render('401')
+            return response.status(403).json({
+                diagnostic: {
+                    ver: version,
+                    error: true,
+                    message: 'not authorized...'
+                }
+            })
         }
 
         const data = await KeuPurchasingOrderHelpers.REJECT(params, user)
-        return data
+        if(data.success){
+            durasi = await initFunc.durasi(t0)
+            return response.status(200).json({
+                diagnostic: {
+                    ver: version,
+                    times: durasi, 
+                    error: false
+                },
+                data: data
+            })
+        }else{
+            durasi = await initFunc.durasi(t0)
+            return response.status(403).json({
+                diagnostic: {
+                    ver: version,
+                    times: durasi, 
+                    error: true
+                },
+                data: data.message
+            })
+        }
     }
 }
 

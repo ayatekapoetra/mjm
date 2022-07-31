@@ -32,9 +32,9 @@ class FakturPembelianController {
             return view.render('401')
         }
 
-        // const data = await KeuFakturPembelianHelpers.LIST(req, user)
-        // console.log(data);
-        return view.render('keuangan.faktur-pembelian.list')
+        const data = await KeuFakturPembelianHelpers.LIST(req, user)
+        console.log(data.data[0]);
+        return view.render('keuangan.faktur-pembelian.list', {list: data})
     }
 
     async create ( { auth, view } ) {
@@ -61,8 +61,46 @@ class FakturPembelianController {
 
         const req = request.all()
         req.data = JSON.parse(req.dataForm)
-        console.log(req);
-        console.log(attchment);
+        // console.log(req);
+        // console.log(attchment);
+        const total = (req.data.items).reduce((a, b) => { return a + parseFloat(b.subtotal) }, 0)
+        const ppn_rp = (total * parseFloat(req.ppn))/100
+        req.itemsTotal = total
+        req.ppn_rp = ppn_rp
+
+        if(!req.cabang_id){
+            return {
+                success: false,
+                message: 'Cabang tidak terdefenisikan...'
+            }
+        }
+
+        if(!req.gudang_id){
+            return {
+                success: false,
+                message: 'Gudang tidak terdefenisikan...'
+            }
+        }
+
+        if(!req.pemasok_id){
+            return {
+                success: false,
+                message: 'Pemasok tidak terdefenisikan...'
+            }
+        }
+
+        req.data.items = req.data.items.map(el => {
+            if(el["type-discount"] === 'persen'){
+                var discount_rp = (parseFloat(el.harga_stn) * parseFloat(el.qty)) * (parseFloat(el.discount)/100)
+            }else{
+                var discount_rp = parseFloat(el.discount)
+            }
+            return {
+                ...el,
+                discount_rp: discount_rp
+            }
+        })
+
         const data = await KeuFakturPembelianHelpers.POST(req, user, attchment)
         return data
 

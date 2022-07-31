@@ -23,6 +23,10 @@ $(function(){
         setUrut()
     })
 
+    $('body').on('focus, click', 'input[type="number"]', function(){
+        $(this).select()
+    })
+
     $('body').on('click', 'span[name="icon-discount"]', function(){
         var elm = $(this).parents('tr')
         var elmDiscount = $(this).parents('tr').find('input[name="type-discount"]')
@@ -140,7 +144,7 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
-                window.location.reload()
+                // window.location.reload()
             }
         })
     })
@@ -379,7 +383,7 @@ $(function(){
         var data = _.object(keys, values)
 
         return {
-            ...data,
+            // ...data,
             items: itemData()
         }
     }
