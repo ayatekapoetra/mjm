@@ -13,7 +13,7 @@ class Gudang extends Model {
     }
 
     rack () {
-        return this.hasMany("App/Models/master/rack", "id", "gudang_id")
+        return this.hasMany("App/Models/master/Rack", "id", "gudang_id")
     }
 }
 

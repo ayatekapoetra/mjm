@@ -9,7 +9,7 @@ class Cabang extends Model {
     }
 
     gudang () {
-        return this.hasMany("App/Models/master/gudang", "id", "cabang_id")
+        return this.hasMany("App/Models/master/Gudang", "id", "cabang_id")
     }
 }
 
