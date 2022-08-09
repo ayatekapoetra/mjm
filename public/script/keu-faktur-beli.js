@@ -345,7 +345,7 @@ $(function(){
         var isPPN = body.find('input[name="ppn"]').val()
         if(isPPN){
             var ppnRp = (parseFloat(isPPN) / 100) * parseFloat(summary)
-            $('input[name="grandtot"]').val(parseFloat(summary) - parseFloat(ppnRp))
+            $('input[name="grandtot"]').val(parseFloat(summary) + parseFloat(ppnRp))
         }else{
             $('input[name="grandtot"]').val(parseFloat(summary))
         }

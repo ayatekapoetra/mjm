@@ -53,10 +53,10 @@ class fakturBeli {
             pemasok_id: req.pemasok_id, 
             reff_order: keuPurchasingRequest?.id || null, 
             kode: req.kode || null, 
-            grandtot: req.itemsTotal, 
-            sisa: req.itemsTotal,
+            grandtot: parseFloat(req.itemsTotal) + parseFloat(req.ppn_rp), 
+            sisa: parseFloat(req.itemsTotal) + parseFloat(req.ppn_rp),
             ppn: req.ppn || 0,
-            ppn_rp: req.ppn_rp || 0,
+            ppn_rp: req.ppn_rp,
             trx_date: req.date_faktur,
             due_date: req.due_date, 
             createdby: user.id,
@@ -151,7 +151,7 @@ class fakturBeli {
                     discount: obj.discount_rp,
                     stn: barang.satuan,
                     harga_stn: obj.harga_stn,
-                    subtotal: parseFloat(obj.qty) * parseFloat(obj.harga_stn)
+                    subtotal: (parseFloat(obj.qty) * parseFloat(obj.harga_stn)) - parseFloat(obj.discount_rp)
                 })
 
                 try {
@@ -179,7 +179,7 @@ class fakturBeli {
                         reff: req.kode,
                         narasi: `[ ${req.kode} ] ${barang.nama}`,
                         trx_date: req.date_faktur || new Date(),
-                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
+                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn) - parseFloat(obj.discount_rp),
                         dk: val.tipe,
                         is_delay: 'N'
                     })
@@ -208,7 +208,7 @@ class fakturBeli {
                         reff: req.kode,
                         narasi: `[ ${req.kode} ] ${val.description}`,
                         trx_date: req.date_faktur || new Date(),
-                        nilai: parseFloat(obj.discount),
+                        nilai: parseFloat(obj.discount_rp),
                         dk: val.tipe,
                         is_delay: 'N'
                     })
@@ -243,7 +243,7 @@ class fakturBeli {
                             trxbeli_item: trxFakturBeliItem.id,
                             periode: moment().format('YYYY-MM'),
                             narasi: req.kode,
-                            harga_beli: parseFloat(obj.harga_stn),
+                            harga_beli: parseFloat(obj.harga_stn) - parseFloat(obj.discount_rp),
                             created_by: user.id
                         })
                         try {

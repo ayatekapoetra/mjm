@@ -33,7 +33,7 @@ class FakturPembelianController {
         }
 
         const data = await KeuFakturPembelianHelpers.LIST(req, user)
-        console.log(data.data[0]);
+        // console.log(data.data[0]);
         return view.render('keuangan.faktur-pembelian.list', {list: data})
     }
 
@@ -63,10 +63,7 @@ class FakturPembelianController {
         req.data = JSON.parse(req.dataForm)
         // console.log(req);
         // console.log(attchment);
-        const total = (req.data.items).reduce((a, b) => { return a + parseFloat(b.subtotal) }, 0)
-        const ppn_rp = (total * parseFloat(req.ppn))/100
-        req.itemsTotal = total
-        req.ppn_rp = ppn_rp
+        
 
         if(!req.cabang_id){
             return {
@@ -97,9 +94,15 @@ class FakturPembelianController {
             }
             return {
                 ...el,
+                subtotal: (parseFloat(el.harga_stn) * parseFloat(el.qty)) - discount_rp,
                 discount_rp: discount_rp
             }
         })
+
+        const subtotal = (req.data.items).reduce((a, b) => { return a + parseFloat(b.subtotal) }, 0)
+        const ppn_rp = (subtotal * parseFloat(req.ppn))/100
+        req.itemsTotal = subtotal
+        req.ppn_rp = ppn_rp || 0
 
         const data = await KeuFakturPembelianHelpers.POST(req, user, attchment)
         return data

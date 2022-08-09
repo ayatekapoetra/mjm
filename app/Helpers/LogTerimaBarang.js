@@ -132,7 +132,7 @@ class terimaBarang {
                 }
             }
 
-            // has_received
+            /* TAMBAH BARANG KE GUDANG PERSEDIAAN */
             if(req.isPemasok === 'Y'){
                 const keuPurchasingRequestItems = await KeuPurchasingRequestItems.query().where( w => {
                     w.where('qty', obj.qty)
@@ -162,7 +162,6 @@ class terimaBarang {
                         gudang_id: req.gudang_id,
                         qty_hand: obj.qty,
                         createdby: user.id,
-                        trx_inv: req.reff_order||null
                     })
                     await addBarang.save(trx)
                 } catch (error) {

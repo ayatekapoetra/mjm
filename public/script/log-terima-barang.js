@@ -87,6 +87,7 @@ $(function(){
                   },
                   error: function(err){
                       console.log(err)
+                      swal("Your not authorized", "Please,,, \ncontact your system administrator to allow the security alert...", "error");
                       body.find('div#content-form').css('display', 'none')
                   }
               })

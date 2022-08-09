@@ -21,7 +21,7 @@
                         @if(list.data.length > 0)
                             @each(item in list.data)
                                 <tr>
-                                    <td class="text-center">{{$loop.index + 1}}</td>
+                                    <td class="text-center v-middle">{{$loop.index + 1}}</td>
                                     <td>
                                         <p>
                                             <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button>
@@ -30,7 +30,7 @@
                                             <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
                                         </p>
                                     </td>
-                                    <td>
+                                    <td class="v-middle">
                                         @if(item.files)
                                             @each(val in item.files)
                                                 <a href="{{val.url}}" target="_blank">
@@ -39,26 +39,26 @@
                                             @endeach
                                         @endif
                                     </td>
-                                    <td class="dateFormatDef" data-elm="strong" data-patten="YYYY-MM-DD" data-tgl="{{item.trx_date}}">
+                                    <td class="dateFormatDef v-middle" data-elm="strong" data-patten="YYYY-MM-DD" data-tgl="{{item.trx_date}}">
                                         <strong></strong><br>
                                         <span class="dateFormatDef" data-elm="span" data-patten="YYYY-MM-DD" data-tgl="{{item.due_date}}">
                                             <span class="text-danger" style="font-weight: 600;"></span>
                                         </span> 
                                     </td>
-                                    <td>
+                                    <td class="v-middle">
                                         <small>{{item.kode ? item.kode : '-'}}</small><br>
                                         <small class="text-white">{{item.author.profile.nama_lengkap}}</small>
                                         
                                     </td>
-                                    <td class="">
+                                    <td class="v-middle">
                                         <h3 class="m-b-0">{{item.cabang.kode}} - {{item.cabang.nama}}</h3>
                                         <small>[{{item.gudang.kode}}] - {{item.gudang.nama}}</small>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="text-right v-middle">
                                         <small>{{item.ppn}}%</small><br>
                                         <span class="formatRp" data-number="{{item.ppn_rp}}">{{item.ppn_rp}}</span>
                                     </td>
-                                    <td class="text-right">
+                                    <td class="text-right v-middle">
                                         <span class="formatRp" data-number="{{item.grandtot}}" data-elm="p">
                                             <p>{{item.grandtot}}</p>
                                         </span>
