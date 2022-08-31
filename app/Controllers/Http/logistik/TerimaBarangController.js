@@ -82,7 +82,7 @@ class TerimaBarangController {
         const data = await LogTerimaBarangHelpers.PRINT(params)
         const logoAsBase64 = await Image64Helpers.GEN_BASE64(logoPath)
         const result = await GENPDF_TANDATERIMA(data, logoAsBase64)
-        console.log(result);
+        // console.log(result);
         return result
     }
 
@@ -192,8 +192,12 @@ function GENPDF_TANDATERIMA(data, logo){
                                     {text: ':  ' + moment(data.received_at).format('DD MMMM YYYY'), fontSize: 10}
                                 ],
                                 [
-                                    {text: 'Kode Request', bold: true, fontSize: 10},
+                                    {text: 'No.Faktur', bold: true, fontSize: 10},
                                     {text: ':  ' + data.reff_rcp, fontSize: 10}
+                                ],
+                                [
+                                    {text: 'No.Request', bold: true, fontSize: 10},
+                                    {text: ':  ' + data.purchasing.kode, fontSize: 10}
                                 ],
                                 [
                                     {text: 'Pemasok', bold: true, fontSize: 10},
@@ -202,10 +206,6 @@ function GENPDF_TANDATERIMA(data, logo){
                                 [
                                     {text: 'Kode', bold: true, fontSize: 10},
                                     {text: ':  ' + data.pemasok.kode, fontSize: 10}
-                                ],
-                                [
-                                    {text: 'Keterangan', bold: true, fontSize: 10},
-                                    {text: ':  ' + data.narasi, fontSize: 10}
                                 ],
                             ]
                         },

@@ -26,7 +26,7 @@ class AksesMenu {
         .with('menu')
         .with('submenu')
         .where( w => {
-          w.where('user_id', 1)
+          w.where('user_id', user.id)
           w.where('aktif', 'Y')
         })
         .fetch()
@@ -39,7 +39,7 @@ class AksesMenu {
           menu_id: key,
           submenu: groupingMenu[key].map( obj => {
             return {
-              bisnis_id: params.unitbisnis,
+              // bisnis_id: params.unitbisnis,
               submenu_id: obj.submenu.id,
               name: obj.submenu.name,
               icon: obj.submenu.icon,

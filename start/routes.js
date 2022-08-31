@@ -55,6 +55,8 @@ Route.group(() => {
     Route.get('/coa/faktur-pelanggan', 'CoaAjaxController.fakturPelanggan').as('ajax.set.fakturPelanggan')
     Route.get('/coa/faktur-gudang', 'CoaAjaxController.fakturGudang').as('ajax.set.fakturGudang')
     Route.get('/coa/option', 'CoaAjaxController.coaHTML').as('ajax.set.coaHTML')
+    Route.get('/coa/pembayaran/onchange-coa', 'CoaAjaxController.onChangeAkunPembayaran').as('ajax.set.onChangeAkunPembayaran')
+    Route.get('/coa/penerimaan/onchange-coa', 'CoaAjaxController.onChangeAkunPenerimaan').as('ajax.set.onChangeAkunPenerimaan')
 
     /* BANK */
     Route.get('/bank', 'CoaAjaxController.listBank').as('ajax.set.bank')
@@ -82,7 +84,8 @@ Route.group(() => {
     Route.get('/options/kas', 'OptionsAjaxController.listKas').as('ajax.set.listKas')
     Route.get('/options/bank', 'OptionsAjaxController.listBank').as('ajax.set.listBank')
     Route.get('/options/coa-subgroup', 'OptionsAjaxController.coaSubGroup').as('ajax.set.coaSubGroup')
-    Route.get('/options/bisnis', 'OptionsAjaxController.bisnis').as('ajax.set.bisnis')
+    Route.get('/options/coa-nasting-list', 'OptionsAjaxController.coaNastingList').as('ajax.set.coaNastingList')
+    // Route.get('/options/bisnis', 'OptionsAjaxController.bisnis').as('ajax.set.bisnis')
     Route.get('/options/cabang', 'OptionsAjaxController.cabang').as('ajax.set.cabang')
     Route.get('/options/cabang/:id/show', 'OptionsAjaxController.cabangShow').as('ajax.set.cabangShow')
     Route.get('/options/workspace', 'OptionsAjaxController.workspace').as('ajax.set.workspace')
@@ -99,6 +102,7 @@ Route.group(() => {
     Route.get('/options/barang-qualitas', 'OptionsAjaxController.barangQualitas').as('ajax.set.barangQualitas')
     Route.get('/options/purchasing-request', 'OptionsAjaxController.purchasingOrder').as('ajax.set.purchasingOrder')
     Route.get('/options/purchasing-request-details', 'OptionsAjaxController.purchasingOrderDetails').as('ajax.set.purchasingOrderDetails')
+    Route.get('/options/purchasing-order-list', 'OptionsAjaxController.purchasingOrderList').as('ajax.set.purchasingOrderList')
     Route.get('/options/barang/show/:id', 'OptionsAjaxController.barangID').as('ajax.set.barangID')
     Route.get('/options/jasa', 'OptionsAjaxController.jasa').as('ajax.set.jasa')
     Route.get('/options/jasa/show/:id', 'OptionsAjaxController.jasaID').as('ajax.set.jasaID')
@@ -113,6 +117,7 @@ Route.group(() => {
     Route.get('/options/faktur-beli', 'OptionsAjaxController.fakturBeli').as('ajax.set.fakturBeli')
     Route.get('/options/faktur-jual', 'OptionsAjaxController.fakturJual').as('ajax.set.fakturJual')
     Route.get('/options/barang/harga-jual', 'OptionsAjaxController.hargaJualBarang').as('ajax.set.hargaJualBarang')
+    
 
 }).prefix('ajax').namespace('ajax')
 
@@ -259,6 +264,7 @@ Route.group(() => {
     /* RINGKASAN */
     Route.get('/ringkasan', 'RingkasanController.index').as('acc.ringkasan').middleware('R')
     Route.get('/ringkasan/list', 'RingkasanController.list').as('acc.ringkasan.list').middleware('R')
+    Route.get('/ringkasan/list-details', 'RingkasanController.listDetails').as('acc.ringkasan.list-details').middleware('R')
     Route.get('/ringkasan/sum-values', 'RingkasanController.sumValues').as('acc.ringkasan.sumvalues')
     Route.get('/ringkasan/profit-loss', 'RingkasanController.profitLoss').as('acc.ringkasan.profitLoss')
 
@@ -307,6 +313,7 @@ Route.group(() => {
     Route.get('/faktur-pembelian/:id/show', 'FakturPembelianController.show').as('acc.faktur-pembelian.show').middleware('U')
     Route.get('/faktur-pembelian/:id/print', 'FakturPembelianController.print').as('acc.faktur-pembelian.print').middleware('R')
     Route.post('/faktur-pembelian/:id/update', 'FakturPembelianController.update').as('acc.faktur-pembelian.update').middleware('U')
+    Route.post('/faktur-pembelian/:id/destroy', 'FakturPembelianController.destroy').as('acc.faktur-pembelian.destroy').middleware('D')
     Route.get('/faktur-pembelian/create/add-item', 'FakturPembelianController.addItem').as('acc.faktur-pembelian.addItem')
 
     /* FAKTUR JUAL */
@@ -343,31 +350,33 @@ Route.group(() => {
     Route.delete('/hapus-persediaan/:id/destroy', 'HapusPersediaanController.destroy').as('acc.hapus-persediaan.destroy').middleware('D')
     Route.get('/hapus-persediaan/create/add-item', 'HapusPersediaanController.addItem').as('acc.hapus-persediaan.addItem')
 
-    /* TANDA TERIMA */
-    Route.get('/tanda-terima', 'TandaTerimaController.index').as('acc.tanda-terima').middleware('R')
-    Route.post('/tanda-terima', 'TandaTerimaController.store').as('acc.tanda-terima.store').middleware('C')
-    Route.get('/tanda-terima/list', 'TandaTerimaController.list').as('acc.tanda-terima.list').middleware('R')
-    Route.get('/tanda-terima/create', 'TandaTerimaController.create').as('acc.tanda-terima.create').middleware('C')
-    Route.get('/tanda-terima/search', 'TandaTerimaController.searchFaktur').as('acc.tanda-terima.searchFaktur').middleware('R')
-    Route.get('/tanda-terima/searchItems', 'TandaTerimaController.searchItems').as('acc.tanda-terima.searchItems').middleware('R')
-    Route.get('/tanda-terima/:id/show', 'TandaTerimaController.show').as('acc.tanda-terima.show').middleware('U')
-    Route.get('/tanda-terima/:id/print', 'TandaTerimaController.print').as('acc.tanda-terima.print').middleware('R')
-    Route.post('/tanda-terima/:id/update', 'TandaTerimaController.update').as('acc.tanda-terima.update').middleware('U')
-    Route.delete('/tanda-terima/:id/destroy', 'TandaTerimaController.destroy').as('acc.tanda-terima.destroy').middleware('D')
-    Route.get('/tanda-terima/create/add-item', 'TandaTerimaController.addItem').as('acc.tanda-terima.addItem')
+    /* PENERIMAAN TANDA TERIMA */
+    Route.get('/keu-penerimaan', 'PenerimaanController.index').as('acc.keu-penerimaan').middleware('R')
+    Route.post('/keu-penerimaan', 'PenerimaanController.store').as('acc.keu-penerimaan.store').middleware('C')
+    Route.get('/keu-penerimaan/list', 'PenerimaanController.list').as('acc.keu-penerimaan.list').middleware('R')
+    Route.get('/keu-penerimaan/create', 'PenerimaanController.create').as('acc.keu-penerimaan.create').middleware('C')
+    Route.get('/keu-penerimaan/search', 'PenerimaanController.searchFaktur').as('acc.keu-penerimaan.searchFaktur').middleware('R')
+    Route.get('/keu-penerimaan/searchItems', 'PenerimaanController.searchItems').as('acc.keu-penerimaan.searchItems').middleware('R')
+    Route.get('/keu-penerimaan/:id/show', 'PenerimaanController.show').as('acc.keu-penerimaan.show').middleware('U')
+    Route.get('/keu-penerimaan/:id/print', 'PenerimaanController.print').as('acc.keu-penerimaan.print').middleware('R')
+    Route.post('/keu-penerimaan/:id/update', 'PenerimaanController.update').as('acc.keu-penerimaan.update').middleware('U')
+    Route.post('/keu-penerimaan/:id/destroy', 'PenerimaanController.destroy').as('acc.keu-penerimaan.destroy').middleware('D')
+    Route.get('/keu-penerimaan/create/add-item', 'PenerimaanController.addItem').as('acc.keu-penerimaan.addItem')
+    Route.get('/keu-penerimaan/show/:id/add-item', 'PenerimaanController.showItems').as('acc.keu-penerimaan.showItems')
 
     /* PEMBAYARAN */
-    Route.get('/keu-pembayaran', 'KeuPembayaranController.index').as('acc.keu-pembayaran').middleware('R')
-    Route.post('/keu-pembayaran', 'KeuPembayaranController.store').as('acc.keu-pembayaran.store').middleware('C')
-    Route.get('/keu-pembayaran/list', 'KeuPembayaranController.list').as('acc.keu-pembayaran.list').middleware('R')
-    Route.get('/keu-pembayaran/create', 'KeuPembayaranController.create').as('acc.keu-pembayaran.create').middleware('C')
-    Route.get('/keu-pembayaran/search', 'KeuPembayaranController.searchFaktur').as('acc.keu-pembayaran.searchFaktur').middleware('R')
-    Route.get('/keu-pembayaran/searchItems', 'KeuPembayaranController.searchItems').as('acc.keu-pembayaran.searchItems').middleware('R')
-    Route.get('/keu-pembayaran/:id/show', 'KeuPembayaranController.show').as('acc.keu-pembayaran.show').middleware('U')
-    Route.get('/keu-pembayaran/:id/print', 'KeuPembayaranController.print').as('acc.keu-pembayaran.print').middleware('R')
-    Route.post('/keu-pembayaran/:id/update', 'KeuPembayaranController.update').as('acc.keu-pembayaran.update').middleware('U')
-    Route.delete('/keu-pembayaran/:id/destroy', 'KeuPembayaranController.destroy').as('acc.keu-pembayaran.destroy').middleware('D')
-    Route.get('/keu-pembayaran/create/add-item', 'KeuPembayaranController.addItem').as('acc.keu-pembayaran.addItem')
+    Route.get('/keu-pembayaran', 'PembayaranController.index').as('acc.keu-pembayaran').middleware('R')
+    Route.post('/keu-pembayaran', 'PembayaranController.store').as('acc.keu-pembayaran.store').middleware('C')
+    Route.get('/keu-pembayaran/list', 'PembayaranController.list').as('acc.keu-pembayaran.list').middleware('R')
+    Route.get('/keu-pembayaran/create', 'PembayaranController.create').as('acc.keu-pembayaran.create').middleware('C')
+    Route.get('/keu-pembayaran/search', 'PembayaranController.searchFaktur').as('acc.keu-pembayaran.searchFaktur').middleware('R')
+    Route.get('/keu-pembayaran/searchItems', 'PembayaranController.searchItems').as('acc.keu-pembayaran.searchItems').middleware('R')
+    Route.get('/keu-pembayaran/:id/show', 'PembayaranController.show').as('acc.keu-pembayaran.show').middleware('U')
+    Route.get('/keu-pembayaran/:id/print', 'PembayaranController.print').as('acc.keu-pembayaran.print').middleware('R')
+    Route.post('/keu-pembayaran/:id/update', 'PembayaranController.update').as('acc.keu-pembayaran.update').middleware('U')
+    Route.post('/keu-pembayaran/:id/destroy', 'PembayaranController.destroy').as('acc.keu-pembayaran.destroy').middleware('D')
+    Route.get('/keu-pembayaran/create/add-item', 'PembayaranController.addItem').as('acc.keu-pembayaran.addItem')
+    Route.get('/keu-pembayaran/show/:id/add-item', 'PembayaranController.showItems').as('acc.keu-pembayaran.showItems')
 
     /* ENTRI JURNAL */
     Route.get('/entri-jurnal', 'EntriJurnalController.index').as('acc.entri-jurnal').middleware('R')

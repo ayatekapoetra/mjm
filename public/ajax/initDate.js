@@ -75,4 +75,15 @@ $(function(){
             }
         }
     })
+
+    $('.remaining-time').each(function(){
+        var elm = $(this).data('elm')
+        var tgl = moment($(this).data('tgl'))
+        var waktu = moment(tgl, "YYYYMMDD").fromNow()
+        if(elm){
+            $(this).find(elm).html('Due date ' + waktu)
+        }else{
+            $(this).html('Due date ' + waktu)
+        }
+    })
 })

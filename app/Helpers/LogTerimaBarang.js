@@ -229,7 +229,7 @@ class terimaBarang {
             .where('id', params.id)
             .last()
         ).toJSON()
-
+        console.log(data);
         return data
     }
 

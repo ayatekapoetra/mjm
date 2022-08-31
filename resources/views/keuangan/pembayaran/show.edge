@@ -1,0 +1,256 @@
+{{ script('ajax/index') }}
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-coa-kasbank') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-update" data-id="{{data.id}}">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Tanggal <span class="text-danger">*</span></label>
+                                <input type="date" name="trx_date" class="form-control item-data setDate" data-tgl="{{data.trx_date}}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Referensi</label>
+                                <input type="text" name="reff" class="form-control item-data" value="{{data.reff}}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Akun Kredit <span class="text-danger">*</span></label>
+                                <select type="text" name="coa_kredit" class="form-control item-data selectCoaKasBank" data-values="{{data.coa_kredit}}"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="">Status</label>
+                            <div class="form-group" style="margin-top: 10px">
+                                <div class="material-switch">
+                                    <input id="is_delay" name="is_delay" type="checkbox" value="{{data.is_delay}}"/>
+                                    <label for="is_delay" class="label-default"></label>
+                                    <span id="txt-checkbox" class="m-l-10">{{data.is_delay === 'Y' ? 'Transaksi Tunda':'Transaksi Sesuai'}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="delay-date">
+                            @if(data.delay_trx)
+                                <div class="col-md-3">
+                                    <label class="control-label">Jatuh Tempo <span class="text-danger">*</span></label>
+                                    <input type="date" name="due_date" class="form-control item-data setDate" data-tgl="{{data.delay_trx}}">
+                                </div>
+                            @endif
+                        </div>
+                        <div class="col-md-6" id="container-cabang">
+                            <div class="form-group">
+                                <label class="control-label">Cabang <span class="text-danger">*</span></label>
+                                @if(auth.user.usertype === 'developer' || auth.user.usertype === 'administrator' || auth.user.usertype === 'keuangan')
+                                    <select type="text" name="cabang_id" class="form-control item-data selectCabang" data-values="{{auth.user.cabang_id}}"></select>
+                                @else
+                                    <select type="text" name="cabang_id" class="form-control item-data selectCabang" data-values="{{auth.user.cabang_id}}" disabled></select>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Diterima Oleh</label>
+                                <select name="paidby" class="form-control item-data">
+                                    <option value="other" {{data.paidby === 'other' ? 'selected':''}}>Other</option>
+                                    <option value="pelanggan" {{data.paidby === 'pelanggan' ? 'selected':''}}>Pelanggan</option>
+                                    <option value="pemasok" {{data.paidby === 'pemasok' ? 'selected':''}}>Pemasok</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Nama Penerima</label>
+                                <input type="text" name="penerima" class="form-control item-data" value="{{data.penerima}}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Keterangan</label>
+                                <input type="text" name="narasi" class="form-control item-data" value="{{data.narasi}}">
+                            </div>
+                        </div>
+                        <div class="col-md-6 pull-right">
+                            <div class="form-group has-warning">
+                                <label class="control-label">Grand Total <span class="text-danger">*</span></label>
+                                <input type="text" name="grandtot" class="form-control item-data" value="{{data.total}}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <th class="bg-extralight" width="50">No</th>
+                                        <th class="bg-inverse">Item Details</th>
+                                    </thead>
+                                    <tbody id="item-details">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="row">
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group">
+                                                            <input class="form-control item-data" type="file" id="lampiran" name="lampiran" multiple>
+                                                            <span><small>Support Multiple Files</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="input-group text-right">
+                                                            <input class="form-control" type="number" id="row-number" name="row-number" value="1">
+                                                            <div class="input-group-addon" id="bt-add-rows"><i class="ti-plus"></i> ADD</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-right">
+                    <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                    <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        var body = $('body')
+
+        ITEM_DETAILS()
+        GET_DATA_PURCASING_ORDER()
+
+        $('input[name="is_delay"]').on('click, change', function(){
+            var txt = body.find('span#txt-checkbox')
+            $(this).is(':checked') ? (
+                $(this).val('N'),
+                txt.html('Transaksi Sesuai'),
+                body.find('div#delay-date').html(''),
+                body.find('div#container-cabang').removeClass('col-md-6').addClass('col-md-3')
+            ):(
+                $(this).val('Y'),
+                txt.html('Transaksi Tunda'),
+                body.find('div#container-cabang').removeClass('col-md-3').addClass('col-md-6'),
+                body.find('div#delay-date').html(
+                    '<div class="col-md-3">'+
+                    '    <div class="form-group">'+
+                    '        <label class="control-label">Jatuh Tempo <span class="text-danger">*</span></label>'+
+                    '        <input type="date" name="due_date" class="form-control item-data initDate" required>'+
+                    '    </div>'+
+                    '</div>')
+            )
+        })
+
+        function GET_DATA_PURCASING_ORDER(){
+            var elm = $('select[name="reff_order"]')
+            $.ajax({
+                async: true,
+                url: '/ajax/options/purchasing-order-list',
+                method: 'GET',
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    elm.select2()
+                    if(result.length > 0){
+                        elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.name+'</option>'))
+                        elm.trigger('change');
+                    }else{
+                        elm.html('<option value="" selected>Blum ada data...</option>')
+                    }
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+
+        function ITEM_DETAILS(){
+            var id = {{data.id}}
+            $.ajax({
+                async: true,
+                url: 'keu-pembayaran/show/'+id+'/add-item',
+                method: 'GET',
+                dataType: 'json',
+                success: function(result){
+                    body.find('tbody#item-details').html(result.map( el => el))
+                },
+                error: function(err){
+                    console.log(err)
+                },
+                complete: function(){
+                    body.find('select').select2()
+                }
+            })
+        }
+    })
+</script>
+<style>
+    .text-bold {
+        font-weight: bold
+    }
+    .material-switch > input[type="checkbox"] {
+        display: none;   
+    }
+    
+    .material-switch > label {
+        cursor: pointer;
+        height: 0px;
+        position: relative; 
+        width: 40px;  
+    }
+    
+    .material-switch > label::before {
+        background: rgb(0, 0, 0);
+        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        content: '';
+        height: 16px;
+        margin-top: -8px;
+        position:absolute;
+        opacity: 0.3;
+        transition: all 0.4s ease-in-out;
+        width: 40px;
+    }
+    .material-switch > label::after {
+        background: rgb(83 230 157);
+        border-radius: 16px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        content: '';
+        height: 24px;
+        left: -4px;
+        margin-top: -8px;
+        position: absolute;
+        top: -4px;
+        transition: all 0.3s ease-in-out;
+        width: 24px;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::before {
+        background: inherit;
+        opacity: 0.5;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::after {
+        background: inherit;
+        left: 20px;
+    }
+</style>

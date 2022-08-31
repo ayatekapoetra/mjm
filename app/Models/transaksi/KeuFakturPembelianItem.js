@@ -11,6 +11,10 @@ class KeuFakturPembelianItem extends Model {
     barang () {
         return this.belongsTo("App/Models/master/Barang", "barang_id", "id")
     }
+
+    coa () {
+        return this.belongsTo("App/Models/akunting/AccCoa", "coa_id", "id")
+    }
 }
 
 module.exports = KeuFakturPembelianItem

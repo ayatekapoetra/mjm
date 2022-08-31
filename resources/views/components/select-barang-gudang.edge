@@ -1,0 +1,15 @@
+<div class="col-md-6">
+    <label for="">Gudang <span class="text-danger">*</span></label>
+    <select class="form-control item-data-details" name="gudang_id" data-values="">
+        <option value="">Pilih Gudang</option>
+        @each(item in gudang)
+            <option value="{{item.id}}">{{item.nama}}</option>
+        @endeach
+    </select>
+</div>
+
+<script>
+    $(function(){
+        $('select.form-control').select2()
+    })
+</script>

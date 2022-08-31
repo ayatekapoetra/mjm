@@ -1,0 +1,68 @@
+{{ script('ajax/initDate') }}
+{{ script('ajax/initNumber') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <button class="btn btn-default btn-sm m-b-10 bt-back" type="button">
+                <i class="ti-arrow-left"></i> Back
+            </button>
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="100" class="text-center bg-inverse b-all">Tanggal</th>
+                            <th width="50" class="text-center bg-inverse b-all">Kode</th>
+                            <th width="*" class="bg-inverse b-all">Nama</th>
+                            <th width="150" class="bg-inverse b-all text-right">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list)
+                            <tr class="rows-total" data-nilai="{{item.nilai}}" data-dk="{{item.dk}}" data-coa="{{item.coa.dk}}">
+                                <td>{{$loop.index + 1}}</td>
+                                <td class="dateFormatDef" data-tgl="{{item.trx_date}}" data-patten="DD-MM-YYYY"></td>
+                                <td class="text-center">{{item.coa_id}}</td>
+                                <td>{{item.narasi}}</td>
+                                <td class="formatRp text-right" data-number="{{item.nilai}}" data-elm="span">
+                                    <span></span>
+                                    @if(item.dk === 'd')
+                                      <small class="text-success">Db</small>
+                                    @else
+                                      <small class="text-danger">Kr</small>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endeach
+                        <tr class="text-white bg-light" style="font-size: large">
+                            <td colspan="4" class="text-right"> Saldo</td>
+                            <td class="text-right" id="saldo">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        var debit = 0
+        var kredit = 0
+        var saldo = 0
+        $('tr.rows-total').each(function(){
+            if ($(this).data('dk') === 'd') {
+                debit += parseFloat($(this).data('nilai'))
+            }
+            if ($(this).data('dk') === 'k') {
+                kredit += parseFloat($(this).data('nilai'))
+            }
+            // console.log(debit - kredit);
+            if($(this).data('coa') === 'd'){
+                saldo = debit - kredit
+            }else{
+                saldo = kredit - debit
+            }
+            $('body').find('td#saldo').html('Rp. ' + (saldo).toLocaleString('ID'))
+        })
+    })
+</script>

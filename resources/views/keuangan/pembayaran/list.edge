@@ -1,0 +1,75 @@
+{{ script('ajax/initDate') }}
+{{ script('ajax/initNumber') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="150" class="bg-inverse b-all">Action</th>
+                            <th width="70" class="bg-inverse b-all">Lampiran</th>
+                            <th width="120"class="bg-inverse b-all">Tanggal</th>
+                            <th width="*"class="bg-inverse b-all">Dibayarkan Dari</th>
+                            <th width="100" class="bg-inverse b-all">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(list.data.length > 0)
+                            @each(item in list.data)
+                                <tr>
+                                    <td class="text-center v-middle">{{$loop.index + 1}}</td>
+                                    <td class="v-middle">
+                                        <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button> 
+                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
+                                        @if(['developer', 'administrator', 'keuangan'].includes(auth.user.usertype))
+                                            <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        @endif
+                                    </td>
+                                    <td class="v-middle">
+                                        @if(item.files)
+                                            @each(val in item.files)
+                                                <a href="{{val.url}}" target="_blank">
+                                                    <i class="ti-clip"></i>file
+                                                </a> <br>
+                                            @endeach
+                                        @endif
+                                    </td>
+                                    <td class="v-middle">
+                                        <span>{{item.reff}}</span> <br>
+                                        <span class="dateFormatDef" data-elm="small" data-patten="YYYY-MM-DD" data-tgl="{{item.trx_date}}">
+                                            <small class="text-info" style="font-weight: 600;"></small>
+                                        </span>
+                                    </td>
+                                    <td class="v-middle">
+                                        <span>{{item.coaKredit.coa_name}}</span><br>
+                                        <small class="text-white">{{item.createdby.nama_lengkap}}</small>
+                                        
+                                    </td>
+                                    <td class="v-middle text-right">
+                                        <h3 class="m-b-0 formatRp" data-number="{{item.total}}">{{item.total}}</h3>
+                                        @if(item.is_delay === 'Y')
+                                            <small>tertunda <span class="dateFormatDef" data-patten="YYYY-MM-DD" data-tgl="{{item.delay_trx}}"></span></small>
+                                        @else
+                                            <small>sesuai <span class="dateFormatDef" data-patten="YYYY-MM-DD" data-tgl="{{item.delay_trx}}"></span></small>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endeach
+                        @else
+                            <tr>
+                                <td colspan="10">Data tdk ditemukan...</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>

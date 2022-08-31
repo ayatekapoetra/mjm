@@ -1,4 +1,3 @@
-
 <tr class="item-rows">
     <td>
         <h3 class="urut-rows"></h3>
@@ -18,49 +17,33 @@
                     <span class="input-group-addon satuan"></span>
                 </div>
             </div>
+            <div class="col-md-6">            
+                <div class="form-group">                
+                    <label for="">Akun</label>                
+                    <select class="form-control selectCoaDebit item-data-details" name="coa_debit" data-values="{{item.coa_debit}}"></select>
+                </div>        
+            </div>
+            <div name="details-akun"></div>
             <div class="col-md-2">            
                 <div class="form-group">                
                     <label for="">Qty <span class="text-danger">*</span></label>                
-                    <input type="number" class="form-control item-data-details item-details" name="qty" value="{{item.qty}}" required>
+                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="1" required>
                 </div>        
             </div>
             <div class="col-md-4">            
                 <div class="form-group">                
                     <label for="">Harga Stn <span class="text-danger">*</span></label>                
-                    <input type="number" class="form-control item-data-details item-details" name="harga_stn" value="{{item.harga_stn}}" required>
+                    <input type="number" class="form-control item-data-details item-details" name="harga_stn" id="" value="0" required>
                 </div>        
-            </div>
-            <div class="col-md-2">            
-                <label for="">Discount</label>                
-                <div class="input-group">
-                    <input type="number" class="form-control item-data-details item-details" name="discount" value="{{item.discount}}">
-                    <input type="hidden" class="form-control item-data-details item-details" name="type-discount" value="{{item.type_discount}}">
-                    <span class="input-group-addon" name="icon-discount">{{item.type_discount === 'persen' ? '%':'Rp.'}}</span>
-                </div>   
             </div>
             <div class="col-md-4">            
                 <div class="form-group">                
                     <label for="">Harga Total</label>                
-                    <input type="number" class="form-control text-right item-data-details item-details" name="subtotal" value="{{item.subtotal}}" readonly>
-                </div>        
-            </div>
-            <div class="col-md-6">            
-                <div class="form-group">                
-                    <label for="">Akun</label>                
-                    <select class="form-control item-data-details selectCoa" name="coa_id">
-                        
-                    </select>
+                    <input type="number" class="form-control text-right item-data-details item-details" name="subtotal" id="" value="0" readonly>
                 </div>        
             </div>
         </div>
     </td>
 </tr>
 {{ script('ajax/opt-barang') }}
-{{ script('ajax/opt-options') }}
-{{ script('ajax/opt-coa') }}
-<script>
-    $(function(){
-        var body = $('body')
-        body.find('select[name="coa_id"]').select2()
-    })
-</script>
+{{ script('ajax/opt-coa-nasting-list') }}

@@ -33,12 +33,12 @@ const AccCoaGroup = use("App/Models/akunting/AccCoaGroup")
 const AccCoaSubGroup = use("App/Models/akunting/AccCoaSubGroup")
 const HargaJualBarang = use("App/Models/master/HargaJual")
 const GajiComponent = use("App/Models/master/GajiComponent")
-// const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
 // const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
 const BarangQualities = use("App/Models/master/BarangQualities")
 const BarangCategories = use("App/Models/master/BarangCategories")
 const LogTerimaBarang = use("App/Models/logistik/LogistikTerimaBarang")
 const BarangSubCategories = use("App/Models/master/BarangSubCategories")
+const KeuFakturPembelian = use("App/Models/transaksi/KeuFakturPembelian")
 const KeuPurchasingRequest = use("App/Models/transaksi/KeuPurchasingRequest")
 const KeuPurchasingRequestItems = use("App/Models/transaksi/KeuPurchasingRequestItems")
 
@@ -344,7 +344,31 @@ class OptionsAjaxController {
         }
         
         return data
+    }
 
+    async coaNastingList ( { request, view } ) {
+        const req = request.all()
+        req.selected = req.selected === 'null' ? null : req.selected
+
+        let coaAkun = (await AccCoa.query().orderBy('id', 'asc').fetch()).toJSON()
+        coaAkun = coaAkun.filter( el => (el.coa_subgrp_nm)?.toLowerCase() != 'bank' )
+        coaAkun = coaAkun.filter( el => (el.coa_subgrp_nm)?.toLowerCase() != 'kas' )
+
+        if(req.selected){
+            coaAkun = coaAkun.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+        }else{
+            coaAkun.unshift({id: '', coa_tipe_nm: 'Akun Debit', coa_name: 'Pilih...', selected: 'selected'})
+        }
+        
+        let data = _.groupBy(coaAkun, 'coa_tipe_nm')
+        data = Object.keys(data).map(key => {
+            return {
+                tipe: key,
+                items: data[key]
+            }
+        })
+
+        return coaAkun
     }
 
     /** LIST KAS **/
@@ -949,10 +973,9 @@ class OptionsAjaxController {
         const req = request.all()
         try {
             let data = (
-                    await TrxFakturBeli.query()
+                    await KeuFakturPembelian.query()
                     .with('pemasok')
                     .where( w => {
-                    w.where('bisnis_id', req.bisnis_id)
                     w.where('sts_paid', 'bersisa')
                 }).orderBy('due_date', 'asc')
                 .fetch() 
@@ -981,7 +1004,31 @@ class OptionsAjaxController {
         if(req.purchasing_id){
             data = data.map(el => el.id === parseInt(req.purchasing_id) ? {...el, name: `[${el.kode}] ${el.narasi}`, selected: 'selected'}:{...el, name: `[${el.kode}] ${el.narasi}`, selected: ''})
         }else{
-            data = data.map(el => ({...el, name: `[${el.kode}] ${el.narasi}`, selected: 'selected'}))
+            data = data.map(el => ({...el, name: `[${el.kode}] ${el.narasi}`, selected: ''}))
+            data.unshift({id: '', name: 'Pilih...', selected: 'selected'})
+        }
+
+        return data
+    }
+
+    async purchasingOrderList ( { auth, request } ) {
+        const req = request.all()
+        // console.log('purchasingOrderList :::', req.purchasing_id);
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        let data = (await KeuPurchasingRequest.query().where( w => {
+            if(user.cabang_id){
+                w.where('cabang_id', user.cabang_id)
+            }
+        }).fetch()).toJSON()
+
+        if(req.purchasing_id){
+            data = data.map(el => el.id === parseInt(req.purchasing_id) ? {...el, name: `[${el.kode}] ${el.narasi}`, selected: 'selected'}:{...el, name: `[${el.kode}] ${el.narasi}`, selected: ''})
+        }else{
+            data = data.map(el => ({...el, name: `[${el.kode}] ${el.narasi}`, selected: ''}))
             data.unshift({id: '', name: 'Pilih...', selected: 'selected'})
         }
 

@@ -5,13 +5,14 @@ const User = use("App/Models/User")
 const initFunc = use("App/Helpers/initFunc")
 const initMenu = use("App/Helpers/_sidebar")
 const AccCoa = use("App/Models/akunting/AccCoa")
-const UsrWorkspace = use("App/Models/UsrWorkspace")
+// const UsrWorkspace = use("App/Models/UsrWorkspace")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
 
 class RingkasanController {
     async index ( { auth, view } ) {
         let usr
         await initFunc.UPDATE_JURNAL_DELAY()
+        await initFunc.SUM_PEMBAYARAN_PELANGGAN()
         try {
             usr = await auth.getUser()
             const sideMenu = await initMenu.SIDEBAR(usr.id)
@@ -35,11 +36,19 @@ class RingkasanController {
         let data = await initFunc.RINGKASAN(user)
         
 
+        console.log(req);
         for (let nrc of data.neraca) {
             var firstCode = parseInt(nrc.kode)
             var lastCode = firstCode + 9999
 
             const sumDebit = await TrxJurnal.query().where( w => {
+                if(req.cabang_id){
+                    w.where('cabang_id', req.cabang_id)
+                }
+                if(req.rangeAwal && req.rangeAkhir){
+                    w.where('trx_date', '>=', req.rangeAwal)
+                    w.where('trx_date', '<=', req.rangeAkhir)
+                }
                 w.where('is_delay', 'N')
                 w.where('aktif', 'Y')
                 w.where('dk', 'd')
@@ -48,6 +57,13 @@ class RingkasanController {
             }).getSum('nilai')
 
             const sumKredit = await TrxJurnal.query().where( w => {
+                if(req.cabang_id){
+                    w.where('cabang_id', req.cabang_id)
+                }
+                if(req.rangeAwal && req.rangeAkhir){
+                    w.where('trx_date', '>=', req.rangeAwal)
+                    w.where('trx_date', '<=', req.rangeAkhir)
+                }
                 w.where('is_delay', 'N')
                 w.where('aktif', 'Y')
                 w.where('dk', 'k')
@@ -64,6 +80,13 @@ class RingkasanController {
             // Looping Group Neraca
             for (let grp of nrc.group) {
                 const sumDebitGrp = await TrxJurnal.query().where( w => {
+                    if(req.cabang_id){
+                        w.where('cabang_id', req.cabang_id)
+                    }
+                    if(req.rangeAwal && req.rangeAkhir){
+                        w.where('trx_date', '>=', req.rangeAwal)
+                        w.where('trx_date', '<=', req.rangeAkhir)
+                    }
                     w.where('is_delay', 'N')
                     w.where('aktif', 'Y')
                     w.where('dk', 'd')
@@ -71,6 +94,13 @@ class RingkasanController {
                 }).getSum('nilai')
     
                 const sumKreditGrp = await TrxJurnal.query().where( w => {
+                    if(req.cabang_id){
+                        w.where('cabang_id', req.cabang_id)
+                    }
+                    if(req.rangeAwal && req.rangeAkhir){
+                        w.where('trx_date', '>=', req.rangeAwal)
+                        w.where('trx_date', '<=', req.rangeAkhir)
+                    }
                     w.where('is_delay', 'N')
                     w.where('aktif', 'Y')
                     w.where('dk', 'k')
@@ -86,6 +116,13 @@ class RingkasanController {
                 // Looping SubGroup
                 for (let sub of grp.subgroup) {
                     const sumDebitSubGrp = await TrxJurnal.query().where( w => {
+                        if(req.cabang_id){
+                            w.where('cabang_id', req.cabang_id)
+                        }
+                        if(req.rangeAwal && req.rangeAkhir){
+                            w.where('trx_date', '>=', req.rangeAwal)
+                            w.where('trx_date', '<=', req.rangeAkhir)
+                        }
                         w.where('is_delay', 'N')
                         w.where('aktif', 'Y')
                         w.where('dk', 'd')
@@ -93,6 +130,13 @@ class RingkasanController {
                     }).getSum('nilai')
         
                     const sumKreditSubGrp = await TrxJurnal.query().where( w => {
+                        if(req.cabang_id){
+                            w.where('cabang_id', req.cabang_id)
+                        }
+                        if(req.rangeAwal && req.rangeAkhir){
+                            w.where('trx_date', '>=', req.rangeAwal)
+                            w.where('trx_date', '<=', req.rangeAkhir)
+                        }
                         w.where('is_delay', 'N')
                         w.where('aktif', 'Y')
                         w.where('dk', 'k')
@@ -113,6 +157,13 @@ class RingkasanController {
             var lastCode = firstCode + 9999
 
             const sumDebit = await TrxJurnal.query().where( w => {
+                if(req.cabang_id){
+                    w.where('cabang_id', req.cabang_id)
+                }
+                if(req.rangeAwal && req.rangeAkhir){
+                    w.where('trx_date', '>=', req.rangeAwal)
+                    w.where('trx_date', '<=', req.rangeAkhir)
+                }
                 w.where('is_delay', 'N')
                 w.where('aktif', 'Y')
                 w.where('dk', 'd')
@@ -121,6 +172,13 @@ class RingkasanController {
             }).getSum('nilai')
 
             const sumKredit = await TrxJurnal.query().where( w => {
+                if(req.cabang_id){
+                    w.where('cabang_id', req.cabang_id)
+                }
+                if(req.rangeAwal && req.rangeAkhir){
+                    w.where('trx_date', '>=', req.rangeAwal)
+                    w.where('trx_date', '<=', req.rangeAkhir)
+                }
                 w.where('is_delay', 'N')
                 w.where('aktif', 'Y')
                 w.where('dk', 'k')
@@ -137,6 +195,13 @@ class RingkasanController {
             // Looping Group LabaRugi
             for (let grp of lbr.group) {
                 const sumDebitGrp = await TrxJurnal.query().where( w => {
+                    if(req.cabang_id){
+                        w.where('cabang_id', req.cabang_id)
+                    }
+                    if(req.rangeAwal && req.rangeAkhir){
+                        w.where('trx_date', '>=', req.rangeAwal)
+                        w.where('trx_date', '<=', req.rangeAkhir)
+                    }
                     w.where('is_delay', 'N')
                     w.where('aktif', 'Y')
                     w.where('dk', 'd')
@@ -144,6 +209,13 @@ class RingkasanController {
                 }).getSum('nilai')
     
                 const sumKreditGrp = await TrxJurnal.query().where( w => {
+                    if(req.cabang_id){
+                        w.where('cabang_id', req.cabang_id)
+                    }
+                    if(req.rangeAwal && req.rangeAkhir){
+                        w.where('trx_date', '>=', req.rangeAwal)
+                        w.where('trx_date', '<=', req.rangeAkhir)
+                    }
                     w.where('is_delay', 'N')
                     w.where('aktif', 'Y')
                     w.where('dk', 'k')
@@ -159,6 +231,13 @@ class RingkasanController {
                 // Looping SubGroup
                 for (let sub of grp.subgroup) {
                     const sumDebitSubGrp = await TrxJurnal.query().where( w => {
+                        if(req.cabang_id){
+                            w.where('cabang_id', req.cabang_id)
+                        }
+                        if(req.rangeAwal && req.rangeAkhir){
+                            w.where('trx_date', '>=', req.rangeAwal)
+                            w.where('trx_date', '<=', req.rangeAkhir)
+                        }
                         w.where('is_delay', 'N')
                         w.where('aktif', 'Y')
                         w.where('dk', 'd')
@@ -166,6 +245,13 @@ class RingkasanController {
                     }).getSum('nilai')
         
                     const sumKreditSubGrp = await TrxJurnal.query().where( w => {
+                        if(req.cabang_id){
+                            w.where('cabang_id', req.cabang_id)
+                        }
+                        if(req.rangeAwal && req.rangeAkhir){
+                            w.where('trx_date', '>=', req.rangeAwal)
+                            w.where('trx_date', '<=', req.rangeAkhir)
+                        }
                         w.where('is_delay', 'N')
                         w.where('aktif', 'Y')
                         w.where('dk', 'k')
@@ -197,6 +283,32 @@ class RingkasanController {
         const data = await initFunc.GET_PNL(cabang_id, rangeAwal, rangeAkhir)
         // console.log(data);
         return data
+    }
+
+    async listDetails ( { request, view } ) {
+        const req = request.all()
+        console.log(req);
+        const data = (
+            await TrxJurnal.query().with('coa').where( w => {
+                if(req.cabang_id){
+                    w.where('cabang_id', req.cabang_id)
+                }
+                if(req.rangeAwal && req.rangeAkhir){
+                    w.where('trx_date', '>=', req.rangeAwal)
+                    w.where('trx_date', '<=', req.rangeAkhir)
+                }
+                w.where('coa_id', 'like', `${req.kode}%`)
+                w.where('nilai', '<>', 0)
+                w.where('aktif', 'Y')
+            }).orderBy([
+                {column: 'trx_date', order: 'asc'},
+                {column: 'coa_id', order: 'asc'}
+            ]).fetch()
+        ).toJSON()
+
+        console.log(data);
+
+        return view.render('keuangan._ringkasan.list-details', {list: data})
     }
 }
 

@@ -13,6 +13,10 @@ $(function(){
         initDefault()
     })
 
+    $('body').on('focus, click', 'input[type="number"]', function(){
+        $(this).select()
+    })
+
     $('body').on('blur', 'input[name="limit"]', function(){
         var limit = $(this).val()
         initDefault(limit, null)

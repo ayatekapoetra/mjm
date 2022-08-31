@@ -1,79 +1,79 @@
 {{ script('ajax/index') }}
 {{ script('ajax/initDate') }}
-{{ script('ajax/opt-pemasok') }}
 {{ script('ajax/opt-cabang') }}
-{{ script('ajax/opt-gudang') }}
+{{ script('ajax/opt-coa-kasbank') }}
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
         <div class="col-sm-12 col-xs-12">
-            <form id="form-update" data-id="{{data.id}}">
+            <form id="form-create">
                 {{ csrfField() }}
                 <div class="panel-body">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">No.Faktur <span class="text-danger">*</span></label>
-                            <input type="text" name="kode" class="form-control item-data" value="{{data.kode}}" required>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Tanggal <span class="text-danger">*</span></label>
+                                <input type="date" name="trx_date" class="form-control item-data initDate" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Tanggal <span class="text-danger">*</span></label>
-                            <input type="date" name="date_faktur" class="form-control item-data setDate" data-tgl="{{data.date_faktur}}" required>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Referensi</label>
+                                <input type="text" name="reff" class="form-control item-data" placeholder="{{reff}}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Jatuh Tempo <span class="text-danger">*</span></label>
-                            <input type="date" name="due_date" class="form-control item-data setDate" data-tgl="{{data.due_date}}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Cabang <span class="text-danger">*</span></label>
-                            <select type="text" name="cabang_id" class="form-control item-data selectCabang" data-values="{{data.cabang_id}}" required></select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">No.Pesanan</label>
-                            <select type="text" name="reff_order" class="form-control item-data" data-values="{{data.reff_order}}"></select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">Gudang <span class="text-danger">*</span></label>
-                            <select type="text" name="gudang_id" class="form-control item-data selectGudang" data-values="{{data.gudang_id}}" required></select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">Pemasok <span class="text-danger">*</span></label>
-                            <select type="text" name="pemasok_id" class="form-control item-data selectPemasok" data-values="{{data.pemasok_id}}" required></select>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6 pull-right">
-                        <div class="form-group has-warning">
-                            <label class="control-label">Grand Total <span class="text-danger">*</span></label>
-                            <input type="text" name="grandtot" class="form-control item-data" value="{{data.grandtot}}" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="isPPn">Pajak (PPn)</label>
-                        <div class="form-group" style="margin-top: 10px">
-                            <div class="material-switch">
-                                <input id="isPPn" name="isPPn" type="checkbox" value="Y"/>
-                                <label for="isPPn" class="label-default"></label>
-                                <span id="txt-checkbox" class="m-l-10">Tambahkan PPn</span>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Akun Debit <span class="text-danger">*</span></label>
+                                <select type="text" name="coa_debit" class="form-control item-data selectCoaKasBank"></select>
                             </div>
                         </div>
                     </div>
-                    <div id="ppn-values">
+                    <div class="row">
                         <div class="col-md-3">
-                            <label for="">PPn</label>                
-                            <div class="input-group">
-                                <input type="number" step="any" name="ppn" class="form-control text-right item-data" value="11">
-                                <span class="input-group-addon">Persen</span>
+                            <label for="isDelay">Delay Transaksi</label>
+                            <div class="checkbox checkbox-danger">
+                                <input class="item-data" id="isDelay" name="is_delay" type="checkbox" value="N" checked="">
+                                <label for="isDelay"><span id="txt-checkbox">Transaksi Tanggal Sesuai</span></label>
+                            </div>
+                        </div>
+                        <div id="delay-date">
+                        </div>
+                        <div class="col-md-6" id="container-cabang">
+                            <div class="form-group">
+                                <label class="control-label">Cabang <span class="text-danger">*</span></label>
+                                @if(auth.user.usertype === 'developer' || auth.user.usertype === 'administrator' || auth.user.usertype === 'keuangan')
+                                    <select type="text" name="cabang_id" class="form-control item-data selectCabang" data-values="{{auth.user.cabang_id}}"></select>
+                                @else
+                                    <select type="text" name="cabang_id" class="form-control item-data selectCabang" data-values="{{auth.user.cabang_id}}" disabled></select>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Diterima Oleh</label>
+                                <select name="paidby" class="form-control item-data">
+                                    <option value="other">Other</option>
+                                    <option value="pelanggan">Pelanggan</option>
+                                    <option value="pemasok">Pemasok</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Nama Penerima</label>
+                                <input type="text" name="penerima" class="form-control item-data">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Keterangan</label>
+                                <input type="text" name="narasi" class="form-control item-data">
+                            </div>
+                        </div>
+                        <div class="col-md-6 pull-right">
+                            <div class="form-group has-warning">
+                                <label class="control-label">Grand Total <span class="text-danger">*</span></label>
+                                <input type="text" name="grandtot" class="form-control item-data" value="0.00" readonly>
                             </div>
                         </div>
                     </div>
@@ -87,9 +87,7 @@
                                         <th class="bg-extralight" width="50">No</th>
                                         <th class="bg-inverse">Item Details</th>
                                     </thead>
-                                    <tbody id="item-details">
-                                        @!each(item in data.items, include = 'components.items.faktur-beli.item-update')
-                                    </tbody>
+                                    <tbody id="item-details"></tbody>
                                     <tfoot>
                                         <tr>
                                             <td colspan="3">
@@ -127,38 +125,42 @@
     $(function(){
         var body = $('body')
         GET_DATA_PURCASING_ORDER()
-        $('input[name="isPPn"]').on('click, change', function(){
+        $('input[name="is_delay"]').on('click, change', function(){
             var txt = body.find('span#txt-checkbox')
             $(this).is(':checked') ? (
                 $(this).val('N'),
-                txt.html('Tanpa PPn'),
-                body.find('div#ppn-values').html('')
-            ):(
+                $(this).attr('checked', 'checked'),
+                txt.html('Transaksi Tanggal Sesuai'),
+                body.find('div#delay-date').html(''),
+                body.find('div#container-cabang').removeClass('col-md-6').addClass('col-md-3')
+                ):(
                 $(this).val('Y'),
-                txt.html('Tambahkan PPn'),
-                body.find('div#ppn-values').html(
-                '<div class="col-md-3">'+
-                '    <label for="">PPn</label>'+
-                '    <div class="input-group">'+
-                '        <input type="number" step="any" name="ppn" class="form-control text-right item-data" value="11">'+
-                '        <span class="input-group-addon">Persen</span>'+
-                '    </div>'+
-                '</div>')
+                $(this).removeAttr('checked'),
+                txt.html('Transaksi Tanggal Tunda'),
+                body.find('div#container-cabang').removeClass('col-md-3').addClass('col-md-6'),
+                body.find('div#delay-date').html(
+                    '<div class="col-md-3">'+
+                    '    <div class="form-group">'+
+                    '        <label class="control-label">Jatuh Tempo <span class="text-danger">*</span></label>'+
+                    '        <input type="date" name="due_date" class="form-control item-data initDate" required>'+
+                    '    </div>'+
+                    '</div>')
             )
         })
 
+        $('select[name="paidby"]').on('change', function(){
+
+        })
+
         function GET_DATA_PURCASING_ORDER(){
-            console.log('...');
             var elm = $('select[name="reff_order"]')
-            var values = elm.data('values') || ''
             $.ajax({
                 async: true,
                 url: '/ajax/options/purchasing-order-list',
                 method: 'GET',
-                data: {
-                    purchasing_id: values || null
-                },
                 dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
                 contentType: false,
                 success: function(result){
                     // console.log(result);

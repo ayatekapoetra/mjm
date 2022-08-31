@@ -16,8 +16,9 @@ const logoPath = Helpers.publicPath('logo.png')
 
 class PembayaranPelangganController {
     async index ( { auth, view } ) {
-        await initFunc.UPDATE_JURNAL_DELAY()
         let user
+        await initFunc.UPDATE_JURNAL_DELAY()
+        await initFunc.SUM_PEMBAYARAN_PELANGGAN()
         try {
             user = await auth.getUser()
             const sideMenu = await initMenu.SIDEBAR(user.id)
@@ -51,7 +52,7 @@ class PembayaranPelangganController {
             return view.render('401')
         }
 
-        console.log('...');
+        // console.log('...');
         const data = await BayarPelangganHelpers.LIST(params)
         return view.render('operational.pembayaran-pelanggan.list-bayar', {list: data})
     }
@@ -62,7 +63,7 @@ class PembayaranPelangganController {
             return view.render('401')
         }
         const data = await BayarPelangganHelpers.PENDING_PAYMENT(params)
-        console.log(data);
+        // console.log(data);
         return view.render('operational.pembayaran-pelanggan.list-invoices', {list: data})
     }
 
@@ -496,7 +497,7 @@ class PembayaranPelangganController {
             return view.render('401')
         }
 
-        console.log(req);
+        // console.log(req);
         const data = await BayarPelangganHelpers.INVOICING(params, req, user)
         return data
     }

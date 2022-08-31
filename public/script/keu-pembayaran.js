@@ -1,5 +1,5 @@
 $(function(){
-    console.log('script/keu-faktur-pembelian');
+    console.log('script/keu-pembayaran');
 
     var body = $('body')
 
@@ -27,55 +27,28 @@ $(function(){
         $(this).select()
     })
 
-    // $('body').on('click', 'span[name="icon-discount"]', function(){
-    //     var elm = $(this).parents('tr')
-    //     var elmDiscount = $(this).parents('tr').find('input[name="type-discount"]')
-
-    //     $(this).html() === '%' ? (
-    //         $(this).html('Rp.'),
-    //         elmDiscount.val('rupiah')
-    //     ):(
-    //         $(this).html('%'),
-    //         elmDiscount.val('persen')
-    //     )
-    //     var harga = elm.find('input[name="harga_stn"]').val() || 0
-    //     var qty = elm.find('input[name="qty"]').val() || 0
-    //     var discount = elm.find('input[name="discount"]').val() || 0
-    //     var type = elm.find('input[name="type-discount"]').val()
-    //     hitungTotalHarga(elm, qty, harga, type, discount)
-    // })
-
     $('body').on('keyup', 'input[name="qty"]', function(){
         var elm = $(this).parents('tr')
         var qty = $(this).val()
         var harga = elm.find('input[name="harga_stn"]').val() || 0
-        var discount = elm.find('input[name="discount"]').val() || 0
-        var type = elm.find('input[name="type-discount"]').val()
+        // var discount = elm.find('input[name="discount"]').val() || 0
+        // var type = elm.find('input[name="type-discount"]').val()
 
-        hitungTotalHarga(elm, qty, harga, type, discount)
+        hitungTotalHarga(elm, qty, harga)
     })
 
     $('body').on('keyup', 'input[name="harga_stn"]', function(){
         var elm = $(this).parents('tr')
         var harga = $(this).val()
         var qty = elm.find('input[name="qty"]').val() || 0
-        var discount = elm.find('input[name="discount"]').val() || 0
-        var type = elm.find('input[name="type-discount"]').val()
-        hitungTotalHarga(elm, qty, harga, type, discount)
-    })
-
-    $('body').on('keyup', 'input[name="discount"]', function(){
-        var elm = $(this).parents('tr')
-        var discount = $(this).val()
-        var qty = elm.find('input[name="qty"]').val() || 0
-        var harga = elm.find('input[name="harga_stn"]').val() || 0
-        var type = elm.find('input[name="type-discount"]').val()
-        hitungTotalHarga(elm, qty, harga, type, discount)
+        // var discount = elm.find('input[name="discount"]').val() || 0
+        // var type = elm.find('input[name="type-discount"]').val()
+        hitungTotalHarga(elm, qty, harga)
     })
 
     $('body').on('change', 'select[name="barang_id"]', function(){
         var values = $(this).val()
-        var elmCoa = $(this).parents('tr').find('select[name="coa_id"]')
+        var elmCoa = $(this).parents('tr').find('select[name="coa_debit"]')
         var elmSatuan = $(this).parents('tr').find('span.satuan')
         if (values) {
             $.ajax({
@@ -87,9 +60,7 @@ $(function(){
                 mimeType: "multipart/form-data",
                 contentType: false,
                 success: function(result){
-                    console.log(result);
                     if(result){
-                        console.log('......', elmCoa);
                         elmCoa.val(result.coa_in)
                         elmCoa.trigger('change')
                         elmCoa.find('option[value!="'+result.coa_in+'"]').attr('disabled', true)
@@ -109,10 +80,90 @@ $(function(){
             })
         }else{
             elmCoa.find('option').removeAttr('disabled')
-            console.log('no values....', elmCoa);
             elmCoa.val(null).trigger('change')
             elmSatuan.html('')
         }
+    })
+
+    $('body').on('change', 'select[name="coa_debit"]', function(){
+        var value = $(this).val()
+        var elm = $(this).parents('tr.item-rows')
+        $.ajax({
+            async: true,
+            url: '/ajax/coa/pembayaran/onchange-coa',
+            method: 'GET',
+            data: {
+                coa_id: value
+            },
+            dataType: 'html',
+            success: function(data){
+                if(data){
+                    elm.find('div[name="details-akun"]').html(data)
+                }else{
+                    elm.find('div[name="details-akun"]').html('')
+                }
+            },
+            error: function(err){
+                console.log(err);
+                elm.find('div[name="details-akun"]').html('')
+            }
+        })
+    })
+
+    $('body').on('change', 'select[name="pelanggan_id"]', function(){
+        var value = $(this).val()
+        var elm = $(this).parents('tr.item-rows')
+        $.ajax({
+            async: true,
+            url: '/ajax/coa/faktur-pelanggan',
+            method: 'GET',
+            data: {
+                pelanggan_id: value
+            },
+            dataType: 'json',
+            success: function(data){
+                console.log(data);
+                if(data){
+                    elm.find('select[name="trx_jual"]').html(
+                        data.map( val => '<option value="'+val.id+'">['+val.kdpesanan+']  sisa pembayaran -----> Rp. '+(val.sisa_trx).toLocaleString('ID')+'</option>')
+                    )
+                }else{
+                    elm.find('select[name="trx_jual"]').html('')
+                }
+            },
+            error: function(err){
+                console.log(err);
+                elm.find('select[name="trx_jual"]').html('')
+            }
+        })
+    })
+
+    $('body').on('change', 'select[name="pemasok_id"]', function(){
+        var value = $(this).val()
+        var elm = $(this).parents('tr.item-rows')
+        $.ajax({
+            async: true,
+            url: '/ajax/coa/faktur-pemasok',
+            method: 'GET',
+            data: {
+                pemasok_id: value
+            },
+            dataType: 'json',
+            success: function(data){
+                console.log(data);
+                if(data){
+                    elm.find('select[name="trx_beli"]').html(
+                        data.map( val => '<option value="'+val.id+'">['+val.kode+']  sisa pembayaran -----> Rp. '+(val.sisa).toLocaleString('ID')+'</option>')
+                    )
+                }else{
+                    elm.find('select[name="trx_beli"]').html('')
+                }
+            },
+            error: function(err){
+                console.log(err);
+                elm.find('select[name="trx_beli"]').html('')
+            }
+        })
     })
 
     $('body').on('submit', 'form#form-create', function(e){
@@ -120,12 +171,11 @@ $(function(){
         var data = getDataForm()
         console.log(data);
         var formdata = new FormData(this)
-        formdata.append('dataForm', JSON.stringify(data))
-        // formdata.append('lampiran', $('input#lampiran')[0].files[0])
+        formdata.append('items', JSON.stringify(data))
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'faktur-pembelian',
+            url: 'keu-pembayaran',
             method: 'POST',
             data: formdata,
             dataType:'json',
@@ -154,7 +204,7 @@ $(function(){
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'faktur-pembelian/'+id+'/show',
+            url: 'keu-pembayaran/'+id+'/show',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -177,6 +227,37 @@ $(function(){
         })
     })
 
+    $('body').on('submit', 'form#form-update', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        var data = getDataForm()
+        var formdata = new FormData(this)
+        formdata.append('items', JSON.stringify(data))
+        $.ajax({
+            async: true,
+            headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            url: 'keu-pembayaran/'+id+'/update',
+            method: 'POST',
+            data: formdata,
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                if(result.success){
+                    swal("Okey,,,!", result.message, "success")
+                    // initDefault()
+                }else{
+                    swal("Opps,,,!", result.message, "warning")
+                }
+            },
+            error: function(err){
+                console.log(err);
+                swal("Opps,,,!", 'Server Error', "error")
+            }
+        })
+    })
+
     $('body').on('click', 'button.bt-delete', function(e){
         e.preventDefault()
         var id = $(this).data('id')
@@ -192,7 +273,7 @@ $(function(){
           function(){
               $.ajax({
                   async: true,
-                  url: 'faktur-pembelian/'+id+'/destroy',
+                  url: 'keu-pembayaran/'+id+'/destroy',
                   method: 'POST',
                   dataType: 'json',
                   processData: false,
@@ -211,7 +292,6 @@ $(function(){
                       swal("Opps,,,!", 'Server Error', "error")
                   }
               })
-
           })
     })
 
@@ -220,13 +300,14 @@ $(function(){
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'faktur-pembelian/'+id+'/print',
+            url: 'keu-pembayaran/'+id+'/print',
             method: 'GET',
             dataType: 'json',
             processData: false,
             mimeType: "multipart/form-data",
             contentType: false,
             success: function(result){
+                console.log(result);
                 pdfMake.createPdf(result).print();
             },
             error: function(err){
@@ -236,44 +317,15 @@ $(function(){
         })
     })
 
-    $('body').on('submit', 'form#form-update', function(e){
-        e.preventDefault()
-        var id = $(this).data('id')
-        var data = getDataForm()
-        var formdata = new FormData(this)
-        formdata.append('dataForm', JSON.stringify(data))
-        $.ajax({
-            async: true,
-            headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'faktur-pembelian/'+id+'/update',
-            method: 'POST',
-            data: formdata,
-            dataType: 'json',
-            processData: false,
-            mimeType: "multipart/form-data",
-            contentType: false,
-            success: function(result){
-                if(result.success){
-                    swal("Okey,,,!", result.message, "success")
-                    initDefault()
-                }else{
-                    swal("Opps,,,!", result.message, "warning")
-                }
-            },
-            error: function(err){
-                console.log(err);
-                swal("Opps,,,!", 'Server Error', "error")
-            }
-        })
-    })
+    
 
     function initDefault(limit, page){
         $.ajax({
             async: true,
-            url: 'faktur-pembelian/list',
+            url: 'keu-pembayaran/list',
             method: 'GET',
             data: {
-                limit: limit,
+                limit: limit || 100,
                 page: page || 1
             },
             dataType: 'html',
@@ -297,7 +349,7 @@ $(function(){
     function initCreate(){
         $.ajax({
             async: true,
-            url: 'faktur-pembelian/create',
+            url: 'keu-pembayaran/create',
             method: 'GET',
             dataType: 'html',
             contentType: false,
@@ -323,7 +375,7 @@ $(function(){
         for (let index = 0; index < len; index++) {
             $.ajax({
                 async: true,
-                url: 'faktur-pembelian/create/add-item',
+                url: 'keu-pembayaran/create/add-item',
                 method: 'GET',
                 dataType: 'html',
                 contentType: false,
@@ -333,9 +385,11 @@ $(function(){
                 },
                 error: function(err){
                     console.log(err)
+                },
+                complete: function(){
+                    body.find('select').select2()
                 }
             })
-            
         }
     }
 
@@ -344,6 +398,7 @@ $(function(){
             var urut = i + 1
             $(this).attr('data-urut', urut)
             $(this).find('td').first().find('h3.urut-rows').html(urut)
+
         })
 
         $('button.bt-remove-item').each(function(i, e){
@@ -352,17 +407,11 @@ $(function(){
         })
     }
 
-    function hitungTotalHarga(elm, qty, harga, type, discount){
-        var elmTotal = elm.find('input[name="subtotal"]')
-        if(type != 'persen'){
-            var count = (parseFloat(qty) * parseFloat(harga)) - parseFloat(discount)
-        }else{
-            var tot = parseFloat(qty) * parseFloat(harga)
-            var discount_rp = (parseFloat(tot) * parseFloat(discount)) / 100
-            console.log(discount_rp);
-            var count = (parseFloat(qty) * parseFloat(harga)) - parseFloat(discount_rp)
-        }
+    
 
+    function hitungTotalHarga(elm, qty, harga){
+        var elmTotal = elm.find('input[name="subtotal"]')
+        var count = (parseFloat(qty) * parseFloat(harga))
         elmTotal.val(count)
 
         var summary = 0
@@ -371,13 +420,7 @@ $(function(){
             summary += parseFloat(total)
         })
 
-        var isPPN = body.find('input[name="ppn"]').val()
-        if(isPPN){
-            var ppnRp = (parseFloat(isPPN) / 100) * parseFloat(summary)
-            $('input[name="grandtot"]').val(parseFloat(summary) + parseFloat(ppnRp))
-        }else{
-            $('input[name="grandtot"]').val(parseFloat(summary))
-        }
+        $('input[name="grandtot"]').val(parseFloat(summary))
     }
 
     function getDataForm(){
@@ -402,8 +445,6 @@ $(function(){
                     vals.push($(this).val())
                 })
 
-                // console.log(props);
-                // console.log(vals);
                 items.push(_.object(props, vals))
             })
             return items

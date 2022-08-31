@@ -6,8 +6,6 @@ const moment = require('moment')
 const DefCoa = use("App/Models/DefCoa")
 const Kas = use("App/Models/akunting/Kas")
 const Bank = use("App/Models/akunting/Bank")
-const TrxBank = use("App/Models/transaksi/TrxBank")
-const TrxKas = use("App/Models/transaksi/TrxKase")
 const Jasa = use("App/Models/master/Jasa")
 const initFunc = use("App/Helpers/initFunc")
 const SysConfig = use("App/Models/SysConfig")
@@ -15,9 +13,14 @@ const Barang = use("App/Models/master/Barang")
 const Gudang = use("App/Models/master/Gudang")
 const AccCoa = use("App/Models/akunting/AccCoa")
 const VBarangStok = use("App/Models/VBarangStok")
+const TrxKas = use("App/Models/transaksi/TrxKase")
+const TrxBank = use("App/Models/transaksi/TrxBank")
 const BarangLokasi = use("App/Models/BarangLokasi")
+const Pelanggan = use("App/Models/master/Pelanggan")
 const HargaBeli = use("App/Models/master/HargaBeli")
 const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
+const KeuPenerimaan = use("App/Models/transaksi/KeuPenerimaan")
+const KeuPenerimaanItem = use("App/Models/transaksi/KeuPenerimaanItem")
 const OpsPelangganBayar = use("App/Models/operational/OpsPelangganBayar")
 const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
 const OpsPelangganOrderItem = use("App/Models/operational/OpsPelangganOrderItem")
@@ -356,6 +359,7 @@ class bayarPelanggan {
                     .fetch()
                 )?.toJSON()
                 
+        /** LOOPING ITEMS **/
         for (const brg of orderItemTrx) {
             const barang = await Barang.query().where('id', brg.barang_id).last()
             const gudang = await Gudang.query().where('id', brg.gudang_id).last()
@@ -382,6 +386,7 @@ class bayarPelanggan {
                     cabang_id: ws.cabang_id,
                     trx_jual: params.id,
                     coa_id: akun.coa_id,
+                    barang_id: barang.id,
                     reff: orderTrx.kdpesanan,
                     narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description + ' ' + barang.nama,
                     trx_date: req.date,
@@ -506,7 +511,7 @@ class bayarPelanggan {
             }
         }
 
-        /* START INSERT DATA JURNAL KAS & BANK */
+        /* START INSERT DATA JURNAL KAS ATAU BANK */
         if(req.kas_id){
             const akun = await AccCoa.query().where('id', req.coa_id).last()
             const trxJurnalKas = new TrxJurnal()
@@ -516,7 +521,7 @@ class bayarPelanggan {
                 kas_id: req.kas_id,
                 coa_id: req.coa_id,
                 reff: kodeKwitansi,
-                narasi: '[ '+orderData.kdpesanan+' ] ' + 'pada ' + akun.coa_name,
+                narasi: '[ '+orderData.kdpesanan+' ] ' + 'Pembayaran pada Kas ' + akun.coa_name,
                 trx_date: req.date,
                 nilai: req.paid_trx,
                 dk: akun.dk,
@@ -581,7 +586,7 @@ class bayarPelanggan {
                 bank_id: req.bank_id,
                 coa_id: req.coa_id,
                 reff: kodeKwitansi,
-                narasi: '[ '+orderData.kdpesanan+' ] ' + 'pada ' + akun.coa_name,
+                narasi: '[ '+orderData.kdpesanan+' ] ' + 'Pembayaran pada Bank ' + akun.coa_name,
                 trx_date: req.date,
                 nilai: (parseFloat(req.paid_trx) - (parseFloat(req.akun_nilai) || 0)),
                 dk: akun.dk,
@@ -648,7 +653,7 @@ class bayarPelanggan {
                 }
             }/* END UPDATE SALDO BANK */
             
-        }/* END INSERT DATA JURNAL KAS & BANK */
+        }/* END INSERT DATA JURNAL KAS ATAU BANK */
 
         if(req.akun){
             const coa = await AccCoa.query().where('id', req.akun).last()
@@ -659,7 +664,7 @@ class bayarPelanggan {
                 bank_id: req.bank_id,
                 coa_id: req.akun,
                 reff: kodeKwitansi,
-                narasi: '[ '+orderData.kdpesanan+' ] ' + 'pada ' + coa.coa_name,
+                narasi: '[ '+orderData.kdpesanan+' ] ' + 'Pembayaran additional ' + coa.coa_name,
                 trx_date: req.date,
                 nilai: req.akun_nilai,
                 dk: coa.dk,
@@ -689,8 +694,8 @@ class bayarPelanggan {
                 cabang_id: ws.cabang_id,
                 createdby: user.id,
                 coa_id: val.coa_id,
-                reff: kodeKwitansi,
-                narasi: '[ '+orderData.kdpesanan+' ] ' + 'pada ' + akun.coa_name,
+                reff: orderData.kdpesanan,
+                narasi: '[ '+kodeKwitansi +' ] ' + 'Pembayaran pada ' + akun.coa_name,
                 trx_date: req.date,
                 nilai: (parseFloat(req.paid_trx) - (parseFloat(req.akun_nilai) || 0)),
                 dk: val.tipe,
@@ -711,6 +716,56 @@ class bayarPelanggan {
             }
         }
 
+        /** INSERT DATA PADA PENERIMAAN KEUANGAN **/
+        const keuPenerimaan = new KeuPenerimaan()
+        try {
+            keuPenerimaan.fill({
+                author: user.id,
+                cabang_id: ws.cabang_id,
+                coa_debit: req.coa_id,
+                trx_jual: orderData.id,
+                bayar_id: opsPelangganBayar.id,
+                reff: kodeKwitansi || null,
+                trx_date: req.date,
+                delay_trx: req.delay_date,
+                is_delay: req.isDelay ? 'Y':'N',
+                penerima: user.nama_lengkap,
+                paidby: 'pelanggan',
+                total: req.paid_trx,
+                narasi: 'Penerimaan Cabang'
+            })
+            await keuPenerimaan.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed insert penerimaan keuangan \n'+ JSON.stringify(error)
+            }
+        }
+
+        const keuPenerimaanItem = new KeuPenerimaanItem()
+        try {
+            keuPenerimaanItem.fill({
+                keuterima_id: keuPenerimaan.id,
+                cabang_id: ws.cabang_id,
+                trx_jual: orderData.id,
+                pelanggan_id: orderData.pelanggan_id,
+                coa_kredit: '11005',
+                description: 'Penerimaan Kasir ' + kodeKwitansi,
+                qty: 1,
+                harga_stn: req.paid_trx,
+                harga_total: req.paid_trx,
+            })
+            await keuPenerimaanItem.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed insert penerimaan keuangan item \n'+ JSON.stringify(error)
+            }
+        }
         /* SEND NOTIFICATION */
         let arrUserTipe = ['administrator', 'developer', 'keuangan']
         await initFunc.SEND_NOTIFICATION(
@@ -738,6 +793,7 @@ class bayarPelanggan {
         const trx = await DB.beginTransaction()
         const ws = await initFunc.WORKSPACE(user)
         const dataBayarOld = (await OpsPelangganBayar.query().with('order').where('id', params.id).last()).toJSON()
+        const dataOrderPelanggan = (await OpsPelangganOrder.query().where('id', dataBayarOld.order_id).last()).toJSON()
 
         const updBayar = await OpsPelangganBayar.query().with('order').where('id', params.id).last()
         updBayar.merge({
@@ -778,7 +834,7 @@ class bayarPelanggan {
             trxJurnalPiutang.merge({
                 coa_id: val.coa_id,
                 reff: dataBayarOld.no_kwitansi,
-                narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'pada ' + akun.coa_name,
+                narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'Pembayaran pada ' + akun.coa_name,
                 trx_date: req.date,
                 nilai: req.paid_trx,
                 dk: val.tipe,
@@ -829,7 +885,7 @@ class bayarPelanggan {
                 kas_id: req.kas_id,
                 coa_id: req.coa_id,
                 reff: kodeKwitansi,
-                narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'pada ' + akun.coa_name,
+                narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'update Pembayaran pada Kas ' + akun.coa_name,
                 trx_date: req.date,
                 nilai: req.paid_trx,
                 dk: akun.dk,
@@ -922,7 +978,7 @@ class bayarPelanggan {
                 bank_id: req.bank_id,
                 coa_id: req.coa_id,
                 reff: dataBayarOld.no_kwitansi,
-                narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'pada ' + akun.coa_name,
+                narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'update Pembayaran pada Bank ' + akun.coa_name,
                 trx_date: req.date,
                 nilai: req.paid_trx,
                 dk: akun.dk,
@@ -949,7 +1005,7 @@ class bayarPelanggan {
                 trx_date: moment(req.date).format('YYYY-MM-DD'),
                 saldo_net: req.isDelay ? 0 : parseFloat(req.paid_trx),
                 setor_tunda: req.isDelay ? parseFloat(req.paid_trx) : 0,
-                desc: 'Pembayaran ' + dataBayarOld.no_invoice
+                desc: 'Update Pembayaran ' + dataBayarOld.no_invoice
             })
             try {
                 await trxBank.save(trx)
@@ -974,7 +1030,7 @@ class bayarPelanggan {
                 bank_id: req.bank_id,
                 coa_id: req.akun,
                 reff: dataBayarOld.no_kwitansi,
-                narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'pada ' + coa.coa_name,
+                narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'update additional pada ' + coa.coa_name,
                 trx_date: req.date,
                 nilai: req.akun_nilai,
                 dk: coa.dk,
@@ -991,6 +1047,59 @@ class bayarPelanggan {
                     success: false,
                     message: 'Failed insert additional akun \n'+ JSON.stringify(error)
                 }
+            }
+        }
+
+        await DB.table('keu_penerimaans').where('bayar_id', updBayar.id).update('aktif', 'N')
+
+        /** INSERT DATA PADA PENERIMAAN KEUANGAN **/
+        const keuPenerimaan = new KeuPenerimaan()
+        try {
+            keuPenerimaan.fill({
+                author: user.id,
+                cabang_id: ws.cabang_id,
+                coa_debit: req.coa_id,
+                trx_jual: dataOrderPelanggan.id,
+                bayar_id: dataBayarOld.id,
+                reff: dataBayarOld.no_kwitansi || null,
+                trx_date: req.date,
+                delay_trx: req.delay_date,
+                is_delay: req.isDelay ? 'Y':'N',
+                penerima: user.nama_lengkap,
+                paidby: 'pelanggan',
+                total: req.paid_trx,
+                narasi: 'Penerimaan Cabang'
+            })
+            await keuPenerimaan.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed insert penerimaan keuangan \n'+ JSON.stringify(error)
+            }
+        }
+
+        const keuPenerimaanItem = new KeuPenerimaanItem()
+        try {
+            keuPenerimaanItem.fill({
+                keuterima_id: keuPenerimaan.id,
+                cabang_id: ws.cabang_id,
+                trx_jual: dataOrderPelanggan.id,
+                pelanggan_id: dataOrderPelanggan.pelanggan_id,
+                coa_kredit: '11005',
+                description: 'Penerimaan Kasir ' + dataBayarOld.no_kwitansi,
+                qty: 1,
+                harga_stn: req.paid_trx,
+                harga_total: req.paid_trx,
+            })
+            await keuPenerimaanItem.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed insert penerimaan keuangan item \n'+ JSON.stringify(error)
             }
         }
 

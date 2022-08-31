@@ -1,16 +1,17 @@
 'use strict'
 
+const _ = require('underscore')
+const DefCoa = use("App/Models/DefCoa")
 const Kas = use("App/Models/akunting/Kas")
 const Bank = use("App/Models/akunting/Bank")
 const initFunc = use("App/Helpers/initFunc")
 const Barang = use("App/Models/master/Barang")
 const Gudang = use("App/Models/master/Gudang")
-const Pelanggan = use("App/Models/master/Pelanggan")
 const Pemasok = use("App/Models/master/Pemasok")
 const AccCoa = use("App/Models/akunting/AccCoa")
-// const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
-// const TrxFakturBeli = use("App/Models/transaksi/TrxFakturBeli")
-const UsrWorkspace = use("App/Models/UsrWorkspace")
+const Pelanggan = use("App/Models/master/Pelanggan")
+const KeuFakturPembelian = use("App/Models/transaksi/KeuFakturPembelian")
+const KeuFakturPenjualan = use("App/Models/operational/OpsPelangganOrder")
 
 class CoaAjaxController {
 
@@ -135,68 +136,6 @@ class CoaAjaxController {
         }
     }
 
-    async checkFaktur ( { request, view } ) {
-        var req = request.all()
-        const coa = await AccCoa.query().where( w => {
-            if(req.selected){
-                w.where('id', req.selected)
-            }
-            w.where('bisnis_id', req.bisnis_id)
-        }).last()
-        console.log('checkFaktur ::', req);
-        switch (coa.kode) {
-            case '100.3':
-                let gudang = (await Gudang.query().where( w => {
-                    w.where('bisnis_id', req.bisnis_id)
-                }).fetch()).toJSON()
-                gudang = gudang.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
-                return view.render('components.option-gudang', { list: gudang })
-            case '100.4':
-                let pelanggan = (await Pelanggan.query().where( w => {
-                    w.where('bisnis_id', req.bisnis_id)
-                }).fetch()).toJSON()
-                pelanggan = pelanggan.map(el => el.id === parseInt(req.pelanggan_id) ? {...el, selected: 'selected'} : {...el, selected: ''})
-                return view.render('components.option-pelanggan', { list: pelanggan })
-            case '200.1.1':
-                let pemasok = (await Pemasok.query().where( w => {
-                    w.where('bisnis_id', req.bisnis_id)
-                }).fetch()).toJSON()
-                pemasok = pemasok.map(el => el.id === parseInt(req.pemasok_id) ? {...el, selected: 'selected'} : {...el, selected: ''})
-                return view.render('components.option-pemasok', { list: pemasok })
-        }
-    }
-
-    async fakturPelanggan ( { request, view } ) {
-        var req = request.all()
-        const fakturJual = (
-            await TrxFakturJual.query().where( w => {
-                w.where('bisnis_id', req.bisnis_id)
-                w.where('cust_id', req.pelanggan_id)
-                w.where('status', 'bersisa')
-            }).fetch()
-        ).toJSON()
-
-        return view.render('components.option-faktur-jual', {
-            list: fakturJual
-        })
-    }
-
-    async fakturPemasok ( { request, view } ) {
-        var req = request.all()
-        const fakturBeli = (
-            await TrxFakturBeli.query().where( w => {
-                w.where('pemasok_id', req.pemasok_id)
-                w.where('bisnis_id', req.bisnis_id)
-                w.where('sts_paid', 'bersisa')
-                w.whereNotNull('due_date')
-            }).fetch()
-        ).toJSON()
-
-        return view.render('components.option-faktur-beli', {
-            list: fakturBeli
-        })
-    }
-
     async fakturGudang ( { request, view } ) {
         var req = request.all()
         // const gudang = (
@@ -294,20 +233,38 @@ class CoaAjaxController {
         return data
     }
 
-    async coaKasBank ({ request }) {
-        const req = request.only(['bisnis_id', 'selected'])
+    async coaKasBank ({ auth, request }) {
+        const req = request.only(['selected'])
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
 
         let data = (
             await AccCoa.query()
             .where( w => {
-                w.where('bisnis_id', req.bisnis_id)
-                w.where('is_akun', 'A')
-                w.whereIn('kode', ['100.1.1', '100.1.2'])
+                w.where('id', '>', 11100)
+                w.where('id', '<', 11299)
             })
             .fetch() || []
         ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+        if(req.selected){
+            data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+        }else{
+            data.unshift({id: '', coa_subgrp_nm: 'Akun Kas & Bank', coa_name: 'Pilih akun yg sesuai...', selected: 'selected'})
+        }
+
+        console.log(data);
+
+        data = _.groupBy(data, 'coa_subgrp_nm')
+        data = Object.keys(data).map( key => {
+            return {
+                name: key,
+                items: data[key]
+            }
+        })
+
         return data
     }
 
@@ -345,6 +302,122 @@ class CoaAjaxController {
         data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
         return data
     }
+
+    async onChangeAkunPembayaran ( { auth, request, view } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        const configCoa = (await DefCoa.query().where( w => {
+            w.where('group', 'pembayaran-keuangan')
+            w.where('coa_id', req.coa_id)
+        }).last())?.toJSON() || null
+
+        const pemasok = (await Pemasok.query().where( w => {
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        const pelanggan = (await Pelanggan.query().where( w => {
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        const gudang = (await Gudang.query().where( w => {
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        if(configCoa){
+            return view.render(configCoa.description, {
+                pemasok: pemasok,
+                pelanggan: pelanggan,
+                gudang: gudang
+            })
+        }
+
+        return
+    }
+
+    async onChangeAkunPenerimaan ( { auth, request, view } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        const configCoa = (await DefCoa.query().where( w => {
+            w.where('group', 'penerimaan-keuangan')
+            w.where('coa_id', req.coa_id)
+        }).last())?.toJSON() || null
+
+        const pemasok = (await Pemasok.query().where( w => {
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        const pelanggan = (await Pelanggan.query().where( w => {
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        const gudang = (await Gudang.query().where( w => {
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        if(configCoa){
+            return view.render(configCoa.description, {
+                pemasok: pemasok,
+                pelanggan: pelanggan,
+                gudang: gudang
+            })
+        }
+
+        return
+    }
+
+    async fakturPelanggan ( { auth, request } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        const fakturPelanggan = (
+            await KeuFakturPenjualan.query().where( w => {
+                w.where('pelanggan_id', req.pelanggan_id)
+                w.where('sisa_trx', '<>', 0)
+            }).fetch()
+        ).toJSON()
+
+        return fakturPelanggan
+    }
+
+    async fakturPemasok ( { auth, request } ) {
+        const req = request.all()
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        const fakturPemasok = (
+            await KeuFakturPembelian.query().where( w => {
+                w.where('pemasok_id', req.pemasok_id)
+                w.where('sisa', '>', 0)
+            }).fetch()
+        ).toJSON()
+
+        return fakturPemasok
+    }
 }
 
 module.exports = CoaAjaxController
+
+
+async function userValidate(auth){
+    let user
+    try {
+        user = await auth.getUser()
+        return user
+    } catch (error) {
+        console.log(error);
+        return null
+    }
+}

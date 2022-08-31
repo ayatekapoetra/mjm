@@ -30,20 +30,32 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label class="control-label">Cabang <span class="text-danger">*</span></label>
-                            <select type="text" name="cabang_id" class="form-control item-data selectCabang" required></select>
+                            <select type="text" name="cabang_id" class="form-control item-data selectCabang"></select>
                         </div>
                     </div>
-                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">No.Pesanan</label>
+                            <select type="text" name="reff_order" class="form-control item-data"></select>
+                        </div>
+                    </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="control-label">Gudang <span class="text-danger">*</span></label>
-                            <select type="text" name="gudang_id" class="form-control item-data selectGudang" required></select>
+                            <select type="text" name="gudang_id" class="form-control item-data selectGudang"></select>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="control-label">Pemasok <span class="text-danger">*</span></label>
-                            <select type="text" name="pemasok_id" class="form-control item-data selectPemasok" required></select>
+                            <select type="text" name="pemasok_id" class="form-control item-data selectPemasok"></select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 pull-right">
+                        <div class="form-group has-warning">
+                            <label class="control-label">Grand Total <span class="text-danger">*</span></label>
+                            <input type="text" name="grandtot" class="form-control item-data" value="0.00" readonly>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -63,12 +75,6 @@
                                 <input type="number" step="any" name="ppn" class="form-control text-right item-data" value="11">
                                 <span class="input-group-addon">Persen</span>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 pull-right">
-                        <div class="form-group has-warning">
-                            <label class="control-label">Grand Total <span class="text-danger">*</span></label>
-                            <input type="text" name="grandtot" class="form-control item-data" value="0.00" readonly>
                         </div>
                     </div>
                 </div>
@@ -120,6 +126,7 @@
 <script>
     $(function(){
         var body = $('body')
+        GET_DATA_PURCASING_ORDER()
         $('input[name="isPPn"]').on('click, change', function(){
             var txt = body.find('span#txt-checkbox')
             $(this).is(':checked') ? (
@@ -139,6 +146,32 @@
                 '</div>')
             )
         })
+
+        function GET_DATA_PURCASING_ORDER(){
+            var elm = $('select[name="reff_order"]')
+            $.ajax({
+                async: true,
+                url: '/ajax/options/purchasing-order-list',
+                method: 'GET',
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    elm.select2()
+                    if(result.length > 0){
+                        elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.name+'</option>'))
+                        elm.trigger('change');
+                    }else{
+                        elm.html('<option value="" selected>Blum ada data...</option>')
+                    }
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
     })
 </script>
 <style>

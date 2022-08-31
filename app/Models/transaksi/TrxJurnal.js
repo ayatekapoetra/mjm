@@ -13,6 +13,10 @@ class TrxJurnal extends Model {
     bisnis () {
         return this.belongsTo("App/Models/BisnisUnit", "bisnis_id", "id")
     }
+
+    coa () {
+        return this.belongsTo("App/Models/akunting/AccCoa", "coa_id", "id")
+    }
 }
 
 module.exports = TrxJurnal

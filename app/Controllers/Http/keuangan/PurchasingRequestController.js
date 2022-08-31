@@ -107,7 +107,7 @@ class PurchasingRequestController {
             return view.render('401')
         }
 
-        console.log(req);
+        // console.log(req);
         if(!req.cabang_id){
             return {
                 success: false,

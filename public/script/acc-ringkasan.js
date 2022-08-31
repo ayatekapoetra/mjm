@@ -3,11 +3,18 @@ $(function(){
     var body = $('body')
 
     initDefault()
+
+    $('body').on('click', 'button.bt-back', function(){
+        body.find('div#content-list').css('display', 'block')
+        body.find('button#open-filter').css('display', 'inline')
+        body.find('div#content-details').css('display', 'none').html('')
+    })
     
     $('body').on('click', 'button#apply-filter', function(){
         var rangeAwal = body.find('input[name="rangeAwal"]').val()
         var rangeAkhir = body.find('input[name="rangeAkhir"]').val()
         var workdir = body.find('select#cabang_id').val()
+        initDefault()
         getValuesAkun(workdir, rangeAwal, rangeAkhir)
         getPnL(workdir, rangeAwal, rangeAkhir)
     })
@@ -51,17 +58,24 @@ $(function(){
     })
 
     function initDefault(){
+        var cabang_id = $('body').find('select[name="cabang_id"]').val()
+        var rangeAwal = $('body').find('input[name="rangeAwal"]').val()
+        var rangeAkhir = $('body').find('input[name="rangeAkhir"]').val()
         $.ajax({
             async: true,
             url: 'ringkasan/list',
             method: 'GET',
-            // dataType: 'json',
+            data: {
+                cabang_id: cabang_id,
+                rangeAwal: rangeAwal,
+                rangeAkhir: rangeAkhir
+            },
             dataType: 'html',
-            contentType: false,
+            // contentType: false,
             success: function(result){
                 // console.log(result);
                 body.find('div#content-list').html(result)
-                body.find('div#content-form').html('')
+                body.find('div#content-details').html('')
             },
             error: function(err){
                 console.log(err)

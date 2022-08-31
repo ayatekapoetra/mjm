@@ -1,0 +1,21 @@
+<div class="col-md-6 m-b-15">
+    <label for="">Pelanggan <span class="text-danger">*</span></label>
+    <select class="form-control item-data-details" name="pelanggan_id" data-values="">
+        <option value="">Pilih Pelanggan</option>
+        @each(item in pelanggan)
+            <option value="{{item.id}}">{{item.nama}}</option>
+        @endeach
+    </select>
+</div>
+<div class="col-md-6 m-b-15">
+    <label for="">Faktur Penjualan <span class="text-danger">*</span></label>
+    <select class="form-control item-data-details" name="trx_jual" data-values="">
+        <option value="">Pilih</option>
+        
+    </select>
+</div>
+<script>
+    $(function(){
+        $('select.form-control').select2()
+    })
+</script>

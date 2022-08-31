@@ -28,6 +28,8 @@ const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
 const TrxBank = use("App/Models/transaksi/TrxBank")
 const TrxKas = use("App/Models/transaksi/TrxKase")
 const Notification = use("App/Models/Notification")
+const KeuPembayaran = use("App/Models/transaksi/KeuPembayaran")
+const KeuPenerimaan = use("App/Models/transaksi/KeuPenerimaan")
 // const TrxOrderBeli = use("App/Models/transaksi/TrxOrderBeli")
 // const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
 const TrxFakturBeli = use("App/Models/transaksi/KeuFakturPembelian")
@@ -46,6 +48,7 @@ const OpsPelangganBayar = use("App/Models/operational/OpsPelangganBayar")
 const KeuTransferKasBank = use("App/Models/transaksi/KeuTransferKasBank")
 
 const { performance } = require('perf_hooks')
+const { last } = require('underscore')
 // const RECONSILIASI_KAS_BANK = use("App/Helpers/_setKasBankValues")
 
 /** Data JSON Collection  **/
@@ -648,6 +651,26 @@ class initFunc {
         return prefix1 + cabKode + prefix2 + '.' + lastNumber
     }
 
+    async SUM_PEMBAYARAN_PELANGGAN () {
+        const orderPelanggan = (await OpsPelangganOrder.query().where( w => {
+            w.where('aktif', 'Y')
+            w.where('status', '!=', 'pending')
+        }).fetch()).toJSON()
+        for (const obj of orderPelanggan) {
+            const orderList = await OpsPelangganOrder.query().where('id', obj.id).last()
+            const sumBayar = await OpsPelangganBayar.query().where( w => {
+                w.where('aktif', 'Y')
+                w.where('order_id', obj.id)
+            }).getSum('paid_trx')
+            orderList.merge({
+                paid_trx: sumBayar,
+                sisa_trx: orderList.grandtot_trx - sumBayar,
+                status: orderList.grandtot_trx != sumBayar ? 'dp':'lunas'
+            })
+            await orderList.save()
+        }
+    }
+
     async GEN_KODE_KWITANSI (user) {
         let ws = await this.WORKSPACE(user)
         let nomor = await OpsPelangganBayar.query().where( w => {
@@ -709,6 +732,42 @@ class initFunc {
         }
     }
 
+    async GENKODE_KEU_PEMBAYARAN(req){
+
+        let prefix = 0
+
+        const keuPembayaran = await KeuPembayaran.query().where( w => {
+            w.where('trx_date', '>=', moment(req.trx_date).startOf('year').format('YYYY-MM-DD'))
+            w.where('trx_date', '<=', moment(req.trx_date).endOf('year').format('YYYY-MM-DD'))
+            w.where('aktif', 'Y')
+        }).orderBy('id', 'asc').getCount()
+
+        prefix = '0'.repeat(4 - `${keuPembayaran}`.length) + (keuPembayaran + 1)
+
+        const bulan = romawiNumber (moment(req.trx_date).format('MM'))
+        const stringKode = 'KEU-BYR/' + moment(req.trx_date).format('YYYY') + '/' + bulan + '-' + prefix
+
+        return stringKode
+    }
+
+    async GENKODE_KEU_PENERIMAAN(req){
+
+        let prefix = 0
+
+        const keuPenerimaan = await KeuPenerimaan.query().where( w => {
+            w.where('trx_date', '>=', moment(req.trx_date).startOf('year').format('YYYY-MM-DD'))
+            w.where('trx_date', '<=', moment(req.trx_date).endOf('year').format('YYYY-MM-DD'))
+            w.where('aktif', 'Y')
+        }).orderBy('id', 'asc').getCount()
+
+        prefix = '0'.repeat(4 - `${keuPenerimaan}`.length) + (keuPenerimaan + 1)
+
+        const bulan = romawiNumber (moment(req.trx_date).format('MM'))
+        const stringKode = 'KEU-TERIMA/' + moment(req.trx_date).format('YYYY') + '/' + bulan + '-' + prefix
+
+        return stringKode
+    }
+
     async GET_SALDO_AWAL (req) {
         const coa_bank = await AccCoa.query().where( w => {
             w.where('id', req.coa_id)
@@ -727,48 +786,6 @@ class initFunc {
     }
 
     async RINGKASAN (user) {
-        // let akunArr = (
-        //     await AccCoa
-        //     .query()
-        //     .where( w => {
-        //         w.where('is_akun', 'A')
-        //     })
-        //     .orderBy('urut', 'asc', 'first')
-        //     .fetch()
-        // ).toJSON()
-
-        // let akun = (
-        //     await AccCoaTipe.query()
-        //     .with('group', g => {
-        //         g.with('akun')
-        //     })
-        //     .orderBy('urut', 'asc')
-        //     .fetch()
-        // ).toJSON()
-
-        // // console.log(akun);
-
-        // /* AKUN NERACA */ 
-        // akun = akun.map(obj => {
-        //     if(obj.group.length > 0){
-        //         return {
-        //             ...obj,
-        //             akun: akunArr.filter(elm => elm.coa_tipe === obj.id && !elm.coa_grp)
-        //         }
-        //     }else{
-        //         return {
-        //             ...obj,
-        //             akun: akunArr.filter(elm => elm.coa_tipe === obj.id)
-        //         }
-        //     }
-        // })
-
-        // console.log(JSON.stringify(akun, null, 2));
-
-        // return {
-        //     neraca : akun.filter(el => el.id <= 3),
-        //     labarugi : akun.filter(el => el.id > 3),
-        // }
 
         let akun = []
 
@@ -823,6 +840,7 @@ class initFunc {
                     }
                     w.where('coa_id', `${kode}%`)
                     w.where('is_delay', 'N')
+                    w.where('aktif', 'Y')
                     w.where('trx_date', '>=', rangeAwal)
                     w.where('trx_date', '<=', rangeAkhir)
                 }).fetch()
@@ -883,6 +901,7 @@ class initFunc {
                     w.where('cabang_id', cabang_id)
                 }
                 w.where('coa_id', 'like', `4%`)
+                w.where('aktif', 'Y')
                 w.where('trx_date', '>=', rangeAwal)
                 w.where('trx_date', '<=', rangeAkhir)
             }).getSum('nilai') || 0
@@ -893,6 +912,7 @@ class initFunc {
                     w.where('cabang_id', cabang_id)
                 }
                 w.where('coa_id', 'like', `5%`)
+                w.where('aktif', 'Y')
                 w.where('trx_date', '>=', rangeAwal)
                 w.where('trx_date', '<=', rangeAkhir)
             }).getSum('nilai') || 0

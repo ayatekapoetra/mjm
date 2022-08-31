@@ -8,7 +8,7 @@
                     <thead>
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">No</th>
-                            <th width="100" class="bg-inverse b-all">Action</th>
+                            <th width="150" class="bg-inverse b-all">Action</th>
                             <th width="70" class="bg-inverse b-all">Lampiran<br/>Files</th>
                             <th width="120"class="bg-inverse b-all">Date Faktur<br>Due Date</th>
                             <th width="150"class="bg-inverse b-all">No.Pesanan<br/>No.Faktur</th>
@@ -22,13 +22,12 @@
                             @each(item in list.data)
                                 <tr>
                                     <td class="text-center v-middle">{{$loop.index + 1}}</td>
-                                    <td>
-                                        <p>
-                                            <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button>
-                                        </p>
-                                        <p>
-                                            <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
-                                        </p>
+                                    <td class="v-middle">
+                                        <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button> 
+                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
+                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
                                     </td>
                                     <td class="v-middle">
                                         @if(item.files)
@@ -39,11 +38,11 @@
                                             @endeach
                                         @endif
                                     </td>
-                                    <td class="dateFormatDef v-middle" data-elm="strong" data-patten="YYYY-MM-DD" data-tgl="{{item.trx_date}}">
-                                        <strong></strong><br>
+                                    <td class="v-middle">
                                         <span class="dateFormatDef" data-elm="span" data-patten="YYYY-MM-DD" data-tgl="{{item.due_date}}">
-                                            <span class="text-danger" style="font-weight: 600;"></span>
-                                        </span> 
+                                            <span class="text-white" style="font-weight: 600;"></span>
+                                        </span> <br>
+                                        <small class="remaining-time text-danger" data-tgl="{{item.due_date}}"></small>
                                     </td>
                                     <td class="v-middle">
                                         <small>{{item.kode ? item.kode : '-'}}</small><br>
