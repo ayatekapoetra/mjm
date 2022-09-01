@@ -401,6 +401,7 @@ class CoaAjaxController {
             await KeuFakturPembelian.query().where( w => {
                 w.where('pemasok_id', req.pemasok_id)
                 w.where('sisa', '>', 0)
+                w.where('aktif', 'Y')
             }).fetch()
         ).toJSON()
 

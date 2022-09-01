@@ -38,6 +38,18 @@ class fakturBeli {
             .orderBy('date_faktur', 'desc')
             .paginate(halaman, limit)
         ).toJSON()
+
+
+        for (const obj of data.data) {
+            const upd = await KeuFakturPembelian.query().where('id', obj.id).last()
+            if(upd.sisa != 0){
+                upd.merge({sts_paid: 'bersisa'})
+            }else{
+                upd.merge({sts_paid: 'lunas'})
+            }
+            
+            await upd.save()
+        }
         
         return data
     }
@@ -155,6 +167,7 @@ class fakturBeli {
         for (const obj of req.data.items) {
             // console.log(obj);
             if(obj.coa_id){
+                const akun = await AccCoa.query().where('id', obj.coa_id).last()
                 const barang = await Barang.query().where('id', obj.barang_id).last()
 
                 const trxFakturBeliItem = new KeuFakturPembelianItem()
@@ -165,7 +178,7 @@ class fakturBeli {
                     qty: obj.qty,
                     type_discount: obj.type_discount,
                     discount: obj.discount_rp,
-                    stn: barang.satuan,
+                    stn: barang?.satuan || null,
                     harga_stn: obj.harga_stn,
                     subtotal: (parseFloat(obj.qty) * parseFloat(obj.harga_stn)) - parseFloat(obj.discount_rp)
                 })
@@ -187,12 +200,12 @@ class fakturBeli {
                 trxJurnalDEBIT.fill({
                     createdby: user.id,
                     cabang_id: req.cabang_id, 
-                    barang_id: obj.barang_id,
+                    barang_id: obj.barang_id || null,
                     fakturbeli_id: trxFakturBeli.id,
                     fakturbeli_item: trxFakturBeliItem.id,
                     coa_id: obj.coa_id,
                     reff: req.kode,
-                    narasi: `[ ${req.kode} ] ${barang.nama}`,
+                    narasi: `[ ${req.kode} ] ${barang?.nama || akun.coa_name}`,
                     trx_date: req.date_faktur || new Date(),
                     nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn) - parseFloat(obj.discount_rp),
                     dk: 'd',
@@ -219,12 +232,12 @@ class fakturBeli {
                     trxJurnalFB.fill({
                         createdby: user.id,
                         cabang_id: req.cabang_id,
-                        barang_id: obj.barang_id,
+                        barang_id: obj.barang_id || null,
                         fakturbeli_id: trxFakturBeli.id,
                         fakturbeli_item: trxFakturBeliItem.id,
                         coa_id: val.coa_id,
                         reff: req.kode,
-                        narasi: `[ ${req.kode} ] ${barang.nama}`,
+                        narasi: `[ ${req.kode} ] ${barang?.nama  || akun.coa_name}`,
                         trx_date: req.date_faktur || new Date(),
                         nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn) - parseFloat(obj.discount_rp),
                         dk: val.tipe,
@@ -250,7 +263,7 @@ class fakturBeli {
                     trxJurnalDisc.fill({
                         createdby: user.id,
                         cabang_id: req.cabang_id, 
-                        barang_id: obj.barang_id,
+                        barang_id: obj.barang_id || null,
                         fakturbeli_id: trxFakturBeli.id,
                         fakturbeli_item: trxFakturBeliItem.id,
                         coa_id: val.coa_id,

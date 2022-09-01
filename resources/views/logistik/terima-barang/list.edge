@@ -43,7 +43,11 @@
                                         {{item.reff_rcp}}
                                     </td>
                                     <td>
-                                        {{item.pemasok.nama}}
+                                        @if(item.pemasok_id)
+                                            {{item.pemasok.nama}}
+                                        @else
+                                            -
+                                        @endif
                                     </td>
                                     <td>
                                         {{item.gudang.nama}}

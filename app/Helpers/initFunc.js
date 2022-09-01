@@ -848,6 +848,8 @@ class initFunc {
     
             let arrDebit = []
             let arrKredit = []
+
+            // console.log(data);
     
             if(data.length > 0){
                 arrDebit = data.filter(el => el.dk === 'd')

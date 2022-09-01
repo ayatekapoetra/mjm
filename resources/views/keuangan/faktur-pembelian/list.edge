@@ -39,10 +39,14 @@
                                         @endif
                                     </td>
                                     <td class="v-middle">
-                                        <span class="dateFormatDef" data-elm="span" data-patten="YYYY-MM-DD" data-tgl="{{item.due_date}}">
+                                        <span class="dateFormatDef" data-elm="span" data-patten="YYYY-MM-DD" data-tgl="{{item.date_faktur}}">
                                             <span class="text-white" style="font-weight: 600;"></span>
                                         </span> <br>
-                                        <small class="remaining-time text-danger" data-tgl="{{item.due_date}}"></small>
+                                        @if(item.sisa === 0)
+                                            <small class="dateFormatDef text-success" data-patten="YYYY-MM-DD" data-tgl="{{item.due_date}}"></small>
+                                        @else
+                                            <small class="remaining-time text-danger" data-tgl="{{item.due_date}}"></small>
+                                        @endif
                                     </td>
                                     <td class="v-middle">
                                         <small>{{item.kode ? item.kode : '-'}}</small><br>
@@ -61,9 +65,14 @@
                                         <span class="formatRp" data-number="{{item.grandtot}}" data-elm="p">
                                             <p>{{item.grandtot}}</p>
                                         </span>
-                                        <span class="formatRp" data-number="{{item.sisa}}" data-elm="small">
-                                            <small class="text-warning">{{item.grandtot}}</small>
-                                        </span>
+                                        @if(item.sisa === 0)
+                                            <small class="text-success">Lunas</small>
+                                        @else
+                                            <span class="formatRp" data-number="{{item.sisa}}" data-elm="small">
+                                                <small class="text-warning">{{item.grandtot}}</small>
+                                            </span>
+                                        @endif
+                                        
                                     </td>
                                 </tr>
                             @endeach

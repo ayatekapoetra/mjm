@@ -306,6 +306,8 @@ class PembayaranController {
         }
         req.items = JSON.parse(req.items)?.items || null
 
+        
+
         if (!req.trx_date) {
             return {
                 success: false,
@@ -382,12 +384,20 @@ class PembayaranController {
 
         req.reff = req.reff || await initFunc.GENKODE_KEU_PEMBAYARAN(req)
 
-        req.is_delay = moment(req.trx_date).isSame(moment(req.due_date)) ? 'N':'Y'
+        // req.is_delay = moment(req.trx_date).isSame(moment(req.due_date)) ? 'N':'Y'
 
         req.subtotal = req.items.reduce((a, b) => { return a + (parseFloat(b.qty) * parseFloat(b.harga_stn)) }, 0)
 
         const bank = await Bank.query().where('id', req.coa_kredit).last()
         const kas = await Kas.query().where('id', req.coa_kredit).last()
+
+
+        if(req.is_delay === 'Y' && !req.due_date){
+            return {
+                success: false,
+                message: 'Tanggal tunda blum di tentukan...'
+            }
+        }
 
         if(bank){
             req.bank_id = req.coa_kredit
@@ -486,12 +496,19 @@ class PembayaranController {
             }
         }
 
-        req.is_delay = moment(req.trx_date).isSame(moment(req.due_date)) ? 'N':'Y'
+        // req.is_delay = moment(req.trx_date).isSame(moment(req.due_date)) ? 'N':'Y'
 
         req.subtotal = req.items.reduce((a, b) => { return a + (parseFloat(b.qty) * parseFloat(b.harga_stn)) }, 0)
 
         const bank = await Bank.query().where('id', req.coa_kredit).last()
         const kas = await Kas.query().where('id', req.coa_kredit).last()
+
+        if(req.is_delay === 'Y' && !req.due_date){
+            return {
+                success: false,
+                message: 'Tanggal tunda blum di tentukan...'
+            }
+        }
 
         if(bank){
             req.bank_id = req.coa_kredit

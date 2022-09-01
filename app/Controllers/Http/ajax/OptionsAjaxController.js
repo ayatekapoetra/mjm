@@ -977,6 +977,7 @@ class OptionsAjaxController {
                     .with('pemasok')
                     .where( w => {
                     w.where('sts_paid', 'bersisa')
+                    w.where('aktif', 'Y')
                 }).orderBy('due_date', 'asc')
                 .fetch() 
             ).toJSON() 

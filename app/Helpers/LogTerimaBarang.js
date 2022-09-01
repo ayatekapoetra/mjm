@@ -60,6 +60,10 @@ class terimaBarang {
         const ws = await initFunc.WORKSPACE(user)
         const kode = await initFunc.GEN_KODE_TERIMA_BRG(user.cabang_id)
 
+        console.log('====================================');
+        console.log(req);
+        console.log('====================================');
+
         const trxTerimaBarang = new TrxTerimaBarang()
         try {
             trxTerimaBarang.fill({
@@ -134,22 +138,24 @@ class terimaBarang {
 
             /* TAMBAH BARANG KE GUDANG PERSEDIAAN */
             if(req.isPemasok === 'Y'){
-                const keuPurchasingRequestItems = await KeuPurchasingRequestItems.query().where( w => {
-                    w.where('qty', obj.qty)
-                    w.where('barang_id', obj.barang_id)
-                    w.where('pemasok_id', req.pemasok_id)
-                    w.where('purchasing_id', req.reff_order)
-                }).last()
-                
-                keuPurchasingRequestItems.merge({has_received: 'Y'})
-                try {
-                    await keuPurchasingRequestItems.save(trx)
-                } catch (error) {
-                    console.log(error);
-                    await trx.rollback()
-                    return {
-                        success: false,
-                        message: 'Failed update items purchasing order \n'+ JSON.stringify(error)
+                if(req.pemasok_id){
+                    const keuPurchasingRequestItems = await KeuPurchasingRequestItems.query().where( w => {
+                        w.where('qty', obj.qty)
+                        w.where('barang_id', obj.barang_id)
+                        w.where('pemasok_id', req.pemasok_id)
+                        w.where('purchasing_id', req.reff_order)
+                    }).last()
+                    
+                    keuPurchasingRequestItems.merge({has_received: 'Y'})
+                    try {
+                        await keuPurchasingRequestItems.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: 'Failed update items purchasing order \n'+ JSON.stringify(error)
+                        }
                     }
                 }
 
@@ -238,32 +244,34 @@ class terimaBarang {
         const logTerimaBarang = await TrxTerimaBarang.query().where('id', params.id).last()
 
         /* KEMBALIKAN STATUS REQUEST ORDER */
-        const reqOrder = await KeuPurchasingRequest.query().where('id', logTerimaBarang.reff_order).last()
-        try {
-            reqOrder.merge({status: 'approved'})
-            await reqOrder.save(trx)
-        } catch (error) {
-            console.log(error);
-            await trx.rollback()
-            return {
-                success: false,
-                message: 'Failed update purchasing request \n'+ JSON.stringify(error)
-            }
-        }
-
-        /* KEMBALIKAN STATUS REQUEST ORDER */
-        const reqOrderItem = (await KeuPurchasingRequestItems.query().where('purchasing_id', reqOrder.id).fetch()).toJSON()
-        for (const obj of reqOrderItem) {
-            const reqOrderItemUpdate = await KeuPurchasingRequestItems.query().where('id', obj.id).last()
+        if(logTerimaBarang.reff_order){
+            const reqOrder = await KeuPurchasingRequest.query().where('id', logTerimaBarang.reff_order).last()
             try {
-                reqOrderItemUpdate.merge({has_received: 'N'})
-                await reqOrderItemUpdate.save(trx)
+                reqOrder.merge({status: 'approved'})
+                await reqOrder.save(trx)
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
                 return {
                     success: false,
-                    message: 'Failed update purchasing request items \n'+ JSON.stringify(error)
+                    message: 'Failed update purchasing request \n'+ JSON.stringify(error)
+                }
+            }
+    
+            /* KEMBALIKAN STATUS REQUEST ORDER */
+            const reqOrderItem = (await KeuPurchasingRequestItems.query().where('purchasing_id', reqOrder.id).fetch()).toJSON()
+            for (const obj of reqOrderItem) {
+                const reqOrderItemUpdate = await KeuPurchasingRequestItems.query().where('id', obj.id).last()
+                try {
+                    reqOrderItemUpdate.merge({has_received: 'N'})
+                    await reqOrderItemUpdate.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed update purchasing request items \n'+ JSON.stringify(error)
+                    }
                 }
             }
         }

@@ -50,6 +50,7 @@ class pembayaran {
     }
 
     async POST (req, user, attach) {
+        console.log(req);
         const trx = await DB.beginTransaction()
         
         /** INSERT TRXPEMBAYARAN **/
@@ -81,9 +82,6 @@ class pembayaran {
 
         /** JIKA DITEMUKAN FILE ATACHMENT **/
         if(attach){
-            console.log('====================================');
-            console.log();
-            console.log('====================================');
             if(attach._files?.length > 1){
                 for (const [i, objFile] of (attach._files).entries()) {
                     const randURL = moment().format('YYYYMMDDHHmmss') + '-' + i
@@ -269,6 +267,7 @@ class pembayaran {
             }
 
             /* INSERT ITEMS JURNAL PEMBAYARAN */
+            var nilaiBayar = parseFloat(obj.qty) * parseFloat(obj.harga_stn)
             const coaDebit = await AccCoa.query().where('id', obj.coa_debit).last()
             if(obj.trx_jual){
                 const reffJual = await OrderPelanggan.query().where('id', req.trx_jual).last()
@@ -277,6 +276,41 @@ class pembayaran {
             if(obj.trx_beli){
                 const reffBeli = await TrxFakturBeli.query().where('id', req.trx_beli).last()
                 var reff_kode = reffBeli.kode
+                /**
+                 * JIKA HUTANG DAGANG MEMILIKI PAJAK PPN
+                 * **/
+                if(reffBeli.ppn_rp > 0){
+                    nilaiBayar = nilaiBayar - reffBeli.ppn_rp
+                    const jurnalPPN = new TrxJurnal()
+                    try {
+                        jurnalPPN.fill({
+                            createdby: user.id,
+                            cabang_id: req.cabang_id,
+                            bank_id: req.bank_id || null,
+                            kas_id: req.kas_id || null,
+                            trx_jual: obj.trx_jual || null,
+                            fakturbeli_id: obj.trx_beli || null,
+                            keubayar_id: trxPembayaran.id,
+                            keubayaritem_id: trxPembayaranItem.id,
+                            coa_id: '11004',
+                            reff: req.reff,
+                            narasi: `[ ${reff_kode || req.reff} ] PPN ${coaDebit.coa_name}`,
+                            trx_date: req.trx_date,
+                            delay_date: req.due_date,
+                            is_delay: req.is_delay,
+                            nilai: reffBeli.ppn_rp,
+                            dk: 'k'
+                        })
+                        await jurnalPPN.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: 'Gagal melakukan kredit pada pajak pembelian '+ JSON.stringify(error)
+                        }
+                    }
+                }
             }
 
             const jurnalDebit = new TrxJurnal()
@@ -296,7 +330,7 @@ class pembayaran {
                     trx_date: req.trx_date,
                     delay_date: req.due_date,
                     is_delay: req.is_delay,
-                    nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
+                    nilai: nilaiBayar,
                     dk: 'd'
                 })
                 await jurnalDebit.save(trx)
@@ -408,6 +442,7 @@ class pembayaran {
 
         try {
             await keuPembayaran.save(trx)
+            console.log('keuPembayaran.save(trx)');
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -440,6 +475,7 @@ class pembayaran {
                 dk: 'k'
             })
             await jurnalKredit.save(trx)
+            console.log('jurnalKredit.save(trx)');
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -474,6 +510,7 @@ class pembayaran {
 
             try {
                 await trxBank.save(trx)
+                console.log('trxBank.save(trx)');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -485,19 +522,37 @@ class pembayaran {
         }
 
         if(req.kas_id){
-            await DB.table('trx_kases').where('keubayar_id', params.id).update('aktif', 'N')
+
+            const updKas = await TrxKases.query().where( w => {
+                w.where('keubayar_id', params.id)
+                w.where('kas_id', req.kas_id)
+                w.where('aktif', 'Y')
+            }).last()
+
+            try {
+                updKas.merge({aktif: 'N'})
+                await updKas.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed delete mutasi kredit kas '+ JSON.stringify(error)
+                }
+            }
             const trxKas = new TrxKases()
             
             trxKas.fill({
                 trx_date: req.trx_date,
                 kas_id: req.kas_id,
-                keubayar_id: trxPembayaran.id,
+                keubayar_id: params.id,
                 saldo_rill: req.subtotal,
                 desc: `[ ${req.reff} ] Pembayaran Akun Faktur`,
             })
 
             try {
                 await trxKas.save(trx)
+                console.log('trxKas.save(trx)');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -601,6 +656,7 @@ class pembayaran {
 
                 trxPembayaranItem.fill(data)
                 await trxPembayaranItem.save(trx)
+                console.log('trxPembayaranItem.save(trx)');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -642,6 +698,7 @@ class pembayaran {
                     dk: 'd'
                 })
                 await jurnalDebit.save(trx)
+                console.log('jurnalDebit.save(trx)');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -669,6 +726,7 @@ class pembayaran {
                     })
 
                     await trxFakturBeli.save(trx)
+                    console.log('trxFakturBeli.save(trx)');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -707,6 +765,7 @@ class pembayaran {
 
                 try {
                     await pelangganBayar.save(trx)
+                    console.log('pelangganBayar.save(trx)');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -730,6 +789,7 @@ class pembayaran {
 
                 try {
                     await orderData.save(trx)
+                    console.log('orderData.save(trx)');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -798,6 +858,7 @@ class pembayaran {
     }
 
     async DELETE (params) {
+        console.log(params);
         const data = (await KeuPembayaran.query().with('items').where('id', params.id).last()).toJSON()
         try {
             await DB.table('keu_pembayarans').where('id', params.id).update({aktif: 'N'})
@@ -841,6 +902,34 @@ class pembayaran {
 
         try {
             await DB.table('pay_pelanggan').where('no_kwitansi', data.reff).update({aktif: 'N'})
+        } catch (error) {
+            console.log(error)
+            return {
+                success: false,
+                message: 'Failed delete data pay_pelanggan...'
+            }
+        }
+
+        /** JIKA PEMBAYARAN MELALUI KAS **/
+        try {
+            await DB.table('trx_kases').where( w => {
+                w.where('keubayar_id', params.id)
+                w.where('kas_id', data.coa_kredit)
+            }).update({aktif: 'N'})
+        } catch (error) {
+            console.log(error)
+            return {
+                success: false,
+                message: 'Failed delete data pay_pelanggan...'
+            }
+        }
+
+         /** JIKA PEMBAYARAN MELALUI BANK **/
+         try {
+            await DB.table('trx_banks').where( w => {
+                w.where('keubayar_id', params.id)
+                w.where('bank_id', data.coa_kredit)
+            }).update({aktif: 'N'})
         } catch (error) {
             console.log(error)
             return {
