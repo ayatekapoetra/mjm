@@ -13,6 +13,7 @@
                             <th width="70" class="text-center bg-inverse b-all">No</th>
                             <th width="100" class="text-center bg-inverse b-all">Tanggal</th>
                             <th width="50" class="text-center bg-inverse b-all">Kode</th>
+                            <th width="50" class="text-center bg-inverse b-all">Kode</th>
                             <th width="*" class="bg-inverse b-all">Nama</th>
                             <th width="150" class="bg-inverse b-all text-right">Saldo</th>
                         </tr>
@@ -23,6 +24,9 @@
                                 <td>{{$loop.index + 1}}</td>
                                 <td class="dateFormatDef" data-tgl="{{item.trx_date}}" data-patten="DD-MM-YYYY"></td>
                                 <td class="text-center">{{item.coa_id}}</td>
+                                <td class="text-info">
+                                    <small>{{item.coa.coa_name}}</small>
+                                </td>
                                 <td>{{item.narasi}}</td>
                                 <td class="formatRp text-right" data-number="{{item.nilai}}" data-elm="span">
                                     <span></span>
@@ -35,7 +39,7 @@
                             </tr>
                         @endeach
                         <tr class="text-white bg-light" style="font-size: large">
-                            <td colspan="4" class="text-right"> Saldo</td>
+                            <td colspan="5" class="text-right"> Saldo</td>
                             <td class="text-right" id="saldo">-</td>
                         </tr>
                     </tbody>

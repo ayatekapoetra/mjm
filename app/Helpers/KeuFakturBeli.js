@@ -70,6 +70,9 @@ class fakturBeli {
     }
 
     async POST (req, user, filex) {
+        console.log('==================KEU FAKTUR PEMBALIAN==================');
+        console.log(req);
+        console.log('==================KEU FAKTUR PEMBALIAN==================');
         const trx = await DB.beginTransaction()
         
         const trxFakturBeli = new KeuFakturPembelian()
@@ -164,6 +167,37 @@ class fakturBeli {
             console.log('end faktur-pembelian-pajak');
         }
 
+        /** INSERT DATA HUTANG DAGANG TRX-JURNAL **/
+        const defCoa = (await DefCoa.query().where('group', 'faktur-pembelian').fetch()).toJSON()
+        console.log('Jurnal Faktur Pembelian :::', defCoa);
+        for (const val of defCoa) {
+            const trxJurnalFB = new TrxJurnal()
+            trxJurnalFB.fill({
+                createdby: user.id,
+                cabang_id: req.cabang_id,
+                barang_id: null,
+                fakturbeli_id: trxFakturBeli.id,
+                coa_id: val.coa_id,
+                reff: req.kode,
+                narasi: `[ ${req.kode} ] Hutang Dagang`,
+                trx_date: req.date_faktur || new Date(),
+                nilai: parseFloat(req.itemsTotal) + parseFloat(req.ppn_rp),
+                dk: val.tipe,
+                is_delay: 'N'
+            })
+            try {
+                await trxJurnalFB.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save data trx jurnal hutang dagang...\n'+JSON.stringify(error)
+                }
+            }
+            console.log('end trxJurnal Kredit', req.ppn_rp);
+        }
+
         for (const obj of req.data.items) {
             // console.log(obj);
             if(obj.coa_id){
@@ -225,37 +259,37 @@ class fakturBeli {
                 console.log('end trxJurnal Debit');
 
                 /** INSERT DATA HUTANG DAGANG TRX-JURNAL **/
-                const defCoa = (await DefCoa.query().where('group', 'faktur-pembelian').fetch()).toJSON()
-                console.log('Jurnal Faktur Pembelian :::', defCoa);
-                for (const val of defCoa) {
-                    const trxJurnalFB = new TrxJurnal()
-                    trxJurnalFB.fill({
-                        createdby: user.id,
-                        cabang_id: req.cabang_id,
-                        barang_id: obj.barang_id || null,
-                        fakturbeli_id: trxFakturBeli.id,
-                        fakturbeli_item: trxFakturBeliItem.id,
-                        coa_id: val.coa_id,
-                        reff: req.kode,
-                        narasi: `[ ${req.kode} ] ${barang?.nama  || akun.coa_name}`,
-                        trx_date: req.date_faktur || new Date(),
-                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn) - parseFloat(obj.discount_rp),
-                        dk: val.tipe,
-                        is_delay: 'N'
-                    })
+                // const defCoa = (await DefCoa.query().where('group', 'faktur-pembelian').fetch()).toJSON()
+                // console.log('Jurnal Faktur Pembelian :::', defCoa);
+                // for (const val of defCoa) {
+                //     const trxJurnalFB = new TrxJurnal()
+                //     trxJurnalFB.fill({
+                //         createdby: user.id,
+                //         cabang_id: req.cabang_id,
+                //         barang_id: obj.barang_id || null,
+                //         fakturbeli_id: trxFakturBeli.id,
+                //         fakturbeli_item: trxFakturBeliItem.id,
+                //         coa_id: val.coa_id,
+                //         reff: req.kode,
+                //         narasi: `[ ${req.kode} ] ${barang?.nama  || akun.coa_name}`,
+                //         trx_date: req.date_faktur || new Date(),
+                //         nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn) - parseFloat(obj.discount_rp),
+                //         dk: val.tipe,
+                //         is_delay: 'N'
+                //     })
 
-                    try {
-                        await trxJurnalFB.save(trx)
-                    } catch (error) {
-                        console.log(error);
-                        await trx.rollback()
-                        return {
-                            success: false,
-                            message: 'Failed save data trx jurnal...'+JSON.stringify(error)
-                        }
-                    }
-                    console.log('end trxJurnal Kredit', req.ppn_rp);
-                }
+                //     try {
+                //         await trxJurnalFB.save(trx)
+                //     } catch (error) {
+                //         console.log(error);
+                //         await trx.rollback()
+                //         return {
+                //             success: false,
+                //             message: 'Failed save data trx jurnal...'+JSON.stringify(error)
+                //         }
+                //     }
+                //     console.log('end trxJurnal Kredit', req.ppn_rp);
+                // }
 
                 const defCoaDiscount = (await DefCoa.query().where('group', 'faktur-pembelian-discount-barang').fetch()).toJSON()
                 for (const val of defCoaDiscount) {

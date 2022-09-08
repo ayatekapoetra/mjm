@@ -179,6 +179,9 @@ $(function(){
             },
             dataType: 'html',
             contentType: false,
+            beforeSend: function(){
+                body.find('div#content-list').html('Please wait,,,,')
+            },
             success: function(result){
                 body.find('div#content-list').html(result)
                 body.find('div#content-form').html('')

@@ -1,4 +1,5 @@
 $(function(){
+    console.log('script/acc-bank-kas');
     var body = $('body')
 
     initDefault()
@@ -311,6 +312,12 @@ $(function(){
             method: 'GET',
             dataType: 'html',
             contentType: false,
+            beforeSend: function(){
+                body.find('div#content-list').html(
+                '<strong class="text-center" style="margin: 10px 25px;">Please wait,,,,</strong>'+
+                '<p style="margin: 10px 25px;">System sedang melakukan loading data......</p>'
+                )
+            },
             success: function(result){
                 body.find('div#content-list').html(result)
                 body.find('div#content-form').html('')

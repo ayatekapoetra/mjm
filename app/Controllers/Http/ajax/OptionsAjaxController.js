@@ -971,6 +971,7 @@ class OptionsAjaxController {
 
     async fakturBeli ( { request } ) {
         const req = request.all()
+        
         try {
             let data = (
                     await KeuFakturPembelian.query()
@@ -981,15 +982,18 @@ class OptionsAjaxController {
                 }).orderBy('due_date', 'asc')
                 .fetch() 
             ).toJSON() 
+            
             return data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
             
         } catch (error) {
+            console.log('error fakturBeli :::', error);
             return []
         }
     }
 
     async purchasingOrder ( { auth, request } ) {
         const req = request.all()
+        console.log('REG ::', req);
         const user = await userValidate(auth)
         if(!user){
             return
@@ -1010,6 +1014,102 @@ class OptionsAjaxController {
         }
 
         return data
+    }
+
+    async purchasingOrderID ( { request, params } ) {
+        const req = request.all()
+        console.log(params);
+        console.log(req);
+        let data = (await KeuPurchasingRequest.query().with('items').where('id', params.id).last()).toJSON()
+        data.items = data.items.filter(obj => obj.pemasok_id == req.pemasok_id)
+        const barang = (await Barang.query().where('aktif', 'Y').fetch()).toJSON()
+
+        let coaAkun = (await AccCoa.query().orderBy('id', 'asc').fetch()).toJSON()
+        coaAkun = coaAkun.filter( el => (el.coa_subgrp_nm)?.toLowerCase() != 'bank' )
+        coaAkun = coaAkun.filter( el => (el.coa_subgrp_nm)?.toLowerCase() != 'kas' )
+
+        let dataCoa = _.groupBy(coaAkun, 'coa_tipe_nm')
+        dataCoa = Object.keys(dataCoa).map(key => {
+            return {
+                tipe: key,
+                items: dataCoa[key]
+            }
+        })
+        const items = data.items.map(el => { 
+            var itemsHTML = 
+                `<tr class="item-rows">
+                <td>
+                    <h3 class="urut-rows"></h3>
+                    <input type="hidden" class="" name="id" value="{{data.id ? data.id : ''}}">   
+                </td>
+                <td class="b-all">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="">Barang</label>                
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-danger bt-remove-item" type="button">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </span>
+                                <select class="form-control item-data-details selectBarang" name="barang_id" data-values="${el.barang_id}">
+                                    <option value="">Pilih...</option>
+                                    ${barang.map(b => '<option value="'+b.id+'" '+(el.barang_id == b.id ? "selected":" ")+'>[ '+b.num_part+ ' ] '+b.nama+'</option>')}
+                                </select>
+                                <span class="input-group-addon satuan">${el.stn}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">            
+                            <div class="form-group">                
+                                <label for="">Qty <span class="text-danger">*</span></label>                
+                                <input type="number" class="form-control text-right item-data-details item-details" name="qty" id="" value="${el.qty}" required>
+                            </div>        
+                        </div>
+                        <div class="col-md-4">            
+                            <div class="form-group">                
+                                <label for="">Harga Stn <span class="text-danger">*</span></label>                
+                                <input type="number" class="form-control item-data-details item-details" name="harga_stn" id="" value="0" required>
+                            </div>        
+                        </div>
+                        <div class="col-md-2">            
+                            <label for="">Discount <span><small>Rupiah</small></span></label>                
+                            <div class="input-group">
+                                <input type="number" class="form-control item-data-details item-details" name="discount" id="" value="0">
+                                <input type="hidden" class="form-control item-data-details item-details" name="type-discount" value="rupiah">
+                                <span class="input-group-addon" name="icon-discount">Rp.</span>
+                            </div>   
+                        </div>
+                        <div class="col-md-4">            
+                            <div class="form-group">                
+                                <label for="">Harga Total</label>                
+                                <input type="number" class="form-control text-right item-data-details item-details" name="subtotal" id="" value="0" readonly>
+                            </div>        
+                        </div>
+                        <div class="col-md-6">            
+                            <div class="form-group">                
+                                <label for="">Akun</label>                
+                                <select class="form-control item-data-details selectCoa" name="coa_id" data-values="" id="">
+                                    <option value="">Pilih...</option>
+                                    ${dataCoa.map( grp => '<optgroup label="'+grp.tipe+'">'+grp.items.map( val => '<option value="'+val.id+'" '+(val.id == '11001' ? "selected":" ")+'>'+val.coa_name+'</option>')+'</optgroup>')}
+                                </select>
+                            </div>        
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <script>
+                $(function(){
+                    var body = $('body')
+                    body.find('select[name="coa_id"]').select2()
+                })
+            </script>`
+            return itemsHTML
+        })
+
+        return {
+            data: data,
+            itemsHTML: items
+        }
     }
 
     async purchasingOrderList ( { auth, request } ) {

@@ -103,6 +103,7 @@ Route.group(() => {
     Route.get('/options/purchasing-request', 'OptionsAjaxController.purchasingOrder').as('ajax.set.purchasingOrder')
     Route.get('/options/purchasing-request-details', 'OptionsAjaxController.purchasingOrderDetails').as('ajax.set.purchasingOrderDetails')
     Route.get('/options/purchasing-order-list', 'OptionsAjaxController.purchasingOrderList').as('ajax.set.purchasingOrderList')
+    Route.get('/options/purchasing-request/:id', 'OptionsAjaxController.purchasingOrderID').as('ajax.set.purchasingOrderID')
     Route.get('/options/barang/show/:id', 'OptionsAjaxController.barangID').as('ajax.set.barangID')
     Route.get('/options/jasa', 'OptionsAjaxController.jasa').as('ajax.set.jasa')
     Route.get('/options/jasa/show/:id', 'OptionsAjaxController.jasaID').as('ajax.set.jasaID')

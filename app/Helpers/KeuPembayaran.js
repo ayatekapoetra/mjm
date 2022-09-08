@@ -67,7 +67,7 @@ class pembayaran {
                 penerima: req.penerima || null,
                 paidby: req.paidby,
                 total: req.subtotal,
-                narasi: req.narasi || 'tanpa keterangan'
+                narasi: req.narasi || ' '
             })
             await trxPembayaran.save(trx)
         } catch (error) {
@@ -197,7 +197,7 @@ class pembayaran {
                 keubayar_id: trxPembayaran.id,
                 saldo_net: saldo_net,
                 tarik_tunda: tarik_tunda,
-                desc: `[ ${req.reff} ] Pembayaran Akun Faktur`,
+                desc: `[ ${req.reff} ] ${req.narasi || 'Pembayaran pada Bank'}`,
             })
 
             try {
@@ -220,7 +220,7 @@ class pembayaran {
                 kas_id: req.kas_id,
                 keubayar_id: trxPembayaran.id,
                 saldo_rill: req.subtotal,
-                desc: `[ ${req.reff} ] Pembayaran Akun Faktur`,
+                desc: `[ ${req.reff} ] ${req.narasi || 'Pembayaran pada Kas'}`,
             })
 
             try {
@@ -273,46 +273,15 @@ class pembayaran {
                 const reffJual = await OrderPelanggan.query().where('id', req.trx_jual).last()
                 var reff_kode = reffJual.kdpesanan
             }
+
             if(obj.trx_beli){
                 const reffBeli = await TrxFakturBeli.query().where('id', req.trx_beli).last()
                 var reff_kode = reffBeli.kode
                 /**
                  * JIKA HUTANG DAGANG MEMILIKI PAJAK PPN
                  * **/
-                if(reffBeli.ppn_rp > 0){
-                    nilaiBayar = nilaiBayar - reffBeli.ppn_rp
-                    const jurnalPPN = new TrxJurnal()
-                    try {
-                        jurnalPPN.fill({
-                            createdby: user.id,
-                            cabang_id: req.cabang_id,
-                            bank_id: req.bank_id || null,
-                            kas_id: req.kas_id || null,
-                            trx_jual: obj.trx_jual || null,
-                            fakturbeli_id: obj.trx_beli || null,
-                            keubayar_id: trxPembayaran.id,
-                            keubayaritem_id: trxPembayaranItem.id,
-                            coa_id: '11004',
-                            reff: req.reff,
-                            narasi: `[ ${reff_kode || req.reff} ] PPN ${coaDebit.coa_name}`,
-                            trx_date: req.trx_date,
-                            delay_date: req.due_date,
-                            is_delay: req.is_delay,
-                            nilai: reffBeli.ppn_rp,
-                            dk: 'k'
-                        })
-                        await jurnalPPN.save(trx)
-                    } catch (error) {
-                        console.log(error);
-                        await trx.rollback()
-                        return {
-                            success: false,
-                            message: 'Gagal melakukan kredit pada pajak pembelian '+ JSON.stringify(error)
-                        }
-                    }
-                }
             }
-
+            
             const jurnalDebit = new TrxJurnal()
             try {
                 jurnalDebit.fill({
@@ -505,7 +474,7 @@ class pembayaran {
                 keubayar_id: params.id,
                 saldo_net: saldo_net,
                 tarik_tunda: tarik_tunda,
-                desc: `[ ${req.reff} ] Pembayaran Akun Faktur`,
+                desc: `[ ${req.reff} ] ${req.narasi || 'Upd Pembayaran pada Bank'}`,
             })
 
             try {
@@ -547,7 +516,7 @@ class pembayaran {
                 kas_id: req.kas_id,
                 keubayar_id: params.id,
                 saldo_rill: req.subtotal,
-                desc: `[ ${req.reff} ] Pembayaran Akun Faktur`,
+                desc: `[ ${req.reff} ] ${req.narasi || 'Upd Pembayaran pada Kas'}`,
             })
 
             try {

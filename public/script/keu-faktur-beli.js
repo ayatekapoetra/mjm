@@ -27,23 +27,39 @@ $(function(){
         $(this).select()
     })
 
-    // $('body').on('click', 'span[name="icon-discount"]', function(){
-    //     var elm = $(this).parents('tr')
-    //     var elmDiscount = $(this).parents('tr').find('input[name="type-discount"]')
+    $('body').on('change', 'select[name="reff_order"], select[name="pemasok_id"]', function(){
+        var value = body.find('select[name="reff_order"]').val()
+        var pemasok = body.find('select[name="pemasok_id"]').val()
+        if(value && pemasok){
+            $.ajax({
+                async: true,
+                url: '/ajax/options/purchasing-request/'+value,
+                method: 'GET',
+                dataType: 'json',
+                data: { pemasok_id: pemasok },
+                contentType: false,
+                beforeSend: function(){
+                    body.find('tbody#item-details').html('')
+                },
+                success: function(data){
+                    console.log(data);
+                    body.find('tbody#item-details').html(data.itemsHTML)
 
-    //     $(this).html() === '%' ? (
-    //         $(this).html('Rp.'),
-    //         elmDiscount.val('rupiah')
-    //     ):(
-    //         $(this).html('%'),
-    //         elmDiscount.val('persen')
-    //     )
-    //     var harga = elm.find('input[name="harga_stn"]').val() || 0
-    //     var qty = elm.find('input[name="qty"]').val() || 0
-    //     var discount = elm.find('input[name="discount"]').val() || 0
-    //     var type = elm.find('input[name="type-discount"]').val()
-    //     hitungTotalHarga(elm, qty, harga, type, discount)
-    // })
+                    body.find('select[name="cabang_id"]').val(data.data.cabang_id).trigger('change')
+                    body.find('select[name="gudang_id"]').val(data.data.gudang_id).trigger('change')
+                    
+                },
+                error: function(err){
+                    console.log(err)
+                    body.find('tbody#item-details').html('<td colspan="2"><code>Tidak ditemukan pesanan dengan pemasok dan kode pesanan terpilih...</code></td?')
+                },
+                complete: function(){
+                    $('select').select2()
+                    setUrut()
+                }
+            })
+        }
+    })
 
     $('body').on('keyup', 'input[name="qty"]', function(){
         var elm = $(this).parents('tr')
@@ -144,7 +160,7 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
-                // window.location.reload()
+                window.location.reload()
             }
         })
     })
