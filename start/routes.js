@@ -433,6 +433,17 @@ Route.group(() => {
     Route.get('/terima-barang/:id/print', 'TerimaBarangController.print').as('log.terima-barang.print').middleware('R')
     Route.delete('/terima-barang/:id/destroy', 'TerimaBarangController.destroy').as('log.terima-barang.destroy').middleware('D')
     Route.get('/terima-barang/create/add-item', 'TerimaBarangController.addItem').as('log.terima-barang.addItem').middleware('C')
+
+    /* STOK OPNAME BARANG */
+    Route.get('/stok-opname', 'StokOpnameController.index').as('log.stok-opname').middleware('R')
+    Route.post('/stok-opname', 'StokOpnameController.store').as('log.stok-opname.store').middleware('C')
+    Route.get('/stok-opname/list', 'StokOpnameController.list').as('log.stok-opname.list').middleware('R')
+    Route.get('/stok-opname/create', 'StokOpnameController.create').as('log.stok-opname.create').middleware('C')
+    Route.get('/stok-opname/:id/show', 'StokOpnameController.show').as('log.stok-opname.show').middleware('U')
+    Route.post('/stok-opname/:id/update', 'StokOpnameController.update').as('log.stok-opname.update').middleware('U')
+    Route.delete('/stok-opname/:id/destroy', 'StokOpnameController.destroy').as('log.stok-opname.destroy').middleware('D')
+    Route.get('/stok-opname/create/add-item', 'StokOpnameController.addItem').as('log.stok-opname.addItem').middleware('C')
+    
 }).prefix('logistik').namespace('logistik')
 
 /*

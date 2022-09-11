@@ -1,0 +1,184 @@
+{{ script('ajax/index') }}
+{{ script('ajax/opt-gudang') }}
+{{ script('ajax/opt-pemasok') }}
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Tanggal <span class="text-danger">*</span></label>
+                            <input type="date" name="date_opname" class="form-control item-data initDate" required>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-group">
+                            <label class="control-label">Gudang <span class="text-danger">*</span></label>
+                            <select type="text" name="gudang_id" class="form-control item-data selectGudang" data-cabang="{{auth.user.cabang_id}}" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="control-label">Narasi</label>
+                            <input type="text" name="keterangan" class="form-control item-data"> 
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <th class="bg-extralight" width="50">No</th>
+                                        <th class="bg-inverse">Item Details</th>
+                                        <th class="bg-title text-center" width="80">ACT</th>
+                                    </thead>
+                                    <tbody id="item-details"></tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="row">
+                                                    <div class="col-sm-9">
+                                                        <div class="col-sm-12">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="input-group text-right">
+                                                            <input class="form-control" type="number" id="row-number" name="row-number" value="1">
+                                                            <div class="input-group-addon" id="bt-add-rows"><i class="ti-plus"></i> ADD</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-right">
+                    <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                    <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        var body = $('body')
+        $('select').select2()
+
+        $('select[name="reff_order"], select[name="pemasok_id"], select[name="gudang_id"]').on('change', function(){
+            getDetailItems()
+        })
+
+        $('a#ispemasok').on('click', function(){
+            body.find('input[name="isPemasok"]').val('Y')
+            body.find('span#type-document').html('Pemasok ')
+            body.find('div.reff_order, div.pemasok_id').css('display', 'block')
+            body.find('select[name="reff_order"]').val('').trigger('change')
+        })
+
+        $('a#isgudang').on('click', function(){
+            body.find('input[name="isPemasok"]').val('N')
+            body.find('span#type-document').html('Transfer Ke ')
+            body.find('div.reff_order, div.pemasok_id').css('display', 'none')
+            body.find('select[name="reff_order"]').val('').trigger('change')
+            body.find('select[name="pemasok_id"]').val('').trigger('change')
+            body.find('tbody#item-details').html("")
+            addItems()
+        })
+
+        function getDetailItems(){
+            let lenArray
+            var order_id = $('select[name="reff_order"]').val()
+            var pemasok_id = $('select[name="pemasok_id"]').val()
+            var gudang_id = $('select[name="gudang_id"]').val()
+            console.log(order_id, pemasok_id, gudang_id);
+            if(order_id && pemasok_id && gudang_id){
+                $.ajax({
+                    async: true,
+                    url: '/ajax/options/purchasing-request-details',
+                    method: 'GET',
+                    data: {
+                        order_id: order_id,
+                        gudang_id: gudang_id,
+                        pemasok_id: pemasok_id
+                    },
+                    dataType: 'html',
+                    contentType: false,
+                    success: function(result){
+                        console.log(result);
+                        body.find('tbody#item-details').html(result)
+                    },
+                    error: function(err){
+                        console.log(err)
+                        body.find('tbody#item-details').html("")
+                        addItems()
+                    }
+                })
+            }
+        }
+
+        getListOrder()
+        function getListOrder(){
+            $.ajax({
+                async: true,
+                url: '/ajax/options/purchasing-request',
+                method: 'GET',
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    console.log(result);
+                    body.find('select[name="reff_order"]').html(
+                        result?.map(o => '<option value="'+o.id+'">'+o.name+'</option>')
+                    )
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+
+        function addItems(len){
+            for (let index = 0; index < (len || 1); index++) {
+                $.ajax({
+                    async: true,
+                    url: 'terima-barang/create/add-item',
+                    method: 'GET',
+                    dataType: 'html',
+                    contentType: false,
+                    success: function(result){
+                        body.find('tbody#item-details').append(result)
+                        setUrut()
+                    },
+                    error: function(err){
+                        console.log(err)
+                    }
+                })
+                
+            }
+        }
+
+        function setUrut(){
+            body.find('tr.item-rows').each(function(i, e){
+                var urut = i + 1
+                $(this).attr('data-urut', urut)
+                $(this).find('td').first().find('h3.urut-rows').html(urut)
+            })
+
+            body.find('button.bt-remove-item').each(function(i, e){
+                var urut = i + 1
+                $(this).attr('data-id', urut)
+            })
+        }
+    })
+</script>
