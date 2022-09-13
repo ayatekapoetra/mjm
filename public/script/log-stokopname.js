@@ -58,7 +58,57 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'button.bt-delete', function(e){
+    $('body').on('click', 'button.bt-show', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'stok-opname/'+id+'/show',
+            method: 'GET',
+            dataType: 'html',
+            success: function(result){
+                body.find('div#content-form').html(result).css('display', 'block')
+                body.find('button#bt-create-form').css('display', 'none')
+                body.find('button#bt-back').css('display', 'inline')
+                body.find('div#content-list').html('')
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    })
+
+    $('body').on('click', 'button.bt-summary', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'stok-opname/'+id+'/showSummary',
+            method: 'GET',
+            dataType: 'html',
+            beforeSend: function(){
+                body.find('div#content-list').html(
+                '<strong class="text-center" style="margin: 10px 25px;">Please wait,,,,</strong>'+
+                '<p style="margin: 10px 25px;">System sedang melakukan loading data......</p>'
+                )
+            },
+            success: function(result){
+                body.find('div#content-form').html(result).css('display', 'block')
+                body.find('button#bt-create-form').css('display', 'none')
+                body.find('button#bt-back').css('display', 'inline')
+                body.find('div#content-list').html('')
+            },
+            error: function(err){
+                console.log(err)
+                body.find('div#content-list').html(
+                    '<strong class="text-center" style="margin: 10px 25px;">Data Error,,,,</strong>'+
+                    '<p style="margin:25px;">'+JSON.stringify(err)+'</p>'
+                    )
+            }
+        })
+    })
+
+    $('body').on('click', 'button#bt-delete', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         swal({
@@ -75,7 +125,7 @@ $(function(){
                   async: true,
                   url: 'stok-opname/'+id+'/destroy',
                   method: 'DELETE',
-                  dataType: 'html',
+                  dataType: 'json',
                   processData: false,
                   mimeType: "multipart/form-data",
                   contentType: false,
@@ -133,7 +183,7 @@ $(function(){
             success: function(result){
                 if(result.success){
                     swal("Okey,,,!", result.message, "success")
-                    initDefault()
+                    // initDefault()
                 }else{
                     swal("Opps,,,!", result.message, "warning")
                 }

@@ -1,47 +1,35 @@
 {{ script('ajax/index') }}
-{{ script('ajax/opt-pemasok') }}
 {{ script('ajax/opt-gudang') }}
+{{ script('ajax/opt-pemasok') }}
 {{ script('ajax/initDate') }}
 <div class="panel-wrapper collapse in" aria-expanded="true">
     <div class="row">
         <div class="col-sm-12 col-xs-12">
-            <form id="form-update">
+            <form id="form-update" data-id="{{data.id}}">
                 {{ csrfField() }}
                 <div class="panel-body">
                     <div class="col-md-3">
                         <div class="form-group">
                             <label class="control-label">Tanggal <span class="text-danger">*</span></label>
-                            <input type="date" name="received_at" class="form-control item-data setDate" data-tgl="{{data.received_at}}" required>
+                            <input type="date" name="date_opname" class="form-control item-data setDate" data-tgl="{{data.date_opname}}" required>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label class="control-label">No.Faktur/Nota</label>
-                            <input type="text" name="reff_rcp" class="form-control item-data" placeholder="e.g : {{kode}}" value="{{data.reff_rcp}}">
+                            <label class="control-label">Kode <span class="text-danger">*</span></label>
+                            <input type="text" name="kode_opname" class="form-control item-data" value="{{data.kode_opname}}" readonly>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">No.Request <span class="text-danger">*</span></label>
-                            <input type="text" name="kode" class="form-control item-data" placeholder="Input No.Pesanan" value="{{data.reff_ro}}">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Pemasok <span class="text-danger">*</span></label>
-                            <select name="pemasok_id" class="form-control item-data selectPemasok" data-values="{{data.pemasok_id}}" required></select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label class="control-label">Gudang <span class="text-danger">*</span></label>
-                            <select name="gudang_id" class="form-control item-data selectGudang" data-values="{{data.gudang_id}}" required></select>
+                            <select type="text" name="gudang_id" class="form-control item-data selectGudang" data-values="{{data.gudang_id}}" data-cabang="{{auth.user.cabang_id}}" required></select>
                         </div>
                     </div>
-                    <div class="col-md-9">
+                    <div class="col-md-12">
                         <div class="form-group">
                             <label class="control-label">Narasi</label>
-                            <input type="text" name="description" class="form-control item-data" value="{{data.narasi ? data.narasi : ''}}"> 
+                            <input type="text" name="keterangan" class="form-control item-data" value="{{data.keterangan || ''}}"> 
                         </div>
                     </div>
                 </div>
@@ -53,11 +41,11 @@
                                     <thead>
                                         <th class="bg-extralight" width="50">No</th>
                                         <th class="bg-inverse">Item Details</th>
+                                        <th class="bg-title text-center" width="80">ACT</th>
                                     </thead>
                                     <tbody id="item-details">
-                                        @!each(data in data.items, include = 'components.terima-barang.item-update')
+                                        @!each(item in data.items, include = 'logistik.stok-opname.item-update')
                                     </tbody>
-                                    <!--
                                     <tfoot>
                                         <tr>
                                             <td colspan="3">
@@ -75,17 +63,30 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    </tfoot>-->
+                                    </tfoot>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="panel-footer">
-                    <!--<button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>-->
-                    <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                    <div class="row">
+                        <div class="col-md-6 text-left">
+                            <button type="button" class="btn btn-danger waves-effect waves-light" id="bt-delete" data-id="{{data.id}}">Delete Data</button>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <button type="reset" class="btn btn-default waves-effect waves-light" id="bt-back">cancel</button>
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script>
+    $(function(){
+        var body = $('body')
+        $('select').select2()
+    })
+</script>

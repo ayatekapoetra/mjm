@@ -8,6 +8,7 @@ const DefCoa = use("App/Models/DefCoa")
 const UsrMenu = use("App/Models/UsrMenu")
 const UsrCabang = use("App/Models/UsrCabang")
 const SysConfig = use("App/Models/SysConfig")
+const Cabang = use("App/Models/master/Cabang")
 const Barang = use("App/Models/master/Barang")
 const Pemasok = use("App/Models/master/Pemasok")
 const Pelanggan = use("App/Models/master/Pelanggan")
@@ -703,6 +704,13 @@ class initFunc {
         let patten = `${conf.prefix_init_receipt_brg}${strCabang}/${strDate}/${romanNumber}-${nomor}`
 
         return patten
+    }
+
+    async GEN_KODE_OPNAME (cabangID) {
+        const cabang = (await Cabang.query().where('id', cabangID).last()).toJSON()
+        console.log(cabang);
+        let str = `${cabang.kode}OPN${moment().format('YYYYMMDD')}`
+        return str
     }
 
     async GEN_KODE_MUTASI (id) {

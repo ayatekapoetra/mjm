@@ -441,9 +441,10 @@ Route.group(() => {
     Route.get('/stok-opname/create', 'StokOpnameController.create').as('log.stok-opname.create').middleware('C')
     Route.get('/stok-opname/:id/show', 'StokOpnameController.show').as('log.stok-opname.show').middleware('U')
     Route.post('/stok-opname/:id/update', 'StokOpnameController.update').as('log.stok-opname.update').middleware('U')
+    Route.get('/stok-opname/:id/showSummary', 'StokOpnameController.showSummary').as('log.stok-opname.showSummary').middleware('R')
     Route.delete('/stok-opname/:id/destroy', 'StokOpnameController.destroy').as('log.stok-opname.destroy').middleware('D')
     Route.get('/stok-opname/create/add-item', 'StokOpnameController.addItem').as('log.stok-opname.addItem').middleware('C')
-    
+
 }).prefix('logistik').namespace('logistik')
 
 /*

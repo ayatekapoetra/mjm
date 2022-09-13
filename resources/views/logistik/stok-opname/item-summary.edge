@@ -1,0 +1,63 @@
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table id="example23" class="display nowrap" cellspacing="0" width="100%" data-page-length='100'>
+                    <thead class="bg-info">
+                        <tr>
+                            <th class="text-white p-b-10 p-t-10" width="5%">No</th>
+                            <th class="text-white p-b-10 p-t-10" width="10%">Tanggal<br>Kode</th>
+                            <th class="text-white p-b-10 p-t-10" width="15%">Lokasi <br>Stokopname</th>
+                            <th class="text-white p-b-10 p-t-10" width="15%">Kode<br/>Barang</th>
+                            <th class="text-white p-b-10 p-t-10" width="*">Item<br/>Barang</th>
+                            <th class="text-white p-b-10 p-t-10">Qty<br/>Opname</th>
+                            <th class="text-white p-b-10 p-t-10">Qty<br>OnHand</th>
+                            <th class="text-white p-b-10 p-t-10">Selisih</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in data)
+                            <tr>
+                                <td>{{$loop.index + 1}}</td>
+                                <td>
+                                    {{item.date_opname}} <br>
+                                    <small>{{item.kode}}</small>
+                                </td>
+                                <td>
+                                    <small>{{item.cabang.nama}}</small><br>
+                                    <small>{{item.gudang.nama}}</small>
+                                </td>
+                                <td>{{item.barang.kode}}</td>
+                                <td>
+                                    <small>{{item.barang.num_part}}</small> <br>
+                                    {{item.barang.nama}}
+                                </td>
+                                <td class="text-success text-right">{{item.qty_opname}}</td>
+                                <td class="text-warning text-right">{{item.qty_onhand}}</td>
+                                <td class="text-center">
+                                    @if(item.variences != 0)
+                                        <strong class="text-danger">{{item.variences}}</strong>
+                                    @else
+                                        <span>-</span>
+                                    @endif
+                                </td>
+                            </tr>
+                          
+                        @endeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        $('table#example23').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+    })
+</script>

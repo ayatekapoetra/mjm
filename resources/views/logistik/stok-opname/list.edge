@@ -20,28 +20,30 @@
                                 <tr>
                                     <td class="text-center">{{$loop.index + 1}}</td>
                                     <td>
-                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">
-                                            <i class="fa fa-trash"></i>
+                                        <button class="m-b-5 btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">
+                                            <i class="fa fa-edit"></i> EDIT
+                                        </button> <br>
+                                        <button class="btn btn-outline btn-info btn-xs bt-summary" data-id="{{item.id}}">
+                                            <i class="fa fa-th-list"></i>
                                         </button>
-                                        <button class="btn btn-outline btn-default btn-xs bt-print" data-id="{{item.id}}">
+                                        <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}" style="border: 1px solid #aea8a8;">
                                             <i class="fa fa-print"></i>
                                         </button>
                                     </td>
-                                    <td class="dateFormatDef" data-patten="YYYY-MM-DD" data-tgl="{{item.received_at}}">
-                                        <strong></strong>
+                                    <td class="dateFormatDef" data-patten="YYYY-MM-DD" data-tgl="{{item.date_opname}}" data-elm="span">
+                                        <span></span><br>
+                                        <code>{{item.author.nama_lengkap}}</code>
                                     </td>
                                     <td>
-                                        {{item.reff_rcp}}
+                                        {{item.kode_opname}} <br>
+                                        <small class="text-warning">{{item.items.length}} Items Barang</small>
                                     </td>
                                     <td>
-                                        @if(item.pemasok_id)
-                                            {{item.pemasok.nama}}
-                                        @else
-                                            -
-                                        @endif
+                                        <small>{{item.cabang.kode}} - {{item.cabang.nama}}</small><br>
+                                        <small>{{item.gudang.kode}} | {{item.gudang.nama}}</small>
                                     </td>
                                     <td class="">
-                                        {{item.narasi ? item.narasi : '-'}}
+                                        {{item.keterangan ? item.keterangan : '-'}}
                                     </td>
                                 </tr>
                             @endeach
