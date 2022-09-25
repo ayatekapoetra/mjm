@@ -86,7 +86,7 @@ class masterBarang {
             }
         }
         
-        if(req.harga_beli){
+        if(req.harga_beli && parseFloat(req.harga_beli) > 0){
             const hargaBeli = new HargaBeli()
             hargaBeli.fill({
                 barang_id: req.barang_id,
@@ -110,7 +110,7 @@ class masterBarang {
             }
         }
 
-        if(req.harga_jual){
+        if(req.harga_jual && parseFloat(req.harga_jual) > 0){
             const hargaJual = new HargaJual()
             hargaJual.fill({
                 barang_id: req.barang_id,

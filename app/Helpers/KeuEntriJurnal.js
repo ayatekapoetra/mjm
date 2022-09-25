@@ -17,6 +17,7 @@ const KeuEntriJurnal = use("App/Models/transaksi/KeuEntriJurnal")
 const KeuEntriJurnalItem = use("App/Models/transaksi/KeuEntriJurnalItem")
 const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
 const OpsPelangganBayar = use("App/Models/operational/OpsPelangganBayar")
+const KeuFakturPembelian = use("App/Models/transaksi/KeuFakturPembelian")
 const KeuEntriJurnalAttach = use("App/Models/transaksi/KeuEntriJurnalAttach")
 
 class entriJurnal {
@@ -32,8 +33,9 @@ class entriJurnal {
             .with('attach')
             .with('cabang')
             .with('createdby')
-            .with('items')
+            .with('items', w => w.where('aktif', 'Y'))
             .where( w => {
+                w.where('aktif', 'Y')
                 if(!isPusat){
                     w.where('cabang_id', ws.cabang_id)
                 }
@@ -46,18 +48,19 @@ class entriJurnal {
     }
 
     async POST (req, user, filex) {
-        console.log(req);
         const ws = await initFunc.WORKSPACE(user)
         const trx = await DB.beginTransaction()
         req.cabang_id = ws.cabang_id
 
         const sumDebit = req.items.reduce((a, b) => { return a + parseFloat(b.debit) }, 0)
         const sumKredit = req.items.reduce((a, b) => { return a + parseFloat(b.kredit) }, 0)
+        const kode = await initFunc.GEN_KODE_JURNAL_PENYESUAIAN()
 
         /** INSERT TRX JURNAL ADJUSTMENT **/
         const keuEntriJurnal = new KeuEntriJurnal()
         keuEntriJurnal.fill({
             cabang_id: ws.cabang_id,
+            reff: kode,
             author: user.id,
             trx_date: req.trx_date,
             narasi: req.narasi,
@@ -79,11 +82,15 @@ class entriJurnal {
             const keuEntriJurnalItem = new KeuEntriJurnalItem()
             keuEntriJurnalItem.fill({
                 sesuai_id: keuEntriJurnal.id,
+                kode: kode,
+                pemasok_id: obj.pemasok_id || null,
                 faktur_id: obj.faktur_id || null,
+                pelanggan_id: obj.pelanggan_id || null,
                 order_id: obj.order_id || null,
                 cabang_id: ws.cabang_id,
                 gudang_id: obj.gudang_id || null,
                 barang_id: obj.barang_id || null,
+                sync_stok: obj.sync_stok || null,
                 coa_id: obj.coa_id,
                 qty: obj.qty || null,
                 narasi: req.narasi,
@@ -107,7 +114,7 @@ class entriJurnal {
                 const gudang = (await Gudang.query().with('cabang').where('id', obj.gudang_id).last())?.toJSON()
                 const cabang = gudang.cabang
                 req.cabang_id = cabang.id
-                if(obj.isStok != 'Y'){
+                if(obj.sync_stok != 'N'){
                     const barangLokasi = new BarangLokasi()
                     barangLokasi.fill({
                         sesuai_item_id: keuEntriJurnalItem.id,
@@ -135,7 +142,7 @@ class entriJurnal {
             /* JIKA AKUN PIUTANG DAGANG */
             let bayarID
             if(obj.pelanggan_id){
-                let paid_trx = parseFloat(obj.debit) - parseFloat(obj.kredit)
+                let paid_trx = parseFloat(obj.kredit) - parseFloat(obj.debit)
                 
                 // FIND INVOICES
                 const order = await OpsPelangganOrder.query().where('id', obj.order_id).last()
@@ -163,7 +170,7 @@ class entriJurnal {
                     order_id: order.id,
                     cabang_id: req.cabang_id,
                     no_invoice: order.kdpesanan,
-                    no_kwitansi: moment().format('YYYYMMDD') + '.JAD' + keuEntriJurnalItem.id,
+                    no_kwitansi: kode,
                     date_paid: req.trx_date,
                     metode_paid: 'jurnal penyesuaian',
                     paid_trx: paid_trx,
@@ -184,9 +191,24 @@ class entriJurnal {
             }
 
             /* JIKA AKUN HUTANG DAGANG */
-            // if(obj.pemasok_id){
+            if(obj.pemasok_id){
+                const keuFakturPembelian = await KeuFakturPembelian.query().where('id', obj.faktur_id).last()
+                var nilaiHutang = parseFloat(obj.debit) - parseFloat(obj.kredit)
+                keuFakturPembelian.merge({
+                    sisa: keuFakturPembelian.grandtot - nilaiHutang,
+                    sts_paid: (keuFakturPembelian.grandtot - nilaiHutang) != 0 ? 'bersisa':'lunas'
+                })
 
-            // }
+                try {
+                    await keuFakturPembelian.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        message: 'Failed update sisa Hutang dagang \n'+ JSON.stringify(error)
+                    }
+                }
+            }
 
             /* JIKA AKUN KAS */
             if(obj.kas_id){
@@ -199,7 +221,7 @@ class entriJurnal {
                     kas_id: obj.kas_id,
                     ja_id: keuEntriJurnalItem.id,
                     saldo_rill: parseFloat(obj.debit) - parseFloat(obj.kredit),
-                    desc: '[ ' +moment().format('YYYYMMDD') + '.JAD' + keuEntriJurnalItem.id+ ' ] Kas Jurnal Penyesuaian',
+                    desc: '[ ' +kode+ ' ] Kas Jurnal Penyesuaian',
                 })
 
                 try {
@@ -222,10 +244,10 @@ class entriJurnal {
                 trxBank.fill({
                     trx_date: req.trx_date,
                     bank_id: obj.bank_id,
-                    mutasi: moment().format('YYYYMMDD') + '.JAD' + keuEntriJurnalItem.id,
+                    mutasi: kode,
                     ja_id: keuEntriJurnalItem.id,
                     saldo_net: parseFloat(obj.debit) - parseFloat(obj.kredit),
-                    desc: '[ ' +moment().format('YYYYMMDD') + '.JAD' + keuEntriJurnalItem.id+ ' ] Bank Jurnal Penyesuaian',
+                    desc: '[ ' +kode+ ' ] Bank Jurnal Penyesuaian',
                 })
 
                 try {
@@ -246,9 +268,11 @@ class entriJurnal {
                 cabang_id: req.cabang_id,
                 kas_id: obj.kas_id || null,
                 bank_id: obj.bank_id || null,
+                trx_jual: obj.order_id || null,
+                fakturbeli_id: obj.faktur_id || null,
                 coa_id: obj.coa_id,
-                reff: moment().format('YYYYMMDD') + '.JAD' + keuEntriJurnalItem.id,
-                narasi: '[ ' +moment().format('YYYYMMDD') + '.JAD' + keuEntriJurnalItem.id+ ' ] Persediaan Jurnal Penyesuaian',
+                reff: kode,
+                narasi: '[ ' +kode+ ' ] Persediaan Jurnal Penyesuaian',
                 trx_date: req.trx_date,
                 nilai: obj.debit,
                 trx_jual: obj.order_id || null,
@@ -272,9 +296,11 @@ class entriJurnal {
                 cabang_id: req.cabang_id,
                 kas_id: obj.kas_id || null,
                 bank_id: obj.bank_id || null,
+                trx_jual: obj.order_id || null,
+                fakturbeli_id: obj.faktur_id || null,
                 coa_id: obj.coa_id,
-                reff: moment().format('YYYYMMDD') + 'JAD' + keuEntriJurnalItem.id,
-                narasi: '[ ' +moment().format('YYYYMMDD') + '.JAD' + keuEntriJurnalItem.id+ ' ] Persediaan Jurnal Penyesuaian',
+                reff: kode,
+                narasi: '[ ' +kode+ ' ] Persediaan Jurnal Penyesuaian',
                 trx_date: req.trx_date,
                 nilai: obj.kredit,
                 trx_jual: obj.order_id || null,
@@ -366,7 +392,7 @@ class entriJurnal {
 
     async SHOW (params) {
         const data = (
-            await TrxJurnalAdjust
+            await KeuEntriJurnal
             .query()
             .with('createdby')
             .with('items')
@@ -379,43 +405,173 @@ class entriJurnal {
     }
 
     async UPDATE (params, req, user, filex) {
-        const ws = await initFunc.GET_WORKSPACE(user.id)
+        req = req.dataForm
         const trx = await DB.beginTransaction()
+        const kode = await initFunc.GEN_KODE_JURNAL_PENYESUAIAN()
 
-        async function GET_DATA_COA(id){
-            const data = await AccCoa.query().where('id', id).last()
-            return data
+        /**
+         * START ROLLBACK ALL DATA
+         * **/
+
+        const oldKeuEntriJurnal = await KeuEntriJurnal.query().where('id', params.id).last()
+        try {
+            oldKeuEntriJurnal.merge({aktif: 'N'})
+            await oldKeuEntriJurnal.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message:'Gagal Rollback Master Jurnal Penyesuaian...'
+            }
         }
 
-        async function GET_CABANG(id){
-            const data = await Gudang.query().where('id', id).last()
-            return data
+        // INACTIVE STATUS AKTIF ITEMS
+        const items = (await KeuEntriJurnalItem.query().where( w => {
+            w.where('sesuai_id', params.id)
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        for (const val of items) {
+            const updItems = await KeuEntriJurnalItem.query().where('id', val.id).last()
+            try {
+                updItems.merge({aktif: 'N'})
+                await updItems.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message:'Gagal Rollback Items Jurnal Penyesuaian...'
+                }
+            }
+
+            const trxJurnalDebit = await TrxJurnal.query().where( w => {
+                w.where('sesuai_item_id', val.id)
+                w.where('dk', 'd')
+            }).last()
+
+            try {
+                trxJurnalDebit.merge({aktif: 'N'})
+                await trxJurnalDebit.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message:'Gagal Rollback TRX Jurnal Penyesuaian debit...'
+                }
+            }
+
+            const trxJurnalKredit = await TrxJurnal.query().where( w => {
+                w.where('sesuai_item_id', val.id)
+                w.where('dk', 'k')
+            }).last()
+
+            try {
+                trxJurnalKredit.merge({aktif: 'N'})
+                await trxJurnalKredit.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message:'Gagal Rollback TRX Jurnal Penyesuaian kredit...'
+                }
+            }
+
+            if(val.barang_id){
+                if(val.sync_stok === 'Y'){
+                    try {
+                        await BarangLokasi.query().where('sesuai_item_id', val.id).delete()
+                    } catch (error) {
+                        console.log(error);
+                        return {
+                            success: false,
+                            message: 'Failed delete jumlah barang pada gudang \n'+ JSON.stringify(error)
+                        }
+                    }
+                }
+            }
+
+            // CARI PEMBAYARAN ORDER PELANGGAN
+            const bayarPelanggan = (await OpsPelangganBayar.query().where( w => {
+                w.where('order_id', val.order_id)
+            }).fetch()).toJSON()
+
+            for (const elm of bayarPelanggan) {
+                const updBayar = await OpsPelangganBayar.query().where('id', elm.id).last()
+                try {
+                    updBayar.merge({aktif: 'N'})
+                    await updBayar.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message:'Gagal Rollback Pembayaran Pelanggan Jurnal Penyesuaian...'
+                    }
+                }
+            }
+
+            // CARI TRANSAKSI BANK
+            const trxBank = (await TrxBank.query().where('ja_id', val.id).fetch()).toJSON()
+            for (const elm of trxBank) {
+                const updTrxBank = await TrxBank.query().where('id', elm.id).last()
+                try {
+                    updTrxBank.merge({aktif: 'N'})
+                    await updTrxBank.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message:'Gagal Rollback TRX BANK pada Jurnal Penyesuaian...'
+                    }
+                }
+            }
+
+            // CARI TRANSAKSI KAS
+            const trxKas = (await TrxKas.query().where('ja_id', val.id).fetch()).toJSON()
+            for (const elm of trxKas) {
+                const updTrxKas = await TrxKas.query().where('id', elm.id).last()
+                try {
+                    updTrxKas.merge({aktif: 'N'})
+                    await updTrxKas.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message:'Gagal Rollback TRX KAS pada Jurnal Penyesuaian...'
+                    }
+                }
+            }
         }
 
-        var totDebit = req.items.reduce((a, b) => { return a + parseFloat(b.d) }, 0)
-        var totKredit = req.items.reduce((a, b) => { return a + parseFloat(b.k) }, 0)
-        var debit = 0
-        var kredit = 0
+        /**
+         ***** END ROLLBACK ALL DATA
+         * **/
 
-        if(totDebit > totKredit){
-            var debit = totDebit - totKredit
-        }else if(totDebit < totKredit){
-            var kredit = totKredit - totDebit
-        }
+        req.cabang_id = user.cabang_id
+        
+        const sumDebit = req.items.reduce((a, b) => { return a + parseFloat(b.debit) }, 0)
+        const sumKredit = req.items.reduce((a, b) => { return a + parseFloat(b.kredit) }, 0)
 
         /** UPDATE TRX JURNAL ADJUSTMENT **/
-        const trxJurnalAdjust = await TrxJurnalAdjust.query().where('id', params.id).last()
-        trxJurnalAdjust.merge({
-            bisnis_id: ws.bisnis_id,
+        const newKeuEntriJurnal = new KeuEntriJurnal()
+        newKeuEntriJurnal.merge({
+            cabang_id: req.cabang_id,
+            reff: kode,
             author: user.id,
             trx_date: req.trx_date,
-            reff: req.reff || null,
-            debit: debit,
-            kredit: kredit
+            narasi: req.narasi,
+            debit: sumDebit,
+            kredit: sumKredit
         })
 
         try {
-            await trxJurnalAdjust.save(trx)
+            await newKeuEntriJurnal.save(trx)
         } catch (error) {
             console.log(error);
             return {
@@ -423,126 +579,236 @@ class entriJurnal {
                 message: 'Failed save jurnal penyesuaian '+ JSON.stringify(error)
             }
         }
-        
-        if(filex){
-            const randURL = moment().format('YYYYMMDDHHmmss')
-            const aliasName = `JA-${randURL}.${filex.extname}`
-            var uriLampiran = '/upload/'+aliasName
 
-            await filex.move(Helpers.publicPath(`upload`), {
-                name: aliasName,
-                overwrite: true,
-            })
-
-            let lampiranFile = await LampiranFile.query().where('ja_id', params.id).last()
-            // console.log('-----------', lampiranFile);
-            if(lampiranFile){
-                lampiranFile.merge({
-                    datatype: filex.extname,
-                    url: uriLampiran
-                })
-            }else{
-                lampiranFile = new LampiranFile()
-                lampiranFile.fill({
-                    ja_id: params.id,
-                    datatype: filex.extname,
-                    url: uriLampiran
-                })
-            }
-            try {
-                await lampiranFile.save(trx)
-            } catch (error) {
-                console.log(error);
-                return {
-                    success: false,
-                    message: 'Failed save files '+ JSON.stringify(error)
-                }
-            }
-        }
-
-        
-
-        /** DELETE JURNAL PENYESUAIAN ITEM **/
-        await TrxJurnalAdjustItem.query(trx).where('trx_adjust', params.id).delete()
-
-        /** DELETE JURNAL ITEM **/
-        await TrxJurnal.query(trx).where('trx_adjust', params.id).delete()
-
-        /** DELETE LOKASI BARANG ITEM **/
-        await BarangLokasi.query(trx).where('trx_adj', params.id).delete()
-
-        /** INSERT JURNAL PENYESUAIAN ITEM **/
         for (const obj of req.items) {
-            var coa = await GET_DATA_COA(obj.coa_id)
-            let gudang = await GET_CABANG(obj.gudang_id)
-
-            /** INSERT TRX JURNAL ADJUSTMENT ITEMS **/
-            const trxJurnalAdjustItem = new TrxJurnalAdjustItem()
-            trxJurnalAdjustItem.fill({
-                d: obj.d,
-                k: obj.k,
-                kode: coa.kode,
-                coa_id: obj.coa_id,
-                narasi: obj.narasi,
-                trx_adjust: trxJurnalAdjust.id,
-                trx_beli: obj.trx_beli || null,
-                trx_jual: obj.trx_jual || null,
+            const keuEntriJurnalItem = new KeuEntriJurnalItem()
+            keuEntriJurnalItem.fill({
+                sesuai_id: newKeuEntriJurnal.id,
+                kode: kode,
+                pemasok_id: obj.pemasok_id || null,
+                faktur_id: obj.faktur_id || null,
+                pelanggan_id: obj.pelanggan_id || null,
+                order_id: obj.order_id || null,
+                cabang_id: user.cabang_id,
                 gudang_id: obj.gudang_id || null,
                 barang_id: obj.barang_id || null,
-                qty: obj.qty || 0,
-                cabang_id: gudang?.cabang_id || null,
+                sync_stok: obj.sync_stok || null,
+                coa_id: obj.coa_id,
+                qty: obj.qty || null,
+                narasi: req.narasi,
+                d: obj.debit,
+                k: obj.kredit,
+                status: parseFloat(obj.debit) != parseFloat(obj.kredit) ? 'Tidak Sesuai' : 'Sesuai'
             })
+
             try {
-                await trxJurnalAdjustItem.save(trx)
+                await keuEntriJurnalItem.save(trx)
             } catch (error) {
                 console.log(error);
                 return {
                     success: false,
-                    message: 'Failed save jurnal penyesuaian items '+ JSON.stringify(error)
+                    message: 'Failed save jurnal penyesuaian items \n'+ JSON.stringify(error)
                 }
             }
 
-            /** INSERT TRX JURNAL DEBIT **/
+            /* JIKA AKUN PERSEDIAAN */
+            if(obj.barang_id){
+                const gudang = (await Gudang.query().with('cabang').where('id', obj.gudang_id).last())?.toJSON()
+                const cabang = gudang.cabang
+                req.cabang_id = cabang.id
+                if(obj.sync_stok != 'N'){
+                    const barangLokasi = new BarangLokasi()
+                    barangLokasi.fill({
+                        sesuai_item_id: keuEntriJurnalItem.id,
+                        createdby: user.id,
+                        cabang_id: cabang.id,
+                        gudang_id: obj.gudang_id,
+                        barang_id: obj.barang_id,
+                        qty_hand: parseFloat(obj.debit) >= parseFloat(obj.kredit) ? parseFloat(obj.qty) : (parseFloat(obj.qty) * -1)
+                    })
+    
+                    try {
+                        await barangLokasi.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        return {
+                            success: false,
+                            message: 'Failed save jumlah barang pada gudang \n'+ JSON.stringify(error)
+                        }
+                    }
+                }
+    
+                
+            }
+
+            /* JIKA AKUN PIUTANG DAGANG */
+            let bayarID
+            if(obj.pelanggan_id){
+                let paid_trx = parseFloat(obj.kredit) - parseFloat(obj.debit)
+                
+                // FIND INVOICES
+                const order = await OpsPelangganOrder.query().where('id', obj.order_id).last()
+                req.cabang_id = order.cabang_id
+                let status = order.grandtot_trx > paid_trx ? 'dp':'lunas'
+
+                order.merge({
+                    paid_trx: order.paid_trx + paid_trx,
+                    sisa_trx: order.sisa_trx - paid_trx,
+                    status: status
+                })
+
+                try {
+                    await order.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        message: 'Failed update sisa order \n'+ JSON.stringify(error)
+                    }
+                }
+
+                const bayar = new OpsPelangganBayar()
+                bayar.fill({
+                    order_id: order.id,
+                    cabang_id: req.cabang_id,
+                    no_invoice: order.kdpesanan,
+                    no_kwitansi: kode,
+                    date_paid: req.trx_date,
+                    metode_paid: 'jurnal penyesuaian',
+                    paid_trx: paid_trx,
+                    createdby: user.id,
+                    is_delay: 'N'
+                })
+
+                try {
+                    await bayar.save(trx)
+                    bayarID = bayar.id
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        message: 'Failed save pembayaran \n'+ JSON.stringify(error)
+                    }
+                }
+            }
+
+            /* JIKA AKUN HUTANG DAGANG */
+            if(obj.pemasok_id){
+                const keuFakturPembelian = await KeuFakturPembelian.query().where('id', obj.faktur_id).last()
+                var nilaiHutang = parseFloat(obj.debit) - parseFloat(obj.kredit)
+                keuFakturPembelian.merge({
+                    sisa: keuFakturPembelian.grandtot - nilaiHutang,
+                    sts_paid: (keuFakturPembelian.grandtot - nilaiHutang) != 0 ? 'bersisa':'lunas'
+                })
+
+                try {
+                    await keuFakturPembelian.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        message: 'Failed update sisa Hutang dagang \n'+ JSON.stringify(error)
+                    }
+                }
+            }
+
+            /* JIKA AKUN KAS */
+            if(obj.kas_id){
+                const kas = await Kas.query().where('id', obj.kas_id).last()
+                req.cabang_id = kas.cabang_id
+
+                const trxKas = new TrxKas()
+                trxKas.fill({
+                    trx_date: req.trx_date,
+                    kas_id: obj.kas_id,
+                    ja_id: keuEntriJurnalItem.id,
+                    saldo_rill: parseFloat(obj.debit) - parseFloat(obj.kredit),
+                    desc: '[ ' +kode+ ' ] Kas Jurnal Penyesuaian',
+                })
+
+                try {
+                    await trxKas.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        message: 'Failed save TrxKas \n'+ JSON.stringify(error)
+                    }
+                }
+            }
+
+            /* JIKA AKUN BANK */
+            if(obj.bank_id){
+                const bank = await Bank.query().where('id', obj.bank_id).last()
+                req.cabang_id = bank.cabang_id
+                
+                const trxBank = new TrxBank()
+                trxBank.fill({
+                    trx_date: req.trx_date,
+                    bank_id: obj.bank_id,
+                    mutasi: kode,
+                    ja_id: keuEntriJurnalItem.id,
+                    saldo_net: parseFloat(obj.debit) - parseFloat(obj.kredit),
+                    desc: '[ ' +kode+ ' ] Bank Jurnal Penyesuaian',
+                })
+
+                try {
+                    await trxBank.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        message: 'Failed save TrxKas \n'+ JSON.stringify(error)
+                    }
+                }
+            }
+
+            /* JIKA AKUN HUTANG DAGANG */
             const trxJurnalDebit = new TrxJurnal()
             trxJurnalDebit.fill({
-                trx_adjust: trxJurnalAdjust.id,
-                trx_date: req.trx_date,
                 createdby: user.id,
-                bisnis_id: ws.bisnis_id,
-                trx_beli: obj.trx_beli || null,
-                trx_jual: obj.trx_jual || null,
+                cabang_id: req.cabang_id,
+                kas_id: obj.kas_id || null,
+                bank_id: obj.bank_id || null,
+                trx_jual: obj.order_id || null,
+                fakturbeli_id: obj.faktur_id || null,
                 coa_id: obj.coa_id,
-                kode: coa.kode,
-                nilai: obj.d,
+                reff: kode,
+                narasi: '[ ' +kode+ ' ] Persediaan Jurnal Penyesuaian',
+                trx_date: req.trx_date,
+                nilai: obj.debit,
+                trx_jual: obj.order_id || null,
+                trx_paid: bayarID || null,
                 dk: 'd',
-                reff: obj.reff || null,
-                narasi: obj.narasi,
+                sesuai_item_id: keuEntriJurnalItem.id
             })
+
             try {
                 await trxJurnalDebit.save(trx)
             } catch (error) {
                 console.log(error);
                 return {
                     success: false,
-                    message: 'Failed save jurnal debit '+ JSON.stringify(error)
+                    message: 'Failed save trxjurnal debit \n'+ JSON.stringify(error)
                 }
             }
-
-            /** INSERT TRX JURNAL KREDIT **/
             const trxJurnalKredit = new TrxJurnal()
             trxJurnalKredit.fill({
-                trx_adjust: trxJurnalAdjust.id,
-                trx_date: req.trx_date,
                 createdby: user.id,
-                bisnis_id: ws.bisnis_id,
-                trx_beli: obj.trx_beli || null,
-                trx_jual: obj.trx_jual || null,
+                cabang_id: req.cabang_id,
+                kas_id: obj.kas_id || null,
+                bank_id: obj.bank_id || null,
+                trx_jual: obj.order_id || null,
+                fakturbeli_id: obj.faktur_id || null,
                 coa_id: obj.coa_id,
-                kode: coa.kode,
-                nilai: obj.k,
+                reff: kode,
+                narasi: '[ ' +kode+ ' ] Persediaan Jurnal Penyesuaian',
+                trx_date: req.trx_date,
+                nilai: obj.kredit,
+                trx_jual: obj.order_id || null,
+                trx_paid: bayarID || null,
                 dk: 'k',
-                reff: obj.reff || null,
-                narasi: obj.narasi,
+                sesuai_item_id: keuEntriJurnalItem.id
             })
 
             try {
@@ -551,35 +817,74 @@ class entriJurnal {
                 console.log(error);
                 return {
                     success: false,
-                    message: 'Failed save jurnal kredit '+ JSON.stringify(error)
+                    message: 'Failed save trxjurnal kredit \n'+ JSON.stringify(error)
                 }
             }
+            
 
-            /** JIKA QTY/JUMLAH DITEMUKAN **/
-            if(obj.gudang_id && obj.barang_id){
-                const tambahBarang = new BarangLokasi()
-                tambahBarang.fill({
-                    trx_adj: trxJurnalAdjust.id,
-                    bisnis_id: ws.bisnis_id,
-                    cabang_id: gudang?.cabang_id || null,
-                    barang_id: obj.barang_id || null,
-                    gudang_id: obj.gudang_id || null,
-                    qty_hand: obj.qty,
-                    qty_rec: 0,
-                    qty_del: 0,
-                    createdby: user.id
+        }
+        
+        
+        if(filex){
+            if(filex.attach?.length > 1){
+                console.log('multi file');
+                for (const [i, obj] of (filex.attach).entries()) {
+                    const randURL = moment().format('YYYYMMDDHHmmss') + '-' + i
+                    const aliasName = `J-SESUAI-${randURL}.${obj.extname}`
+                    var uriLampiran = '/upload/'+aliasName
+                    await obj.move(Helpers.publicPath(`upload`), {
+                        name: aliasName,
+                        overwrite: true,
+                    })
+
+                    const lampiranFile = new KeuEntriJurnalAttach()
+                    lampiranFile.fill({
+                        sesuai_id: keuEntriJurnal.id,
+                        filetype: obj.extname,
+                        size: obj.size,
+                        url: uriLampiran
+                    })
+                    try {
+                        await lampiranFile.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: 'Failed save data transfer Kas & Bank '+ JSON.stringify(error)
+                        }
+                    }
+                }
+            }else{
+                console.log('single file');
+                const randURL = moment().format('YYYYMMDDHHmmss')
+                const aliasName = `J-SESUAI-${randURL}.${filex.extname}`
+                var uriLampiran = '/upload/'+aliasName
+                await filex.move(Helpers.publicPath(`upload`), {
+                    name: aliasName,
+                    overwrite: true,
+                })
+    
+                const lampiranFile = new KeuEntriJurnalAttach()
+                lampiranFile.fill({
+                    sesuai_id: keuEntriJurnal.id,
+                    filetype: filex.extname,
+                    size: filex.size,
+                    url: uriLampiran
                 })
                 try {
-                    await tambahBarang.save(trx)
+                    await lampiranFile.save(trx)
                 } catch (error) {
                     console.log(error);
+                    await trx.rollback()
                     return {
                         success: false,
-                        message: 'Failed save jumlah persediaan '+ JSON.stringify(error)
+                        message: 'Failed save data transfer Kas & Bank '+ JSON.stringify(error)
                     }
                 }
             }
         }
+
         await trx.commit()
         return {
             success: true,
@@ -587,18 +892,174 @@ class entriJurnal {
         }
     }
     async DELETE (params) {
+        const trx = await DB.beginTransaction()
+
+        /**
+         * START ROLLBACK ALL DATA
+         * **/
+
+        const oldKeuEntriJurnal = await KeuEntriJurnal.query().where('id', params.id).last()
         try {
-            await TrxJurnalAdjust.query().where('id', params.id).delete()
-            return {
-                success: true,
-                message: 'Success delete data...'
-            }
+            oldKeuEntriJurnal.merge({aktif: 'N'})
+            await oldKeuEntriJurnal.save(trx)
         } catch (error) {
             console.log(error);
+            await trx.rollback()
             return {
                 success: false,
-                message: 'Failed delete data '+ JSON.stringify(error)
+                message:'Gagal Rollback Master Jurnal Penyesuaian...'
             }
+        }
+
+        // INACTIVE STATUS AKTIF ITEMS
+        const items = (await KeuEntriJurnalItem.query().where( w => {
+            w.where('sesuai_id', params.id)
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        for (const val of items) {
+
+            await BarangLokasi.query().where('sesuai_item_id', val.id).delete()
+
+            const updItems = await KeuEntriJurnalItem.query().where('id', val.id).last()
+            try {
+                updItems.merge({aktif: 'N'})
+                await updItems.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message:'Gagal Rollback Items Jurnal Penyesuaian...'
+                }
+            }
+
+            const trxJurnalDebit = await TrxJurnal.query().where( w => {
+                w.where('sesuai_item_id', val.id)
+                w.where('dk', 'd')
+            }).last()
+
+            try {
+                trxJurnalDebit.merge({aktif: 'N'})
+                await trxJurnalDebit.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message:'Gagal Rollback TRX Jurnal Penyesuaian debit...'
+                }
+            }
+
+            const trxJurnalKredit = await TrxJurnal.query().where( w => {
+                w.where('sesuai_item_id', val.id)
+                w.where('dk', 'k')
+            }).last()
+
+            try {
+                trxJurnalKredit.merge({aktif: 'N'})
+                await trxJurnalKredit.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message:'Gagal Rollback TRX Jurnal Penyesuaian kredit...'
+                }
+            }
+
+            // CARI & ROLLBACK PEMBAYARAN ORDER PELANGGAN
+            const bayarPelanggan = (await OpsPelangganBayar.query().where( w => {
+                w.where('order_id', val.order_id)
+            }).fetch()).toJSON()
+
+            for (const elm of bayarPelanggan) {
+                const updBayar = await OpsPelangganBayar.query().where('id', elm.id).last()
+                try {
+                    updBayar.merge({aktif: 'N'})
+                    await updBayar.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message:'Gagal Rollback Pembayaran Pelanggan Jurnal Penyesuaian...'
+                    }
+                }
+            }
+
+            // CARI & ROLLBACK PEMBAYARAN FAKTUR PEMASOK
+            if(val.faktur_id){
+                const fakturPemasok = (await TrxJurnal.query().where( w => {
+                    w.where('sesuai_item_id', params.id)
+                    w.where('fakturbeli_id', val.faktur_id)
+                }).fetch()).toJSON()
+    
+                const valueDebitFaktur =  fakturPemasok.filter( d => d.dk == 'd').reduce((a, b) => { return a + b.nilai }, 0)
+                const valueKreditFaktur =  fakturPemasok.filter( k => k.dk == 'k').reduce((a, b) => { return a + b.nilai }, 0)
+    
+                const valueRollbackFaktur = valueDebitFaktur - valueKreditFaktur
+                const fakturBeli = await KeuFakturPembelian.query().where('id', val.faktur_id).last()
+                try {
+                    fakturBeli.merge({
+                        sisa: fakturBeli.sisa + valueRollbackFaktur,
+                        sts_paid: (fakturBeli.sisa + valueRollbackFaktur) != 0 ? 'bersisa':'lunas'
+                    })
+                    await fakturBeli.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message:'Gagal Rollback KeuFakturPembelian pada Jurnal Penyesuaian...'
+                    }
+                }
+            }
+
+            // CARI TRANSAKSI BANK
+            const trxBank = (await TrxBank.query().where('ja_id', val.id).fetch()).toJSON()
+            for (const elm of trxBank) {
+                const updTrxBank = await TrxBank.query().where('id', elm.id).last()
+                try {
+                    updTrxBank.merge({aktif: 'N'})
+                    await updTrxBank.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message:'Gagal Rollback TRX BANK pada Jurnal Penyesuaian...'
+                    }
+                }
+            }
+
+            // CARI TRANSAKSI KAS
+            const trxKas = (await TrxKas.query().where('ja_id', val.id).fetch()).toJSON()
+            for (const elm of trxKas) {
+                const updTrxKas = await TrxKas.query().where('id', elm.id).last()
+                try {
+                    updTrxKas.merge({aktif: 'N'})
+                    await updTrxKas.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message:'Gagal Rollback TRX KAS pada Jurnal Penyesuaian...'
+                    }
+                }
+            }
+        }
+
+        /**
+         ***** END ROLLBACK ALL DATA
+         * 
+         * **/
+
+        await trx.commit()
+        return {
+            success: true,
+            message: 'Success save data...'
         }
     }
 }

@@ -23,13 +23,18 @@
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <label for="ppn">Sumber</label>
+                            <label for="">Dari</label>
+                            <!--
                             <div class="form-group" style="margin-top: 10px">
                                 <div class="material-switch">
                                     <input id="isBankScr" name="isBankScr" type="checkbox"/>
                                     <label for="isBankScr" class="label-default"></label>
                                     <span id="txt-checkbox-source" class="m-l-10"> Sumber Bank</span>
                                 </div>
+                            </div>-->
+                            <div class="checkbox checkbox-danger">
+                                <input id="isBankScr" name="isBankScr" type="checkbox">
+                                <label for="isBankScr"> Bank Sumber </label>
                             </div>
                         </div>
                         <div class="col-md-3" id="bank-source">
@@ -63,13 +68,18 @@
                     </div>
                     <div class="row">
                         <div class="col-md-2">
-                            <label for="ppn">Tujuan</label>
+                            <label for="">Ke</label>
+                            <!--
                             <div class="form-group" style="margin-top: 10px">
                                 <div class="material-switch">
                                     <input id="isBankTarget" name="isBankTarget" type="checkbox"/>
                                     <label for="isBankTarget" class="label-default"></label>
                                     <span id="txt-checkbox-target" class="m-l-10"> Sumber Bank</span>
                                 </div>
+                            </div>-->
+                            <div class="checkbox checkbox-danger">
+                                <input id="isBankTarget" name="isBankTarget" type="checkbox">
+                                <label for="isBankTarget"> Bank Tujuan </label>
                             </div>
                         </div>
                         <div class="col-md-3" id="bank-target">
@@ -121,13 +131,13 @@
         $('input[name="isBankScr"]').on('click', function(){
             var isBank = $(this).is(':checked')
             if(isBank){
-                $('span#txt-checkbox-source').html('Sumber Kas')
+                $('label[for="isBankScr"]').html('Kas Sumber')
                 $('select[name="bank_src"]').removeAttr('required').val('').trigger('change')
                 $('select[name="kas_src"]').attr('required', 'required')
                 $('div#bank-source').css('display', 'none')
                 $('div#kas-source').css('display', 'block')
             }else{
-                $('span#txt-checkbox-source').html('Sumber Bank')
+                $('label[for="isBankScr"]').html('Bank Sumber')
                 $('select[name="kas_src"]').removeAttr('required').val('').trigger('change')
                 $('select[name="bank_src"]').attr('required', 'required')
                 $('div#bank-source').css('display', 'block')
@@ -138,13 +148,13 @@
         $('input[name="isBankTarget"]').on('click', function(){
             var isBank = $(this).is(':checked')
             if(isBank){
-                $('span#txt-checkbox-target').html('Sumber Kas')
+                $('label[for="isBankTarget"]').html('Sumber Kas')
                 $('select[name="bank_target"]').removeAttr('required').val('').trigger('change')
                 $('select[name="kas_target"]').attr('required', 'required')
                 $('div#bank-target').css('display', 'none')
                 $('div#kas-target').css('display', 'block')
             }else{
-                $('span#txt-checkbox-target').html('Sumber Bank')
+                $('label[for="isBankTarget"]').html('Sumber Bank')
                 $('select[name="kas_target"]').removeAttr('required').val('').trigger('change')
                 $('select[name="bank_target"]').attr('required', 'required')
                 $('div#bank-target').css('display', 'block')

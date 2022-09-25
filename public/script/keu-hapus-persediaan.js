@@ -1,6 +1,4 @@
 $(function(){
-    console.log('script/keu-faktur-pembelian');
-
     var body = $('body')
 
     initDefault()
@@ -13,6 +11,11 @@ $(function(){
         initDefault()
     })
 
+    $('body').on('blur', 'input[name="limit"]', function(){
+        var limit = $(this).val()
+        initDefault(limit, null)
+    })
+
     $('body').on('click', 'div#bt-add-rows', function(){
         var tambahRows = body.find('input#row-number').val() || 1
         addItems(tambahRows)
@@ -23,32 +26,49 @@ $(function(){
         setUrut()
     })
 
-    $('body').on('focus, click', 'input[type="number"]', function(){
-        $(this).select()
+    $('body').on('click, change', 'input[name="isKurangi"]', function(){
+        $(this).is(':checked') ? (
+            $(this).val('Y'),
+            $(this).attr('checked', 'checked')
+        ) : (
+            $(this).val('N'),
+            $(this).removeAttr('checked')
+        )
     })
 
-    $('body').on('hidden.bs.modal', '#filterForm', function(){
-        console.log('xxxx');
-        var elm = body.find('div#filterForm')
-        var duedate_begin = elm.find('input[name="duedate_begin"]').val()
-        var status_paid = elm.find('select[name="fil_status_paid"]').val()
-        var duedate_end = elm.find('input[name="duedate_end"]').val()
-        var pemasok_id = elm.find('select[name="fil_pemasok_id"]').val()
-        var gudang_id = elm.find('select[name="fil_gudang_id"]').val()
-        var kode_ = elm.find('input[name="kode_"]').val()
+    $('body').on('change', 'select[name="barang_id"]', function(){
+        var elm = $(this)
+        var target = elm.parents('td.b-all').find('input[name="satuan"]')
+        if(elm.val()){
+            $.ajax({
+                async: true,
+                url: '../ajax/options/barang/show/'+elm.val(),
+                method: 'GET',
+                dataType: 'json',
+                contentType: false,
+                success: function(result){
+                    console.log(result);
+                    target.val(result.satuan)
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+    })
 
+    $('body').on('click', '#apply-filter', function(){
+        var limit = $('input[name="limit"]').val()
+        var kode = $('input[name="kode"]').val() && '&kode=' + $('input[name="kode"]').val()
+        var serial = $('input[name="serial"]').val() && '&serial=' + $('input[name="serial"]').val()
+        var num_part = $('input[name="num_part"]').val() && '&num_part=' + $('input[name="num_part"]').val()
+        var nama = $('input[name="nama"]').val() && '&nama=' + $('input[name="nama').val()
+        var satuan = $('select[name="satuan"]').val()  && '&satuan=' + $('select[name="satuan"]').val()
+        var url = `hapus-persediaan/list?keyword=true&limit=${limit}${kode}${serial}${num_part}${nama}${satuan}`
         $.ajax({
             async: true,
-            url: 'faktur-pembelian/list',
+            url: url,
             method: 'GET',
-            data: {
-                duedate_begin: duedate_begin,
-                duedate_end: duedate_end,
-                status_paid: status_paid,
-                pemasok_id: pemasok_id,
-                gudang_id: gudang_id,
-                kode_: kode_
-            },
             dataType: 'html',
             contentType: false,
             success: function(result){
@@ -63,115 +83,16 @@ $(function(){
                 body.find('button.bt-back').css('display', 'none')
                 body.find('div#content-list').css('display', 'block')
                 body.find('div#content-form').css('display', 'none')
+                body.find('div#div-filter-limit').css('display', 'inline')
             }
         })
     })
 
-    $('body').on('change', 'select[name="reff_order"], select[name="pemasok_id"]', function(){
-        var order_id = body.find('select[name="reff_order"]').val()
-        var pemasok = body.find('select[name="pemasok_id"]').val()
-        if(order_id && pemasok){
-            $.ajax({
-                async: true,
-                url: '/ajax/options/purchasing-request/'+order_id,
-                method: 'GET',
-                dataType: 'json',
-                data: { 
-                    pemasok_id: pemasok,
-                },
-                contentType: false,
-                beforeSend: function(){
-                    console.log(order_id, pemasok);
-                    body.find('tbody#item-details').html('')
-                },
-                success: function(data){
-                    console.log(data);
-                    body.find('tbody#item-details').html(data.itemsHTML)
-
-                    body.find('select[name="cabang_id"]').val(data.data.cabang_id).trigger('change')
-                    body.find('select[name="gudang_id"]').val(data.data.gudang_id).trigger('change')
-                    
-                },
-                error: function(err){
-                    console.log(err)
-                    body.find('tbody#item-details').html('<td colspan="2"><code>Tidak ditemukan pesanan dengan pemasok dan kode pesanan terpilih...</code></td?')
-                },
-                complete: function(){
-                    $('select').select2()
-                    setUrut()
-                }
-            })
-        }
-    })
-
-    $('body').on('keyup', 'input[name="qty"]', function(){
-        var elm = $(this).parents('tr')
-        var qty = $(this).val()
-        var harga = elm.find('input[name="harga_stn"]').val() || 0
-        var discount = elm.find('input[name="discount"]').val() || 0
-        var type = elm.find('input[name="type-discount"]').val()
-
-        hitungTotalHarga(elm, qty, harga, type, discount)
-    })
-
-    $('body').on('keyup', 'input[name="harga_stn"]', function(){
-        var elm = $(this).parents('tr')
-        var harga = $(this).val()
-        var qty = elm.find('input[name="qty"]').val() || 0
-        var discount = elm.find('input[name="discount"]').val() || 0
-        var type = elm.find('input[name="type-discount"]').val()
-        hitungTotalHarga(elm, qty, harga, type, discount)
-    })
-
-    $('body').on('keyup', 'input[name="discount"]', function(){
-        var elm = $(this).parents('tr')
-        var discount = $(this).val()
-        var qty = elm.find('input[name="qty"]').val() || 0
-        var harga = elm.find('input[name="harga_stn"]').val() || 0
-        var type = elm.find('input[name="type-discount"]').val()
-        hitungTotalHarga(elm, qty, harga, type, discount)
-    })
-
-    $('body').on('change', 'select[name="barang_id"]', function(){
-        var values = $(this).val()
-        var elmCoa = $(this).parents('tr').find('select[name="coa_id"]')
-        var elmSatuan = $(this).parents('tr').find('span.satuan')
-        if (values) {
-            $.ajax({
-                async: true,
-                url: '/ajax/options/barang/show/'+values,
-                method: 'GET',
-                dataType: 'json',
-                processData: false,
-                mimeType: "multipart/form-data",
-                contentType: false,
-                success: function(result){
-                    console.log(result);
-                    if(result){
-                        console.log('......', elmCoa);
-                        elmCoa.val(result.coa_in)
-                        elmCoa.trigger('change')
-                        elmCoa.find('option[value!="'+result.coa_in+'"]').attr('disabled', true)
-                        elmSatuan.html(result.satuan)
-                    }else{
-                        elmCoa.find('option').removeAttr('disabled')
-                        elmCoa.val(null).trigger('change')
-                        elmSatuan.html('')
-                    }
-                },
-                error: function(err){
-                    console.log(err)
-                    elmCoa.find('option').removeAttr('disabled')
-                    elmCoa.val(null).trigger('change')
-                    elmSatuan.html('')
-                }
-            })
-        }else{
-            elmCoa.find('option').removeAttr('disabled')
-            console.log('no values....', elmCoa);
-            elmCoa.val(null).trigger('change')
-            elmSatuan.html('')
-        }
+    $('body').on('click', '#reset-filter', function(){
+        var limit = $('input[name="limit"]').val()
+        initDefault(limit)
+        $('div#filtermodal').find('input').val('')
+        $('div#filtermodal').find('select').val(null).trigger('change')
     })
 
     $('body').on('submit', 'form#form-create', function(e){
@@ -180,14 +101,13 @@ $(function(){
         console.log(data);
         var formdata = new FormData(this)
         formdata.append('dataForm', JSON.stringify(data))
-        // formdata.append('lampiran', $('input#lampiran')[0].files[0])
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'faktur-pembelian',
+            url: 'hapus-persediaan',
             method: 'POST',
             data: formdata,
-            dataType:'json',
+            dataType: 'json',
             processData: false,
             mimeType: "multipart/form-data",
             contentType: false,
@@ -195,7 +115,7 @@ $(function(){
                 console.log(result);
                 if(result.success){
                     swal('Okey', result.message, 'success')
-                    window.location.reload()
+                    initCreate()
                 }else{
                     swal('Opps', result.message, 'warning')
                 }
@@ -211,7 +131,7 @@ $(function(){
         var id = $(this).data('id')
         $.ajax({
             async: true,
-            url: 'faktur-pembelian/'+id+'/show',
+            url: 'hapus-persediaan/'+id+'/show',
             method: 'GET',
             dataType: 'html',
             processData: false,
@@ -230,11 +150,35 @@ $(function(){
                 body.find('button.bt-back').css('display', 'inline')
                 body.find('div#content-list').css('display', 'none')
                 body.find('div#content-form').css('display', 'inline')
+                body.find('div#div-filter-limit').css('display', 'none')
             }
         })
     })
 
-    $('body').on('click', 'button.bt-delete', function(e){
+    $('body').on('click', 'button.bt-print', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'hapus-persediaan/'+id+'/print',
+            method: 'GET',
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                // console.log(result);
+                pdfMake.createPdf(result).print();
+            },
+            error: function(err){
+                console.log(err)
+                alert('Gagal generate pdf file...')
+            }
+        })
+        
+    })
+
+    $('body').on('click', 'button#bt-delete', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         swal({
@@ -249,8 +193,9 @@ $(function(){
           function(){
               $.ajax({
                   async: true,
-                  url: 'faktur-pembelian/'+id+'/destroy',
-                  method: 'POST',
+                  headers: {'x-csrf-token': $('[name=_csrf]').val()},
+                  url: 'hapus-persediaan/'+id+'/destroy',
+                  method: 'DELETE',
                   dataType: 'json',
                   processData: false,
                   mimeType: "multipart/form-data",
@@ -268,41 +213,20 @@ $(function(){
                       swal("Opps,,,!", 'Server Error', "error")
                   }
               })
-
-          })
-    })
-
-    $('body').on('click', 'button.bt-print', function(e){
-        e.preventDefault()
-        var id = $(this).data('id')
-        $.ajax({
-            async: true,
-            url: 'faktur-pembelian/'+id+'/print',
-            method: 'GET',
-            dataType: 'json',
-            processData: false,
-            mimeType: "multipart/form-data",
-            contentType: false,
-            success: function(result){
-                pdfMake.createPdf(result).print();
-            },
-            error: function(err){
-                console.log(err)
-                body.find('div#content-form').css('display', 'none')
-            }
-        })
+          });
     })
 
     $('body').on('submit', 'form#form-update', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         var data = getDataForm()
+        console.log(data);
         var formdata = new FormData(this)
         formdata.append('dataForm', JSON.stringify(data))
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
-            url: 'faktur-pembelian/'+id+'/update',
+            url: 'hapus-persediaan/'+id+'/update',
             method: 'POST',
             data: formdata,
             dataType: 'json',
@@ -327,14 +251,21 @@ $(function(){
     function initDefault(limit, page){
         $.ajax({
             async: true,
-            url: 'faktur-pembelian/list',
+            url: 'hapus-persediaan/list',
             method: 'GET',
             data: {
-                limit: limit,
-                page: page || 1
+                limit: limit || 100,
+                page: page || 1,
+                keyword: null
             },
             dataType: 'html',
             contentType: false,
+            beforeSend: function(){
+                body.find('div#content-list').html(
+                '<strong class="text-center" style="margin: 10px 25px;">Please wait,,,,</strong>'+
+                '<p style="margin: 10px 25px;">System sedang melakukan loading data......</p>'
+                )
+            },
             success: function(result){
                 body.find('div#content-list').html(result)
                 body.find('div#content-form').html('')
@@ -347,6 +278,7 @@ $(function(){
                 body.find('button.bt-back').css('display', 'none')
                 body.find('div#content-list').css('display', 'block')
                 body.find('div#content-form').css('display', 'none')
+                body.find('div#div-filter-limit').css('display', 'inline')
             }
         })
     }
@@ -354,7 +286,7 @@ $(function(){
     function initCreate(){
         $.ajax({
             async: true,
-            url: 'faktur-pembelian/create',
+            url: 'hapus-persediaan/create',
             method: 'GET',
             dataType: 'html',
             contentType: false,
@@ -370,17 +302,17 @@ $(function(){
                 body.find('button.bt-back').css('display', 'inline')
                 body.find('div#content-form').css('display', 'block')
                 body.find('div#content-list').css('display', 'none')
+                body.find('div#div-filter-limit').css('display', 'none')
                 var tambahRows = body.find('input#row-number').val() || 1
                 addItems(tambahRows)
             }
         })
     }
-
     function addItems(len){
         for (let index = 0; index < len; index++) {
             $.ajax({
                 async: true,
-                url: 'faktur-pembelian/create/add-item',
+                url: 'hapus-persediaan/create/add-item',
                 method: 'GET',
                 dataType: 'html',
                 contentType: false,
@@ -399,6 +331,7 @@ $(function(){
     function setUrut(){
         $('tr.item-rows').each(function(i, e){
             var urut = i + 1
+            // console.log(urut);
             $(this).attr('data-urut', urut)
             $(this).find('td').first().find('h3.urut-rows').html(urut)
         })
@@ -407,34 +340,6 @@ $(function(){
             var urut = i + 1
             $(this).attr('data-id', urut)
         })
-    }
-
-    function hitungTotalHarga(elm, qty, harga, type, discount){
-        var elmTotal = elm.find('input[name="subtotal"]')
-        if(type != 'persen'){
-            var count = (parseFloat(qty) * parseFloat(harga)) - parseFloat(discount)
-        }else{
-            var tot = parseFloat(qty) * parseFloat(harga)
-            var discount_rp = (parseFloat(tot) * parseFloat(discount)) / 100
-            console.log(discount_rp);
-            var count = (parseFloat(qty) * parseFloat(harga)) - parseFloat(discount_rp)
-        }
-
-        elmTotal.val(count)
-
-        var summary = 0
-        body.find('input[name="subtotal"]').each(function(){
-            var total = $(this).val()
-            summary += parseFloat(total)
-        })
-
-        var isPPN = body.find('input[name="ppn"]').val()
-        if(isPPN){
-            var ppnRp = (parseFloat(isPPN) / 100) * parseFloat(summary)
-            $('input[name="grandtot"]').val(parseFloat(summary) + parseFloat(ppnRp))
-        }else{
-            $('input[name="grandtot"]').val(parseFloat(summary))
-        }
     }
 
     function getDataForm(){
@@ -459,8 +364,6 @@ $(function(){
                     vals.push($(this).val())
                 })
 
-                // console.log(props);
-                // console.log(vals);
                 items.push(_.object(props, vals))
             })
             return items
@@ -469,7 +372,7 @@ $(function(){
         var data = _.object(keys, values)
 
         return {
-            // ...data,
+            ...data,
             items: itemData()
         }
     }

@@ -1,0 +1,62 @@
+{{ script('ajax/initDate') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="100" class="bg-inverse b-all">Action</th>
+                            <th width="150"class="bg-inverse b-all">Trx.Date</th>
+                            <th width="150"class="bg-inverse b-all">Cabang</th>
+                            <th width="150" class="bg-inverse b-all">Gudang</th>
+                            <th width="*" class="bg-inverse b-all">Narasi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(list.data.length > 0)
+                            @each(item in list.data)
+                                <tr>
+                                    <td class="text-center">{{$loop.index + 1}}</td>
+                                    <td>
+                                        <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button>
+                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                    </td>
+                                    <td class="dateFormatDef" data-elm="strong" data-patten="YYYY-MM-DD" data-tgl="{{item.trx_date}}">
+                                        <strong></strong><br>
+                                        <small>Author: {{item.author ? item.author.nama_lengkap : ''}}</small>
+                                    </td>
+                                    <td>
+                                        Kode : {{item.cabang.kode}} <br>
+                                        <small>{{item.cabang.nama}}</small>
+                                    </td>
+                                    <td class="">
+                                        Kode : {{item.gudang.kode}} <br>
+                                        <small>{{item.gudang.nama}}</small>
+                                    </td>
+                                    <td class="">
+                                        @if(item.files)
+                                            <a href="{{item.files.url}}" target="_blank">
+                                                <i class="ti-clip"></i>
+                                            </a>
+                                        @endif
+                                        <strong>{{item.reff}}</strong> <br>
+                                        <small>{{item.keterangan}}</small>
+                                    </td>
+                                </tr>
+                            @endeach
+                        @else
+                            <tr>
+                                <td colspan="10">Data tdk ditemukan...</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>

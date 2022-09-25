@@ -5,6 +5,7 @@ const DB = use('Database')
 const Helpers = use('Helpers')
 const _ = require('underscore')
 const moment = require('moment')
+const DefCoa = use("App/Models/DefCoa")
 const initFunc = use("App/Helpers/initFunc")
 const Barang = use("App/Models/master/Barang")
 const Gudang = use("App/Models/master/Gudang")
@@ -715,93 +716,98 @@ class pembayaran {
                 }
             }
             
-            // if(obj.trx_beli){
-            //     /** UPDATE SISA PEMBAYARAN FAKTUR PEMBELIAN **/
-            //     const trxFakturBeli = await TrxFakturBeli.query().where('id', obj.trx_beli).last()
-            //     const sumPembayaran = await KeuPembayaranItem.query().where( w => {
-            //         w.where('keuterima_id', params.id)
-            //         w.where('trx_beli', obj.trx_beli)
-            //         w.where('aktif', 'Y')
-            //     }).getSum('harga_total') || 0
+            if(obj.trx_beli){
+                /** UPDATE SISA PEMBAYARAN FAKTUR PEMBELIAN **/
+                const fakturPembalian = await TrxFakturBeli.query().where('id', obj.trx_beli).last()
+                const akunHutangDagang = await DefCoa.query().where( w => {
+                    w.where('group', 'faktur-pembelian')
+                    w.where('description', 'Hutang Dagang')
+                }).last()
+                const totBayarHutang = await TrxJurnal.query().where( w => {
+                    w.where('coa_id', akunHutangDagang.coa_id)
+                    w.where('fakturbeli_id', obj.trx_beli)
+                    w.where('keubayar_id', params.id)
+                    w.where('aktif', 'Y')
+                }).getSum('nilai') || 0
 
-            //     let totalPembelian = parseFloat(trxFakturBeli.grandtot) - ((parseFloat(obj.qty) * parseFloat(obj.harga_stn)) + sumPembayaran)
-            //     try {
-            //         trxFakturBeli.merge({
-            //             sisa: totalPembelian,
-            //             sts_paid: trxFakturBeli.grandtot - totalPembelian > 0 ? 'bersisa':'lunas'
-            //         })
+                let totalPembelian = parseFloat(fakturPembalian.grandtot) - (totBayarHutang)
+                try {
+                    fakturPembalian.merge({
+                        sisa: totalPembelian,
+                        sts_paid: fakturPembalian.grandtot - totalPembelian > 0 ? 'bersisa':'lunas'
+                    })
 
-            //         await trxFakturBeli.save(trx)
-            //     } catch (error) {
-            //         console.log(error);
-            //         await trx.rollback()
-            //         return {
-            //             success: false,
-            //             message: 'Failed update sisa transaksi faktur pembelian '+ JSON.stringify(error)
-            //         }
-            //     }
-            // }
+                    await fakturPembalian.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed update sisa transaksi faktur pembelian '+ JSON.stringify(error)
+                    }
+                }
+            }
 
-            /** KASUS KELEBIHAN PEMBAYARAN **/
-            // if(obj.trx_jual){
-            //     const order = await OrderPelanggan.query().where('id', obj.trx_jual).last()
-            //     /** UPADTE PEMBAYARAN SEBELUMNYA **/
+            /** KASUS FAKTUR PELANGGAN BAYAR DI PUSAT **/
+            if(obj.trx_jual){
+                const order = await OrderPelanggan.query().where('id', obj.trx_jual).last()
+                /** UPADTE PEMBAYARAN SEBELUMNYA **/
                 
-            //     await DB.table('pay_pelanggan').where( w => {
-            //         w.where('no_kwitansi', req.reff)
-            //     }).update('aktif', 'N')
+                await DB.table('pay_pelanggan').where( w => {
+                    w.where('no_kwitansi', req.reff)
+                }).update('aktif', 'N')
 
-            //     const pelangganBayar = new TrxFakturPelanggan()
-            //     pelangganBayar.fill({
-            //         order_id: obj.trx_jual,
-            //         cabang_id: req.cabang_id,
-            //         no_invoice: order.kdpesanan,
-            //         no_kwitansi: req.reff,
-            //         date_paid: req.trx_date,
-            //         delay_date: req.is_delay == true ? req.due_date : req.trx_date,
-            //         metode_paid: 'Kelebihan pembayaran',
-            //         kas_id: req.kas_id || null,
-            //         bank_id: req.bank_id || null,
-            //         paid_trx: (parseFloat(obj.qty) * parseFloat(obj.harga_stn)),
-            //         narasi: 'Kelebihan pembayaran pada invoices '+order.kdpesanan,
-            //         createdby: user.id,
-            //         is_delay: req.is_delay
-            //     })
+                const pelangganBayar = new TrxFakturPelanggan()
+                pelangganBayar.fill({
+                    order_id: obj.trx_jual,
+                    cabang_id: req.cabang_id,
+                    no_invoice: order.kdpesanan,
+                    no_kwitansi: req.reff,
+                    date_paid: req.trx_date,
+                    delay_date: req.is_delay == true ? req.due_date : req.trx_date,
+                    metode_paid: 'Pembayaran Keuangan Pusat',
+                    kas_id: req.kas_id || null,
+                    bank_id: req.bank_id || null,
+                    paid_trx: (parseFloat(obj.qty) * parseFloat(obj.harga_stn)),
+                    narasi: 'Penerimaan pembayaran oleh keuangan pusat dengan kode pesanan : '+order.kdpesanan,
+                    createdby: user.id,
+                    is_delay: req.is_delay
+                })
 
-            //     try {
-            //         await pelangganBayar.save(trx)
-            //     } catch (error) {
-            //         console.log(error);
-            //         await trx.rollback()
-            //         return {
-            //             success: false,
-            //             message: 'Failed insert kelebihan pembayaran '+ JSON.stringify(error)
-            //         }
-            //     }
+                try {
+                    await pelangganBayar.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed insert kelebihan pembayaran '+ JSON.stringify(error)
+                    }
+                }
 
-            //     const sumPelangganBayar = await TrxFakturPelanggan.query().where( w => {
-            //         w.where('order_id', obj.trx_jual)
-            //         w.where('aktif', 'Y')
-            //     }).getSum('paid_trx') || 0
+                const sumPelangganBayar = await TrxFakturPelanggan.query().where( w => {
+                    w.where('order_id', obj.trx_jual)
+                    w.where('aktif', 'Y')
+                }).getSum('paid_trx') || 0
 
-            //     const orderData = await OrderPelanggan.query().where('id', obj.trx_jual).last()
-            //     orderData.merge({
-            //         sisa_trx: (orderData.grandtot_trx) - (sumPelangganBayar + (parseFloat(obj.qty) * parseFloat(obj.harga_stn))),
-            //         paid_trx: sumPelangganBayar + (parseFloat(obj.qty) * parseFloat(obj.harga_stn)),
-            //         status: orderData.grandtot_trx - (sumPelangganBayar + (parseFloat(obj.qty) * parseFloat(obj.harga_stn))) > 0 ? 'dp':'lunas'
-            //     })
+                const orderData = await OrderPelanggan.query().where('id', obj.trx_jual).last()
+                orderData.merge({
+                    sisa_trx: (orderData.grandtot_trx) - (sumPelangganBayar + (parseFloat(obj.qty) * parseFloat(obj.harga_stn))),
+                    paid_trx: sumPelangganBayar + (parseFloat(obj.qty) * parseFloat(obj.harga_stn)),
+                    status: orderData.grandtot_trx - (sumPelangganBayar + (parseFloat(obj.qty) * parseFloat(obj.harga_stn))) > 0 ? 'dp':'lunas'
+                })
 
-            //     try {
-            //         await orderData.save(trx)
-            //     } catch (error) {
-            //         console.log(error);
-            //         await trx.rollback()
-            //         return {
-            //             success: false,
-            //             message: 'Failed update kelebihan pembayaran pada table order pelanggan '
-            //         }
-            //     }
-            // }
+                try {
+                    await orderData.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed update penerimaan pembayaran pada table order pelanggan '
+                    }
+                }
+            }
         }
 
         await trx.commit()

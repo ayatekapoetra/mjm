@@ -82,12 +82,16 @@ class transferKasBank {
             const kas = await Kas.query().where('id', id).last()
             return kas
         }
+
+       
         
         if(req.bank_src){
             const banksrc = await GET_BANK_COA(req.bank_src)
             req.bankSumber = banksrc.toJSON()
             req.coa_src_id = banksrc.coa_id
             req.cabang_jurnal = banksrc.cabang_id
+
+            console.log(banksrc);
 
             if(banksrc.saldo_net < parseFloat(req.total)){
                 return {
@@ -222,7 +226,7 @@ class transferKasBank {
                 cabang_id: req.cabang_jurnal,
                 bank_id: req.bank_src || null,
                 kas_id: req.kas_src || null,
-                coa_id: req.coa_src_id,
+                coa_id: req.coa_target_id,
                 reff: kdMutasi,
                 narasi: req.narasi ? `[ ${kdMutasi} ] ${req.narasi}` : `[ ${kdMutasi} ] Transfer dari ${nameSrc}`,
                 trx_date: req.trx_date,

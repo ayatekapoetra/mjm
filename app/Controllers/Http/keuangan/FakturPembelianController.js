@@ -33,7 +33,6 @@ class FakturPembelianController {
         }
 
         const data = await KeuFakturPembelianHelpers.LIST(req, user)
-        // console.log(data.data[0]);
         return view.render('keuangan.faktur-pembelian.list', {list: data})
     }
 
@@ -43,7 +42,8 @@ class FakturPembelianController {
             return view.render('401')
         }
 
-        return view.render('keuangan.faktur-pembelian.create')
+        const cabang = user.cabang_id
+        return view.render('keuangan.faktur-pembelian.create', {usr_cabang: cabang})
     }
 
     async show ( { auth, params, view } ) {

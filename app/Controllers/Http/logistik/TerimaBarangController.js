@@ -114,7 +114,7 @@ async function userValidate(auth){
     }
 }
 
-function GENPDF_TANDATERIMA(data, logo){
+async function GENPDF_TANDATERIMA(data, logo){
     let body = []
 
     body.push([

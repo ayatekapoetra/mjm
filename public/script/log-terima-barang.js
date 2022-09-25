@@ -49,7 +49,7 @@ $(function(){
                 console.log(result);
                 if(result.success){
                     swal('Okey', result.message, 'success')
-                    // window.location.reload()
+                    window.location.reload()
                 }else{
                     swal('Opps', result.message, 'warning')
                 }

@@ -149,23 +149,23 @@ class CoaAjaxController {
         return barang
     }
 
-    async coaHTML ( { request, view } ) {
-        var req = request.all()
-        let coa = (
-            await AccCoa.query().with('group')
-            .where( w => {
-                w.where('bisnis_id', req.bisnis_id)
-                w.whereNotIn('kode', ['100.1.1', '100.1.2'])
-            }).fetch()
-        ).toJSON()
+    // async coaHTML ( { request, view } ) {
+    //     var req = request.all()
+    //     let coa = (
+    //         await AccCoa.query().with('group')
+    //         .where( w => {
+    //             w.where('bisnis_id', req.bisnis_id)
+    //             w.whereNotIn('kode', ['100.1.1', '100.1.2'])
+    //         }).fetch()
+    //     ).toJSON()
 
-        coa = coa.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+    //     coa = coa.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
 
-        return view.render('components.option-coa', {
-            list: coa,
-            field: 'coa_kredit'
-        })
-    }
+    //     return view.render('components.option-coa', {
+    //         list: coa,
+    //         field: 'coa_kredit'
+    //     })
+    // }
 
     /** LIST COA KAS **/
     async listKas ( { request } ) {

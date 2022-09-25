@@ -116,6 +116,7 @@ Route.group(() => {
     Route.get('/options/gaji', 'OptionsAjaxController.gaji').as('ajax.set.gaji')
     Route.get('/options/component-gaji', 'OptionsAjaxController.componentGaji').as('ajax.set.componentGaji')
     Route.get('/options/faktur-beli', 'OptionsAjaxController.fakturBeli').as('ajax.set.fakturBeli')
+    Route.get('/options/faktur-beli/:id', 'OptionsAjaxController.fakturBeliID').as('ajax.set.fakturBeliID')
     Route.get('/options/faktur-jual', 'OptionsAjaxController.fakturJual').as('ajax.set.fakturJual')
     Route.get('/options/barang/harga-jual', 'OptionsAjaxController.hargaJualBarang').as('ajax.set.hargaJualBarang')
     
@@ -350,6 +351,7 @@ Route.group(() => {
     Route.post('/hapus-persediaan/:id/update', 'HapusPersediaanController.update').as('acc.hapus-persediaan.update').middleware('U')
     Route.delete('/hapus-persediaan/:id/destroy', 'HapusPersediaanController.destroy').as('acc.hapus-persediaan.destroy').middleware('D')
     Route.get('/hapus-persediaan/create/add-item', 'HapusPersediaanController.addItem').as('acc.hapus-persediaan.addItem')
+    Route.get('/hapus-persediaan/show/:id/show-item', 'HapusPersediaanController.showItems').as('acc.hapus-persediaan.showItems')
 
     /* PENERIMAAN TANDA TERIMA */
     Route.get('/keu-penerimaan', 'PenerimaanController.index').as('acc.keu-penerimaan').middleware('R')
@@ -391,6 +393,7 @@ Route.group(() => {
     Route.delete('/entri-jurnal/:id/destroy', 'EntriJurnalController.destroy').as('acc.entri-jurnal.destroy').middleware('D')
     Route.get('/entri-jurnal/create/add-item', 'EntriJurnalController.addItem').as('acc.entri-jurnal.addItem')
     Route.get('/entri-jurnal/create/select-gudang', 'EntriJurnalController.selectGudang').as('acc.entri-jurnal.selectGudang')
+    Route.get('/entri-jurnal/show/:id/show-item', 'EntriJurnalController.showItem').as('acc.entri-jurnal.showItem')
     Route.get('/entri-jurnal/create/:coa/select-relation', 'EntriJurnalController.selectRelation').as('acc.entri-jurnal.selectRelation')
     Route.get('/entri-jurnal/create/:pemasok/select-faktur', 'EntriJurnalController.selectFaktur').as('acc.entri-jurnal.selectFaktur')
     Route.get('/entri-jurnal/create/:pelanggan/select-invoice', 'EntriJurnalController.selectInvoice').as('acc.entri-jurnal.selectInvoice')
@@ -419,8 +422,6 @@ Route.group(() => {
     
 
 }).prefix('acc').namespace('keuangan')
-
-
 /*
 *   ROUTING LOGISTIK
 */
@@ -440,6 +441,7 @@ Route.group(() => {
     Route.get('/stok-opname/list', 'StokOpnameController.list').as('log.stok-opname.list').middleware('R')
     Route.get('/stok-opname/create', 'StokOpnameController.create').as('log.stok-opname.create').middleware('C')
     Route.get('/stok-opname/:id/show', 'StokOpnameController.show').as('log.stok-opname.show').middleware('U')
+    Route.get('/stok-opname/:id/print', 'StokOpnameController.print').as('log.stok-opname.print').middleware('R')
     Route.post('/stok-opname/:id/update', 'StokOpnameController.update').as('log.stok-opname.update').middleware('U')
     Route.get('/stok-opname/:id/showSummary', 'StokOpnameController.showSummary').as('log.stok-opname.showSummary').middleware('R')
     Route.delete('/stok-opname/:id/destroy', 'StokOpnameController.destroy').as('log.stok-opname.destroy').middleware('D')
@@ -471,6 +473,7 @@ Route.group(() => {
     Route.get('/entry-pembayaran/create', 'PembayaranPelangganController.create').as('ops.entry-pembayaran.create').middleware('C')
     Route.get('/entry-pembayaran/:id/invoicing', 'PembayaranPelangganController.invoicing').as('ops.entry-pembayaran.invoicing').middleware('U')
     Route.post('/entry-pembayaran/:id/invoicing', 'PembayaranPelangganController.invoicingStore').as('ops.entry-pembayaran.invoicing').middleware('U')
+    Route.get('/entry-pembayaran/:id/invoicing-rollback', 'PembayaranPelangganController.invoicingRollback').as('ops.entry-pembayaran.invoicingRollback').middleware('U')
     Route.get('/entry-pembayaran/:id/paid', 'PembayaranPelangganController.payment').as('ops.entry-pembayaran.payment').middleware('R')
     Route.get('/entry-pembayaran/:id/show', 'PembayaranPelangganController.show').as('ops.entry-pembayaran.show').middleware('U')
     Route.post('/entry-pembayaran/:id/update', 'PembayaranPelangganController.update').as('ops.entry-pembayaran.update').middleware('U')

@@ -3,13 +3,13 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class LogistikStokOpnameSummary extends Model {
+class KeuHapusPersediaanItem extends Model {
     static get table(){
-        return 'log_opname_summary'
+        return 'keu_hapus_persediaan_items'
     }
-
-    cabang () {
-        return this.belongsTo("App/Models/master/Cabang", "cabang_id", "id")
+    
+    hapusPersediaan () {
+        return this.belongsTo("App/Models/transaksi/KeuHapusPersediaan", "hapus_id", "id")
     }
 
     gudang () {
@@ -20,9 +20,6 @@ class LogistikStokOpnameSummary extends Model {
         return this.belongsTo("App/Models/master/Barang", "barang_id", "id")
     }
 
-    createdby () {
-        return this.belongsTo("App/Models/VUser", "author", "id")
-    }
 }
 
-module.exports = LogistikStokOpnameSummary
+module.exports = KeuHapusPersediaanItem

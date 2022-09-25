@@ -1,0 +1,64 @@
+{{ script('ajax/opt-pemasok') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
+<div class="modal fade" id="filterForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Filter Data
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="panel-body p-0">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Start Due Date</label>
+                                <input type="date" name="duedate_begin" class="form-control" value="">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">End Due Date</label>
+                                <input type="date" name="duedate_end" class="form-control" value="">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Pemasok</label>
+                                <select name="fil_pemasok_id" class="form-control selectPemasok"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Gudang</label>
+                                <select name="fil_gudang_id" class="form-control selectGudang"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label class="control-label">Kode</label>
+                                <input type="text" name="kode_" class="form-control" placeholder="input kode...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Status</label>
+                                <select class="form-control" name="fil_status_paid" id="status_paid">
+                                    <option value="">Pilih Status</option>
+                                    <option value="lunas">Lunas</option>
+                                    <option value="bersisa">Bersisa</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

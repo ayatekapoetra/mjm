@@ -136,13 +136,128 @@ class bayarPelanggan {
         return data
     }
 
+    async INVOICING_ROLLBACK (params, user){
+        const trx = await DB.beginTransaction()
+
+        const checkPembayaran = (await OpsPelangganBayar.query().where( w => {
+            w.where('order_id', params.id)
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+
+        console.log(checkPembayaran);
+
+        if(checkPembayaran.length > 0){
+            return {
+                success: false,
+                message: 'Data gagal untuk rollback, ditemukan '+checkPembayaran.length+' data pembayaran pelanggan yang sah...'
+            }
+        }
+
+        const orderTrx = await OpsPelangganOrder.query().where('id', params.id).last()
+        orderTrx.merge({
+            barangdisc_rp: 0,
+            jasadisc_rp: 0,
+            totdisc_rp: 0,
+            ppn: 0,
+            pajak_trx: 0,
+            status: 'pending'
+        })
+
+        /**
+         * ROLLBACK DATA INVOICING PELANGGAN
+         * **/
+        try {
+            await orderTrx.save(trx)
+            console.log('orderTrx :::', orderTrx.toJSON())
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed generate invoice \n'+ JSON.stringify(error)
+            }
+        }/* END ROLLBACK DATA INVOICING PELANGGAN */
+
+        /**
+         * UPDATE TRX-JURNAL STATUS TIDAK AKTIF
+         * **/
+        const trxJurnalRollBack = (await TrxJurnal.query().where('trx_jual', params.id).fetch()).toJSON()
+        for (const val of trxJurnalRollBack) {
+            const trxJurnal = await TrxJurnal.query().where('id', val.id).last()
+            trxJurnal.merge({aktif: 'N'})
+            try {
+                await trxJurnal.save(trx)
+            } catch (error) {
+                onsole.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed rollback jurnal invoice \n'+ JSON.stringify(error)
+                }
+            }
+        }/* END ROLLBACK JURNAL INVOICING PELANGGAN */
+
+        /**
+         * ROLLBACK ITEM BARANG ORDER PADA BARANG LOKASI
+         * **/
+        const listBarangOrder = (
+            await OpsPelangganOrderItem.query().where( w => {
+                w.where('order_id', params.id)
+                w.where('aktif', 'Y')
+            }).fetch()
+        ).toJSON()
+
+        for (const brg of listBarangOrder) {
+            const barangLokasi = new BarangLokasi()
+            barangLokasi.fill({
+                trx_inv: brg.id,
+                barang_id: brg.barang_id,
+                gudang_id: brg.gudang_id,
+                cabang_id: orderTrx.cabang_id,
+                qty_hand: parseFloat(brg.qty),
+                qty_del: parseFloat(brg.qty),
+                createdby: user.id
+            })
+
+            try {
+                await barangLokasi.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Gagal mempengaruhi stok barang...\n'+JSON.stringify(error)
+                }
+            }
+        }
+
+        /* SEND NOTIFICATION */
+        let arrUserTipe = ['administrator', 'developer', 'keuangan']
+        await initFunc.SEND_NOTIFICATION(
+            user, 
+            arrUserTipe, 
+            {
+                header: "Invoicing",
+                title: orderTrx.kdpesanan,
+                link: '/operational/entry-pembayaran',
+                content: user.nama_lengkap + " telah melakukan ROLLBACK data invoices dengan kode "+orderTrx.kdpesanan,
+            }
+        )
+
+        await trx.commit()
+        return {
+            success: true,
+            message: 'Success rollback data...'
+        }
+    }
+
     async INVOICING (params, req, user) {
         const trx = await DB.beginTransaction()
         const ws = await initFunc.WORKSPACE(user)
 
         /* START UPDATE ORDER PELANGGAN */
         const orderTrx = await OpsPelangganOrder.query().where('id', params.id).last()
-
+        
         let totdisc_rp = 0
         
         if(req.potongan_type === 'rupiah'){
@@ -162,6 +277,7 @@ class bayarPelanggan {
 
         orderTrx.merge({
             narasi: req.narasi,
+            type_discount: req.potongan_type,
             barangdisc_rp: req.barangdisc_rp,
             jasadisc_rp: req.jasadisc_rp,
             totdisc_rp: totdisc_rp,
@@ -174,6 +290,7 @@ class bayarPelanggan {
 
         try {
             await orderTrx.save(trx)
+            console.log('orderTrx :::', orderTrx.toJSON())
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -186,8 +303,8 @@ class bayarPelanggan {
         /* START INSERT JURNAL POTONGAN BARANG */
         const arrPotonganBarangCoa = (await DefCoa.query().where({group: 'invoicing-discount-barang'}).fetch())?.toJSON()
         for (const akun of arrPotonganBarangCoa) {
-            const trxJurnalDebit = new TrxJurnal()
-            trxJurnalDebit.fill({
+            const invoicingDiscountBarang = new TrxJurnal()
+            invoicingDiscountBarang.fill({
                 cabang_id: ws.cabang_id,
                 trx_jual: params.id,
                 coa_id: akun.coa_id,
@@ -199,7 +316,8 @@ class bayarPelanggan {
                 dk: akun.tipe
             })
             try {
-                await trxJurnalDebit.save(trx)
+                await invoicingDiscountBarang.save(trx)
+                console.log('invoicingDiscountBarang :::', invoicingDiscountBarang.toJSON())
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -213,8 +331,8 @@ class bayarPelanggan {
         /* START INSERT JURNAL POTONGAN JASA */
         const arrPotonganJasaCoa = (await DefCoa.query().where({group: 'invoicing-discount-jasa'}).fetch())?.toJSON()
         for (const akun of arrPotonganJasaCoa) {
-            const trxJurnalDebit = new TrxJurnal()
-            trxJurnalDebit.fill({
+            const invoicingDiscountJasa = new TrxJurnal()
+            invoicingDiscountJasa.fill({
                 cabang_id: ws.cabang_id,
                 trx_jual: params.id,
                 coa_id: akun.coa_id,
@@ -226,7 +344,8 @@ class bayarPelanggan {
                 dk: akun.tipe
             })
             try {
-                await trxJurnalDebit.save(trx)
+                await invoicingDiscountJasa.save(trx)
+                console.log('invoicingDiscountJasa :::', invoicingDiscountJasa.toJSON())
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -240,8 +359,8 @@ class bayarPelanggan {
         /* START INSERT JURNAL PAJAK */
         const arrPajakCoa = (await DefCoa.query().where({group: 'invoicing-pajak', tipe: 'k'}).fetch())?.toJSON()
         for (const akun of arrPajakCoa) {
-            const trxJurnalDebit = new TrxJurnal()
-            trxJurnalDebit.fill({
+            const invoicingPajak = new TrxJurnal()
+            invoicingPajak.fill({
                 cabang_id: ws.cabang_id,
                 trx_jual: params.id,
                 coa_id: akun.coa_id,
@@ -253,7 +372,8 @@ class bayarPelanggan {
                 dk: 'k'
             })
             try {
-                await trxJurnalDebit.save(trx)
+                await invoicingPajak.save(trx)
+                console.log('invoicingPajak :::', invoicingPajak.toJSON())
             } catch (error) {
                 console.log(error);
                 await trx.rollback()

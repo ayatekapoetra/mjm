@@ -26,6 +26,13 @@
                         <i class="ti-arrow-left"></i>
                         Back
                     </button>
+                    <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#filterForm">
+                        <i class="ti-filter"></i>
+                        Filter
+                    </button>
+                </div>
+                <div id="filter-form">
+                    @include('keuangan.faktur-pembelian.filter')
                 </div>
                 <div id="content-list" style="display:none;"></div>
                 <div id="content-form" style="display:none;"></div>

@@ -40,6 +40,9 @@ const LogistikTerimaBarang = use("App/Models/logistik/LogistikTerimaBarang")
 // const TrxFakturJualBayar = use("App/Models/transaksi/TrxFakturJualBayar")
 const TrxFakturBeliBayar = use("App/Models/transaksi/TrxFakturBeliBayar")
 
+const KeuEntriJurnal = use("App/Models/transaksi/KeuEntriJurnal")
+const KeuHapusPersediaan = use("App/Models/transaksi/KeuHapusPersediaan")
+
 const KeuPurchasingRequest = use("App/Models/transaksi/KeuPurchasingRequest")
 const KeuPurchasingRequestItems = use("App/Models/transaksi/KeuPurchasingRequestItems")
 const KeuPurchasingRequestAttach = use("App/Models/transaksi/KeuPurchasingRequestAttach")
@@ -650,6 +653,18 @@ class initFunc {
         lastNumber = '0'.repeat(3 - `${lastNumber}`.length) + lastNumber
         
         return prefix1 + cabKode + prefix2 + '.' + lastNumber
+    }
+
+    async GEN_KODE_HAPUS_PERSEDIAAN () {
+        const keuHapusPersediaan = await KeuHapusPersediaan.query().last()
+        const urut = keuHapusPersediaan ? keuHapusPersediaan.id + 1 : 1
+        return 'REM-BRG'+moment().format('YYMMDD')+'-'+ urut
+    }
+
+    async GEN_KODE_JURNAL_PENYESUAIAN () {
+        const keuEntriJurnal = await KeuEntriJurnal.query().last()
+        const urut = keuEntriJurnal ? keuEntriJurnal.id + 1 : 1
+        return 'JP'+moment().format('YYMMDD')+'-'+ urut
     }
 
     async SUM_PEMBAYARAN_PELANGGAN () {

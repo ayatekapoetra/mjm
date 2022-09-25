@@ -1,0 +1,147 @@
+{{ script('ajax/index') }}
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-coa') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Tanggal <span class="text-danger">*</span></label>
+                            <input type="date" name="trx_date" class="form-control item-data initDate" value="">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">Kode.Penghapusan <span class="text-danger">*</span></label>
+                            <input type="text" name="reff" class="form-control item-data" placeholder="{{kode}}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Cabang</label>
+                            <select name="cabang_id" class="form-control item-data selectCabang" data-values="{{ws}}"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Gudang</label>
+                            <select name="gudang_id" class="form-control item-data selectGudang"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Alokasi Akun</label>
+                            <select name="coa_id" class="form-control item-data">
+                                @each(item in coa)
+                                    <optgroup label="{{item.nama}}">
+                                        @each(akun in item.items)
+                                            <option value="{{akun.id}}">{{akun.coa_name}}</option>
+                                        @endeach
+                                    </optgroup>
+                                @endeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">Upload Dukumen</label>
+                            <input type="file" name="photo" class="form-control text-right">
+                            <span><code><small>file extentions : png, bmp, jpg, jpeg, pdf, xls, doc</small></code></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 m-b-20">
+                        <label for="isKurangi">Pengaruhi Stok</label>
+                        <div class="checkbox checkbox-danger">
+                            <input class="item-data" id="isKurangi" name="isKurangi" type="checkbox" value="Y" checked="">
+                            <label for="isKurangi"><span id="txt-checkbox">Kurangi Stok Fisik</span></label>
+                        </div>
+                        <span><small>Dengan mencentang pilihan ini, setiap <code>item barang</code> akan mengurangi stok pada gudangnya</small></span>
+                    </div>
+                    
+                    
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="control-label">Keterangan</label>
+                            <input type="text" name="keterangan" class="form-control item-data">
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <th class="bg-extralight" width="50">No</th>
+                                        <th class="bg-inverse" width="*">
+                                            Item Barang
+                                        </th>
+                                        <th class="bg-title text-center" width="80">ACT</th>
+                                    </thead>
+                                    <tbody id="item-details">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="row">
+                                                    <div class="col-sm-9">
+                                                        
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="input-group text-right">
+                                                            <input class="form-control" type="number" id="row-number" name="row-number" value="1">
+                                                            <div class="input-group-addon" id="bt-add-rows"><i class="ti-plus"></i> ADD</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-right">
+                    <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                    <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function(){
+        var body = $('body')
+
+        initLoad()
+        function initLoad(){
+            $.ajax({
+                async: true,
+                url: '/ajax/options/gudang-group-cabang',
+                method: 'GET',
+                dataType: 'json',
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                success: function(result){
+                    // console.log('gudang group cabang :::', result);
+                    body.find('select[name="gudang_src"], select[name="gudang_target"]').html(
+                        '<option value="">Pilih</option>'+
+                        result?.map(g => '<optgroup label="'+g.nm_cabang+'">'+g.items?.map(v => '<option value="'+v.id+'">['+v.kode+'] '+v.nama+'</option>')+'</optgroup>')
+                    )
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+    })
+</script>

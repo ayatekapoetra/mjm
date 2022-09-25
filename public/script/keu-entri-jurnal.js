@@ -27,6 +27,72 @@ $(function(){
         hitungDebitKredit()
     })
 
+    $('body').on('change', 'select[name="coa_id"]', function(e){
+        e.preventDefault()
+        var elm = $(this)
+        var value = elm.val()
+        setRelationEntry(elm, value)
+    })
+
+    $('body').on('change', 'select[name="pelanggan_id"]', function(e){
+        e.preventDefault()
+        var elm = $(this)
+        var value = elm.val()
+        console.log(value);
+        if(value){
+            optionInvoices(elm, value)
+        }
+        elm.parents('tr.item-rows').find('select[name="order_id"]').val(null).trigger('change')
+    })
+
+    $('body').on('change', 'select[name="barang_id"]', function(e){
+        e.preventDefault()
+        var elm = $(this)
+        var value = elm.val()
+        elm.parents('tr.item-rows').find('select[name="gudang_id"]').val('').trigger('change')
+        if(value){
+            optionGudang(elm)
+        }
+    })
+
+    $('body').on('change', 'select[name="pemasok_id"]', function(e){
+        e.preventDefault()
+        var value = $(this).val()
+        var elm = $(this).parents('tr.item-rows')
+        $.ajax({
+            async: true,
+            url: '/ajax/coa/faktur-pemasok',
+            method: 'GET',
+            data: {
+                pemasok_id: value
+            },
+            dataType: 'json',
+            beforeSend: function(){
+                elm.find('span[id="faktur_id"]').html('<i class="fa fa-spinner fa-spin"></i>')
+            },
+            success: function(data){
+                console.log(data);
+                if(data.length > 0){
+                    elm.find('select[name="faktur_id"]').html(
+                        data.map( val => '<option value="'+val.id+'">['+val.kode+']  sisa pembayaran -----> Rp. '+(val.sisa).toLocaleString('ID')+'</option>')
+                    )
+                    elm.find('select[name="faktur_id"]').trigger('change')
+                    elm.find('span[id="faktur_id"]').html('Faktur Hutang')
+                }else{
+                    elm.find('select[name="faktur_id"]').html('<option value="">Data tidak ditemukan...</option>')
+                    elm.find('select[name="faktur_id"]').val('').trigger('change')
+                    elm.find('span[id="faktur_id"]').html('<i class="fa fa-spinner fa-spin"></i>')
+                }
+            },
+            error: function(err){
+                console.log(err);
+                elm.find('select[name="faktur_id"]').html('')
+                elm.find('span[id="faktur_id"]').html('error data...')
+            }
+        })
+    })
+    
+
     $('body').on('submit', 'form#form-create', function(e){
         e.preventDefault()
         var formdata = new FormData(this)
@@ -34,7 +100,6 @@ $(function(){
         console.log(data);
         formdata.append('dataForm', JSON.stringify(data))
         formdata.append('file', $('input[name="attach"]').get(0).files)
-        // $('body').find('button[type="submit"]').attr('disabled', true)
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
@@ -115,7 +180,7 @@ $(function(){
         console.log(data);
         var formdata = new FormData()
         formdata.append('dataForm', JSON.stringify(data))
-        formdata.append('lampiran', $('input#lampiran')[0].files[0])
+        formdata.append('file', $('input[name="attach"]').get(0).files)
         $.ajax({
             async: true,
             headers: {'x-csrf-token': $('[name=_csrf]').val()},
@@ -141,7 +206,7 @@ $(function(){
         })
     })
 
-    $('body').on('click', 'button#bt-delete', function(e){
+    $('body').on('click', 'button.bt-delete', function(e){
         e.preventDefault()
         var id = $(this).data('id')
         console.log(id);
@@ -182,6 +247,7 @@ $(function(){
 
     /** FUNC **/
     function initDefault(limit, page){
+        var start_date = body.find('input[name="trxdate_begin"]').val()
         $.ajax({
             async: true,
             url: 'entri-jurnal/list',
@@ -261,6 +327,8 @@ $(function(){
             $(this).find('td').first().find('h4.urut-rows').html(urut)
         })
 
+        $('tr.item-rows').last().find('button.bt-add-jurnal').removeAttr('disabled').addClass('btn-warning').removeClass('btn-default')
+
         $('button.bt-remove-item').each(function(i, e){
             var urut = i + 1
             $(this).attr('data-id', urut)
@@ -322,5 +390,80 @@ $(function(){
             return error
         }
 
+    }
+
+    function setRelationEntry(elm, coa){
+        elm.parents('tr.item-rows').find('div.entri-details').css('display', 'none')
+        elm.parents('tr.item-rows').find('select.entri-items, input.entri-items').val('').trigger('change')
+        $.ajax({
+            async: true,
+            url: 'entri-jurnal/create/' + coa + '/select-relation',
+            method: 'GET',
+            dataType: 'json',
+            contentType: false,
+            success: function(result){
+                // console.log(result);
+                if(result.group){
+                    elm.parents('tr.item-rows').find('div.'+result.group).css('display', 'block')
+                    elm.parents('tr.item-rows').find('select[name="order_id"]').html('<option value="">Pilih...</option>')
+                }
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    }
+
+    function optionGudang(elm){
+        $.ajax({
+            async: true,
+            url: 'entri-jurnal/create/select-gudang',
+            method: 'GET',
+            dataType: 'json',
+            contentType: false,
+            beforeSend: function(){
+                console.log('beforeSend...', elm.parents('tr.item-rows').find('select[name="gudang_id"]'));
+                elm.parents('tr.item-rows').find('select[name="gudang_id"]').val('').trigger('change')
+            },
+            success: function(result){
+                console.log('optionGudang :::', result);
+                if(result.length > 0){
+                    let data = result.map( o => '<option value="'+o.id+'">[ ' + o.kode + ' ] ' + o.nama + '</option>')
+                    elm.parents('tr.item-rows').find('select[name="gudang_id"]').html(data)
+                }else{
+                    elm.parents('tr.item-rows').find('select[name="gudang_id"]').val('').trigger('change')
+                }
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    }
+
+    function optionInvoices(elm, pelanggan){
+        elm.parents('tr.item-rows').find('select[name="order_id"]').val('').trigger('change')
+        $.ajax({
+            async: true,
+            url: 'entri-jurnal/create/' + pelanggan + '/select-invoice',
+            method: 'GET',
+            dataType: 'json',
+            contentType: false,
+            success: function(result){
+                console.log('optionInvoices :::', result);
+                if(result.length > 0){
+                    let data = result.map( o =>
+                        '<optgroup label="Tanggal : '+o.date+'">'+
+                            o.items?.map( i => '<option value="'+i.id+'">'+i.invoices+'</option>')+
+                        '<optgroup>'
+                    )
+                    elm.parents('tr.item-rows').find('select[name="order_id"]').html(data)
+                }else{
+                    elm.parents('tr.item-rows').find('select[name="order_id"]').val('').trigger('change')
+                }
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
     }
 })

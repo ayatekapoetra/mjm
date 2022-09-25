@@ -325,6 +325,43 @@ $(function(){
             }
         })
     })
+
+    $('body').on('click', 'button.bt-rollback', function(e){
+        e.preventDefault()
+        var id = $(this).data('id')
+        console.log(id);
+        swal({
+            title: "Are you sure?",
+            text: "This will affect all data journal transaction...",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-warning",
+            confirmButtonText: "Yes, rollback!",
+            closeOnConfirm: false
+          },
+          function(){
+              $.ajax({
+                  async: true,
+                  url: 'entry-pembayaran/'+id+'/invoicing-rollback',
+                  method: 'GET',
+                  dataType: 'json',
+                  processData: false,
+                  mimeType: "multipart/form-data",
+                  contentType: false,
+                  success: function(result){
+                    if(result.success){
+                        swal('Okey', result.message, 'success')
+                        initDefault()
+                    }else{
+                        swal('Opps', result.message, 'warning')
+                    }
+                  },
+                  error: function(err){
+                      console.log(err)
+                  }
+              })
+          })
+    })
     
     $('body').on('click', 'a.bt-details', function(e){
         e.preventDefault()

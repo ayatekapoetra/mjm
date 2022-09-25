@@ -69,13 +69,6 @@
 </style>
 <script>
     $(function(){
-        $('body').on('click', 'span[name="btn-isStock"]', function(e){
-            e.preventDefault()
-            $(this).toggleClass('bg-black')
-            $(this).find('i').toggleClass('text-success')
-            $(this).find('input[name="isStok"]').val() === '' ? $(this).find('input[name="isStok"]').val('Y') : $(this).find('input[name="isStok"]').val('')
-        })
-
         $('body').on('change', 'select[name="coa_id"]', function(e){
             e.preventDefault()
             var elm = $(this)

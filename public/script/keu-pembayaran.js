@@ -106,6 +106,10 @@ $(function(){
             error: function(err){
                 console.log(err);
                 elm.find('div[name="details-akun"]').html('')
+            },
+            complete: function(){
+                elm.find('input[name="harga_stn"]').val(0)
+                hitungTotalHarga(elm, 1, 0)
             }
         })
     })
@@ -155,6 +159,8 @@ $(function(){
                     elm.find('select[name="trx_beli"]').html(
                         data.map( val => '<option value="'+val.id+'">['+val.kode+']  sisa pembayaran -----> Rp. '+(val.sisa).toLocaleString('ID')+'</option>')
                     )
+                    elm.find('select[name="trx_beli"]').trigger('change')
+                    elm.find('input[name="harga_stn"]').val(data[0].sisa)
                 }else{
                     elm.find('select[name="trx_beli"]').html('')
                 }
@@ -162,6 +168,27 @@ $(function(){
             error: function(err){
                 console.log(err);
                 elm.find('select[name="trx_beli"]').html('')
+            }
+        })
+    })
+
+    $('body').on('change', 'select[name="trx_beli"]', function(){
+        var id = $(this).val()
+        var elm = $(this).parents('tr.item-rows')
+        var qty = elm.find('input[name="qty"]').val()
+        $.ajax({
+            async: true,
+            url: '/ajax/options/faktur-beli/'+id,
+            method: 'GET',
+            dataType: 'json',
+            success: function(data){
+                console.log(data);
+                elm.find('input[name="harga_stn"]').val(data.sisa)
+                hitungTotalHarga(elm, qty, data.sisa)
+            },
+            error: function(err){
+                console.log(err);
+                elm.find('input[name="harga_stn"]').val(0)
             }
         })
     })

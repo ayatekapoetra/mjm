@@ -13,118 +13,38 @@
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label class="control-label">Tanggal</label>
-                                <input type="date" name="trx_date" class="form-control setDate" data-tgl="{{data.trx_date}}" value="" required>
+                                <input type="date" name="trx_date" class="form-control setDate item-data" data-tgl="{{data.trx_date}}" required>
                             </div>
                         </div>
                         <div class="col-md-10">
                             <div class="form-group">
-                                <label class="control-label">Keterangan</label>
-                                <input type="text" name="narasi" class="form-control" placeholder="Input keterangan disini..." value="{{data.narasi || ''}}">
-                            </div>
-                        </div>
-                        @if(data.bank_src)
-                            <div class="col-md-2">
-                                <label for="ppn">Sumber</label>
-                                <div class="form-group" style="margin-top: 10px">
-                                    <div class="material-switch">
-                                        <input id="isBankScr" name="isBankScr" type="checkbox"/>
-                                        <label for="isBankScr" class="label-default"></label>
-                                        <span id="txt-checkbox-source" class="m-l-10"> Sumber Bank</span>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <div class="col-md-2">
-                                <label for="ppn">Sumber</label>
-                                <div class="form-group" style="margin-top: 10px">
-                                    <div class="material-switch">
-                                        <input id="isBankScr" name="isBankScr" type="checkbox" checked/>
-                                        <label for="isBankScr" class="label-default"></label>
-                                        <span id="txt-checkbox-source" class="m-l-10"> Sumber Kas</span>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                        <div class="col-md-3" id="bank-source" style="display: {{data.bank_src?'block':'none'}}">
-                            <div class="form-group">
-                                <label class="control-label">Dibayarkan Dari</label>
-                                <select class="form-control" name="bank_src" data-values="{{data.bank_src}}" required></select>
-                            </div>
-                        </div>
-                        <div class="col-md-3" id="kas-source" style="display: {{data.kas_src?'block':'none'}};">
-                            <div class="form-group">
-                                <label class="control-label">Dibayarkan Dari</label>
-                                <select class="form-control" name="kas_src" data-values="{{data.kas_src}}"></select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Jumlah</label>
-                                <input type="number" name="total" class="form-control text-right" value="{{data.total}}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="ppn">Status</label>
-                            <select class="form-control selectOptions" name="status_out" data-group="mutasi-status" data-values="{{data.status_out}}"></select>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label class="control-label">Tanggal Delay</label>
-                                <input type="date" name="delay_out" class="form-control text-right setDate" data-tgl="{{data.out_date}}" readonly>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        @if(data.bank_target)
-                            <div class="col-md-2">
-                                <label for="ppn">Tujuan</label>
-                                <div class="form-group" style="margin-top: 10px">
-                                    <div class="material-switch">
-                                        <input id="isBankTarget" name="isBankTarget" type="checkbox"/>
-                                        <label for="isBankTarget" class="label-default"></label>
-                                        <span id="txt-checkbox-target" class="m-l-10"> Sumber Bank</span>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <div class="col-md-2">
-                                <label for="ppn">Tujuan</label>
-                                <div class="form-group" style="margin-top: 10px">
-                                    <div class="material-switch">
-                                        <input id="isBankTarget" name="isBankTarget" type="checkbox" checked/>
-                                        <label for="isBankTarget" class="label-default"></label>
-                                        <span id="txt-checkbox-target" class="m-l-10"> Sumber Kas</span>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                        
-                        <div class="col-md-3" id="bank-target" style="display: {{data.bank_target?'block':'none'}}">
-                            <div class="form-group">
-                                <label class="control-label">Dana Masuk</label>
-                                <select class="form-control" name="bank_target" data-values="{{data.bank_target}}" {{data.bank_target?'required':''}}></select>
-                            </div>
-                        </div>
-                        <div class="col-md-3" id="kas-target" style="display: {{data.kas_target?'block':'none'}}">
-                            <div class="form-group">
-                                <label class="control-label">Dana Masuk</label>
-                                <select class="form-control" name="kas_target" data-values="{{data.kas_target}}" {{data.kas_target?'required':''}}></select>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="ppn">Status</label>
-                            <select class="form-control selectOptions" name="status_in" data-group="mutasi-status" data-values="{{data.status_in}}"></select>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Tanggal Delay</label>
-                                <input type="date" name="delay_in" class="form-control text-right initDate" readonly>
+                                <label class="control-label">Narasi</label>
+                                <input type="text" name="narasi" class="form-control item-data" placeholder="Input keterangan disini..." value="{{data.narasi}}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label class="control-label">Bukti Photo</label>
-                                <input type="file" name="photo" class="form-control text-right">
+                                <label class="control-label">Attachment Files</label>
+                                <input type="file" name="attach" class="form-control" multiple>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="panel panel-default">
+                            <div class="bg-inverse panel-heading">List Akun
+                                <div class="panel-action">
+                                    <a href="#" data-perform="panel-collapse"><i class="fa fa-minus"></i></a> 
+                                </div>
+                            </div>
+                            <div class="panel-wrapper collapse in" aria-expanded="true">
+                                <div class="panel-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <tbody id="item-akun">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -145,49 +65,50 @@
 
 <script>
     $(function(){
-        $('input[name="isBankScr"]').on('click', function(){
-            var isBank = $(this).is(':checked')
-            if(isBank){
-                $('span#txt-checkbox-source').html('Sumber Kas')
-                $('select[name="bank_src"]').removeAttr('required').val('').trigger('change')
-                $('select[name="kas_src"]').attr('required', 'required')
-                $('div#bank-source').css('display', 'none')
-                $('div#kas-source').css('display', 'block')
-            }else{
-                $('span#txt-checkbox-source').html('Sumber Bank')
-                $('select[name="kas_src"]').removeAttr('required').val('').trigger('change')
-                $('select[name="bank_src"]').attr('required', 'required')
-                $('div#bank-source').css('display', 'block')
-                $('div#kas-source').css('display', 'none')
-            }
+        var body = $('body')
+
+        $('body').on('click', 'span[name="btn-isStock"]', function(e){
+            e.preventDefault()
+            $(this).toggleClass('bg-black')
+            $(this).find('i').toggleClass('text-success')
+            $(this).find('input[name="isStok"]').val() === '' ? $(this).find('input[name="isStok"]').val('Y') : $(this).find('input[name="isStok"]').val('')
         })
 
-        $('input[name="isBankTarget"]').on('click', function(){
-            var isBank = $(this).is(':checked')
-            if(isBank){
-                $('span#txt-checkbox-target').html('Sumber Kas')
-                $('select[name="bank_target"]').removeAttr('required').val('').trigger('change')
-                $('select[name="kas_target"]').attr('required', 'required')
-                $('div#bank-target').css('display', 'none')
-                $('div#kas-target').css('display', 'block')
-            }else{
-                $('span#txt-checkbox-target').html('Sumber Bank')
-                $('select[name="kas_target"]').removeAttr('required').val('').trigger('change')
-                $('select[name="bank_target"]').attr('required', 'required')
-                $('div#bank-target').css('display', 'block')
-                $('div#kas-target').css('display', 'none')
-            }
-        })
+        
 
-        $('select[name="status_out"]').on('change', function(){
-            $(this).val() === 'sesuai' ? $('input[name="delay_out"]').attr('readonly', 'true') : $('input[name="delay_out"]').removeAttr('readonly')
-            $('input[name="delay_out"]').val(moment().format('YYYY-MM-DD'))
-        })
+        function setUrut(){
+            $('tr.item-rows').each(function(i, e){
+                var urut = i + 1
+                $(this).attr('data-urut', urut)
+                $(this).find('td').first().find('h4.urut-rows').html(urut)
+            })
 
-        $('select[name="status_in"]').on('change', function(){
-            $(this).val() === 'sesuai' ? $('input[name="delay_in"]').attr('readonly', 'true') : $('input[name="delay_in"]').removeAttr('readonly')
-            $('input[name="delay_in"]').val(moment().format('YYYY-MM-DD'))
-        })
+            $('tr.item-rows').last().find('button.bt-add-jurnal').removeAttr('disabled').addClass('btn-warning').removeClass('btn-default')
+
+            $('button.bt-remove-item').each(function(i, e){
+                var urut = i + 1
+                $(this).attr('data-id', urut)
+            })
+        }
+
+        AJAX_ITEMS()
+        function AJAX_ITEMS(){
+            var id = $('form#form-update').data('id')
+            $.ajax({
+                async: true,
+                url: 'entri-jurnal/show/'+id+'/show-item',
+                method: 'GET',
+                dataType: 'json',
+                success: function(result){
+                    console.log(result);
+                    body.find('tbody#item-akun').html(result.map(elm => elm))
+                    setUrut()
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
     })
 </script>
 

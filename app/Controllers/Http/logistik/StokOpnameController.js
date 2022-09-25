@@ -5,6 +5,8 @@ const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
 const initMenu = use("App/Helpers/_sidebar")
 const BarangHelpers = use("App/Helpers/Barang")
+const logoPath = Helpers.publicPath('logo.png')
+const Image64Helpers = use("App/Helpers/_encodingImages")
 const LogStokOpnameHelpers = use("App/Helpers/LogStokOpname")
 
 class StokOpnameController {
@@ -121,6 +123,21 @@ class StokOpnameController {
         return data
     }
 
+    async print ( { auth, params } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return {
+                success: false,
+                message: 'Not authorized....'
+            }
+        }
+
+        const data = await LogStokOpnameHelpers.PRINT(params)
+        const logoAsBase64 = await Image64Helpers.GEN_BASE64(logoPath)
+        const result = await GENPDF_SUMMARY_STOKOPNAME(data, logoAsBase64)
+        return result
+    }
+
 }
 
 module.exports = StokOpnameController
@@ -134,4 +151,136 @@ async function userValidate(auth){
         console.log(error);
         return null
     }
+}
+
+async function GENPDF_SUMMARY_STOKOPNAME(data, logo){
+    let body = []
+
+    body.push([
+        {text: 'No', bold: true, fillColor: '#ddd'},
+        {text: 'Kode', bold: true, fillColor: '#ddd'},
+        {text: 'Barang', bold: true, fillColor: '#ddd'},
+        {text: 'Stn', bold: true, fillColor: '#ddd'},
+        {text: 'opname', bold: true, fillColor: '#ddd', alignment: 'right'},
+        {text: 'hand', bold: true, fillColor: '#ddd', alignment: 'right'},
+        {text: 'Diff', bold: true, fillColor: '#ddd', alignment: 'right'},
+    ])
+
+    for (const [i, obj] of data.entries()) {
+        body.push([
+            {text: i+1},
+            {text: obj.barang.kode+'\n'+obj.barang.num_part, fontSize: 9},
+            {text: obj.barang.nama},
+            {text: obj.barang.satuan},
+            {text: obj.qty_opname, alignment: 'right'},
+            {text: obj.qty_onhand, alignment: 'right'},
+            {text: obj.variences, alignment: 'right', fillColor: obj.variences != 0 ? '#faebd7':'#fff'},
+        ])
+    }
+    
+
+    var dd = {
+        pageSize: 'A4',
+        pageMargins: [ 20, 30, 20, 45 ],
+        watermark: { 
+            angle: 0,
+            fontSize: 50,
+            text: 'Stok Opname',
+            color: 'blue',
+            angle: 0,
+            opacity: 0.3, 
+            bold: true, 
+            italics: false,
+        },
+        info: {
+            title: 'Stok Opname Makassar Jaya Marine',
+            author: 'ayat ekapoetra',
+            subject: 'Makassar Jaya Marine Personal license',
+            keywords: 'Stok Opname MJM',
+        },
+        content: [
+            {
+                alignment: 'justify',
+                columns: [
+                    {
+                        width: 120,
+                        style: 'tableExample',
+                        table: {
+                            body: [
+                                [
+                                    {
+                                        width: 100,
+                                        image: `${logo}`,
+                                    }
+                                ],
+                                [
+                                    {
+                                        text: 'Jln.Banda No.87\nMakassar, Sulawesi-Selatan\nIndonesia 90173\n0411 3630014\n0813 1196 799',
+                                        fontSize: 8
+                                    }
+                                ]
+                            ]
+                        },
+                        layout: 'noBorders'
+                    },
+                    {
+                        width: '*',
+                        margin: [5, 15, 5, 5],
+                        style: 'tableExample',
+                        table: {
+                            widths: [100, '*'],
+                            body: [
+                                [
+                                    {text: 'Kode', bold: true, fontSize: 10},
+                                    {text: ':  '+ data[0].kode, fontSize: 10}
+                                ],
+                                [
+                                    {text: 'Cabang', bold: true, fontSize: 10},
+                                    {text: ':  '+ data[0].cabang.nama, fontSize: 10}
+                                ],
+                                [
+                                    {text: 'Gudang', bold: true, fontSize: 10},
+                                    {text: ':  '+ data[0].gudang.nama, fontSize: 10}
+                                ],
+                                [
+                                    {text: 'Tanggal Opname', bold: true, fontSize: 10},
+                                    {text: ':  '+ moment(data[0].date_opname).format('dddd, DD MMMM YYYY'), fontSize: 10}
+                                ],
+                                [
+                                    {text: 'CreatedBy', bold: true, fontSize: 10},
+                                    {text: ':  '+ data[0].createdby.nama_lengkap, fontSize: 10}
+                                ],
+                            ]
+                        },
+                        layout: 'noBorders'
+                    },
+                    
+                ]
+            },
+            {text: '\n'},
+            {
+                style: 'tableExample',
+                table: {
+                    widths: [30, 'auto', '*', 'auto', 'auto', 'auto', 30],
+                    body: body
+                },
+                layout: 'lightHorizontalLines'
+            },
+            {text: '\n\n'},
+            {
+                alignment: 'right',
+                columns: [
+                    {
+                        width: '*',
+                        text: 'Print at, ' + moment().format('dddd, DD MMMM YYYY [Pukul :] HH:mm:ss A'),
+                        fontSize: 10,
+                        italics: true
+                    }
+                ]
+            }
+        ]
+        
+    }
+
+    return dd
 }

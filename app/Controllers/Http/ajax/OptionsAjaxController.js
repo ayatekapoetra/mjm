@@ -991,6 +991,23 @@ class OptionsAjaxController {
         }
     }
 
+    async fakturBeliID ( { params } ) {
+        try {
+            let data = (
+                await KeuFakturPembelian.query()
+                    .with('pemasok')
+                    .where('id', params.id)
+                .last() 
+            ).toJSON() 
+            
+            return data
+            
+        } catch (error) {
+            console.log('error fakturBeli :::', error);
+            return []
+        }
+    }
+
     async purchasingOrder ( { auth, request } ) {
         const req = request.all()
         console.log('REG ::', req);
@@ -1013,15 +1030,22 @@ class OptionsAjaxController {
             data.unshift({id: '', name: 'Pilih...', selected: 'selected'})
         }
 
+        console.log(data);
         return data
     }
 
     async purchasingOrderID ( { request, params } ) {
         const req = request.all()
-        console.log(params);
+        console.log('params :::', params);
         console.log(req);
-        let data = (await KeuPurchasingRequest.query().with('items').where('id', params.id).last()).toJSON()
-        data.items = data.items.filter(obj => obj.pemasok_id == req.pemasok_id)
+        let data = (
+            await KeuPurchasingRequest.query()
+            .with('items', w => w.where('pemasok_id', req.pemasok_id))
+            .where('id', params.id)
+            .last()
+        ).toJSON()
+        console.log('data ::', data);
+        // data.items = data.items.filter(obj => obj.pemasok_id == req.pemasok_id)
         const barang = (await Barang.query().where('aktif', 'Y').fetch()).toJSON()
 
         let coaAkun = (await AccCoa.query().orderBy('id', 'asc').fetch()).toJSON()
@@ -1114,7 +1138,6 @@ class OptionsAjaxController {
 
     async purchasingOrderList ( { auth, request } ) {
         const req = request.all()
-        // console.log('purchasingOrderList :::', req.purchasing_id);
         const user = await userValidate(auth)
         if(!user){
             return
@@ -1123,6 +1146,7 @@ class OptionsAjaxController {
         let data = (await KeuPurchasingRequest.query().where( w => {
             if(user.cabang_id){
                 w.where('cabang_id', user.cabang_id)
+                w.where('status', '!=', 'finish')
             }
         }).fetch()).toJSON()
 

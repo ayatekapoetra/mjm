@@ -70,8 +70,8 @@ class stokOpname {
             .query()
             .with('cabang')
             .with('gudang')
-            .with('author')
             .with('barang')
+            .with('createdby')
             .where('opname_id', params.id)
             .fetch()
         ).toJSON()
@@ -81,17 +81,14 @@ class stokOpname {
 
     async PRINT (params) {
         const data = (
-            await Opname
+            await OpnameSummary
             .query()
             .with('cabang')
             .with('gudang')
-            .with('author')
-            .with('items', w => {
-                w.with('barang')
-                w.where('aktif', 'Y')
-            })
-            .where('id', params.id)
-            .last()
+            .with('createdby')
+            .with('barang')
+            .where('opname_id', params.id)
+            .fetch()
         ).toJSON()
         console.log(data);
         return data

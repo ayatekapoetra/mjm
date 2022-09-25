@@ -44,20 +44,6 @@
             </div>
         </div>
         <div class="row">
-            <!--
-            <div class="col-md-6 entri-details visible-entri-jurnal-kas" style="display:none;">
-                <div class="input-group m-b-10">
-                    <span class="input-group-addon" id="basic-addon2">Kas</span>
-                    <select class="form-control entri-items selectKas item-data-details" name="kas_id"></select>
-                </div>
-            </div>
-            <div class="col-md-6 entri-details visible-entri-jurnal-bank" style="display:none;">
-                <div class="input-group m-b-10">
-                    <span class="input-group-addon" id="basic-addon2">Bank</span>
-                    <select class="form-control entri-items selectBank item-data-details" name="bank_id"></select>
-                </div>
-            </div>
-            -->
             <div class="col-md-6 entri-details visible-entri-jurnal-pemasok" style="display:none;">
                 <div class="input-group m-b-10">
                     <span class="input-group-addon" id="basic-addon2">Pemasok</span>
@@ -66,7 +52,7 @@
             </div>
             <div class="col-md-6 entri-details visible-entri-jurnal-pemasok" style="display:none;">
                 <div class="input-group m-b-10">
-                    <span class="input-group-addon" id="basic-addon2">Faktur Hutang</span>
+                    <span class="input-group-addon" id="faktur_id">Faktur Hutang</span>
                     <select class="form-control entri-items item-data-details" name="faktur_id"></select>
                 </div>
             </div>
@@ -78,7 +64,7 @@
             </div>
             <div class="col-md-6 entri-details visible-entri-jurnal-pelanggan" style="display:none;">
                 <div class="input-group m-b-10">
-                    <span class="input-group-addon" id="basic-addon2">Invoice</span>
+                    <span class="input-group-addon" id="invoice-pelanggan">Invoice</span>
                     <select class="form-control entri-items item-data-details" name="order_id"></select>
                 </div>
             </div>
@@ -94,23 +80,20 @@
                     <select class="form-control entri-items selectGudang item-data-details" name="gudang_id" data-values=""></select>
                 </div>
             </div>
-            <div class="col-md-9 entri-details visible-entri-jurnal-persediaan" style="display:none;">
-                <span>
-                    <small>
-                        Note: <br>
-                        Untuk menambahkan jumlah barang ke stok persediaan, 
-                        klik tombol <code><i class="icon-basket-loaded"></i></code> hingga berganti warna, ini akan mempengaruhi stok barang pada gudang
-                    </small>
-                </span>
+            <div class="col-md-3 col-md-offset-6 entri-details visible-entri-jurnal-persediaan" style="display:none;">
+                <div class="input-group m-b-10">
+                    <span class="input-group-addon" id="basic-addon2">...</span>
+                    <select class="form-control entri-items item-data-details" name="sync_stok">
+                        <option value="">Pilih</option>
+                        <option value="N">Jangan Pengaruhi Stok</option>
+                        <option value="Y">Pengaruhi Stok</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-3 pull-right entri-details visible-entri-jurnal-persediaan" style="display:none;">
+            <div class="col-md-3 entri-details visible-entri-jurnal-persediaan" style="display:none;">
                 <div class="input-group m-b-10">
                     <span class="input-group-addon" id="basic-addon2">Qty</span>
                     <input type="number" class="form-control entri-items item-data-details" name="qty">
-                    <span class="input-group-addon" name="btn-isStock">
-                        <i class="icon-basket-loaded"></i>
-                        <input type="hidden" class="form-control entri-items item-data-details" name="isStok" value="">
-                    </span>
                 </div>
             </div>
         </div>

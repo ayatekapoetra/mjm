@@ -30,7 +30,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label class="control-label">Cabang <span class="text-danger">*</span></label>
-                            <select type="text" name="cabang_id" class="form-control item-data selectCabang"></select>
+                            <select type="text" name="cabang_id" class="form-control item-data selectCabang" data-values="{{usr_cabang}}"></select>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -158,7 +158,7 @@
                 mimeType: "multipart/form-data",
                 contentType: false,
                 success: function(result){
-                    // console.log(result);
+                    console.log(result);
                     elm.select2()
                     if(result.length > 0){
                         elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.name+'</option>'))

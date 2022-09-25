@@ -91,7 +91,7 @@ class PembayaranPelangganController {
         let data = await OrderPelangganHelpers.SHOW(params)
         const initTax = await SysConfig.query().select('pajak').last()
         data.tot_inv = parseFloat(data.tot_order) + parseFloat(data.tot_service)
-        // console.log(data);
+
         return view.render('operational.pembayaran-pelanggan.invoicing', { data: data, ppn: initTax.pajak })
     }
 
@@ -497,8 +497,18 @@ class PembayaranPelangganController {
             return view.render('401')
         }
 
-        // console.log(req);
         const data = await BayarPelangganHelpers.INVOICING(params, req, user)
+        return data
+    }
+
+    async invoicingRollback ( { auth, params, view } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        const data = await BayarPelangganHelpers.INVOICING_ROLLBACK(params, user)
+        console.log(data);
         return data
     }
 

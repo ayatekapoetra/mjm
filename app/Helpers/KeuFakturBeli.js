@@ -19,9 +19,22 @@ const KeuFakturPembelianItem = use("App/Models/transaksi/KeuFakturPembelianItem"
 
 class fakturBeli {
     async LIST (req, user) {
+        console.log(req);
         const ws = await initFunc.WORKSPACE(user)
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
+
+        const updStatus = (await KeuFakturPembelian.query().where('aktif', 'Y').fetch()).toJSON()
+        for (const obj of updStatus) {
+            const upd = await KeuFakturPembelian.query().where('id', obj.id).last()
+            if(upd.sisa != 0){
+                upd.merge({sts_paid: 'bersisa'})
+            }else{
+                upd.merge({sts_paid: 'lunas'})
+            }
+            
+            await upd.save()
+        }
 
         let data = (await KeuFakturPembelian
             .query()
@@ -34,22 +47,27 @@ class fakturBeli {
             .where( w => {
                 w.where('cabang_id', user.cabang_id)
                 w.where('aktif', 'Y')
+                if(req.pemasok_id){
+                    w.where('pemasok_id', req.pemasok_id)
+                }
+                if(req.gudang_id){
+                    w.where('gudang_id', req.gudang_id)
+                }
+                if(req.status_paid){
+                    w.where('sts_paid', req.status_paid)
+                }
+                if(req.kode_){
+                    w.where('kode', 'like', `%${req.kode_}%`)
+                }
+                if(req.duedate_begin && req.duedate_end){
+                    w.where('due_date', '>=', moment(req.duedate_begin).format('YYYY-MM-DD'))
+                    w.where('due_date', '<=', moment(req.duedate_end).format('YYYY-MM-DD'))
+                }
             })
             .orderBy('date_faktur', 'desc')
             .paginate(halaman, limit)
         ).toJSON()
 
-
-        for (const obj of data.data) {
-            const upd = await KeuFakturPembelian.query().where('id', obj.id).last()
-            if(upd.sisa != 0){
-                upd.merge({sts_paid: 'bersisa'})
-            }else{
-                upd.merge({sts_paid: 'lunas'})
-            }
-            
-            await upd.save()
-        }
         
         return data
     }
@@ -104,24 +122,57 @@ class fakturBeli {
         console.log('end KeuFakturPembelian');
 
         if(filex){
-            for (const [i, objFile] of (filex._files).entries()) {
-                const randURL = moment().format('YYYYMMDDHHmmss') + '-' + i
-                const aliasName = `FB-${randURL}.${objFile.extname}`
+            if(filex._files?.length > 1){
+                for (const [i, objFile] of (filex._files).entries()) {
+                    const randURL = moment().format('YYYYMMDDHHmmss') + '-' + i
+                    const aliasName = `FB-${randURL}.${objFile.extname}`
+                    var uriLampiran = '/upload/'+aliasName
+                    await objFile.move(Helpers.publicPath(`upload`), {
+                        name: aliasName,
+                        overwrite: true,
+                    })
+    
+                    if (!objFile.moved()) {
+                        return objFile.error()
+                    }
+    
+                    const lampiranFile = new LampiranFile()
+                    lampiranFile.fill({
+                        fakturbeli_id: trxFakturBeli.id,
+                        size: objFile.size,
+                        filetype: objFile.extname,
+                        url: uriLampiran
+                    })
+    
+                    try {
+                        await lampiranFile.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: 'Failed save data attachment...'+JSON.stringify(error)
+                        }
+                    }
+                }
+            }else{
+                const randURL = moment().format('YYYYMMDDHHmmss') + '-0'
+                const aliasName = `FB-${randURL}.${filex.extname}`
                 var uriLampiran = '/upload/'+aliasName
-                await objFile.move(Helpers.publicPath(`upload`), {
+                await filex.move(Helpers.publicPath(`upload`), {
                     name: aliasName,
                     overwrite: true,
                 })
 
-                if (!objFile.moved()) {
-                    return objFile.error()
+                if (!filex.moved()) {
+                    return filex.error()
                 }
 
                 const lampiranFile = new LampiranFile()
                 lampiranFile.fill({
                     fakturbeli_id: trxFakturBeli.id,
-                    size: objFile.size,
-                    filetype: objFile.extname,
+                    size: filex.size,
+                    filetype: filex.extname,
                     url: uriLampiran
                 })
 
@@ -203,6 +254,9 @@ class fakturBeli {
             if(obj.coa_id){
                 const akun = await AccCoa.query().where('id', obj.coa_id).last()
                 const barang = await Barang.query().where('id', obj.barang_id).last()
+                
+                const subtotal = (parseFloat(obj.qty) * parseFloat(obj.harga_stn)) - parseFloat(obj.discount_rp)
+                // const subtotal_ppn = subtotal + (subtotal * (parseFloat(req.ppn)/100))
 
                 const trxFakturBeliItem = new KeuFakturPembelianItem()
                 trxFakturBeliItem.fill({
@@ -214,7 +268,7 @@ class fakturBeli {
                     discount: obj.discount_rp,
                     stn: barang?.satuan || null,
                     harga_stn: obj.harga_stn,
-                    subtotal: (parseFloat(obj.qty) * parseFloat(obj.harga_stn)) - parseFloat(obj.discount_rp)
+                    subtotal: subtotal
                 })
 
                 try {
