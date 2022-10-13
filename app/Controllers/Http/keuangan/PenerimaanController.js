@@ -420,7 +420,7 @@ class KeuPenerimaanController {
         }
         req.items = JSON.parse(req.items)?.items || null
 
-        console.log(req);
+        // console.log(req);
         if (!req.trx_date) {
             return {
                 success: false,
@@ -520,9 +520,9 @@ class KeuPenerimaanController {
 
         const attach = request.file('lampiran', validateFile)
         
-        // const data = await KeuPenerimaanHelpers.UPDATE(params, req, user, attach)
+        const data = await KeuPenerimaanHelpers.UPDATE(params, req, user, attach)
 
-        // return data
+        return data
     }
 
     async destroy ( { auth, params } ) {

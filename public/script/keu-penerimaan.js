@@ -248,7 +248,7 @@ $(function(){
             success: function(result){
                 if(result.success){
                     swal("Okey,,,!", result.message, "success")
-                    // initDefault()
+                    initDefault()
                 }else{
                     swal("Opps,,,!", result.message, "warning")
                 }

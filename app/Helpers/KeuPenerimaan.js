@@ -412,6 +412,7 @@ class pembayaran {
 
         try {
             await keuPenerimaan.save(trx)
+            console.log('update penerimaaan OK');
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -422,7 +423,12 @@ class pembayaran {
         }
 
         /** UPDATE TRX JURNAL **/
-        await DB.table('trx_jurnals').where('keuterima_id', params.id).update('aktif', 'N')
+        try {
+            await DB.table('trx_jurnals').where('keuterima_id', params.id).update({aktif: 'N'})
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+        }
 
         /** INSERT TRX JURNAL KREDIT **/
         const coaDebit = await AccCoa.query().where('id', req.coa_debit).last()
@@ -444,6 +450,7 @@ class pembayaran {
                 dk: 'd'
             })
             await jurnalDebit.save(trx)
+            console.log('update jurnal debit OK');
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -455,9 +462,16 @@ class pembayaran {
 
         /** INSERT MUTASI KAS ATAU BANK **/
         if(req.bank_id){
-            await DB.table('trx_banks').where('keuterima_id', params.id).update('aktif', 'N')
+            try {
+                const updTrxBank = await TrxBank.query().where('keuterima_id', params.id).last()
+                updTrxBank.merge({aktif: 'N'})
+                await updTrxBank.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+            }
+            
             const trxBank = new TrxBank()
-
             if(req.is_delay){
                 var saldo_net = 0
                 var tarik_tunda = req.subtotal
@@ -475,9 +489,10 @@ class pembayaran {
                 tarik_tunda: tarik_tunda,
                 desc: `[ ${req.reff} ] Pembayaran Akun Faktur`,
             })
-
+            
             try {
                 await trxBank.save(trx)
+                console.log('add trx bank OK');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -487,7 +502,7 @@ class pembayaran {
                 }
             }
         }
-
+        
         if(req.kas_id){
             await DB.table('trx_kases').where('keuterima_id', params.id).update('aktif', 'N')
             const trxKas = new TrxKases()
@@ -499,9 +514,10 @@ class pembayaran {
                 saldo_rill: req.subtotal,
                 desc: `[ ${req.reff} ] Pembayaran Akun Faktur`,
             })
-
+            
             try {
                 await trxKas.save(trx)
+                console.log('add trx kas OK');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -511,7 +527,8 @@ class pembayaran {
                 }
             }
         }
-
+        
+        
         if(attach){
             await DB.table('keu_pembayaran_attach').where('keuterima_id', params.id).update('aktif', 'N')
             if(attach._files.length > 1){
@@ -538,6 +555,7 @@ class pembayaran {
         
                     try {
                         await lampiranFile.save(trx)
+                        console.log('add file lampiran OK');
                     } catch (error) {
                         console.log(error);
                         await trx.rollback()
@@ -570,6 +588,7 @@ class pembayaran {
     
                 try {
                     await lampiranFile.save(trx)
+                    console.log('add file lampiran OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -581,12 +600,12 @@ class pembayaran {
             }
         }
 
-        await DB.table('keu_pembayaran_items').where('keuterima_id', params.id).update('aktif', 'N')
+        await DB.table('keu_penerimaan_items').where('keuterima_id', params.id).update({aktif: 'N'})
 
         /** INSERT keuPenerimaan ITEMS **/
         for (const obj of req.items) {
             /* INSERT ITEMS PEMBAYARAN */
-            const keuPenerimaanItem = new KeuPembayaranItem()
+            const keuPenerimaanItem = new KeuPenerimaanItem()
             try {
                 const data = {
                     keuterima_id: params.id,
@@ -606,6 +625,7 @@ class pembayaran {
 
                 keuPenerimaanItem.fill(data)
                 await keuPenerimaanItem.save(trx)
+                console.log('add penerimaan items OK');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -652,6 +672,7 @@ class pembayaran {
                     dk: 'k'
                 })
                 await jurnalKredit.save(trx)
+                console.log('add jurnal kredit OK');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -688,6 +709,7 @@ class pembayaran {
 
                 try {
                     await pelangganBayar.save(trx)
+                    console.log('add pembayaran pelanggan OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -706,6 +728,7 @@ class pembayaran {
 
                 try {
                     await orderData.save(trx)
+                    console.log('update invoice pelanggan OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -738,6 +761,7 @@ class pembayaran {
                     })
 
                     await fakturPembalian.save(trx)
+                    console.log('update faktur pembelian OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -776,6 +800,7 @@ class pembayaran {
 
                 try {
                     await pelangganBayar.save(trx)
+                    console.log('add pembayaran pelanggan OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -799,6 +824,7 @@ class pembayaran {
 
                 try {
                     await orderData.save(trx)
+                    console.log('update pembayaran pelanggan OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -811,6 +837,7 @@ class pembayaran {
         }
 
         await trx.commit()
+        console.log('all success...');
         return {
             success: true,
             message: 'Success save pembayaran '
@@ -869,7 +896,9 @@ class pembayaran {
     async DELETE (params) {
         const data = (await KeuPenerimaan.query().with('items').where('id', params.id).last()).toJSON()
         try {
-            await DB.table('keu_penerimaans').where('id', params.id).update({aktif: 'N'})
+            const keuTandaterima = await KeuPenerimaan.query().where('id', params.id).last()
+            keuTandaterima.merge({aktif: 'N'})
+            await keuTandaterima.save()
         } catch (error) {
             console.log(error)
             return {

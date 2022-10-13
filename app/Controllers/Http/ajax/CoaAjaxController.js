@@ -404,6 +404,7 @@ class CoaAjaxController {
                 w.where('aktif', 'Y')
             }).fetch()
         ).toJSON()
+        console.log('fakturPemasok :::', fakturPemasok);
 
         return fakturPemasok
     }

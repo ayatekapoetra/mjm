@@ -456,9 +456,19 @@ class pembayaran {
 
         /** INSERT MUTASI KAS ATAU BANK **/
         if(req.bank_id){
-            await DB.table('trx_banks').where('keubayar_id', params.id).update('aktif', 'N')
-            const trxBank = new TrxBank()
+            const updTrxBank = await TrxBank.query().where( w => {
+                w.where('keubayar_id', params.id)
+                w.where('aktif', 'Y')
+            }).last()
+            try {
+                updTrxBank.merge({aktif: 'N'})
+                await updTrxBank.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+            }
 
+            const trxBank = new TrxBank()
             if(req.is_delay){
                 var saldo_net = 0
                 var tarik_tunda = req.subtotal
@@ -533,7 +543,7 @@ class pembayaran {
         }
 
         if(attach){
-            await DB.table('keu_pembayaran_attach').where('keubayar_id', params.id).update('aktif', 'N')
+            await DB.table('keu_pembayaran_attach').where('keubayar_id', params.id).update({aktif: 'N'})
             if(attach._files.length > 1){
                 for (const [i, objFile] of (attach._files).entries()) {
                     const randURL = moment().format('YYYYMMDDHHmmss') + '-' + i
@@ -601,7 +611,7 @@ class pembayaran {
             }
         }
 
-        await DB.table('keu_pembayaran_items').where('keubayar_id', params.id).update('aktif', 'N')
+        await DB.table('keu_pembayaran_items').where('keubayar_id', params.id).update({aktif: 'N'})
 
         /** INSERT TRXPEMBAYARAN ITEMS **/
         for (const obj of req.items) {
@@ -713,7 +723,7 @@ class pembayaran {
                 
                 await DB.table('pay_pelanggan').where( w => {
                     w.where('no_kwitansi', req.reff)
-                }).update('aktif', 'N')
+                }).update({aktif: 'N'})
 
                 const pelangganBayar = new TrxFakturPelanggan()
                 pelangganBayar.fill({
@@ -828,24 +838,35 @@ class pembayaran {
 
     async DELETE (params) {
         console.log(params);
+        const trx = await DB.beginTransaction()
         const data = (await KeuPembayaran.query().with('items').where('id', params.id).last()).toJSON()
         try {
-            await DB.table('keu_pembayarans').where('id', params.id).update({aktif: 'N'})
+            // await DB.table('keu_pembayarans').where('id', params.id).update({aktif: 'N'})
+            const delBayar = await KeuPembayaran.query().where('id', params.id).last()
+            delBayar.merge({aktif: 'N'})
+            await delBayar.save(trx)
         } catch (error) {
             console.log(error)
+            await trx.rollback()
             return {
                 success: false,
                 message: 'Failed delete data keu_pembayarans...'
             }
         }
 
-        try {
-            await DB.table('keu_pembayaran_items').where('keubayar_id', params.id).update({aktif: 'N'})
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'Failed delete data keu_pembayaran_items...'
+        const itemBayar = (await KeuPembayaranItem.query().where('keubayar_id', params.id).fetch()).toJSON()
+        for (const val of itemBayar) {
+            const delItems = await KeuPembayaranItem.query().where('id', val.id).last()
+            try {
+                delItems.merge({aktif: 'N'})
+                await delItems.save(trx)
+            } catch (error) {
+                console.log(error)
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed delete data keu_pembayaran_items...'
+                }
             }
         }
 
@@ -859,58 +880,111 @@ class pembayaran {
             }
         }
 
-        try {
-            await DB.table('trx_jurnals').where('keubayar_id', params.id).update({aktif: 'N'})
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'Failed delete data trx_jurnals...'
+        const delJurnal = (await TrxJurnal.query().where('keubayar_id', params.id).fetch()).toJSON()
+        for (const val of delJurnal) {
+            const delTrxJurnal = await TrxJurnal.query().where('id', val.id).last()
+            try {
+                // await DB.table('trx_jurnals').where('keubayar_id', params.id).update({aktif: 'N'})
+                delTrxJurnal.merge({aktif: 'N'})
+                await delTrxJurnal.save(trx)
+            } catch (error) {
+                console.log(error)
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed delete data trx_jurnals...'
+                }
             }
         }
 
-        try {
-            await DB.table('pay_pelanggan').where('no_kwitansi', data.reff).update({aktif: 'N'})
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'Failed delete data pay_pelanggan...'
+        const trxPelangganBayar = (await TrxFakturPelanggan.query().where( w => {
+            w.where('no_kwitansi', data.reff)
+            w.where('aktif', 'Y')
+        }).fetch()).toJSON()
+        for (const val of trxPelangganBayar) {
+            const delBayar = await TrxFakturPelanggan.query().where('id', val.id).last()
+            try {
+                // await DB.table('pay_pelanggan').where('no_kwitansi', data.reff).update({aktif: 'N'})
+                delBayar.merge({aktif: 'N'})
+                await delBayar.save(trx)
+            } catch (error) {
+                console.log(error)
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed delete data pay_pelanggan...'
+                }
             }
         }
 
         /** JIKA PEMBAYARAN MELALUI KAS **/
-        try {
-            await DB.table('trx_kases').where( w => {
+        const dataKas = (
+            await TrxKases.query().where( w => {
                 w.where('keubayar_id', params.id)
                 w.where('kas_id', data.coa_kredit)
-            }).update({aktif: 'N'})
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'Failed delete data pay_pelanggan...'
+            }).fetch()
+        ).toJSON()
+
+        for (const val of dataKas) {
+            const delKas = await TrxKases.query().where('id', val.id).last()
+            try {
+                // await DB.table('trx_kases').where( w => {
+                //     w.where('keubayar_id', params.id)
+                //     w.where('kas_id', data.coa_kredit)
+                // }).update({aktif: 'N'})
+                delKas.merge({aktif: 'N'})
+                await delKas.save(trx)
+            } catch (error) {
+                console.log(error)
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed delete data pay_pelanggan...'
+                }
             }
         }
 
          /** JIKA PEMBAYARAN MELALUI BANK **/
-         try {
-            await DB.table('trx_banks').where( w => {
+         const dataBank = (
+            await TrxBank.query().where( w => {
                 w.where('keubayar_id', params.id)
                 w.where('bank_id', data.coa_kredit)
-            }).update({aktif: 'N'})
-        } catch (error) {
-            console.log(error)
-            return {
-                success: false,
-                message: 'Failed delete data pay_pelanggan...'
-            }
+            }).fetch()
+        ).toJSON()
+        for (const val of dataBank) {
+            try {
+                //    await DB.table('trx_banks').where( w => {
+                //        w.where('keubayar_id', params.id)
+                //        w.where('bank_id', data.coa_kredit)
+                //    }).update({aktif: 'N'})
+                const delBank = await TrxBank.query().where('id', val.id).last()
+                delBank.merge({aktif: 'N'})
+                await delBank.save(trx)
+           } catch (error) {
+               console.log(error)
+               await trx.rollback()
+               return {
+                   success: false,
+                   message: 'Failed delete data pay_pelanggan...'
+               }
+           }
         }
 
         for (const obj of data.items) {
             if(obj.trx_beli){
+                const sumItemBeli = await KeuPembayaranItem.query().where( w => {
+                    w.where('trx_beli', obj.trx_beli)
+                    w.where('aktif', 'Y')
+                }).getSum('harga_total') || 0
+                const trxFakturBeli = await TrxFakturBeli.query().where('id', obj.trx_beli).last()
+                var sisa = trxFakturBeli.grandtot - sumItemBeli
+                console.log('SISA :::', sisa);
                 try {
-                    await DB.table('keu_faktur_pembelians').where('id', obj.trx_beli).update({aktif: 'N'})
+                    trxFakturBeli.merge({
+                        sisa: sisa,
+                        sts_paid: sisa != 0 ? 'bersisa':'lunas'
+                    })
+                    await trxFakturBeli.save(trx)
                 } catch (error) {
                     console.log(error)
                     return {
@@ -937,6 +1011,7 @@ class pembayaran {
             }
         }
 
+        await trx.commit()
         return {
             success: true,
             message: 'Success delete data...'

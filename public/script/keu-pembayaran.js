@@ -145,31 +145,39 @@ $(function(){
     $('body').on('change', 'select[name="pemasok_id"]', function(){
         var value = $(this).val()
         var elm = $(this).parents('tr.item-rows')
-        $.ajax({
-            async: true,
-            url: '/ajax/coa/faktur-pemasok',
-            method: 'GET',
-            data: {
-                pemasok_id: value
-            },
-            dataType: 'json',
-            success: function(data){
-                console.log(data);
-                if(data){
-                    elm.find('select[name="trx_beli"]').html(
-                        data.map( val => '<option value="'+val.id+'">['+val.kode+']  sisa pembayaran -----> Rp. '+(val.sisa).toLocaleString('ID')+'</option>')
-                    )
-                    elm.find('select[name="trx_beli"]').trigger('change')
-                    elm.find('input[name="harga_stn"]').val(data[0].sisa)
-                }else{
-                    elm.find('select[name="trx_beli"]').html('')
+        if(value){
+            $.ajax({
+                async: true,
+                url: '/ajax/coa/faktur-pemasok',
+                method: 'GET',
+                data: {
+                    pemasok_id: value
+                },
+                dataType: 'json',
+                success: function(data){
+                    console.log('data ::', data);
+                    if(data.length > 0){
+                        elm.find('select[name="trx_beli"]').html(
+                            data.map( val => '<option value="'+val.id+'">['+val.kode+']  sisa pembayaran -----> Rp. '+(val.sisa).toLocaleString('ID')+'</option>')
+                        )
+                        elm.find('select[name="trx_beli"]').trigger('change')
+                        elm.find('input[name="harga_stn"]').val(data[0].sisa)
+                    }else{
+                        elm.find('select[name="trx_beli"]').html('<option value="" selected>Data tidak ditemukan</option>')
+                        elm.find('select[name="trx_beli"]').val('').trigger('change')
+                    }
+                },
+                error: function(err){
+                    console.log(err);
+                    elm.find('select[name="trx_beli"]').html('<option value="" selected>Tentukan pemasoknya...</option>')
+                    elm.find('select[name="trx_beli"]').val('').trigger('change')
                 }
-            },
-            error: function(err){
-                console.log(err);
-                elm.find('select[name="trx_beli"]').html('')
-            }
-        })
+            })
+        }else{
+            console.log('tdk ada pemasok...');
+            elm.find('select[name="trx_beli"]').html('<option value="" selected>Tentukan pemasoknya...</option>')
+            elm.find('select[name="trx_beli"]').val('').trigger('change')
+        }
     })
 
     $('body').on('change', 'select[name="trx_beli"]', function(){
@@ -213,6 +221,7 @@ $(function(){
                 console.log(result);
                 if(result.success){
                     swal('Okey', result.message, 'success')
+                    initDefault()
                 }else{
                     swal('Opps', result.message, 'warning')
                 }
@@ -273,7 +282,7 @@ $(function(){
             success: function(result){
                 if(result.success){
                     swal("Okey,,,!", result.message, "success")
-                    // initDefault()
+                    initDefault()
                 }else{
                     swal("Opps,,,!", result.message, "warning")
                 }
