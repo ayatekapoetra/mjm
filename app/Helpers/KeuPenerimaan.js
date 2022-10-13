@@ -82,6 +82,7 @@ class pembayaran {
 
         /** JIKA DITEMUKAN FILE ATACHMENT **/
         if(attach){
+            console.log('attach ::', attach);
             if(attach._files?.length > 1){
                 for (const [i, objFile] of (attach._files).entries()) {
                     const randURL = moment().format('YYYYMMDDHHmmss') + '-' + i
@@ -530,8 +531,9 @@ class pembayaran {
         
         
         if(attach){
-            await DB.table('keu_pembayaran_attach').where('keuterima_id', params.id).update('aktif', 'N')
-            if(attach._files.length > 1){
+            console.log('attach update ::', attach._files);
+            await DB.table('keu_penerimaan_attach').where('keuterima_id', params.id).update({aktif: 'N'})
+            if(attach._files?.length > 1){
                 for (const [i, objFile] of (attach._files).entries()) {
                     const randURL = moment().format('YYYYMMDDHHmmss') + '-' + i
                     const aliasName = `KEU-BAYAR-${randURL}.${objFile.extname}`
