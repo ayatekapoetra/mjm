@@ -531,7 +531,7 @@ class pembayaran {
         
         
         if(attach){
-            console.log('attach update ::', attach._files);
+            // console.log('attach update ::', attach._files);
             await DB.table('keu_penerimaan_attach').where('keuterima_id', params.id).update({aktif: 'N'})
             if(attach._files?.length > 1){
                 for (const [i, objFile] of (attach._files).entries()) {
@@ -571,7 +571,7 @@ class pembayaran {
                 const randURL = moment().format('YYYYMMDDHHmmss')
                 const aliasName = `KEU-BAYAR-${randURL}.${attach.extname}`
                 var uriLampiran = '/upload/'+aliasName
-                await objFile.move(Helpers.publicPath(`upload`), {
+                await attach.move(Helpers.publicPath(`upload`), {
                     name: aliasName,
                     overwrite: true,
                 })
