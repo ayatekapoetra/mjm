@@ -217,6 +217,9 @@ $(function(){
             processData: false,
             mimeType: "multipart/form-data",
             contentType: false,
+            beforeSend: function(){
+                body.find('div.preloader').css('display', 'block')
+            },
             success: function(result){
                 console.log(result);
                 if(result.success){
@@ -231,6 +234,7 @@ $(function(){
             },
             complete: function() {
                 // window.location.reload()
+                body.find('div.preloader').css('display', 'none')
             }
         })
     })
@@ -279,6 +283,9 @@ $(function(){
             processData: false,
             mimeType: "multipart/form-data",
             contentType: false,
+            beforeSend: function(){
+                body.find('div.preloader').css('display', 'block')
+            },
             success: function(result){
                 if(result.success){
                     swal("Okey,,,!", result.message, "success")
@@ -290,6 +297,9 @@ $(function(){
             error: function(err){
                 console.log(err);
                 swal("Opps,,,!", 'Server Error', "error")
+            },
+            complete: function(){
+                body.find('div.preloader').css('display', 'none')
             }
         })
     })
@@ -315,6 +325,9 @@ $(function(){
                   processData: false,
                   mimeType: "multipart/form-data",
                   contentType: false,
+                  beforeSend: function(){
+                    body.find('div.preloader').css('display', 'block')
+                  },
                   success: function(result){
                       if(result.success){
                           swal("Okey,,,!", result.message, "success")
@@ -326,6 +339,9 @@ $(function(){
                   error: function(err){
                       console.log(err);
                       swal("Opps,,,!", 'Server Error', "error")
+                  },
+                  complete: function(){
+                    body.find('div.preloader').css('display', 'none')
                   }
               })
           })
