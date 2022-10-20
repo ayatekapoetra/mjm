@@ -525,6 +525,19 @@ class KeuPenerimaanController {
         return data
     }
 
+    async print ( { auth, params } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return view.render('401')
+        }
+
+        const data = await KeuPenerimaanHelpers.PRINT(params)
+        const logoAsBase64 = await Image64Helpers.GEN_BASE64(logoPath)
+        const result = await GEN_PENERIMAAN_PDF(data, logoAsBase64)
+        console.log(data);
+        return result
+    }
+
     async destroy ( { auth, params } ) {
         const user = await userValidate(auth)
         if(!user){
@@ -547,4 +560,161 @@ async function userValidate(auth){
         console.log(error);
         return null
     }
+}
+
+async function GEN_PENERIMAAN_PDF(data, logo){
+    let body = []
+    body.push([
+        {text: 'No', fillColor: '#C4C4C4', bold: true},
+        {text: 'Keterangan Items', fillColor: '#C4C4C4', bold: true},
+        {text: 'Qty', alignment: 'right', fillColor: '#C4C4C4', bold: true},
+        {text: 'Harga', alignment: 'right', fillColor: '#C4C4C4', bold: true},
+        {text: 'Total', alignment: 'right', fillColor: '#C4C4C4', bold: true}
+    ])
+
+    for (const [i, val] of data.items.entries()) {
+       
+        if(val.barang_id){
+            body.push(
+                [
+                    {text: `${i + 1}`},
+                    {text: `${val.coaKredit.coa_name} - ${val.barang?.nama}`},
+                    {text: `${val.qty}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_stn)?.toLocaleString('ID')}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_total)?.toLocaleString('ID')}`, alignment: 'right'},
+                ]
+            )
+        } else if(val.trx_beli){
+            body.push(
+                [
+                    {text: `${i + 1}`},
+                    {text: `${val.coaKredit.coa_name} - ${val.trxPembelian?.kode}`},
+                    {text: `${val.qty}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_stn)?.toLocaleString('ID')}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_total)?.toLocaleString('ID')}`, alignment: 'right'},
+                ]
+            )
+        } else if(val.trx_jual){
+            body.push(
+                [
+                    {text: `${i + 1}`},
+                    {text: `${val.coaKredit.coa_name} - ${val.trxPenjualan?.kdpesanan}`},
+                    {text: `${val.qty}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_stn)?.toLocaleString('ID')}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_total)?.toLocaleString('ID')}`, alignment: 'right'},
+                ]
+            )
+        }else {
+            body.push(
+                [
+                    {text: `${i + 1}`},
+                    {text: `${val.coaKredit.coa_name} ${val.description || ''}`},
+                    {text: `${val.qty}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_stn)?.toLocaleString('ID')}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_total)?.toLocaleString('ID')}`, alignment: 'right'},
+                ]
+            )
+        }
+    }
+
+    var dd = {
+        pageSize: 'A4',
+        pageMargins: [ 20, 30, 20, 45 ],
+        watermark: { 
+            angle: 0,
+            fontSize: 50,
+            text: 'PAID',
+            color: 'red',
+            // angle: -25,
+            opacity: 0.3, 
+            bold: true, 
+            italics: false,
+        },
+        info: {
+            title: 'Penerimaan Keuangan Makassar Jaya Marine',
+            author: 'ayat ekapoetra',
+            subject: 'Makassar Jaya Marine Personal license',
+            keywords: 'Penerimaan Keuangan MJM',
+        },
+        content: [
+            {
+                alignment: 'justify',
+                columns: [
+                    {
+                        width: 150,
+                        style: 'tableExample',
+                        table: {
+                            body: [
+                                [
+                                    {
+                                        width: 100,
+                                        image: `${logo}`,
+                                    }
+                                ],
+                                [
+                                    {
+                                        text: 'Jln.Banda No.87\nMakassar, Sulawesi-Selatan\nIndonesia 90173\n0411 3630014\n0813 1196 799',
+                                        fontSize: 8
+                                    }
+                                ]
+                            ]
+                        },
+                        layout: 'noBorders'
+                    },
+                    {
+                        width: '*',
+                        margin: [5, 15, 5, 5],
+                        style: 'tableExample',
+                        table: {
+                            widths: [120, '*'],
+                            body: [
+                                [
+                                    {text: 'Kode Pembayaran', bold: true, fontSize: 10},
+                                    {text: ':  ' + data.reff, fontSize: 10}
+                                ],
+                                [
+                                    {text: 'Tanggal Terima', bold: true, fontSize: 10},
+                                    {text: ':  ' + moment(data.trx_date).format('DD MMMM YYYY'), fontSize: 10}
+                                ],
+                                [
+                                    {text: 'Penerima', bold: true, fontSize: 10},
+                                    {text: ':  ' + data.penerima, fontSize: 10}
+                                ],
+                                [
+                                    {text: 'Cabang', bold: true, fontSize: 10},
+                                    {text: ':  ' + data.cabang.nama, fontSize: 10}
+                                ],
+                                [
+                                    {text: 'Penerimaan Ke', bold: true, fontSize: 10},
+                                    {text: ':  ' + data.coaDebit.coa_name, fontSize: 10}
+                                ],
+                                [
+                                    {text: ''},
+                                    {text: ''}
+                                ],
+                            ]
+                        },
+                        layout: 'lightHorizontalLines'
+                    },
+                    
+                ]
+            },
+            {text: '\n'},
+            {
+                style: 'tableExample',
+                table: {
+                    widths: [20, '*', 30, 'auto', 'auto'],
+                    body: body
+                },
+                // layout: 'noBorders'
+                layout: 'lightHorizontalLines'
+            },
+            {text: '\n'},
+            {text: 'Keterangan : ', bold: true},
+            {text: data.narasi || 'tanpa keterangan', fontSize: 9, italics: true}
+        ]
+        
+    }
+
+    return dd
 }

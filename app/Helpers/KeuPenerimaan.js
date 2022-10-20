@@ -874,12 +874,12 @@ class pembayaran {
 
     async PRINT (params) {
         const data = (
-            await KeuPembayaran.query()
+            await KeuPenerimaan.query()
             .with('cabang')
-            .with('coaKredit')
+            .with('coaDebit')
             .with('createdby')
             .with('items', i => {
-                i.with('coaDebit')
+                i.with('coaKredit')
                 i.with('barang')
                 i.with('gudang')
                 i.with('pemasok')
