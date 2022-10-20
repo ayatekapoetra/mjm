@@ -183,7 +183,7 @@ class pembayaran {
         if(req.bank_id){
             const trxBank = new TrxBank()
 
-            if(req.is_delay){
+            if(req.is_delay == 'Y'){
                 var saldo_net = 0
                 var setor_tunda = req.subtotal
             }else{
@@ -197,7 +197,7 @@ class pembayaran {
                 bank_id: req.bank_id,
                 keuterima_id: keuPenerimaan.id,
                 saldo_net: saldo_net,
-                tarik_tunda: setor_tunda,
+                setor_tunda: setor_tunda,
                 desc: `[ ${req.reff} ] Penerimaan Pembayaran`,
             })
 
@@ -475,10 +475,10 @@ class pembayaran {
             const trxBank = new TrxBank()
             if(req.is_delay){
                 var saldo_net = 0
-                var tarik_tunda = req.subtotal
+                var setor_tunda = req.subtotal
             }else{
                 var saldo_net = req.subtotal
-                var tarik_tunda = 0
+                var setor_tunda = 0
             }
             
             trxBank.fill({
@@ -487,7 +487,7 @@ class pembayaran {
                 bank_id: req.bank_id,
                 keuterima_id: params.id,
                 saldo_net: saldo_net,
-                tarik_tunda: tarik_tunda,
+                setor_tunda: setor_tunda,
                 desc: `[ ${req.reff} ] Pembayaran Akun Faktur`,
             })
             

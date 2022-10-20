@@ -401,6 +401,7 @@ class bayarPelanggan {
             })
             try {
                 await trxJurnalPendapatanBarang.save(trx)
+                console.log('await trxJurnalPendapatanBarang.save(trx)');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -428,6 +429,7 @@ class bayarPelanggan {
             })
             try {
                 await trxJurnalPendapatanJasa.save(trx)
+                console.log('await trxJurnalPendapatanJasa.save(trx)');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -455,6 +457,7 @@ class bayarPelanggan {
             })
             try {
                 await trxJurnalPiutang.save(trx)
+                console.log('await trxJurnalPiutang.save(trx)');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -516,6 +519,7 @@ class bayarPelanggan {
                 })
                 try {
                     await trxJurnalHppDebit.save(trx)
+                    console.log('await trxJurnalHppDebit.save(trx)');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -539,6 +543,7 @@ class bayarPelanggan {
 
             try {
                 await barangLokasi.save(trx)
+                console.log('await barangLokasi.save(trx)');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
