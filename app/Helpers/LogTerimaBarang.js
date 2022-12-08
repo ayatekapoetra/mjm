@@ -32,16 +32,20 @@ class terimaBarang {
                         w.where('reff_ro', 'like', `${req.reff_ro}%`)
                     }
                     if(req.reff_rcp){
-                        w.where('reff_ro', 'like', `${req.reff_rcp}%`)
+                        w.where('reff_rcp', 'like', `${req.reff_rcp}%`)
                     }
                     if(req.narasi){
-                        w.where('reff_ro', 'like', `${req.narasi}%`)
+                        w.where('narasi', 'like', `${req.narasi}%`)
                     }
                     if(req.pemasok_id){
-                        w.where('reff_ro', req.pemasok_id)
+                        w.where('pemasok_id', req.pemasok_id)
                     }
                     if(req.gudang_id){
-                        w.where('reff_ro', req.gudang_id)
+                        w.where('gudang_id', req.gudang_id)
+                    }
+                    if(req.received_at_begin && req.received_at_end){
+                        w.where('received_at', '>=', req.received_at_begin)
+                        w.where('received_at', '<=', req.received_at_end)
                     }
                 })
                 .orderBy('created_at', 'desc')
@@ -202,6 +206,7 @@ class terimaBarang {
         }
         return {
             success: true,
+            id: trxTerimaBarang.id,
             message: 'Success save data...'
         }
     }

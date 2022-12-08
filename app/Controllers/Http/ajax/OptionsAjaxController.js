@@ -7,7 +7,7 @@ const VUser = use("App/Models/VUser")
 const UsrMenu = use("App/Models/UsrMenu")
 const SysMenu = use("App/Models/SysMenu")
 const Jasa = use("App/Models/master/Jasa")
-const Gaji = use("App/Models/master/Gaji")
+// const Gaji = use("App/Models/master/Gaji")
 const Rack = use("App/Models/master/Rack")
 const Bank = use("App/Models/akunting/Bank")
 const Kas = use("App/Models/akunting/Kas")
@@ -28,19 +28,20 @@ const Pelanggan = use("App/Models/master/Pelanggan")
 const Department = use("App/Models/master/Department")
 const BarangBrand = use("App/Models/master/BarangBrand")
 const AccCoaTipe = use("App/Models/akunting/AccCoaTipe")
-const HargaRental = use("App/Models/master/HargaRental")
+// const HargaRental = use("App/Models/master/HargaRental")
 const AccCoaGroup = use("App/Models/akunting/AccCoaGroup")
 const AccCoaSubGroup = use("App/Models/akunting/AccCoaSubGroup")
 const HargaJualBarang = use("App/Models/master/HargaJual")
-const GajiComponent = use("App/Models/master/GajiComponent")
+// const GajiComponent = use("App/Models/master/GajiComponent")
 // const TrxFakturJual = use("App/Models/transaksi/TrxFakturJual")
 const BarangQualities = use("App/Models/master/BarangQualities")
 const BarangCategories = use("App/Models/master/BarangCategories")
-const LogTerimaBarang = use("App/Models/logistik/LogistikTerimaBarang")
+// const LogTerimaBarang = use("App/Models/logistik/LogistikTerimaBarang")
 const BarangSubCategories = use("App/Models/master/BarangSubCategories")
+const OpsPelangganOrder = use("App/Models/operational/OpsPelangganOrder")
 const KeuFakturPembelian = use("App/Models/transaksi/KeuFakturPembelian")
 const KeuPurchasingRequest = use("App/Models/transaksi/KeuPurchasingRequest")
-const KeuPurchasingRequestItems = use("App/Models/transaksi/KeuPurchasingRequestItems")
+// const KeuPurchasingRequestItems = use("App/Models/transaksi/KeuPurchasingRequestItems")
 
 // const jsonData = use("App/Helpers/JSON/barang_sewas")
 
@@ -899,58 +900,58 @@ class OptionsAjaxController {
         return data
     }
 
-    async gaji ( { request } ) {
-        const req = request.all()
-        let data = (
-                await Gaji.query().where( w => {
-                    if(req.tipe){
-                        w.where('tipe', req.tipe)
-                    }
-                w.where('aktif', 'Y')
-            }).orderBy('urut', 'asc')
-            .fetch()
-        ).toJSON()
+    // async gaji ( { request } ) {
+    //     const req = request.all()
+    //     let data = (
+    //             await Gaji.query().where( w => {
+    //                 if(req.tipe){
+    //                     w.where('tipe', req.tipe)
+    //                 }
+    //             w.where('aktif', 'Y')
+    //         }).orderBy('urut', 'asc')
+    //         .fetch()
+    //     ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+    //     data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
 
-        return data
-    }
+    //     return data
+    // }
 
-    async componentGaji ( { request } ) {
-        const req = request.all()
-        let data = (
-                await GajiComponent.query().where( w => {
-                    if(req.karyawan_id){
-                        w.where('karyawan_id', req.karyawan_id)
-                    }
-                    if(req.component_id){
-                        w.where('component_id', req.component_id)
-                    }
-            }).orderBy('karyawan_id', 'asc')
-            .fetch()
-        ).toJSON()
+    // async componentGaji ( { request } ) {
+    //     const req = request.all()
+    //     let data = (
+    //             await GajiComponent.query().where( w => {
+    //                 if(req.karyawan_id){
+    //                     w.where('karyawan_id', req.karyawan_id)
+    //                 }
+    //                 if(req.component_id){
+    //                     w.where('component_id', req.component_id)
+    //                 }
+    //         }).orderBy('karyawan_id', 'asc')
+    //         .fetch()
+    //     ).toJSON()
 
-        data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
+    //     data = data.map(obj => obj.id === parseInt(req.selected) ? {...obj, selected: 'selected'} : {...obj, selected: ''})
 
-        return data
-    }
+    //     return data
+    // }
 
-    async hargaRental ( { request } ) {
-        const req = request.all()
-        try {
-            let data = (
-                    await HargaRental.query().where( w => {
-                    w.where('bisnis_id', req.bisnis_id)
-                    w.where('equipment_id', req.equipment_id)
-                }).orderBy('periode', 'desc')
-                .first() 
-            ).toJSON() 
-            return data
+    // async hargaRental ( { request } ) {
+    //     const req = request.all()
+    //     try {
+    //         let data = (
+    //                 await HargaRental.query().where( w => {
+    //                 w.where('bisnis_id', req.bisnis_id)
+    //                 w.where('equipment_id', req.equipment_id)
+    //             }).orderBy('periode', 'desc')
+    //             .first() 
+    //         ).toJSON() 
+    //         return data
             
-        } catch (error) {
-            return {equipment_id: req.equipment_id, bisnis_id: req.bisnis_id, harga: 0}
-        }
-    }
+    //     } catch (error) {
+    //         return {equipment_id: req.equipment_id, bisnis_id: req.bisnis_id, harga: 0}
+    //     }
+    // }
 
     async hargaJualBarang ( { request } ) {
         const req = request.all()
@@ -1160,6 +1161,19 @@ class OptionsAjaxController {
         return data
     }
 
+    async purchasingOrderByIDJSON ( { auth, params } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        const data = (
+            await KeuPurchasingRequest.query().where('id', params.id).last()
+        ).toJSON()
+
+        return data
+    }
+
     async purchasingOrderDetails ( { auth, request, view } ) {
         const req = request.all()
         console.log(req);
@@ -1176,11 +1190,48 @@ class OptionsAjaxController {
         })
         .where( w => {
             w.where('id', req.order_id)
-            w.where('gudang_id', req.gudang_id)
+            if(req.gudang_id){
+                w.where('gudang_id', req.gudang_id)
+            }
         }).last()).toJSON()
 
         console.log(data);
         return view.render('logistik.terima-barang.items-purchasing-order', {list: data})
+    }
+
+    async transaksiBill ({ auth }) {
+        const user = await userValidate(auth)
+        if(!user){
+            return
+        }
+
+        let data = (
+            await OpsPelangganOrder.query()
+            .where( w => {
+                w.where('aktif', 'Y')
+                w.where('cabang_id', user.cabang_id)
+                w.where('date', '>=', moment().startOf('day').format('YYYY-MM-DD HH:mm'))
+                w.where('date', '<=', moment().endOf('day').format('YYYY-MM-DD HH:mm'))
+            }).fetch()
+        ).toJSON()
+        
+        data = _.groupBy(data, 'status')
+        data = Object.keys(data).map(key => {
+            return {
+                status: key,
+                length: data[key].length,
+                total_trx: data[key].reduce((a, b) => { return a + b.grandtot_trx }, 0),
+                sisa_trx: data[key].reduce((a, b) => { return a + b.sisa_trx }, 0),
+                items: data[key]
+            }
+        })
+
+        return {
+            data: data,
+            rp_bill: data.reduce((a, b) => { return a + b.total_trx }, 0),
+            tot_bill: data.reduce((a, b) => { return a + b.length }, 0),
+            avg_check:  data.reduce((a, b) => { return a + b.total_trx }, 0) / data.reduce((a, b) => { return a + b.length }, 0),
+        }
     }
 
     // async fakturJual ( { request } ) {

@@ -35,9 +35,9 @@ class User extends Model {
     return this.hasMany('App/Models/Token')
   }
 
-  bisnisUnit () {
-    return this.belongsToMany("App/Models/BisnisUnit").pivotTable('usr_bisnis_units')
-  }
+  // bisnisUnit () {
+  //   return this.belongsToMany("App/Models/BisnisUnit").pivotTable('usr_bisnis_units')
+  // }
 
   workspace () {
     return this.hasOne("App/Models/UsrWorkspace")

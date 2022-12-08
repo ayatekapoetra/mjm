@@ -111,7 +111,37 @@
         var body = $('body')
         $('select').select2()
 
-        $('select[name="reff_order"], select[name="pemasok_id"], select[name="gudang_id"]').on('change', function(){
+        // $('select[name="reff_order"], select[name="pemasok_id"], select[name="gudang_id"]').on('change', function(){
+        //     getDetailItems()
+        // })
+
+        $('select[name="reff_order"]').on('change', function(){
+            var value = $(this).val()
+            if(value){
+                $.ajax({
+                    async: true,
+                    url: '/ajax/options/purchasing-request-json/'+value,
+                    method: 'GET',
+                    dataType: 'json',
+                    contentType: false,
+                    success: function(result){
+                        console.log(result);
+                        $('select[name="gudang_id"]').val(result.gudang_id).trigger('change')
+                    },
+                    error: function(err){
+                        console.log(err)
+                        body.find('tbody#item-details').html("")
+                        addItems()
+                    }
+                })
+            }
+        })
+
+        $('select[name="pemasok_id"]').on('change', function(){
+            getDetailItems()
+        })
+
+        $('select[name="gudang_id"]').on('change', function(){
             getDetailItems()
         })
 
@@ -145,13 +175,13 @@
                     method: 'GET',
                     data: {
                         order_id: order_id,
-                        gudang_id: gudang_id,
-                        pemasok_id: pemasok_id
+                        gudang_id: gudang_id || null,
+                        pemasok_id: pemasok_id || null
                     },
                     dataType: 'html',
                     contentType: false,
                     success: function(result){
-                        console.log(result);
+                        // console.log(result);
                         body.find('tbody#item-details').html(result)
                     },
                     error: function(err){

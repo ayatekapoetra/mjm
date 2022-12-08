@@ -6,27 +6,27 @@ const initFunc = use("App/Helpers/initFunc")
 const UsrWorkspace = use("App/Models/UsrWorkspace")
 
 class HomeController {
-    async index ( { auth, response, view } ) {
+    async index ( { auth, view } ) {
         try {
             const usr = await auth.getUser()
             const sideMenu = await initMenu.SIDEBAR(usr.id)
 
-            console.log('----', usr);
              /** ADD USER MENU **/
              await initFunc.POST_ACCESS_MENU(usr.id)
              
              /** ADD USER ACCESS **/
             //  await initFunc.POST_RESOURCES_ACCESS(usr.id)
              
-             let user = (await User.query().with('bisnisUnit').with('workspace').where('id', usr.id).last()).toJSON() || null
-             user = user.bisnisUnit.map(el => {
-                 return {
-                     ...el,
-                     bisnis_id: user.workspace?.bisnis_id || null
-                 }
-             })
+            let user = (await User.query().with('workspace').where('id', usr.id).last()).toJSON() || null
+            // user = user.bisnisUnit.map(el => {
+            //     return {
+            //         ...el,
+            //         bisnis_id: user.workspace?.bisnis_id || null
+            //     }
+            // })
             return view.render('welcome', {
                 bisnis : user,
+                cabang_id: usr.cabang_id,
                 user: usr.email,
                 menu: sideMenu
             })

@@ -1,8 +1,7 @@
 
 @layout('_layouts.main')
 @section('content')
-{{ script('https://code.highcharts.com/highcharts') }}
-
+    {{ script('ajax/opt-cabang') }}
     <div class="container-fluid">
         <div class="row bg-title">
             <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
@@ -18,7 +17,7 @@
                     <h3 class="box-title">Pelanggan</h3>
                     <ul class="list-inline two-part">
                         <li><i class="icon-people text-info"></i></li>
-                        <li class="text-right"><span class="counter">23</span></li>
+                        <li class="text-right"><span class="counter" id="count-pelanggan">...</span></li>
                     </ul>
                 </div>
             </div>
@@ -26,26 +25,35 @@
                 <div class="white-box">
                     <h3 class="box-title">Total Bill</h3>
                     <ul class="list-inline two-part">
-                        <li><i class="icon-folder text-purple"></i></li>
-                        <li class="text-right"><span class="counter">169</span></li>
+                        <li><i class="ti-receipt text-purple"></i></li>
+                        <li class="text-right">
+                            <span class="counter" id="count-bill">...</span><br>
+                            today
+                        </li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-3 col-sm-6 col-xs-12">
                 <div class="white-box">
-                    <h3 class="box-title">Total Kas</h3>
+                    <h3 class="box-title">Total Sales</h3>
                     <ul class="list-inline two-part">
-                        <li><i class="icon-folder-alt text-danger"></i></li>
-                        <li class="text-right"><span class="">311</span></li>
+                        <li><i class="ti-wallet text-danger"></i></li>
+                        <li class="text-right">
+                            <span class="" id="count-sales">...</span><br>
+                            today
+                        </li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-3 col-sm-6 col-xs-12">
                 <div class="white-box">
-                    <h3 class="box-title">Tagihan</h3>
+                    <h3 class="box-title">Averages Check Bill</h3>
                     <ul class="list-inline two-part">
-                        <li><i class="ti-wallet text-success"></i></li>
-                        <li class="text-right"><span class="">117</span></li>
+                        <li><i class="icon-calculator text-success"></i></li>
+                        <li class="text-right">
+                            <span class="" id="count-ratio-bill">...</span><br>
+                            today
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -53,27 +61,234 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="white-box">
-                    <div id="container"></div>
+                    <h3>
+                        Omzet Penjualan 
+                        <span class="pull-right">
+                            <button class="btn btn-outline btn-default btn-xs" data-toggle="modal" data-target="#filterOmzet">Filter</button>
+                        </span>
+                    </h3>
+                    <div class="modal fade" id="filterOmzet" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Filter Data Omzet</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="">Mulai Tanggal</label>
+                                            <div class="form-group">
+                                                <input type="date" class="form-control inp-filter" name="omzetStart">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="">Hingga Tanggal</label>
+                                            <div class="form-group">
+                                                <input type="date" class="form-control inp-filter" name="omzetEnd">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label for="">Cabang</label>
+                                            <div class="form-group">
+                                                <select class="form-control selectCabang" name="omzet_cabang" data-values="{{cabang_id}}"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" id="reset-filter-omzet" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="button" id="apply-filter-omzet" class="btn btn-info" data-dismiss="modal">Apply Filter</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="morris-line-chart"></div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="white-box">
-                    <div id="container-donat"></div>
+                    <h3>
+                        Hutang vs Piutang
+                        <span class="pull-right">
+                            <button class="btn btn-outline btn-default btn-xs" data-toggle="modal" data-target="#filterHutangPiutang">Filter</button>
+                        </span>
+                    </h3>
+                    <div class="modal fade" id="filterHutangPiutang" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Filter Data Hutang & Piutang Dagang</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="">Mulai Tanggal</label>
+                                            <div class="form-group">
+                                                <input type="date" class="form-control inp-filter" name="hpStart">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="">Hingga Tanggal</label>
+                                            <div class="form-group">
+                                                <input type="date" class="form-control inp-filter" name="hpEnd">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label for="">Cabang</label>
+                                            <div class="form-group">
+                                                <select class="form-control selectCabang" name="hp_cabang" data-values="{{cabang_id}}"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" id="reset-filter-hp" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="button" id="apply-filter-hp" class="btn btn-info" data-dismiss="modal">Apply Filter</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="morris-donut-chart"></div>
                 </div>
             </div>
         </div>
     </div>
-    <!--
     <script>
-        OneSignal.push(function() {
-            /* These examples are all valid */
-            OneSignal.getUserId(function(userId) {
-                console.log("OneSignal User ID:", userId);
-                // (Output) OneSignal User ID: 270a35cd-4dda-4b3f-b04e-41d7463a2316    
-            });
-        });
+        $(function(){
+            initData()
+
+            $('button#apply-filter-omzet').on('click', function(e){
+                e.preventDefault()
+                CHART_OMZET()
+            })
+
+            $('button#apply-filter-hp').on('click', function(e){
+                e.preventDefault()
+                HUTANG_PIUTANG()
+            })
+
+            function initData(){
+                GET_PELANGGAN()
+                GET_BILL()
+                CHART_OMZET()
+                HUTANG_PIUTANG()
+            }
+
+            function GET_PELANGGAN(){
+                $.ajax({
+                    async: true,
+                    url: '/ajax/options/pelanggan',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(result){
+                        // console.log(result)
+                        $('span[id="count-pelanggan"]').html(result.length)
+                    },
+                    error: function(err){
+                        console.log(err.response)
+                    }
+                })
+            }
+
+            function GET_BILL(){
+                $.ajax({
+                    async: true,
+                    url: '/ajax/options/transaksi/bill',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(result){
+                        // console.log(result)
+                        $('span[id="count-bill"]').html(result.tot_bill)
+                        $('span[id="count-sales"]').html(result.rp_bill)
+                        $('span[id="count-ratio-bill"]').html(result.avg_check || 0)
+                    },
+                    error: function(err){
+                        console.log(err.response)
+                    }
+                })
+            }
+
+            function CHART_OMZET(){
+                var omzetStart = $('body').find('input[name="omzetStart"]').val()
+                var omzetEnd = $('body').find('input[name="omzetEnd"]').val()
+                var omzetCabang = $('body').find('select[name="omzet_cabang"]').val()
+                console.log(omzetStart, omzetEnd, omzetCabang);
+                $.ajax({
+                    async: true,
+                    url: '/ajax/chart/omzet',
+                    method: 'GET',
+                    data: {
+                        omzetStart: omzetStart || null,
+                        omzetEnd: omzetEnd || null,
+                        omzetCabang: omzetCabang || null,
+                    },
+                    dataType: 'json',
+                    success: function(result){
+                        console.log(result)
+                        $('body').find('div#morris-line-chart').html('')
+                        if (result.length > 0) {
+                            var line = new Morris.Line({
+                                element: 'morris-line-chart',
+                                parseTime: false,
+                                resize: false,
+                                data: result,
+                                xkey: 'tgl',
+                                ykeys: ['total'],
+                                labels: ['total'],
+                                gridLineColor: 'rgba(120, 130, 140, 0.28)',
+                                lineColors: ['#a3a4a9'],
+                                lineWidth: 1,
+                                gridTextColor: '#96a2b4',
+                                hideHover: 'auto'
+                            });
+                        } else {
+                            $('body').find('div#morris-line-chart').html('<code>Data tidak ditemukan...</code>').css('min-height', '350px')
+                        }
+                    },
+                    error: function(err){
+                        console.log(err.response)
+                        $('body').find('div#morris-line-chart').html('Internal server error')
+                    }
+                })
+            }
+
+            function HUTANG_PIUTANG (){
+                var hpStart = $('body').find('input[name="hpStart"]').val()
+                var hpEnd = $('body').find('input[name="hpEnd"]').val()
+                var hpCabang = $('body').find('select[name="hp_cabang"]').val()
+                $.ajax({
+                    async: true,
+                    url: '/ajax/chart/hutang-piutang',
+                    method: 'GET',
+                    data: {
+                        hpStart: hpStart,
+                        hpEnd: hpEnd,
+                        hpCabang: hpCabang
+                    },
+                    dataType: 'json',
+                    success: function(result){
+                        console.log(result)
+                        $('body').find('div#morris-donut-chart').html('')
+                        if (result.length > 0) {
+                            Morris.Donut({
+                                element: 'morris-donut-chart',
+                                data: result,
+                                colors: ['#59e978', '#f05881']
+                            });
+                        } else {
+                            $('body').find('div#morris-donut-chart').html('<code>Data tidak ditemukan...</code>')
+                        }
+                        
+                    },
+                    error: function(err){
+                        console.log(err.response)
+                        $('body').find('div#morris-donut-chart').html('Internal server error')
+                    }
+                })
+
+            }
+        })
     </script>
--->
     <script>
         $(function() {
             $('[data-plugin="knob"]').knob();
@@ -87,164 +302,35 @@
                 interval: 3000
             })
 
-            $('a.list-unit-bisnis').on('click', function(e){
-                e.preventDefault()
-                var bisnis_id = $(this).data('id')
-                $.ajax({
-                    async: true,
-                    headers: {'x-csrf-token': $('[name=_csrf]').val()},
-                    url: '/workspace?bisnis_id='+bisnis_id,
-                    method: 'POST',
-                    dataType: 'json',
-                    processData: false,
-                    mimeType: "multipart/form-data",
-                    contentType: false,
-                    success: function(result){
-                        console.log(result)
-                        window.location.reload()
-                    },
-                    error: function(err){
-                        console.log(err.response)
-                        const { message } = err.responseJSON
-                        swal("Opps,,,!", message, "warning")
-                    }
-                })
-            })
+            // $('a.list-unit-bisnis').on('click', function(e){
+            //     e.preventDefault()
+            //     var bisnis_id = $(this).data('id')
+            //     $.ajax({
+            //         async: true,
+            //         headers: {'x-csrf-token': $('[name=_csrf]').val()},
+            //         url: '/workspace?bisnis_id='+bisnis_id,
+            //         method: 'POST',
+            //         dataType: 'json',
+            //         processData: false,
+            //         mimeType: "multipart/form-data",
+            //         contentType: false,
+            //         success: function(result){
+            //             console.log(result)
+            //             window.location.reload()
+            //         },
+            //         error: function(err){
+            //             console.log(err.response)
+            //             const { message } = err.responseJSON
+            //             swal("Opps,,,!", message, "warning")
+            //         }
+            //     })
+            // })
     })
     </script>
 
-    <script>
-        $(function(){
-            Highcharts.chart('container', {
-                chart: {
-                    backgroundColor: '#2f323e'
-                },
-                title: {
-                    text: 'Solar Employment Growth by Sector, 2010-2016'
-                },
-
-                subtitle: {
-                    text: 'Source: thesolarfoundation.com'
-                },
-
-                yAxis: {
-                    title: {
-                        text: 'Number of Employees'
-                    }
-                },
-
-                xAxis: {
-                    accessibility: {
-                        rangeDescription: 'Range: 2010 to 2017'
-                    }
-                },
-
-                legend: {
-                    layout: 'vertical',
-                    align: 'right',
-                    verticalAlign: 'middle'
-                },
-
-                plotOptions: {
-                    series: {
-                        label: {
-                            connectorAllowed: false
-                        },
-                        pointStart: 2010
-                    }
-                },
-
-                series: [{
-                    name: 'Installation',
-                    data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
-                }, {
-                    name: 'Manufacturing',
-                    data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
-                }, {
-                    name: 'Sales & Distribution',
-                    data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387]
-                }, {
-                    name: 'Project Development',
-                    data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227]
-                }, {
-                    name: 'Other',
-                    data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111]
-                }],
-
-                responsive: {
-                    rules: [{
-                        condition: {
-                            maxWidth: 500
-                        },
-                        chartOptions: {
-                            legend: {
-                                layout: 'horizontal',
-                                align: 'center',
-                                verticalAlign: 'bottom'
-                            }
-                        }
-                    }]
-                }
-
-            });
-
-            Highcharts.chart('container-donat', {
-                chart: {
-                    backgroundColor: '#2f323e',
-                    plotBackgroundColor: null,
-                    plotBorderWidth: 0,
-                    plotShadow: false
-                },
-                title: {
-                    text: 'Browser<br>shares<br>2017',
-                    align: 'center',
-                    verticalAlign: 'middle',
-                    y: 60
-                },
-                tooltip: {
-                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-                },
-                accessibility: {
-                    point: {
-                        valueSuffix: '%'
-                    }
-                },
-                plotOptions: {
-                    pie: {
-                        dataLabels: {
-                            enabled: true,
-                            distance: -50,
-                            style: {
-                                fontWeight: 'bold',
-                                color: 'white'
-                            }
-                        },
-                        startAngle: -90,
-                        endAngle: 90,
-                        center: ['50%', '75%'],
-                        size: '110%'
-                    }
-                },
-                series: [{
-                    type: 'pie',
-                    name: 'Browser share',
-                    innerSize: '50%',
-                    data: [
-                        ['Chrome', 58.9],
-                        ['Firefox', 13.29],
-                        ['Internet Explorer', 13],
-                        ['Edge', 3.78],
-                        ['Safari', 3.42],
-                        {
-                            name: 'Other',
-                            y: 7.61,
-                            dataLabels: {
-                                enabled: false
-                            }
-                        }
-                    ]
-                }]
-            });
-        })
-    </script>
+    <style>
+        text {
+            fill: aliceblue;
+        }
+    </style>
 @endsection

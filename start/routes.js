@@ -70,6 +70,10 @@ Route.group(() => {
     /* PENYESUAIAN KAS ATAU BANK TERHADAP JURNAL */
     Route.get('/update-kas-bank', 'CoaAjaxController.penyesuaianKas').as('ajax.set.kas')
 
+    /** GRAFIK DASHBOARD **/
+    Route.get('/chart/omzet', 'GrafikAjaxController.omzet').as('ajax.chart.omzet')
+    Route.get('/chart/hutang-piutang', 'GrafikAjaxController.hutangPiutang').as('ajax.chart.hutangPiutang')
+
     /* OPTIONS */
     Route.get('/options', 'OptionsAjaxController.index').as('ajax.set.option')
     Route.get('/options/menu', 'OptionsAjaxController.menu').as('ajax.set.menu')
@@ -104,6 +108,7 @@ Route.group(() => {
     Route.get('/options/purchasing-request-details', 'OptionsAjaxController.purchasingOrderDetails').as('ajax.set.purchasingOrderDetails')
     Route.get('/options/purchasing-order-list', 'OptionsAjaxController.purchasingOrderList').as('ajax.set.purchasingOrderList')
     Route.get('/options/purchasing-request/:id', 'OptionsAjaxController.purchasingOrderID').as('ajax.set.purchasingOrderID')
+    Route.get('/options/purchasing-request-json/:id', 'OptionsAjaxController.purchasingOrderByIDJSON').as('ajax.set.purchasingOrderByIDJSON')
     Route.get('/options/barang/show/:id', 'OptionsAjaxController.barangID').as('ajax.set.barangID')
     Route.get('/options/jasa', 'OptionsAjaxController.jasa').as('ajax.set.jasa')
     Route.get('/options/jasa/show/:id', 'OptionsAjaxController.jasaID').as('ajax.set.jasaID')
@@ -119,6 +124,7 @@ Route.group(() => {
     Route.get('/options/faktur-beli/:id', 'OptionsAjaxController.fakturBeliID').as('ajax.set.fakturBeliID')
     Route.get('/options/faktur-jual', 'OptionsAjaxController.fakturJual').as('ajax.set.fakturJual')
     Route.get('/options/barang/harga-jual', 'OptionsAjaxController.hargaJualBarang').as('ajax.set.hargaJualBarang')
+    Route.get('/options/transaksi/bill', 'OptionsAjaxController.transaksiBill').as('ajax.set.transaksiBill')
     
 
 }).prefix('ajax').namespace('ajax')
@@ -585,11 +591,25 @@ Route.group(() => {
     Route.get('/bin', 'ApiBinController.index')
     Route.get('/bin/:id/show', 'ApiBinController.show')
 
+    /** PELANGGAN **/
+    Route.get('/pelanggan', 'ApiPelangganController.index')
+    Route.get('/pelanggan/:id/show', 'ApiPelangganController.show')
+
+
     /** PURCHASING ORDER **/
     Route.get('/purchasing-request', 'ApiPurchasingRequestController.index')
     Route.get('/purchasing-request/:id/show', 'ApiPurchasingRequestController.show')
     Route.post('/purchasing-request/:id/approved', 'ApiPurchasingRequestController.approveStore')
     Route.post('/purchasing-request/:id/rejected', 'ApiPurchasingRequestController.rejectStore')
+
+    /** TERIMA BARANG **/
+    Route.get('/terima-barang', 'ApiTerimaBarangController.index')
+    Route.post('/terima-barang', 'ApiTerimaBarangController.store')
+    Route.post('/terima-barang/photo', 'ApiTerimaBarangController.storePhoto')
+    Route.get('/terima-barang/:id/show', 'ApiTerimaBarangController.show')
+
+    /** TRANSAKSI **/
+    Route.get('/transaksi-pelanggan', 'ApiTransaksiPelangganController.index')
 
 }).prefix('api-v1').namespace('api')
 

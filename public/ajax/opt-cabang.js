@@ -84,5 +84,27 @@ $(function(){
             }
         })
     })
+
+    $('body select[name="omzet_cabang"], select[name="hp_cabang"]').each(function(){
+        var elm = $(this)
+        var values = $(this).data('values') || elm.val()
+        $.ajax({
+            async: true,
+            url: '/ajax/options/cabang?selected='+values,
+            method: 'GET',
+            dataType: 'json',
+            processData: false,
+            mimeType: "multipart/form-data",
+            contentType: false,
+            success: function(result){
+                // console.log(result);
+                elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>['+v.kode+']  '+v.nama+'</option>'))
+                elm.trigger('change');
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    })
 })
 
