@@ -611,5 +611,8 @@ Route.group(() => {
     /** TRANSAKSI **/
     Route.get('/transaksi-pelanggan', 'ApiTransaksiPelangganController.index')
 
+    /** CHART MOBILE **/
+    Route.get('/chart-sales', 'ApiChartController.monthlySales')
+
 }).prefix('api-v1').namespace('api')
 
