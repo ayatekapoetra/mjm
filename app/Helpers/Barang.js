@@ -89,7 +89,8 @@ class masterBarang {
         barang.fill({
             kode: kode,
             num_part: req.num_part,
-            kategori_id: req.kategori_id,
+            kategori_id: req.kategori_id || null,
+            subkategori_id: req.subkategori_id || null,
             brand_id: req.brand_id,
             qualitas_id: req.qualitas_id,
             nama: req.nama,
@@ -180,6 +181,7 @@ class masterBarang {
             kode: kode,
             num_part: req.num_part,
             kategori_id: req.kategori_id,
+            subkategori_id: req.subkategori_id || null,
             brand_id: req.brand_id,
             qualitas_id: req.qualitas_id,
             nama: req.nama,

@@ -78,6 +78,8 @@ class BarangController {
             size: '10mb',
             extnames: ['png', 'gif', 'jpg', 'jpeg', 'pdf']
         }
+
+        console.log(req);
         const attchment = request.file('photo', validateFile)
         const data = await BarangHelpers.UPDATE(params, req, user, attchment)
         return data

@@ -14,6 +14,7 @@ const Pemasok = use("App/Models/master/Pemasok")
 const Pelanggan = use("App/Models/master/Pelanggan")
 const BarangBrand = use("App/Models/master/BarangBrand")
 const BarangCategories = use("App/Models/master/BarangCategories")
+const BarangSubCategories = use("App/Models/master/BarangSubCategories")
 const BarangConfig = use("App/Models/master/BarangConfig")
 const BarangQualities = use("App/Models/master/BarangQualities")
 const BisnisUnit = use("App/Models/BisnisUnit")
@@ -548,6 +549,7 @@ class initFunc {
     async GEN_KODE_BARANG (req, method) {
         const sett = (await BarangConfig.query().last()).toJSON()
         const kategori = await BarangCategories.query().where('id', req.kategori_id).last()
+        const subkategori = await BarangSubCategories.query().where('id', req.subkategori_id).last()
         const brand = await BarangBrand.query().where('id', req.brand_id).last()
         const qualitas = await BarangQualities.query().where('id', req.qualitas_id).last()
         let nomor = await Barang.query().last() || null
@@ -565,8 +567,13 @@ class initFunc {
 
         
         let strPrefix = '0'.repeat(sett.len_prefix - `${lastNumber + 1}`.length)
+
+        if(method != 'update'){
+            var patten = `${sett.alfa_prefix}${kategori.kode || '00'}${subkategori.kode || '00'}${brand.kode || '00'}${qualitas.kode}${sett.separator}${strPrefix}${lastNumber + 1}`
+        }else{
+            var patten = `${sett.alfa_prefix}${kategori.kode || '00'}${subkategori.kode || '00'}${brand.kode || '00'}${qualitas.kode}${sett.separator}${strPrefix}${lastNumber}`
+        }
         
-        let patten = `${sett.alfa_prefix}${kategori.kode}${brand.kode}${qualitas.kode}${sett.separator}${strPrefix}${method != 'update' ? lastNumber + 1 : lastNumber}`
 
         return patten
     }
