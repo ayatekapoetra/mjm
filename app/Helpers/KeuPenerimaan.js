@@ -424,11 +424,18 @@ class pembayaran {
         }
 
         /** UPDATE TRX JURNAL **/
-        try {
-            await DB.table('trx_jurnals').where('keuterima_id', params.id).update({aktif: 'N'})
-        } catch (error) {
-            console.log(error);
-            await trx.rollback()
+        const arr_jurnal = (await TrxJurnal.query().where('keuterima_id', params.id).fetch()).toJSON()
+        for (const val of arr_jurnal) {
+            try {
+                const updJurnal = await TrxJurnal.query().where('id', val.id).last()
+                updJurnal.merge({aktif: 'N'})
+                await updJurnal.save(trx)
+                // await DB.table('trx_jurnals').where('keuterima_id', params.id).update({aktif: 'N'})
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+            }
+            
         }
 
         /** INSERT TRX JURNAL KREDIT **/
@@ -503,9 +510,25 @@ class pembayaran {
                 }
             }
         }
+
+        console.log(req);
         
         if(req.kas_id){
-            await DB.table('trx_kases').where('keuterima_id', params.id).update('aktif', 'N')
+            // DELETE DATA KAS
+            const delKas = await TrxKases.query().where('keuterima_id', params.id).last()
+            delKas.merge({aktif: "N"})
+            try {
+                await delKas.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save mutasi kredit kas '+ JSON.stringify(error)
+                }
+            }
+
+            // INSERT NEW DATA KAS
             const trxKas = new TrxKases()
             
             trxKas.fill({

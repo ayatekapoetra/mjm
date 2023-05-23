@@ -20,9 +20,9 @@ $(function(){
                 // console.log(result);
                 if(result.length > 0){
                     elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>[ ' +v.num_part+ ' ] '+v.nama+'</option>'))
+                    elm.trigger('change');
                     // setSelected(result, values)
                     // initSelected(result, elm)
-                    elm.trigger('change');
                 }else{
                     elm.html('<option value="" selected>Blum ada data...</option>')
                 }

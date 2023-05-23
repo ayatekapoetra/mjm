@@ -9,6 +9,7 @@ const SysMenu = use("App/Models/SysMenu")
 const Jasa = use("App/Models/master/Jasa")
 // const Gaji = use("App/Models/master/Gaji")
 const Rack = use("App/Models/master/Rack")
+const Bin = use("App/Models/master/Bin")
 const Bank = use("App/Models/akunting/Bank")
 const Kas = use("App/Models/akunting/Kas")
 const initFunc = use("App/Helpers/initFunc")
@@ -547,6 +548,7 @@ class OptionsAjaxController {
 
         if(req.selected){
             data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : {...el, selected: ''})
+            data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: ''})
         }else{
             if (!req.cabang_id) {
                 data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
@@ -610,11 +612,41 @@ class OptionsAjaxController {
 
     async rack ( { request } ) {
         const req = request.all()
+        console.log('RAK', req);
         req.selected = req.selected === 'null' ? null : req.selected
         let data = (
                 await Rack.query().where( w => {
                     if (req.gudang_id) {
                         w.where('gudang_id', req.gudang_id)
+                    }
+                w.where('aktif', 'Y')
+            }).orderBy('nama', 'asc')
+            .fetch()
+        ).toJSON()
+
+        if(req.selected){
+            data = data.map(el => el.id === parseInt(req.selected) ? {...el, selected: 'selected'} : el)
+            data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: ''})
+        }else{
+            data.unshift({id: '', kode: 'x', nama: 'Pilih', selected: 'selected'})
+        }
+        return data
+    }
+
+    async bin ( { request } ) {
+        const req = request.all()
+        console.log("BIN", req);
+        req.selected = req.selected === 'null' ? null : req.selected
+        let data = (
+                await Bin.query().where( w => {
+                    if (req.cabang_id) {
+                        w.where('cabang_id', req.cabang_id)
+                    }
+                    if (req.gudang_id) {
+                        w.where('gudang_id', req.gudang_id)
+                    }
+                    if (req.rack_id) {
+                        w.where('rack_id', req.rack_id)
                     }
                 w.where('aktif', 'Y')
             }).orderBy('nama', 'asc')
@@ -632,9 +664,14 @@ class OptionsAjaxController {
         const req = request.all()
         req.selected = req.selected === 'null' ? null : req.selected
         let data = (
-                await Barang.query().where( w => {
-                w.where('aktif', 'Y')
-            }).orderBy('nama', 'asc')
+                await Barang.query()
+                .with("brand")
+                .with("qualitas")
+                .with("kategori")
+                .with("subkategori")
+                .where( w => {
+                    w.where('aktif', 'Y')
+                }).orderBy('nama', 'asc')
             .fetch()
         ).toJSON()
 

@@ -6,15 +6,8 @@ const Helpers = use('Helpers')
 const _ = require('underscore')
 const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
-const Barang = use("App/Models/master/Barang")
-const Gudang = use("App/Models/master/Gudang")
-const AccCoa = use("App/Models/akunting/AccCoa")
 const VBarangStok = use("App/Models/VBarangStok")
-const BarangLokasi = use("App/Models/BarangLokasi")
-const HargaJual = use("App/Models/master/HargaJual")
-const HargaBeli = use("App/Models/master/HargaBeli")
-const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
-const BarangCategories = use("App/Models/master/BarangCategories")
+const SettBarang = use("App/Models/setting/SettRakBarang")
 
 class persediaanBarang {
     async LIST (req, user) {
@@ -43,7 +36,31 @@ class persediaanBarang {
                 .paginate(halaman, limit)
         ).toJSON()
 
-        return barangStok
+        let data = []
+        for (const val of barangStok.data) {
+            const setTempat = (
+                await SettBarang
+                    .query()
+                    .with("rack")
+                    .with("bin")
+                    .where( w => {
+                        w.where('barang_id', val.id)
+                        w.where('cabang_id', val.cabang_id)
+                        w.where('gudang_id', val.gudang_id)
+                        w.where('aktif', 'Y')
+                    }).last()
+                )?.toJSON() || null
+
+            if(setTempat){
+                data.push({...val, rack: setTempat.rack, bin: setTempat.bin})
+            }else{
+                data.push({...val, rack: null, bin: null})
+            }
+        }
+
+        // console.log({...barangStok, data: data});
+
+        return {...barangStok, data: data}
 
     }
 

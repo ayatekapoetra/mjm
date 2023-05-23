@@ -12,6 +12,7 @@
                             <th width="300" class="bg-inverse b-all">Desciptions <br>Barang</th>
                             <th width="*" class="bg-inverse b-all">Brand <br>Qualitas</th>
                             <th width="*" class="bg-inverse b-all">Kategori <br>Subkategori</th>
+                            <th width="*" class="bg-inverse b-all">Rak <br>Bin</th>
                             <th width="100" class="text-right bg-inverse b-all">Barang <br>onHand</th>
                             <th width="100" class="text-right bg-inverse b-all">Barang <br>onReveived</th>
                             <th width="100" class="text-right bg-inverse b-all">Barang <br>onDeliver</th>
@@ -40,6 +41,10 @@
                                     @if(item.barang.subkategori)
                                         <small>{{item.barang.subkategori.nama}}</small>
                                     @endif
+                                </td>
+                                <td>
+                                    <span class="text-white">{{item.rack.nama||'-'}}</span> <br>
+                                    <span class="text-white">{{item.bin.nama||'-'}}</span>
                                 </td>
                                 <td class="text-right {{item.brg_hand > 0 ? 'text-white':'text-danger'}}">{{item.brg_hand}}</td>
                                 <td class="text-right text-white">{{item.brg_onreceived}}</td>

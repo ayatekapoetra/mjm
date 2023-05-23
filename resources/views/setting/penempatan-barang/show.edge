@@ -1,0 +1,210 @@
+{{ script('ajax/opt-coa') }}
+{{ script('ajax/opt-options') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-barang') }}
+{{ script('ajax/opt-bin') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Cabang</label>
+                                <select class="form-control" name="cabang_id" data-values="{{data.cabang_id}}"></select>
+                            </div>
+                        </div>
+                        <div class="div-gudang" style="display:none">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label">Gudang</label>
+                                    <select class="form-control" name="gudang_id" data-values="{{data.gudang_id}}"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="div-rack" style="display:none">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="control-label">Rak</label>
+                                    <select class="form-control" name="rack_id" data-values="{{data.rack_id}}"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="div-bin" style="display:inline">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="control-label">Bin</label>
+                                    <select class="form-control selectBin" name="bin_id" data-values="{{data.bin_id}}"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Barang</label>
+                                <select class="form-control selectBarang" name="barang_id" data-values="{{data.barang_id}}"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Kode</label>
+                                <input type="text" class="form-control inp-view" name="kode">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Satuan</label>
+                                <input type="text" class="form-control inp-view" name="satuan">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Brand</label>
+                                <input type="text" class="form-control inp-view" name="brand">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Kategori</label>
+                                <input type="text" class="form-control inp-view" name="kategori">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">SubKategori</label>
+                                <input type="text" class="form-control inp-view" name="subkategori">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Qualitas</label>
+                                <input type="text" class="form-control inp-view" name="qualitas">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <button type="button" class="btn btn-danger waves-effect waves-light" id="bt-delete" data-id="{{data.id}}">Delete</button>
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                            <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        var body = $("body")
+        $("select").select2()
+
+        $("select[name='gudang_id']").on("change", function(){
+            var value = $(this).val()
+            var selected = body.find('select[name="rack_id"]').data('values')
+            if(value){
+                $.ajax({
+                    async: true,
+                    url: '/ajax/options/rack?gudang_id='+value+'&selected='+selected,
+                    method: 'GET',
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    success: function(result){
+                        console.log(result);
+                        body.find('.div-rack').css('display','inline')
+                        if(result.length > 0){
+                            body.find('select[name="rack_id"]').html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>['+v.kode+']  '+v.nama+'</option>'))
+                        }else{
+                            body.find('select[name="rack_id"]').html('<option value="" selected>Blum ada data...</option>')
+                        }
+                    },
+                    error: function(err){
+                        console.log(err)
+                    },
+                    complete: function(){
+                        $("select").select2()
+                    }
+                })
+            }else{
+                body.find('select[name="rack_id"]').val("").trigger("change")
+                body.find('select[name="bin_id"]').val("").trigger("change")
+                body.find('.div-rack').css('display','none')
+                body.find('.div-bin').css('display','none')
+            }
+        })
+
+        $("select[name='rack_id']").on("change", function(){
+            var selected = body.find('select[name="bin_id"]').data('values')
+            var value = $(this).val()
+            if(value){
+                $.ajax({
+                    async: true,
+                    url: '/ajax/options/bin?rack_id='+value+'&selected='+selected,
+                    method: 'GET',
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    success: function(result){
+                        console.log("bin", result);
+                        body.find('.div-bin').css('display','inline')
+                        if(result.length > 0){
+                            body.find('select[name="bin_id"]').html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>['+v.kode+']  '+v.nama+'</option>'))
+                        }else{
+                            body.find('select[name="bin_id"]').html('<option value="" selected>Blum ada data...</option>')
+                        }
+                    },
+                    error: function(err){
+                        console.log(err)
+                    },
+                    complete: function(){
+                        $("select").select2()
+                    }
+                })
+            }else{
+                body.find('select[name="bin_id"]').val("").trigger("change")
+            }
+        })
+
+        $("select[name='barang_id']").on("change", function(){
+            var value = $(this).val()
+            if(value){
+                $.ajax({
+                    async: true,
+                    url: '/ajax/options/barang/show/'+value,
+                    method: 'GET',
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    beforeSend: function(){
+                        body.find('input.inp-view').val("")
+                    },
+                    success: function(result){
+                        // console.log(result);
+                        body.find('input[name="kode"]').val(result?.kode)
+                        body.find('input[name="satuan"]').val(result?.satuan)
+                        body.find('input[name="brand"]').val(result?.brand?.nama)
+                        body.find('input[name="kategori"]').val(result?.kategori?.nama)
+                        body.find('input[name="subkategori"]').val(result?.subkategori?.nama)
+                        body.find('input[name="qualitas"]').val(result?.qualitas?.nama)
+                    },
+                    error: function(err){
+                        console.log(err)
+                    }
+                })
+            }else{
+                body.find('input.inp-view').val("")
+            }
+        })
+    })
+</script>

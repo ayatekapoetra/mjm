@@ -3,9 +3,9 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class Bin extends Model {
+class SettRakBarang extends Model {
     static get table(){
-        return 'mas_bins'
+        return 'set_barang_rak'
     }
 
     cabang(){
@@ -16,9 +16,17 @@ class Bin extends Model {
         return this.belongsTo("App/Models/master/Gudang", "gudang_id", "id")
     }
 
+    bin(){
+        return this.belongsTo("App/Models/master/Bin", "bin_id", "id")
+    }
+
     rack(){
         return this.belongsTo("App/Models/master/Rack", "rack_id", "id")
     }
+
+    barang(){
+        return this.belongsTo("App/Models/master/Barang", "barang_id", "id")
+    }
 }
 
-module.exports = Bin
+module.exports = SettRakBarang

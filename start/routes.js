@@ -99,6 +99,7 @@ Route.group(() => {
     Route.get('/options/gudang-group-cabang', 'OptionsAjaxController.gudangGroupCabang').as('ajax.set.gudangGroupCabang')
     Route.get('/options/department', 'OptionsAjaxController.department').as('ajax.set.department')
     Route.get('/options/rack', 'OptionsAjaxController.rack').as('ajax.set.rack')
+    Route.get('/options/bin', 'OptionsAjaxController.bin').as('ajax.set.bin')
     Route.get('/options/barang', 'OptionsAjaxController.barang').as('ajax.set.barang')
     Route.get('/options/barang-brand', 'OptionsAjaxController.barangBrand').as('ajax.set.barangBrand')
     Route.get('/options/barang-kategori', 'OptionsAjaxController.barangKategori').as('ajax.set.barangKategori')
@@ -537,6 +538,15 @@ Route.group(() => {
     Route.get('/options/:id/show', 'OptionController.show').as('set.options.show').middleware('U')
     Route.post('/options/:id/update', 'OptionController.update').as('set.options.update').middleware('U')
     Route.delete('/options/:id/destroy', 'OptionController.destroy').as('set.options.destroy').middleware('D')
+
+    /** SETTING PENEMPATAN BARANG **/
+    Route.get('/penempatan-barang', 'PenempatanBarangController.index').as('set.penempatan-barang').middleware('R')
+    Route.post('/penempatan-barang', 'PenempatanBarangController.store').as('set.penempatan-barang.store').middleware('C')
+    Route.get('/penempatan-barang/list', 'PenempatanBarangController.list').as('set.penempatan-barang.list').middleware('R')
+    Route.get('/penempatan-barang/create', 'PenempatanBarangController.create').as('set.penempatan-barang.create').middleware('C')
+    Route.get('/penempatan-barang/:id/show', 'PenempatanBarangController.show').as('set.penempatan-barang.show').middleware('U')
+    Route.post('/penempatan-barang/:id/update', 'PenempatanBarangController.update').as('set.penempatan-barang.update').middleware('U')
+    Route.delete('/penempatan-barang/:id/destroy', 'PenempatanBarangController.destroy').as('set.penempatan-barang.destroy').middleware('D')
 
 }).prefix('setting').namespace('setting').middleware(['MM'])
 

@@ -55,6 +55,8 @@ $(function(){
             })
         }else{
             body.find('.div-gudang').css('display','none')
+            body.find('.div-rack').css('display','none')
+            body.find('.div-bin').css('display','none')
         }
     })
 

@@ -1,0 +1,81 @@
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="50" class="text-center bg-inverse b-all">ACT</th>
+                            <th class="bg-inverse b-all">Kode<br/>Nama</th>
+                            <th class="bg-inverse b-all">Category<br/>Brand</th>
+                            <th class="bg-inverse b-all">PartNumber<br/>Qualitas</th>
+                            <th class="bg-inverse b-all">Gudang<br/>Rak/Bin </th>
+                            <th width="150" class="text-center bg-inverse b-all">Images</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @each(item in list.data)
+                            <tr>
+                                <td class="text-center">{{$loop.index + 1}}</td>
+                                <td>
+                                    <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                </td>
+                                <td>
+                                    <small>{{item.barang.kode}} <span class="pull-right text-white">{{item.barang.satuan}}</span></small><br>
+                                    <strong>{{item.barang.nama}}</strong>
+                                </td>
+                                <td>
+                                    <small>{{item.barang.kategori.nama}}</small>
+                                    @if(item.barang.subkategori)
+                                        <small class="text-success">-> {{item.barang.subkategori.nama}} </small>
+                                    @endif
+                                    <br>
+                                    <strong>{{item.barang.brand.nama||'No Brand'}}</strong>
+                                </td>
+                                <td class="text-warning">
+                                    {{item.barang.num_part || ''}}<br>
+                                    {{item.barang.qualitas.nama || 'unset'}} 
+                                </td>
+                                <td class="text-white">
+                                    {{item.gudang.nama}}<br>
+                                    {{item.rack.nama}} -- {{item.bin.nama}}
+                                </td>
+                                <td class="text-center">
+                                    @if(item.photo)
+                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl(item.barang.photo) }}" title="{{item.barang.nama}}">
+                                            <img class="img-rounded" src="{{ assetsUrl(item.barang.photo) }}" width="50" height="50"/>
+                                        </a>
+                                    @else
+                                        <a class="image-popup-vertical-fit" href="{{ assetsUrl('images/ximg_not_found.jpeg') }}" title="{{item.nama}}">
+                                            <img class="img-rounded" src="{{ assetsUrl('images/ximg_not_found.jpeg') }}" width="50"/>
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endeach
+                    </tbody>
+                    <tfoot>
+                        <tr>Total {{list.total}} data</tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination-default')
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.image-popup-vertical-fit').magnificPopup({
+		type: 'image',
+		closeOnContentClick: true,
+		mainClass: 'mfp-img-mobile',
+		image: {
+			verticalFit: true
+		}
+		
+	});
+    })
+</script>
