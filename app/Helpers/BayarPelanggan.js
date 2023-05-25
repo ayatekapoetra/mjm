@@ -33,7 +33,10 @@ class bayarPelanggan {
             .with('cabang')
             .with('bank')
             .with('kas')
-            .where('order_id', params.id)
+            .where( w => {
+                w.where('order_id', params.id)
+                w.where('aktif', 'Y')
+            })
             .orderBy('created_at', 'desc')
             .paginate()
         ).toJSON()
@@ -89,6 +92,7 @@ class bayarPelanggan {
                 .paginate(halaman, limit)
             ).toJSON()
         }
+        console.log("<LIST-ORDER>", data);
         return data
     }
     async PENDING_PAYMENT (params){
@@ -918,9 +922,8 @@ class bayarPelanggan {
         const trx = await DB.beginTransaction()
         const ws = await initFunc.WORKSPACE(user)
         const dataBayarOld = (await OpsPelangganBayar.query().with('order').where('id', params.id).last()).toJSON()
-        const dataOrderPelanggan = (await OpsPelangganOrder.query().where('id', dataBayarOld.order_id).last()).toJSON()
 
-        const updBayar = await OpsPelangganBayar.query().with('order').where('id', params.id).last()
+        const updBayar = await OpsPelangganBayar.query().where('id', params.id).last()
         updBayar.merge({
             coa_id: req.coa_id,
             date_paid: req.date,
@@ -935,6 +938,7 @@ class bayarPelanggan {
             createdby: user.id,
             is_delay: req.isDelay ? 'Y':'N'
         })
+        console.log("<RESULT-UPD_BAYAR>", updBayar.toJSON());
         try {
             await updBayar.save(trx)
         } catch (error) {
@@ -943,6 +947,37 @@ class bayarPelanggan {
             return {
                 success: false,
                 message: 'Failed update pembayaran \n'+ JSON.stringify(error)
+            }
+        }
+
+        /* UPDATE SISA PEMBAYARAN ORDER PELANGGAN */
+        const dataOrderPelanggan = await OpsPelangganOrder.query().where('id', dataBayarOld.order_id).last()
+        let sisa = (dataOrderPelanggan.sisa_trx + dataBayarOld.paid_trx) - parseFloat(req.paid_trx)
+        let sumBayar = (dataOrderPelanggan.paid_trx - dataBayarOld.paid_trx) + parseFloat(req.paid_trx)
+        let totalBelanja = dataOrderPelanggan.grandtot_trx
+        if(sumBayar == 0){
+            var status = 'ready'
+        }else if(sumBayar >=  totalBelanja){
+            var status = 'lunas'
+        }else if(sumBayar < totalBelanja){
+            var status = 'dp'
+        }else{
+            var status = 'batal'
+        }
+        
+        try {
+            dataOrderPelanggan.merge({
+                sisa_trx: sisa,
+                paid_trx: sumBayar,
+                status: status
+            })
+            await dataOrderPelanggan.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed rollback sisa bayar order pelanggan \n'+ JSON.stringify(error)
             }
         }
 
@@ -1000,7 +1035,7 @@ class bayarPelanggan {
             const akun = await AccCoa.query().where('id', req.coa_id).last()
             const trxJurnalKas = await TrxJurnal.query().where( w => {
                 w.where('trx_jual', updBayar.order_id)
-                w.where('trx_paid', updBayar.params.id)
+                w.where('trx_paid', params.id)
                 w.where('kas_id', dataBayarOld.kas_id)
             }).last()
 
@@ -1009,7 +1044,7 @@ class bayarPelanggan {
                 createdby: user.id,
                 kas_id: req.kas_id,
                 coa_id: req.coa_id,
-                reff: kodeKwitansi,
+                reff: updBayar.no_kwitansi,
                 narasi: '[ '+dataBayarOld.no_invoice+' ] ' + 'update Pembayaran pada Kas ' + akun.coa_name,
                 trx_date: req.date,
                 nilai: req.paid_trx,
@@ -1037,7 +1072,7 @@ class bayarPelanggan {
             trxKas.fill({
                 trx_date: req.date,
                 kas_id: req.kas_id,
-                paid_id: opsPelangganBayar.id,
+                paid_id: params.id,
                 saldo_rill: parseFloat(req.paid_trx) + sumPaidOnKas,
                 desc: 'Pembayaran ' + dataBayarOld.no_kwitansi
             })
@@ -1241,8 +1276,10 @@ class bayarPelanggan {
         
         const paidment = await OpsPelangganBayar.query().where('id', params.id).last()
         const order = await OpsPelangganOrder.query().where('id', paidment.order_id).last()
-        let status = (order.sisa_trx + paidment.paid_trx) === order.grandtot_trx ? 'ready':'dp'
+        let kembaliRp = order.sisa_trx + paidment.paid_trx
+        let status = kembaliRp === order.grandtot_trx ? 'ready':'dp'
         
+        console.log("<STATUS NYA>", status);
         
         order.merge({
             paid_trx: order.paid_trx - paidment.paid_trx,
@@ -1260,34 +1297,37 @@ class bayarPelanggan {
             }
         }
 
-        /* RETURN STOK */
-        const isLastPayment = await OpsPelangganBayar.query().where('order_id', paidment.order_id).getCount()
-        if(isLastPayment <= 1){
-            const listBarang = (await OpsPelangganOrderItem.query().where('order_id', paidment.order_id).fetch()).toJSON()
-            // console.log(listBarang);
-            for (const brg of listBarang) {
-                const barangLokasi = new BarangLokasi()
-                barangLokasi.fill({
-                    trx_inv: brg.id,
-                    barang_id: brg.barang_id,
-                    gudang_id: brg.gudang_id,
-                    cabang_id: ws.cabang_id,
-                    qty_del: parseFloat(brg.qty),
-                    qty_hand: parseFloat(brg.qty),
-                    createdby: user.id
-                })
-                try {
-                    await barangLokasi.save(trx)
-                } catch (error) {
-                    console.log(error);
-                    await trx.rollback()
-                    return {
-                        success: false,
-                        message: 'Failed update stok \n'+ JSON.stringify(error)
-                    }
-                }
-            }
-        }/* RETURN STOK */
+        // /* RETURN STOK */
+        // const isLastPayment = await OpsPelangganBayar.query().where( w => {
+        //     w.where('order_id', paidment.order_id)
+        //     w.where('aktif', 'Y')
+        // }).getCount()
+        // if(isLastPayment <= 1){
+        //     const listBarang = (await OpsPelangganOrderItem.query().where('order_id', paidment.order_id).fetch()).toJSON()
+        //     // console.log(listBarang);
+        //     for (const brg of listBarang) {
+        //         const barangLokasi = new BarangLokasi()
+        //         barangLokasi.fill({
+        //             trx_inv: brg.id,
+        //             barang_id: brg.barang_id,
+        //             gudang_id: brg.gudang_id,
+        //             cabang_id: ws.cabang_id,
+        //             qty_del: parseFloat(brg.qty),
+        //             qty_hand: parseFloat(brg.qty),
+        //             createdby: user.id
+        //         })
+        //         try {
+        //             await barangLokasi.save(trx)
+        //         } catch (error) {
+        //             console.log(error);
+        //             await trx.rollback()
+        //             return {
+        //                 success: false,
+        //                 message: 'Failed update stok \n'+ JSON.stringify(error)
+        //             }
+        //         }
+        //     }
+        // }/* RETURN STOK */
 
         /* PENGEMBALIAN SALDO */ 
         if(paidment.kas_id){
@@ -1335,7 +1375,8 @@ class bayarPelanggan {
 
         const delPaiyment = await OpsPelangganBayar.query().where('id', params.id).last()
         try {
-            await delPaiyment.delete(trx)
+            delPaiyment.merge({aktif: "N"})
+            await delPaiyment.save(trx)
         } catch (error) {
             await trx.rollback()
             return {
@@ -1344,7 +1385,20 @@ class bayarPelanggan {
             }
         }
 
-        
+        const trxJurnal = (await TrxJurnal.query().where('trx_paid', params.id).fetch()).toJSON()
+        for (const val of trxJurnal) {
+            const updJurnal = await TrxJurnal.query().where('id', val.id).last()
+            try {
+                updJurnal.merge({aktif: "N"})
+                await updJurnal.save(trx)
+            } catch (error) {
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed rollback data jurnal...'
+                }
+            }
+        }
 
 
         await trx.commit()

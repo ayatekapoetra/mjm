@@ -54,7 +54,7 @@
                                     <td class="items-vcenter">
                                         <strong>{{item.kdpesanan}}</strong><br>
                                         <small>{{item.cabang.nama}}</small>
-                                        @if(item.status === 'ready' || item.status === 'dp' || item.status === 'lunas')
+                                        @if((item.status === 'ready' || item.status === 'dp' || item.status === 'lunas') && (item.payment.length > 0))
                                             <br>
                                             <a href="#" data-id="{{item.id}}" class="bt-details">
                                                 <small>Show Details Payment</small>
