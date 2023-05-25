@@ -101,6 +101,7 @@ class GrafikAjaxController {
             w.where('cabang_id', req.hpCabang)
             w.where('trx_date', '>=', req.hpStart)
             w.where('trx_date', '<=', req.hpEnd)
+            w.where('aktif', 'Y')
         }).getSum('nilai') || 0
         const dataHutangDeb = await TrxJurnal.query().where( w => {
             w.where('dk', 'd')
@@ -108,6 +109,7 @@ class GrafikAjaxController {
             w.where('cabang_id', req.hpCabang)
             w.where('trx_date', '>=', req.hpStart)
             w.where('trx_date', '<=', req.hpEnd)
+            w.where('aktif', 'Y')
         }).getSum('nilai') || 0
         let totHutang = dataHutangKre - dataHutangDeb
 
@@ -117,6 +119,7 @@ class GrafikAjaxController {
             w.where('cabang_id', req.hpCabang)
             w.where('trx_date', '>=', req.hpStart)
             w.where('trx_date', '<=', req.hpEnd)
+            w.where('aktif', 'Y')
         }).getSum('nilai') || 0
         const dataPiutangDeb = await TrxJurnal.query().where( w => {
             w.where('dk', 'd')
@@ -124,6 +127,7 @@ class GrafikAjaxController {
             w.where('cabang_id', req.hpCabang)
             w.where('trx_date', '>=', req.hpStart)
             w.where('trx_date', '<=', req.hpEnd)
+            w.where('aktif', 'Y')
         }).getSum('nilai') || 0
 
         let totPiutang = dataPiutangDeb - dataPiutangKre
