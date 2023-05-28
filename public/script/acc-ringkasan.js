@@ -15,7 +15,7 @@ $(function(){
         var rangeAkhir = body.find('input[name="rangeAkhir"]').val()
         var workdir = body.find('select#cabang_id').val()
         initDefault()
-        getValuesAkun(workdir, rangeAwal, rangeAkhir)
+        // getValuesAkun(workdir, rangeAwal, rangeAkhir)
         getPnL(workdir, rangeAwal, rangeAkhir)
     })
 
@@ -25,10 +25,10 @@ $(function(){
         var rangeAkhir = body.find('input[name="rangeAkhir"]').val()
         console.log(workdir);
         if(workdir){
-            getValuesAkun(workdir, rangeAwal, rangeAkhir)
+            // getValuesAkun(workdir, rangeAwal, rangeAkhir)
             getPnL(workdir, rangeAwal, rangeAkhir)
         }else{
-            getValuesAkun(null, rangeAwal, rangeAkhir)
+            // getValuesAkun(null, rangeAwal, rangeAkhir)
             getPnL(null, rangeAwal, rangeAkhir)
         }
     })
@@ -81,7 +81,7 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
-                getValuesAkun()
+                // getValuesAkun()
                 getPnL()
                 body.find('button#bt-create-form').css('display', 'inline')
                 body.find('button.bt-back').css('display', 'none')

@@ -330,6 +330,31 @@ class bayarPelanggan {
                     message: 'Failed jurnal debit \n'+ JSON.stringify(error)
                 }
             }
+
+            // INSERT LABA DITAHAN
+            const invoicingDiscountBarangLabaDitahan = new TrxJurnal()
+            invoicingDiscountBarangLabaDitahan.fill({
+                cabang_id: ws.cabang_id,
+                trx_jual: params.id,
+                coa_id: 30003,
+                reff: orderTrx.kdpesanan,
+                narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description,
+                trx_date: req.date,
+                nilai: req.barangdisc_rp,
+                createdby: user.id,
+                dk: akun.tipe
+            })
+            try {
+                await invoicingDiscountBarangLabaDitahan.save(trx)
+                console.log('invoicingDiscountBarang :::', invoicingDiscountBarangLabaDitahan.toJSON())
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed jurnal debit \n'+ JSON.stringify(error)
+                }
+            }
         }/* END INSERT JURNAL POTONGAN BARANG */
 
         /* START INSERT JURNAL POTONGAN JASA */
@@ -350,6 +375,31 @@ class bayarPelanggan {
             try {
                 await invoicingDiscountJasa.save(trx)
                 console.log('invoicingDiscountJasa :::', invoicingDiscountJasa.toJSON())
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed jurnal debit \n'+ JSON.stringify(error)
+                }
+            }
+
+            // INSERT LABA DITAHAN
+            const invoicingDiscountJasaLabaDitahan = new TrxJurnal()
+            invoicingDiscountJasaLabaDitahan.fill({
+                cabang_id: ws.cabang_id,
+                trx_jual: params.id,
+                coa_id: 30003,
+                reff: orderTrx.kdpesanan,
+                narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description,
+                trx_date: req.date,
+                nilai: req.jasadisc_rp,
+                createdby: user.id,
+                dk: akun.tipe
+            })
+            try {
+                await invoicingDiscountJasaLabaDitahan.save(trx)
+                console.log('invoicingDiscountJasaLabaDitahan :::', invoicingDiscountJasaLabaDitahan.toJSON())
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -414,6 +464,31 @@ class bayarPelanggan {
                     message: 'Failed jurnal debit \n'+ JSON.stringify(error)
                 }
             }
+
+            // INSERT LABA DITAHAN
+            const trxJurnalPendapatanBarangLabaDitahan = new TrxJurnal()
+            trxJurnalPendapatanBarangLabaDitahan.fill({
+                cabang_id: ws.cabang_id,
+                trx_jual: params.id,
+                coa_id: 30003,
+                reff: orderTrx.kdpesanan,
+                narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description,
+                trx_date: req.date,
+                nilai: orderTrx.tot_service,
+                dk: akun.tipe,
+                createdby: user.id
+            })
+            try {
+                await trxJurnalPendapatanBarangLabaDitahan.save(trx)
+                console.log('trxJurnalPendapatanBarangLabaDitahan :::', trxJurnalPendapatanBarangLabaDitahan.toJSON())
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed jurnal debit \n'+ JSON.stringify(error)
+                }
+            }
         }/* END INSERT JURNAL PENDAPATAN BARANG */
 
         /* START INSERT JURNAL PENDAPATAN JASA */
@@ -434,6 +509,31 @@ class bayarPelanggan {
             try {
                 await trxJurnalPendapatanJasa.save(trx)
                 console.log('await trxJurnalPendapatanJasa.save(trx)');
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed jurnal debit \n'+ JSON.stringify(error)
+                }
+            }
+
+            // INSERT LABA DITAHAN
+            const trxJurnalPendapatanJasaLabaDitahan = new TrxJurnal()
+            trxJurnalPendapatanJasaLabaDitahan.fill({
+                cabang_id: ws.cabang_id,
+                trx_jual: params.id,
+                coa_id: 30003,
+                reff: orderTrx.kdpesanan,
+                narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description,
+                trx_date: req.date,
+                nilai: orderTrx.tot_service,
+                dk: akun.tipe,
+                createdby: user.id
+            })
+            try {
+                await trxJurnalPendapatanJasaLabaDitahan.save(trx)
+                console.log('trxJurnalPendapatanJasaLabaDitahan :::', trxJurnalPendapatanJasaLabaDitahan.toJSON())
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -524,6 +624,32 @@ class bayarPelanggan {
                 try {
                     await trxJurnalHppDebit.save(trx)
                     console.log('await trxJurnalHppDebit.save(trx)');
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed jurnal Hpp & Persediaan Barang \n'+ JSON.stringify(error)
+                    }
+                }
+
+                // INSERT LABA DITAHAN
+                const trxJurnalHppDebitLabaDitahan = new TrxJurnal()
+                trxJurnalHppDebitLabaDitahan.fill({
+                    cabang_id: ws.cabang_id,
+                    trx_jual: params.id,
+                    coa_id: akun.coa_id,
+                    barang_id: barang.id,
+                    reff: orderTrx.kdpesanan,
+                    narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description + ' ' + barang.nama,
+                    trx_date: req.date,
+                    nilai: hargaBeli * brg.qty,
+                    dk: akun.tipe,
+                    createdby: user.id
+                })
+                try {
+                    await trxJurnalHppDebitLabaDitahan.save(trx)
+                    console.log('await trxJurnalHppDebitLabaDitahan.save(trx)');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -784,6 +910,8 @@ class bayarPelanggan {
             
         }/* END INSERT DATA JURNAL KAS ATAU BANK */
 
+        
+
         if(req.akun){
             const coa = await AccCoa.query().where('id', req.akun).last()
             const additionalAkunJurnal = new TrxJurnal()
@@ -842,6 +970,33 @@ class bayarPelanggan {
                     success: false,
                     message: 'Failed jurnal bank \n'+ JSON.stringify(error)
                 }
+            }
+        }
+
+        // JIKA AKUN PENDAPATAN ATAU BIAYA INSERT LABA DITAHAN
+        const trxJurnalLabaDitahan = new TrxJurnal()
+        trxJurnalLabaDitahan.fill({
+            cabang_id: ws.cabang_id,
+            createdby: user.id,
+            bank_id: req.bank_id || null,
+            kas_id: req.kas_id || null,
+            coa_id: 30003,
+            reff: orderData.kdpesanan,
+            narasi: '[ '+kodeKwitansi+' ] Laba di Tahan',
+            trx_date: req.date,
+            nilai: (parseFloat(req.paid_trx) - (parseFloat(req.akun_nilai) || 0)),
+            dk: 'k',
+            trx_jual: opsPelangganOrder.id,
+            trx_paid: opsPelangganBayar.id
+        })
+        try {
+            await trxJurnalLabaDitahan.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed insert LABA DITAHAN \n'+ JSON.stringify(error)
             }
         }
 
@@ -1012,6 +1167,34 @@ class bayarPelanggan {
                     success: false,
                     message: 'Failed jurnal bank \n'+ JSON.stringify(error)
                 }
+            }
+        }
+
+        // JIKA AKUN PENDAPATAN ATAU BIAYA INSERT LABA DITAHAN
+        const trxJurnalLabaDitahan = await TrxJurnal.query().where( w => {
+            w.where('trx_jual', dataBayarOld.order_id)
+            w.where('trx_paid', params.id)
+            w.where('coa_id', 30003)
+        }).last()
+
+        trxJurnalLabaDitahan.fill({
+            coa_id: 30003,
+            bank_id: req.bank_id || null,
+            kas_id: req.kas_id || null,
+            trx_date: req.date,
+            nilai: req.paid_trx,
+            dk: 'k',
+            trx_paid: params.id,
+            trx_jual: dataBayarOld.order_id,
+        })
+        try {
+            await trxJurnalLabaDitahan.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: 'Failed insert LABA DITAHAN \n'+ JSON.stringify(error)
             }
         }
 

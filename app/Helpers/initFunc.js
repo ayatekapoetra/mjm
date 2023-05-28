@@ -860,7 +860,6 @@ class initFunc {
         const dk = await AccCoa.query().where( w => {
             w.where('kode', 'like', `${kode}%`)
         }).first()
-        // console.log('DK :::', dk.id, dk.coa_name);
 
         if(dk){
             const data = (

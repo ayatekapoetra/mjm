@@ -313,6 +313,39 @@ class pembayaran {
                 }
             }
 
+            // JIKA AKUN PENDAPATAN ATAU BIAYA INSERT LABA DITAHAN
+            if(parseInt(obj.coa_kredit) > 40000){
+                const jurnalKreditEquitas = new TrxJurnal()
+                try {
+                    jurnalKreditEquitas.fill({
+                        createdby: user.id,
+                        cabang_id: req.cabang_id,
+                        bank_id: req.bank_id || null,
+                        kas_id: req.kas_id || null,
+                        trx_jual: obj.trx_jual || null,
+                        fakturbeli_id: obj.trx_beli || null,
+                        keuterima_id: keuPenerimaan.id,
+                        keuterimaitem_id: keuPenerimaanItem.id,
+                        coa_id: 30003,
+                        reff: req.reff,
+                        narasi: req.keterangan,
+                        trx_date: req.trx_date,
+                        delay_date: req.due_date,
+                        is_delay: req.is_delay,
+                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
+                        dk: 'k'
+                    })
+                    await jurnalKreditEquitas.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed save trx jurnal LABA DITAHAN '+ JSON.stringify(error)
+                    }
+                }
+            }
+
             
             // if(obj.trx_beli){
             //     /** UPDATE SISA PEMBAYARAN FAKTUR PEMBELIAN **/
@@ -413,7 +446,7 @@ class pembayaran {
 
         try {
             await keuPenerimaan.save(trx)
-            console.log('update penerimaaan OK');
+            // console.log('update penerimaaan OK');
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -458,7 +491,7 @@ class pembayaran {
                 dk: 'd'
             })
             await jurnalDebit.save(trx)
-            console.log('update jurnal debit OK');
+            // console.log('update jurnal debit OK');
         } catch (error) {
             console.log(error);
             await trx.rollback()
@@ -500,7 +533,7 @@ class pembayaran {
             
             try {
                 await trxBank.save(trx)
-                console.log('add trx bank OK');
+                // console.log('add trx bank OK');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -511,7 +544,7 @@ class pembayaran {
             }
         }
 
-        console.log(req);
+        // console.log(req);
         
         if(req.kas_id){
             // DELETE DATA KAS
@@ -541,7 +574,7 @@ class pembayaran {
             
             try {
                 await trxKas.save(trx)
-                console.log('add trx kas OK');
+                // console.log('add trx kas OK');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -580,7 +613,7 @@ class pembayaran {
         
                     try {
                         await lampiranFile.save(trx)
-                        console.log('add file lampiran OK');
+                        // console.log('add file lampiran OK');
                     } catch (error) {
                         console.log(error);
                         await trx.rollback()
@@ -613,7 +646,7 @@ class pembayaran {
     
                 try {
                     await lampiranFile.save(trx)
-                    console.log('add file lampiran OK');
+                    // console.log('add file lampiran OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -650,7 +683,7 @@ class pembayaran {
 
                 keuPenerimaanItem.fill(data)
                 await keuPenerimaanItem.save(trx)
-                console.log('add penerimaan items OK');
+                // console.log('add penerimaan items OK');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -697,13 +730,47 @@ class pembayaran {
                     dk: 'k'
                 })
                 await jurnalKredit.save(trx)
-                console.log('add jurnal kredit OK');
+                // console.log('add jurnal kredit OK');
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
                 return {
                     success: false,
                     message: 'Failed save trx jurnal debit '+ JSON.stringify(error)
+                }
+            }
+
+            // JIKA AKUN PENDAPATAN ATAU BIAYA
+            if(parseInt(obj.coa_kredit) > 40000){
+                const jurnalKreditEquitas = new TrxJurnal()
+                try {
+                    jurnalKreditEquitas.fill({
+                        createdby: user.id,
+                        cabang_id: req.cabang_id,
+                        bank_id: req.bank_id || null,
+                        kas_id: req.kas_id || null,
+                        trx_jual: obj.trx_jual || null,
+                        fakturbeli_id: obj.trx_beli || null,
+                        keuterima_id: params.id,
+                        keuterimaitem_id: keuPenerimaanItem.id,
+                        coa_id: 30003,
+                        reff: req.reff,
+                        narasi: req.keterangan,
+                        trx_date: req.trx_date,
+                        delay_date: req.due_date,
+                        is_delay: req.is_delay,
+                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
+                        dk: 'k'
+                    })
+                    await jurnalKreditEquitas.save(trx)
+                    // console.log('add jurnal kredit OK');
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed save trx jurnal debit '+ JSON.stringify(error)
+                    }
                 }
             }
 
@@ -734,7 +801,7 @@ class pembayaran {
 
                 try {
                     await pelangganBayar.save(trx)
-                    console.log('add pembayaran pelanggan OK');
+                    // console.log('add pembayaran pelanggan OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -753,7 +820,7 @@ class pembayaran {
 
                 try {
                     await orderData.save(trx)
-                    console.log('update invoice pelanggan OK');
+                    // console.log('update invoice pelanggan OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -786,7 +853,7 @@ class pembayaran {
                     })
 
                     await fakturPembalian.save(trx)
-                    console.log('update faktur pembelian OK');
+                    // console.log('update faktur pembelian OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -825,7 +892,7 @@ class pembayaran {
 
                 try {
                     await pelangganBayar.save(trx)
-                    console.log('add pembayaran pelanggan OK');
+                    // console.log('add pembayaran pelanggan OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -849,7 +916,7 @@ class pembayaran {
 
                 try {
                     await orderData.save(trx)
-                    console.log('update pembayaran pelanggan OK');
+                    // console.log('update pembayaran pelanggan OK');
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()

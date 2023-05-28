@@ -312,6 +312,40 @@ class pembayaran {
                 }
             }
 
+            if(parseInt(obj.coa_debit) > 40000){
+                const jurnalDebitEquiptas = new TrxJurnal()
+                try {
+                    jurnalDebitEquiptas.fill({
+                        createdby: user.id,
+                        cabang_id: req.cabang_id,
+                        bank_id: req.bank_id || null,
+                        kas_id: req.kas_id || null,
+                        trx_jual: obj.trx_jual || null,
+                        fakturbeli_id: obj.trx_beli || null,
+                        keubayar_id: params.id,
+                        keubayaritem_id: trxPembayaranItem.id,
+                        coa_id: 30003,
+                        reff: req.reff,
+                        narasi: `[ ${reff_kode || req.reff} ] ${coaDebit.coa_name}`,
+                        trx_date: req.trx_date,
+                        delay_date: req.due_date,
+                        is_delay: req.is_delay,
+                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
+                        dk: 'd'
+                    })
+                    await jurnalDebitEquiptas.save(trx)
+                    console.log('jurnalDebitEquiptas.save(trx)');
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed save trx jurnal debit '+ JSON.stringify(error)
+                    }
+                }
+
+            }
+
             
             if(obj.trx_beli){
                 /** UPDATE SISA PEMBAYARAN FAKTUR PEMBELIAN **/
@@ -685,6 +719,40 @@ class pembayaran {
                     success: false,
                     message: 'Failed save trx jurnal debit '+ JSON.stringify(error)
                 }
+            }
+
+            if(parseInt(obj.coa_debit) > 40000){
+                const jurnalDebitEquiptas = new TrxJurnal()
+                try {
+                    jurnalDebitEquiptas.fill({
+                        createdby: user.id,
+                        cabang_id: req.cabang_id,
+                        bank_id: req.bank_id || null,
+                        kas_id: req.kas_id || null,
+                        trx_jual: obj.trx_jual || null,
+                        fakturbeli_id: obj.trx_beli || null,
+                        keubayar_id: params.id,
+                        keubayaritem_id: trxPembayaranItem.id,
+                        coa_id: 30003,
+                        reff: req.reff,
+                        narasi: `[ ${reff_kode || req.reff} ] ${coaDebit.coa_name}`,
+                        trx_date: req.trx_date,
+                        delay_date: req.due_date,
+                        is_delay: req.is_delay,
+                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
+                        dk: 'd'
+                    })
+                    await jurnalDebitEquiptas.save(trx)
+                    console.log('jurnalDebitEquiptas.save(trx)');
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed save trx jurnal debit '+ JSON.stringify(error)
+                    }
+                }
+
             }
 
             

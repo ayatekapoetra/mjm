@@ -48,7 +48,7 @@
                                                                                 <i class="ti-control-forward" style="color:white"></i>
                                                                             </span>
                                                                             <span class="pull-right link-data count-values" data-kode="{{item.id}}">
-                                                                                <i class="fa fa-spin fa-spinner"></i>
+                                                                                Rp. {{item.total}}
                                                                             </span>
                                                                         </li>
                                                                         @endeach
@@ -65,7 +65,7 @@
                                                                         <i class="ti-control-forward" style="color:white"></i>
                                                                     </span>
                                                                     <span class="pull-right link-data count-values" data-kode="{{elm.id}}">
-                                                                        <i class="fa fa-spin fa-spinner"></i>
+                                                                        Rp. {{elm.total}}
                                                                     </span>
                                                                 </li>
                                                             @endeach
@@ -80,8 +80,8 @@
                                                         <span class="pull-left m-r-10">
                                                             <i class="ti-control-forward" style="color:white"></i>
                                                         </span>
-                                                        <span class="pull-right count-values" data-kode="{{elm.kode}}">
-                                                            <i class="fa fa-spin fa-spinner"></i>
+                                                        <span class="pull-right link-data count-values" data-kode="{{elm.kode}}">
+                                                            Rp. {{elm.total}}
                                                         </span>
                                                     </li>
                                                 @endeach
@@ -147,7 +147,7 @@
                                                                             @endif
                                                                         </span>
                                                                         <span class="pull-right link-data count-values" data-kode="{{val.kode}}">
-                                                                            <i class="fa fa-spin fa-spinner"></i>
+                                                                            <i class="fa fa-spin fa-spinner"></i> {{val.total}}
                                                                         </span>
                                                                     </li>
                                                                     @endeach
@@ -165,7 +165,7 @@
                                                                     <i class="ti-control-forward" style="color:white"></i>
                                                                 </span>
                                                                 <span class="pull-right link-data count-values" data-kode="{{elm.kode}}">
-                                                                    <i class="fa fa-spin fa-spinner"></i>
+                                                                    Rp. {{elm.total}}
                                                                 </span>
                                                             </li>
                                                         @endeach
@@ -181,7 +181,7 @@
                                                         <i class="ti-control-forward" style="color:white"></i>
                                                     </span>
                                                     <span class="pull-right link-data count-values" data-kode="{{elm.kode}}">
-                                                        <i class="fa fa-spin fa-spinner"></i>
+                                                        Rp. {{elm.total}}
                                                     </span>
                                                 </li>
                                             @endeach

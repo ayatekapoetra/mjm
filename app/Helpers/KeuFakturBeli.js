@@ -373,7 +373,34 @@ class fakturBeli {
                             message: 'Failed save data trx jurnal discount...'+JSON.stringify(error)
                         }
                     }
-                    console.log('end faktur-pembelian-discount-barang');
+
+                    // INSERT LABA DITAHAN
+                    const trxJurnalDiscLabaDitahan = new TrxJurnal()
+                    trxJurnalDiscLabaDitahan.fill({
+                        createdby: user.id,
+                        cabang_id: req.cabang_id, 
+                        barang_id: obj.barang_id || null,
+                        fakturbeli_id: trxFakturBeli.id,
+                        fakturbeli_item: trxFakturBeliItem.id,
+                        coa_id: val.coa_id,
+                        reff: req.kode,
+                        narasi: `[ ${req.kode} ] ${val.description}`,
+                        trx_date: req.date_faktur || new Date(),
+                        nilai: parseFloat(obj.discount_rp),
+                        dk: val.tipe,
+                        is_delay: 'N'
+                    })
+
+                    try {
+                        await trxJurnalDiscLabaDitahan.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: 'Failed save data trx jurnal discount...'+JSON.stringify(error)
+                        }
+                    }
                 }
                 
                 if(obj.barang_id){
@@ -639,7 +666,33 @@ class fakturBeli {
                             message: 'Failed save data trx jurnal discount...'+JSON.stringify(error)
                         }
                     }
-                    console.log('end faktur-pembelian-discount-barang');
+
+                    // INSERT LABA DITAHAN
+                    const trxJurnalDiscLabaDitahan = new TrxJurnal()
+                    trxJurnalDiscLabaDitahan.fill({
+                        createdby: user.id,
+                        cabang_id: req.cabang_id, 
+                        fakturbeli_id: params.id,
+                        fakturbeli_item: trxFakturBeliItem.id,
+                        coa_id: val.coa_id,
+                        reff: req.kode,
+                        narasi: `[ ${req.kode} ] ${val.description}`,
+                        trx_date: req.date_faktur || new Date(),
+                        nilai: parseFloat(obj.discount_rp),
+                        dk: val.tipe,
+                        is_delay: 'N'
+                    })
+
+                    try {
+                        await trxJurnalDiscLabaDitahan.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: 'Failed save data trx jurnal discount...'+JSON.stringify(error)
+                        }
+                    }
                 }
                 
                 /* DELETE EXSISTING DATA HARGA BELI */

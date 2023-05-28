@@ -255,7 +255,7 @@ class CoaAjaxController {
             data.unshift({id: '', coa_subgrp_nm: 'Akun Kas & Bank', coa_name: 'Pilih akun yg sesuai...', selected: 'selected'})
         }
 
-        console.log(data);
+        // console.log(data);
 
         data = _.groupBy(data, 'coa_subgrp_nm')
         data = Object.keys(data).map( key => {

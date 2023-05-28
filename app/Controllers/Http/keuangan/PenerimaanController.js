@@ -180,13 +180,12 @@ class KeuPenerimaanController {
         }).fetch()).toJSON()
 
         let opsPelangganOrder = (await OpsPelangganOrder.query().where( w => {
-            w.where('status', '<>', 'lunas')
+            w.where('aktif', 'Y')
         }).fetch()).toJSON()
         
         var html = result.items.map( (obj, i) => {
             if(obj.pemasok_id){
                 keuFakturPembelian = keuFakturPembelian.filter(el => el.pemasok_id === obj.pemasok_id)
-                // console.log(obj.trx_beli);
                 var detailFiled = 
                 '<div class="col-md-6 m-b-15">'+
                 '    <label for="">Pemasok <span class="text-danger">*</span></label>'+
@@ -206,6 +205,13 @@ class KeuPenerimaanController {
 
             if(obj.pelanggan_id){
                 opsPelangganOrder = opsPelangganOrder.filter(el => el.pelanggan_id === obj.pelanggan_id)
+                opsPelangganOrder = _.groupBy(opsPelangganOrder, 'status')
+                opsPelangganOrder = Object.keys(opsPelangganOrder).map( key => {
+                    return {
+                        status: key,
+                        items: opsPelangganOrder[key]
+                    }
+                })
                 var detailFiled = 
                 '<div class="col-md-6 m-b-15">'+
                 '    <label for="">Pelanggan <span class="text-danger">*</span></label>'+
@@ -218,7 +224,13 @@ class KeuPenerimaanController {
                 '    <label for="">Faktur Pembelian <span class="text-danger">*</span></label>'+
                 '    <select class="form-control item-data-details" name="trx_jual" data-values="">'+
                 '        <option value="">Pilih</option>'+
-                         opsPelangganOrder.map(el => '<option value="'+el.id+'" '+`${obj.trx_jual === el.id ? "selected":""}`+'>'+el.kdpesanan+' -----> Sisa Rp. '+(el.sisa_trx).toLocaleString('ID')+'</option>')+
+                         opsPelangganOrder.map(el => {
+                            return '<optgroup label="'+el.status+'">'+
+                            el.items.map( o => {
+                                return '<option value="'+o.id+'" '+`${obj.trx_jual === o.id ? "selected":""}`+'>'+o.kdpesanan+' -----> Sisa Rp. '+(o.sisa_trx).toLocaleString('ID')+'</option>'
+                            })+
+                            '</optgroup>'
+                         })+
                 '    </select>'+
                 '</div>'
             }
@@ -294,6 +306,7 @@ class KeuPenerimaanController {
             '</td>'+
         '</tr>'
         });
+
         return html
     }
 
@@ -406,7 +419,7 @@ class KeuPenerimaanController {
         }
 
         const attach = request.file('lampiran', validateFile)
-        console.log(req);
+        // console.log(req);
         const data = await KeuPenerimaanHelpers.POST(req, user, attach)
 
         return data
@@ -534,7 +547,7 @@ class KeuPenerimaanController {
         const data = await KeuPenerimaanHelpers.PRINT(params)
         const logoAsBase64 = await Image64Helpers.GEN_BASE64(logoPath)
         const result = await GEN_PENERIMAAN_PDF(data, logoAsBase64)
-        console.log(data);
+        // console.log(data);
         return result
     }
 
