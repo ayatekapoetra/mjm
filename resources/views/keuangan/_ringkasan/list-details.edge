@@ -7,7 +7,7 @@
                 <i class="ti-arrow-left"></i> Back
             </button>
             <div class="table-responsive">
-                <table class="table table-hover manage-u-table">
+                <table class="table table-hover manage-u-table" id="myTable">
                     <thead>
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">No</th>
@@ -38,35 +38,59 @@
                                 </td>
                             </tr>
                         @endeach
+                    </tbody>
+                    <tfoot>
                         <tr class="text-white bg-light" style="font-size: large">
                             <td colspan="5" class="text-right"> Saldo</td>
-                            <td class="text-right" id="saldo">-</td>
+                            <td class="text-right" id="saldo">{{totalRp}}</td>
                         </tr>
-                    </tbody>
+                    </tfoot>
                 </table>
             </div>
         </div>
     </div>
 </div>
+<style>
+   #myTable_wrapper > .dt-buttons {
+        max-width: 15%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+   }
+   a.dt-button, button.dt-button, div.dt-button {
+        background: #2cabe3;
+        color: #fff;
+        border-color: #2cabe3;
+        padding: 5px 15px;
+   }
+</style>
 <script>
     $(function(){
-        var debit = 0
-        var kredit = 0
-        var saldo = 0
-        $('tr.rows-total').each(function(){
-            if ($(this).data('dk') === 'd') {
-                debit += parseFloat($(this).data('nilai'))
-            }
-            if ($(this).data('dk') === 'k') {
-                kredit += parseFloat($(this).data('nilai'))
-            }
-            // console.log(debit - kredit);
-            if($(this).data('coa') === 'd'){
-                saldo = debit - kredit
-            }else{
-                saldo = kredit - debit
-            }
-            $('body').find('td#saldo').html('Rp. ' + (saldo).toLocaleString('ID'))
-        })
+        $('#myTable').DataTable({
+            pageLength: 50,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+        // var debit = 0
+        // var kredit = 0
+        // var saldo = 0
+        // $('tr.rows-total').each(function(){
+        //     if ($(this).data('dk') === 'd') {
+        //         debit += parseFloat($(this).data('nilai'))
+        //     }
+        //     if ($(this).data('dk') === 'k') {
+        //         kredit += parseFloat($(this).data('nilai'))
+        //     }
+        //     // console.log(debit - kredit);
+        //     if($(this).data('coa') === 'd'){
+        //         saldo = debit - kredit
+        //     }else{
+        //         saldo = kredit - debit
+        //     }
+        //     $('body').find('td#saldo').html('Rp. ' + (saldo).toLocaleString('ID'))
+        // })
     })
 </script>

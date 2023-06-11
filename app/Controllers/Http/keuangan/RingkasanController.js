@@ -33,32 +33,11 @@ class RingkasanController {
         if(!user){
             return view.render('401')
         }
+        req.rangeAkhir = req.rangeAkhir  || moment().format("YYYY-MM-DD")
 
-        console.log("REQ-RINGKASAN", req);
-
-        // INSERT LABA DITAHAN
-        // const listJurnal = (await TrxJurnal.query().where( w =>{
-        //     w.where('coa_id', '>', 40000)
-        //     w.where('aktif', 'Y')
-        // }).fetch()).toJSON()
-
-        // for (let item of listJurnal) {
-        //     console.log(item);
-        //     const labaditahan = new TrxJurnal()
-        //     labaditahan.fill({
-        //         ...item,
-        //         id: null,
-        //         coa_id: 30003
-        //     })
-        //     try {
-        //         await labaditahan.save()
-        //         console.log("SAVE", labaditahan.toJSON());
-        //     } catch (error) {
-        //         console.log(error);
-        //     }
-        // }
-
-
+        console.log("REQ-RINGKASAN------------", req);
+        
+        
         let data = await initFunc.RINGKASAN(user)
 
         for (let nrc of data.neraca) {
@@ -70,8 +49,8 @@ class RingkasanController {
                 if(req.cabang_id){
                     w.where('cabang_id', req.cabang_id)
                 }
-                if(req.rangeAwal && req.rangeAkhir){
-                    w.where('trx_date', '>=', req.rangeAwal)
+                if(req.rangeAkhir){
+                    // w.where('trx_date', '>=', '2000-01-01')
                     w.where('trx_date', '<=', req.rangeAkhir)
                 }
                 w.where('is_delay', 'N')
@@ -81,12 +60,13 @@ class RingkasanController {
                 w.where('coa_id', '<=', lastCode)
             }).getSum('nilai') || 0
 
+
             const sumKredit = await TrxJurnal.query().where( w => {
                 if(req.cabang_id){
                     w.where('cabang_id', req.cabang_id)
                 }
-                if(req.rangeAwal && req.rangeAkhir){
-                    w.where('trx_date', '>=', req.rangeAwal)
+                if(req.rangeAkhir){
+                    // w.where('trx_date', '>=', '2000-01-01')
                     w.where('trx_date', '<=', req.rangeAkhir)
                 }
                 w.where('is_delay', 'N')
@@ -102,6 +82,8 @@ class RingkasanController {
                 nrc.total = (sumKredit - sumDebit).toLocaleString('id')
             }
 
+            // console.log("DATA-RINGKASAN------------", nrc.name, nrc.total);
+
             // LOOPING AKUN GROUP
             if(nrc.group.length > 0){
                 for (let grp of nrc.group) {
@@ -109,8 +91,8 @@ class RingkasanController {
                         if(req.cabang_id){
                             w.where('cabang_id', req.cabang_id)
                         }
-                        if(req.rangeAwal && req.rangeAkhir){
-                            w.where('trx_date', '>=', req.rangeAwal)
+                        if(req.rangeAkhir){
+                            // w.where('trx_date', '>=', '2000-01-01')
                             w.where('trx_date', '<=', req.rangeAkhir)
                         }
                         w.where('is_delay', 'N')
@@ -123,8 +105,8 @@ class RingkasanController {
                         if(req.cabang_id){
                             w.where('cabang_id', req.cabang_id)
                         }
-                        if(req.rangeAwal && req.rangeAkhir){
-                            w.where('trx_date', '>=', req.rangeAwal)
+                        if(req.rangeAkhir){
+                            w.where('trx_date', '>=', '2000-01-01')
                             w.where('trx_date', '<=', req.rangeAkhir)
                         }
                         w.where('is_delay', 'N')
@@ -147,8 +129,8 @@ class RingkasanController {
                                 if(req.cabang_id){
                                     w.where('cabang_id', req.cabang_id)
                                 }
-                                if(req.rangeAwal && req.rangeAkhir){
-                                    w.where('trx_date', '>=', req.rangeAwal)
+                                if(req.rangeAkhir){
+                                    // w.where('trx_date', '>=', '2000-01-01')
                                     w.where('trx_date', '<=', req.rangeAkhir)
                                 }
                                 w.where('is_delay', 'N')
@@ -161,8 +143,8 @@ class RingkasanController {
                                 if(req.cabang_id){
                                     w.where('cabang_id', req.cabang_id)
                                 }
-                                if(req.rangeAwal && req.rangeAkhir){
-                                    w.where('trx_date', '>=', req.rangeAwal)
+                                if(req.rangeAkhir){
+                                    // w.where('trx_date', '>=', '2000-01-01')
                                     w.where('trx_date', '<=', req.rangeAkhir)
                                 }
                                 w.where('is_delay', 'N')
@@ -176,6 +158,7 @@ class RingkasanController {
                             }else{
                                 akun.total = (sumKreditGrpAkun - sumDebitGrpAkun).toLocaleString('id')
                             }
+                            
                         }
                     }
     
@@ -185,8 +168,8 @@ class RingkasanController {
                             if(req.cabang_id){
                                 w.where('cabang_id', req.cabang_id)
                             }
-                            if(req.rangeAwal && req.rangeAkhir){
-                                w.where('trx_date', '>=', req.rangeAwal)
+                            if(req.rangeAkhir){
+                                // w.where('trx_date', '>=', '2000-01-01')
                                 w.where('trx_date', '<=', req.rangeAkhir)
                             }
                             w.where('is_delay', 'N')
@@ -199,8 +182,8 @@ class RingkasanController {
                             if(req.cabang_id){
                                 w.where('cabang_id', req.cabang_id)
                             }
-                            if(req.rangeAwal && req.rangeAkhir){
-                                w.where('trx_date', '>=', req.rangeAwal)
+                            if(req.rangeAkhir){
+                                // w.where('trx_date', '>=', '2000-01-01')
                                 w.where('trx_date', '<=', req.rangeAkhir)
                             }
                             w.where('is_delay', 'N')
@@ -223,8 +206,8 @@ class RingkasanController {
                                     if(req.cabang_id){
                                         w.where('cabang_id', req.cabang_id)
                                     }
-                                    if(req.rangeAwal && req.rangeAkhir){
-                                        w.where('trx_date', '>=', req.rangeAwal)
+                                    if(req.rangeAkhir){
+                                        // w.where('trx_date', '>=', '2000-01-01')
                                         w.where('trx_date', '<=', req.rangeAkhir)
                                     }
                                     w.where('is_delay', 'N')
@@ -237,8 +220,8 @@ class RingkasanController {
                                     if(req.cabang_id){
                                         w.where('cabang_id', req.cabang_id)
                                     }
-                                    if(req.rangeAwal && req.rangeAkhir){
-                                        w.where('trx_date', '>=', req.rangeAwal)
+                                    if(req.rangeAkhir){
+                                        // w.where('trx_date', '>=', '2000-01-01')
                                         w.where('trx_date', '<=', req.rangeAkhir)
                                     }
                                     w.where('is_delay', 'N')
@@ -259,12 +242,15 @@ class RingkasanController {
             }else{
                 // LOOPING AKUN DALAM AKUN TYPE
                 for (let coa of nrc.akun) {
+                    // let test = (await TrxJurnal.query().where( w => w.where('coa_id', 'like', `${coa.kode}`)).fetch()).toJSON()
+                    // test = test.map( v => ({trx_date: moment(v.trx_date).format("DD-MM-YYYY"), nilai: v.nilai, coa_id: v.coa_id}))
+                    // console.log(">>>>>>", test);
                     const sumDebitAkun = await TrxJurnal.query().where( w => {
                         if(req.cabang_id){
                             w.where('cabang_id', req.cabang_id)
                         }
-                        if(req.rangeAwal && req.rangeAkhir){
-                            w.where('trx_date', '>=', req.rangeAwal)
+                        if(req.rangeAkhir){
+                            // w.where('trx_date', '>=', '2000-01-01')
                             w.where('trx_date', '<=', req.rangeAkhir)
                         }
                         w.where('is_delay', 'N')
@@ -277,8 +263,8 @@ class RingkasanController {
                         if(req.cabang_id){
                             w.where('cabang_id', req.cabang_id)
                         }
-                        if(req.rangeAwal && req.rangeAkhir){
-                            w.where('trx_date', '>=', req.rangeAwal)
+                        if(req.rangeAkhir){
+                            // w.where('trx_date', '>=', '2000-01-01')
                             w.where('trx_date', '<=', req.rangeAkhir)
                         }
                         w.where('is_delay', 'N')
@@ -292,6 +278,7 @@ class RingkasanController {
                     }else{
                         coa.total = (sumKreditAkun - sumDebitAkun).toLocaleString('id')
                     }
+                    console.log("DATA-RINGKASAN------------", nrc.name, coa.total);
                 }
             }
         }
@@ -514,7 +501,14 @@ class RingkasanController {
 
     async listDetails ( { request, view } ) {
         const req = request.all()
-        console.log(req);
+        const isNeraca = (await TrxJurnal.query().with('coa').where( w => {
+            w.where('coa_id', 'like', `${req.kode}%`)
+            w.where('nilai', '!=', 0)
+            w.where('aktif', 'Y')
+        }).last()).toJSON()
+        
+        req.rangeAwal = isNeraca.coa.id <= 39999 ? '2000-01-01':req.rangeAwal
+        // console.log(req);
         const data = (
             await TrxJurnal.query().with('coa').where( w => {
                 w.where('coa_id', 'like', `${req.kode}%`)
@@ -528,14 +522,35 @@ class RingkasanController {
                     w.where('trx_date', '<=', req.rangeAkhir)
                 }
             }).orderBy([
-                {column: 'trx_date', order: 'asc'},
+                {column: 'trx_date', order: 'desc'},
                 {column: 'coa_id', order: 'asc'}
             ]).fetch()
         ).toJSON()
 
-        console.log(data);
+        let dk = data[0].coa.dk
+        let total
+        let totalDebi = 0
+        let totalKre = 0
+        for (const val of data) {
+            if(val.dk === 'd'){
+                totalDebi += val.nilai
+            }else{
+                totalKre += val.nilai
+            }
+        }
+        if(dk === 'k'){
+            total = totalKre - totalDebi
+        }else{
+            total = totalDebi - totalKre
+        }
+        console.log('D=', totalDebi);
+        console.log('K=', totalKre);
 
-        return view.render('keuangan._ringkasan.list-details', {list: data})
+        return view.render('keuangan._ringkasan.list-details', {
+            list: data,
+            total: total,
+            totalRp: total.toLocaleString('ID')
+        })
     }
 }
 
