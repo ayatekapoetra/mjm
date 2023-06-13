@@ -1,10 +1,16 @@
 'use strict'
 
+const DB = use('Database')
 const Helpers = use('Helpers')
 const moment = require('moment')
+moment.locale("ID")
 const initFunc = use("App/Helpers/initFunc")
 const initMenu = use("App/Helpers/_sidebar")
 const BarangHelpers = use("App/Helpers/Barang")
+const DefCoa = use("App/Models/DefCoa")
+const Opname = use("App/Models/logistik/LogistikStokOpname")
+const HargaBeli = use("App/Models/master/HargaBeli")
+const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
 const logoPath = Helpers.publicPath('logo.png')
 const Image64Helpers = use("App/Helpers/_encodingImages")
 const LogStokOpnameHelpers = use("App/Helpers/LogStokOpname")
@@ -70,7 +76,147 @@ class StokOpnameController {
             }
         })
         console.log(data);
-        return view.render('logistik.stok-opname.item-summary', {data: data})
+        return view.render('logistik.stok-opname.item-summary', {
+            data: data,
+            params: params.id
+        })
+    }
+
+    async autoJurnal ( { auth, params } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return {
+                success: false,
+                message: 'Not authorized....'
+            }
+        }
+
+        const sdhJurnal = await Opname.query().where('id', params.id).last()
+        if(sdhJurnal.auto_jurnal === 'Y'){
+            return {
+                success: false,
+                message: 'Data sudah ini sudah melakukan auto jurnal pada hari ' + 
+                moment(sdhJurnal.jurnal_date).format("dddd, DD MMMM YYYY") +
+                '\nPukul ' +
+                moment(sdhJurnal.jurnal_date).format("HH:mm A")
+            }
+        }
+
+        let data = await LogStokOpnameHelpers.SUMMARY(params)
+
+        data = data.filter( v => v.variences != '0.00')
+
+        const trx = await DB.beginTransaction()
+        for (const val of data) {
+            const hargaBeli = await HargaBeli.query().where( w => {
+                w.where('barang_id', val.barang_id)
+                w.where('gudang_id', val.gudang_id)
+            }).getAvg('harga_beli') || 0
+
+            
+            if(hargaBeli <= 0){
+                return {
+                    success: false,
+                    message: 'Harga beli ' + val.barang?.nama + ' \npada ' + val.gudang?.nama + ' \ntidak ditemukan...'
+                }
+            }
+
+            /**
+             * JIKA ITEM CHEATING
+             * Maka Jurnal Debit pada Beban Lain2 & Jurnal Kredit pada Persediaan
+             * **/ 
+            if(val.variences < 0){
+                const initOpnameMinus = (await DefCoa.query().where('group', 'auto-jurnal-opname-minus').fetch()).toJSON()
+                for (const obj of initOpnameMinus) {
+                    const MinJurnal = new TrxJurnal()
+                    MinJurnal.fill({
+                        createdby: user.id,
+                        cabang_id: val.cabang_id,
+                        coa_id: obj.coa_id,
+                        reff: val.kode,
+                        narasi: '[ ' + val.kode + ' ] ' + obj.description,
+                        trx_date: new Date(),
+                        nilai: hargaBeli * (val.variences * -1),
+                        dk: obj.tipe,
+                        is_delay: 'N',
+                        barang_id: val.barang_id
+                    })
+
+                    try {
+                        await MinJurnal.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: "Error jurnal " + val.barang?.nama
+                        }
+                    }
+                }
+
+            }
+
+            /**
+             * JIKA ITEM OVER
+             * Maka Jurnal Debit pada Persediaan & Jurnal Kredit pada Pendapatan Lain2
+             * **/ 
+            if(val.variences > 0){
+                const initOpnamePlus = (await DefCoa.query().where('group', 'auto-jurnal-opname-plus').fetch()).toJSON()
+                for (const obj of initOpnamePlus) {
+                    const PlusJurnal = new TrxJurnal()
+                    PlusJurnal.fill({
+                        createdby: user.id,
+                        cabang_id: val.cabang_id,
+                        coa_id: obj.coa_id,
+                        reff: val.kode,
+                        narasi: '[ ' + val.kode + ' ] ' + obj.description,
+                        trx_date: new Date(),
+                        nilai: hargaBeli * val.variences,
+                        dk: obj.tipe,
+                        is_delay: 'N',
+                        barang_id: val.barang_id
+                    })
+
+                    try {
+                        await PlusJurnal.save(trx)
+                    } catch (error) {
+                        console.log(error);
+                        await trx.rollback()
+                        return {
+                            success: false,
+                            message: "Error jurnal " + val.barang?.nama
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * UPDATE DATA STOK OPNAME
+         * **/ 
+        const updStokOpname = await Opname.query().where('id', params.id).last()
+        updStokOpname.merge({
+            auto_jurnal: 'Y',
+            jurnalby: user.id,
+            jurnal_date: new Date()
+        })
+
+        try {
+            await updStokOpname.save(trx)
+        } catch (error) {
+            console.log(error);
+            await trx.rollback()
+            return {
+                success: false,
+                message: "Error update data opname setelah melakukan jurnal"
+            }
+        }
+
+        await trx.commit()
+        return {
+            success: true,
+            message: "Auto Jurnal Berhasil dilakukan..."
+        }
     }
     
     async addItem ( { view } ) {

@@ -1,6 +1,10 @@
 {{ script('ajax/initDate') }}
 <div class="panel-wrapper collapse in">
     <div class="panel-body">
+        <button class="btn btn-danger" id="bt-auto-jurnal" data-id="{{params}}" style="margin-left: -15px;">
+            <i class="ti-pulse"></i>
+            Jurnal Otomatis
+        </button>
         <div class="row">
             <div class="table-responsive">
                 <table id="example23" class="display nowrap" cellspacing="0" width="100%" data-page-length='100'>
@@ -51,13 +55,69 @@
         </div>
     </div>
 </div>
+<style>
+    #example23 > .dt-buttons {
+         max-width: 20%;
+         display: flex;
+         flex-direction: row;
+         align-items: center;
+         justify-content: space-between;
+    }
+    div.dt-buttons {
+        position: absolute;
+        margin-top: 10px;
+        left: 20px;
+    }
+    a.dt-button, button.dt-button, div.dt-button {
+         background: #2cabe3;
+         color: #fff;
+         border-color: #2cabe3;
+         padding: 5px 15px;
+         margin: 2px 5px;
+    }
+ </style>
 <script>
     $(function(){
         $('table#example23').DataTable({
             dom: 'Bfrtip',
             buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
+                'copy', 'csv', 'excel', 'print'
             ]
         });
+
+        $('button#bt-auto-jurnal').on('click', function(e){
+            e.preventDefault()
+            var id = $(this).data('id')
+            swal({
+                title: "Apakah anda yakin ?",
+                text: "System akan melakukan auto jurnal, fitur ini hanya akan dapat dilakukan sekali untuk setiap stokopname!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-warning",
+                confirmButtonText: "Ya, Lakukan!",
+                closeOnConfirm: false
+            }, () => {
+                $.ajax({
+                    async: true,
+                    url: 'stok-opname/'+id+'/auto-jurnal',
+                    method: 'POST',
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    success: function(resp){
+                        if (resp.success) {
+                            swal("Success!", "Auto Jurnal berhasil dilakukan...", "success");
+                        }else{
+                            swal("Error!", resp?.message, "error");
+                        }
+                    },
+                    error: function(err){
+                        console.log(err)
+                        // body.find('div#content-form').css('display', 'none')
+                    }
+                })
+            })
+        })
     })
 </script>

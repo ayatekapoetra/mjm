@@ -451,6 +451,7 @@ Route.group(() => {
     Route.get('/stok-opname/:id/print', 'StokOpnameController.print').as('log.stok-opname.print').middleware('R')
     Route.post('/stok-opname/:id/update', 'StokOpnameController.update').as('log.stok-opname.update').middleware('U')
     Route.get('/stok-opname/:id/showSummary', 'StokOpnameController.showSummary').as('log.stok-opname.showSummary').middleware('R')
+    Route.post('/stok-opname/:id/auto-jurnal', 'StokOpnameController.autoJurnal').as('log.stok-opname.autoJurnal').middleware('U')
     Route.delete('/stok-opname/:id/destroy', 'StokOpnameController.destroy').as('log.stok-opname.destroy').middleware('D')
     Route.get('/stok-opname/create/add-item', 'StokOpnameController.addItem').as('log.stok-opname.addItem').middleware('C')
 
