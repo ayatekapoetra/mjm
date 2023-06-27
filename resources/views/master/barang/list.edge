@@ -7,6 +7,7 @@
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">No</th>
                             <th width="50" class="text-center bg-inverse b-all">ACT</th>
+                            <th width="80" class="bg-inverse b-all">QRCODE</th>
                             <th class="bg-inverse b-all">Kode<br/>Nama</th>
                             <th class="bg-inverse b-all">Category<br/>Brand</th>
                             <th class="bg-inverse b-all">PartNumber<br/>Qualitas</th>
@@ -20,6 +21,9 @@
                                 <td class="text-center">{{$loop.index + 1}}</td>
                                 <td>
                                     <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">show</button>
+                                </td>
+                                <td class="text-center">
+                                    <div class="qrcode-img" data-qr="{{item.kode}}" id="{{item.kode}}" style="padding:5px;background-color: white;"></div>
                                 </td>
                                 <td>
                                     <small>{{item.kode}}</small><br>
@@ -69,13 +73,27 @@
 <script>
     $(function(){
         $('.image-popup-vertical-fit').magnificPopup({
-		type: 'image',
-		closeOnContentClick: true,
-		mainClass: 'mfp-img-mobile',
-		image: {
-			verticalFit: true
-		}
-		
-	});
+            type: 'image',
+            closeOnContentClick: true,
+            mainClass: 'mfp-img-mobile',
+            image: {
+                verticalFit: true
+            }
+            
+        });
+
+        $('div.qrcode-img').each(function(){
+            var codeQr = $(this).data('qr')
+            new QRCode(document.getElementById(codeQr), {
+                text: codeQr,
+                width: 50,
+                height: 50,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        })
+
+
     })
 </script>

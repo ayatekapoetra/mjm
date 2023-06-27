@@ -6,6 +6,8 @@ const moment = require('moment')
 moment.locale("ID")
 const initFunc = use("App/Helpers/initFunc")
 const initMenu = use("App/Helpers/_sidebar")
+const VUser = use("App/Models/VUser")
+const Barang = use("App/Models/master/Barang")
 const BarangHelpers = use("App/Helpers/Barang")
 const DefCoa = use("App/Models/DefCoa")
 const Opname = use("App/Models/logistik/LogistikStokOpname")
@@ -14,6 +16,7 @@ const TrxJurnal = use("App/Models/transaksi/TrxJurnal")
 const logoPath = Helpers.publicPath('logo.png')
 const Image64Helpers = use("App/Helpers/_encodingImages")
 const LogStokOpnameHelpers = use("App/Helpers/LogStokOpname")
+const LogistikStokOpnameItemApps = use("App/Models/logistik/LogistikStokOpnameItemApps")
 
 class StokOpnameController {
     async index ( { auth, view } ) {
@@ -45,7 +48,92 @@ class StokOpnameController {
     }
 
     async create ( { auth, view } ) {
-        return view.render('logistik.stok-opname.create')
+        const user = await userValidate(auth)
+        if(!user){
+            return {
+                success: false,
+                message: 'Not authorized....'
+            }
+        }
+        const qrcode = await initFunc.GEN_KODE_OPNAME(user)
+        return view.render('logistik.stok-opname.create', {qr: qrcode})
+    }
+
+    async appsSync ( { auth, params } ) {
+        const user = await userValidate(auth)
+        if(!user){
+            return {
+                success: false,
+                message: 'Not authorized....'
+            }
+        }
+
+        const itemsApps = (
+            await LogistikStokOpnameItemApps.query().where( w => {
+                w.where('aktif', 'Y')
+                w.where('kode', params.kode)
+            }).fetch()
+        ).toJSON()
+
+        const barang = (await Barang.query().where('aktif', 'Y').fetch()).toJSON()
+        let HTML = []
+        for (const obj of itemsApps) {
+            let barangArr = barang.map( v => v.id === obj.barang_id ? {...v, selected: "selected"} : {...v, selected: ""})
+            let userScan = await VUser.query().where('id', obj.createdby).last()
+            userScan = userScan?.nama_lengkap || ''
+            HTML.push(
+                '<tr class="item-rows items-mobile">'+
+                '    <td>'+
+                '        <h3 class="urut-rows"></h3>'+
+                '        <input type="hidden" class="" name="id" value="">'+
+                '    </td>'+
+                '    <td class="b-all">'+
+                '        <div class="row">'+
+                '            <div class="col-md-10">'+
+                '                <div class="form-group m-b-10">'+    
+                '                    <label for="">Nama Barang <span class="text-danger">*</span></label>'+    
+                '                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="" id="" required>'+
+                '                        <option value="">Pilih Barang...</option>'+
+                                            barangArr.map( v => '<option value="'+v.id+'" '+v.selected+'>[ '+v.num_part+' ] '+v.nama+'</option>')+
+                '                    </select>'+
+                '                </div>'+
+                '            </div>'+
+                '            <div class="col-md-2">'+
+                '                <div class="form-group m-b-10">'+    
+                '                    <label for="">Qty opname <span class="text-danger">*</span></label>'+    
+                '                    <input type="number" class="form-control item-data-details item-details" name="qty" id="" value="'+obj.qty_opname+'" required>'+
+                '                </div>'+
+                '            </div>'+
+                '            <div class="col-md-7">'+
+                '                <div class="form-group m-b-10">'+    
+                '                    <label for="">Keterangan</label>'+    
+                '                    <input type="text" class="form-control item-data-details" name="description" data-id="" id="" value="'+obj.narasi+'">'+
+                '                </div>'+
+                '            </div>'+
+                '            <div class="col-md-3">'+
+                '                <div class="form-group m-b-10">'+    
+                '                    <label for="">Scan By</label>'+    
+                '                    <input type="text" class="form-control" name="createdby" value="'+userScan+'">'+
+                '                </div>'+
+                '            </div>'+
+                '            <div class="col-md-2">'+
+                '                <div class="form-group m-b-10">'+    
+                '                    <label for="">Devices</label>'+    
+                '                    <input type="text" class="form-control" name="devices" value="'+obj.devices+'">'+
+                '                </div>'+
+                '            </div>'+
+                '        </div>'+
+                '    </td>'+
+                '    <td class="text-center">'+
+                '        <button type="button" class="btn btn-danger btn-circle m-t-30 bt-remove-item">'+
+                '            <i class="fa fa-trash"></i>'+
+                '        </button>'+
+                '    </td>'+
+                '</tr>'
+            )
+        }
+        console.log(HTML);
+        return HTML
     }
 
     async show ( { auth, params, view } ) {
@@ -75,7 +163,7 @@ class StokOpnameController {
                 date_opname: moment(v.date_opname).format('dddd, DD-MM-YYYY')
             }
         })
-        console.log(data);
+        // console.log(data);
         return view.render('logistik.stok-opname.item-summary', {
             data: data,
             params: params.id
@@ -237,6 +325,49 @@ class StokOpnameController {
             }
         }
 
+        console.log(req);
+
+
+        if(!req.kode_opname){
+            return {
+                success: false,
+                message: "Kode Stok Opname tidak valid..."
+            }
+        }
+
+        if(!req.gudang_id){
+            return {
+                success: false,
+                message: "Gudang belum ditentukan..."
+            }
+        }
+
+        if(!req.date_opname){
+            return {
+                success: false,
+                message: "Tanggal stok opname belum ditentukan..."
+            }
+        }
+
+        if(!req.items.length > 0){
+            return {
+                success: false,
+                message: "Items stok opname masih kosong !\n\n Lakukan sinkronisasi apps dengan klik tombol SINKRONISASI APPS..."
+            }
+        }
+
+        for (const [i, val] of (req.items).entries()) {
+            console.log(i);
+            console.log(val);
+            var urut = i + 1
+            if(!val.barang_id){
+                return {
+                    success: false,
+                    message: "Items barang No. " + urut + "\nbelum ditentukan..."
+                }
+            }
+        }
+        
         const data = await LogStokOpnameHelpers.POST(req, user)
         return data
     }

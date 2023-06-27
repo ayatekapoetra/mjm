@@ -9,7 +9,7 @@
             <div class="col-md-10">            
                 <div class="form-group m-b-10">                
                     <label for="">Nama Barang <span class="text-danger">*</span></label>                
-                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="" id="" required>
+                    <select class="form-control item-data-details selectBarang" name="barang_id" data-values="" id="">
                         <option value="">Pilih Barang...</option>
                         @each(item in barang)
                             <option value="{{item.id}}">[ {{item.num_part}} ] {{item.kode}} - {{item.nama}}</option>

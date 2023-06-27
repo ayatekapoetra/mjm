@@ -728,10 +728,11 @@ class initFunc {
         return patten
     }
 
-    async GEN_KODE_OPNAME (cabangID) {
-        const cabang = (await Cabang.query().where('id', cabangID).last()).toJSON()
+    async GEN_KODE_OPNAME (user) {
+        const cabang = (await Cabang.query().where('id', user.cabang_id).last()).toJSON()
         console.log(cabang);
-        let str = `${cabang.kode}OPN${moment().format('YYYYMMDD')}`
+        let strUser = '0'.repeat(3 - `${user.id}`) + user.id
+        let str = `SO-${cabang.kode}${strUser}${moment().format('YYYYMMDD')}`
         return str
     }
 

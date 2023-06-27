@@ -5,7 +5,7 @@ const Helpers = use('Helpers')
 const _ = require('underscore')
 const moment = require('moment')
 const initFunc = use("App/Helpers/initFunc")
-const Barang = use("App/Models/master/Barang")
+const Gudang = use("App/Models/master/Gudang")
 const VBarang = use("App/Models/VBarangStok")
 
 class barangStok {
@@ -40,24 +40,35 @@ class barangStok {
                 .paginate(halaman, limit)
             ).toJSON()
         }
-
-        
-
-        console.log(data);
         return data
     }
 
     
 
-    async SHOW (params) {
-        console.log(params);
-        const data = (
-            await VBarang
-            .query()
-            .where('id', params.id)
-            .last()
-        ).toJSON()
-        return data
+    async SHOW (params, user) {
+        let result = []
+        const arrGudang = (
+            await Gudang.query().where( w => {
+                w.where('cabang_id', user.cabang_id)
+            }).fetch()
+        )?.toJSON() || []
+
+        for (const val of arrGudang) {
+            const data = (
+                await VBarang
+                .query()
+                .where( w => {
+                    w.where('id', params.id)
+                    w.where('gudang_id', val.id)
+                    w.where('cabang_id', val.cabang_id)
+                }).last()
+            )?.toJSON() || null
+
+            result.push({...val, stok: data})
+            
+        }
+
+        return result
     }
 
     

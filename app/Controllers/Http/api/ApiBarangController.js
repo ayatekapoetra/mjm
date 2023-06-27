@@ -13,7 +13,7 @@ class ApiBarangController {
         var req = request.all()
 
         const user = await userValidate(auth)
-        console.log(user);
+        console.log(req);
         if(!user){
             return response.status(403).json({
                 diagnostic: {
@@ -25,7 +25,7 @@ class ApiBarangController {
         }
 
         try {
-            const data = await BarangHelpers.LIST(req)
+            const data = await BarangHelpers.LIST_API(req)
             durasi = await initFunc.durasi(t0)
             return response.status(200).json({
                 diagnostic: {

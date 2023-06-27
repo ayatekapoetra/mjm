@@ -27,6 +27,32 @@ $(function(){
         setUrut()
     })
 
+    $('body').on('click', 'button#bt-sink-apps', function(e){
+        e.preventDefault()
+        var kode = $(this).data('id')
+        $.ajax({
+            async: true,
+            url: 'stok-opname/syn-apps/'+kode+'/add-item',
+            method: 'GET',
+            dataType: 'json',
+            beforeSend: function(){
+                body.find('tbody#item-details tr.items-mobile').remove()
+            },
+            success: function(result){
+                console.log(result);
+                if(result.length > 0){
+                    body.find('tbody#item-details').append(result.map( v => v))
+                }else{
+                    alert('Tidak ada data ditemukan...')
+                }
+                setUrut()
+            },
+            error: function(err){
+                console.log(err)
+            }
+        })
+    })
+
     $('body').on('submit', 'form#form-create', function(e){
         e.preventDefault()
         var data = getDataForm()

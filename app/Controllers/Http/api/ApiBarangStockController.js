@@ -62,26 +62,42 @@ class ApiBarangStockController {
             })
         }
 
+        // console.log("USER", user);
+
         try {
-            const data = await BarangStokHelpers.SHOW(params)
+            const data = await BarangStokHelpers.SHOW(params, user)
+            if(data){
+                durasi = await initFunc.durasi(t0)
+                return response.status(200).json({
+                    diagnostic: {
+                        ver: version,
+                        times: durasi, 
+                        error: false
+                    },
+                    data: data
+                })
+            }else{
+                durasi = await initFunc.durasi(t0)
+                return response.status(403).json({
+                    diagnostic: {
+                        ver: version,
+                        times: durasi, 
+                        error: true,
+                        message: 'data stok tidat ditemukan...'
+                    },
+                    data: data
+                })
+            }
+        } catch (err) {
+            console.log(err);
             durasi = await initFunc.durasi(t0)
-            return response.status(200).json({
-                diagnostic: {
-                    ver: version,
-                    times: durasi, 
-                    error: false
-                },
-                data: data
-            })
-        } catch (error) {
-            durasi = await initFunc.durasi(t0)
-            return response.status(403).json({
+            return response.status(500).json({
                 diagnostic: {
                     ver: version,
                     times: durasi, 
                     error: true
                 },
-                data: error
+                data: err.Error
             })
         }
     }

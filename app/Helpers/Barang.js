@@ -58,7 +58,25 @@ class masterBarang {
             ).toJSON()
         }
 
-        // console.log(data);
+        return data
+    }
+
+    async LIST_API (req) {
+        const data = (
+            await Barang
+            .query()
+            .with('brand')
+            .with('kategori')
+            .with('subkategori')
+            .with('qualitas')
+            .where( w => {
+                if(req.keyword){
+                    w.where('kode', 'like', `%${req.keyword}%`)
+                    w.orWhere('num_part', 'like', `%${req.keyword}%`)
+                    w.orWhere('nama', 'like', `%${req.keyword}%`)
+                }
+            }).orderBy('kode', 'asc').fetch()
+        )?.toJSON()
         return data
     }
 
@@ -137,7 +155,7 @@ class masterBarang {
     }
 
     async SHOW_BY_KODE (params) {
-        const data = (
+        let data = (
             await Barang
             .query()
             .with('brand')
@@ -149,6 +167,11 @@ class masterBarang {
             .where('kode', params.kode)
             .last()
         ).toJSON()
+
+        // console.log(user);
+
+        // let stok = (await BarangLokasi.query().where('barang_id', data.id).fetch()).toJSON()
+        // console.log(stok);
         return data
     }
 

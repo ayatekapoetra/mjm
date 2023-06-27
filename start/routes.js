@@ -454,6 +454,7 @@ Route.group(() => {
     Route.post('/stok-opname/:id/auto-jurnal', 'StokOpnameController.autoJurnal').as('log.stok-opname.autoJurnal').middleware('U')
     Route.delete('/stok-opname/:id/destroy', 'StokOpnameController.destroy').as('log.stok-opname.destroy').middleware('D')
     Route.get('/stok-opname/create/add-item', 'StokOpnameController.addItem').as('log.stok-opname.addItem').middleware('C')
+    Route.get('/stok-opname/syn-apps/:kode/add-item', 'StokOpnameController.appsSync').as('log.stok-opname.appsSync').middleware('C')
 
 }).prefix('logistik').namespace('logistik')
 
@@ -622,8 +623,12 @@ Route.group(() => {
     /** TRANSAKSI **/
     Route.get('/transaksi-pelanggan', 'ApiTransaksiPelangganController.index')
 
+    /** STOK-OPNAME **/
+    Route.post('/mobile-opname', 'ApiOpnameMobileController.post')
+    Route.get('/mobile-opname/user-scan', 'ApiOpnameMobileController.userScan')
+
     /** CHART MOBILE **/
-    Route.get('/chart-sales', 'ApiChartController.monthlySales')
+    Route.get('/chart-sales', 'ApiOpnameMobileController.monthlySales')
 
 }).prefix('api-v1').namespace('api')
 

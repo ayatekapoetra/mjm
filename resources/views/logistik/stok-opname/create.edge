@@ -8,28 +8,59 @@
             <form id="form-create">
                 {{ csrfField() }}
                 <div class="panel-body">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="control-label">Tanggal <span class="text-danger">*</span></label>
-                            <input type="date" name="date_opname" class="form-control item-data initDate" required>
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Kode</label>
+                                    <input type="text" name="kode_opname" class="form-control item-data" value="{{qr}}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">Tanggal <span class="text-danger">*</span></label>
+                                    <input type="date" name="date_opname" class="form-control item-data initDate">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Gudang <span class="text-danger">*</span></label>
+                                    <select type="text" name="gudang_id" class="form-control item-data selectGudang" data-cabang="{{auth.user.cabang_id}}"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Narasi</label>
+                                    <input type="text" name="keterangan" class="form-control item-data">
+                                    <span>Klik gambar qrcode untuk melakukan sinkronisasi dengan data stokopname dari mobile apps</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-9">
-                        <div class="form-group">
-                            <label class="control-label">Gudang <span class="text-danger">*</span></label>
-                            <select type="text" name="gudang_id" class="form-control item-data selectGudang" data-cabang="{{auth.user.cabang_id}}" required></select>
+                    <div class="col-md-2">
+                        <div class="row">
+                            <div class="col-md-12">
+                                Code : <strong>{{qr}}</strong>
+                                <div id="qrcode-so" 
+                                style="display: flex;
+                                flex: 1;
+                                justify-content: center;
+                                align-items: center;
+                                padding: 10px;
+                                background-color: aliceblue;
+                                border: 1px solid;"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label class="control-label">Narasi</label>
-                            <input type="text" name="keterangan" class="form-control item-data"> 
-                        </div>
-                    </div>
+                    
                 </div>
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-sm-12">
+                            <button class="btn btn-default" id="bt-sink-apps" data-id="{{qr}}">
+                                <i class="ti-server"></i>
+                                Sinkronisasi Apps
+                            </button>
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
@@ -73,5 +104,18 @@
     $(function(){
         var body = $('body')
         $('select').select2()
+        new QRCode(document.getElementById("qrcode-so"), {
+            text: "{{qr}}",
+            width: 128,
+            height: 128,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        $('div#qrcode-so').click(function(e){
+            e.preventDefault()
+            alert('....')
+        })
     })
 </script>

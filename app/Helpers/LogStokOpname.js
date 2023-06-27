@@ -9,6 +9,7 @@ const BarangLokasi = use("App/Models/BarangLokasi")
 const Opname = use("App/Models/logistik/LogistikStokOpname")
 const OpnameItems = use("App/Models/logistik/LogistikStokOpnameItem")
 const OpnameSummary = use("App/Models/logistik/LogistikStokOpnameSummary")
+const LogistikStokOpnameItemApps = use("App/Models/logistik/LogistikStokOpnameItemApps")
 
 class stokOpname {
     async LIST (req, user) {
@@ -96,8 +97,15 @@ class stokOpname {
 
     async POST (req, user) {
         const trx = await DB.beginTransaction()
-        req.kode_opname = await initFunc.GEN_KODE_OPNAME(user.cabang_id)
-        console.log(req);
+        req.kode_opname = req.kode_opname || await initFunc.GEN_KODE_OPNAME(user)
+
+        const isExsistingKode = await Opname.query().where('kode_opname', req.kode_opname).last()
+        if(isExsistingKode){
+            return {
+                success: false,
+                message: "Stok Opname dengan kode \n" + req.kode_opname + "\nsudah ada !!!\nSilahkan melakukan update data..."
+            }
+        }
         
         const opname = new Opname()
         opname.fill({
@@ -120,6 +128,33 @@ class stokOpname {
             }
         }
 
+        /**
+         * UPDATE INACTIVE ITEMS SCAN AT MOBILE APPS
+         * **/ 
+        const itemsApps = (
+            await LogistikStokOpnameItemApps.query().where( w => {
+                w.where('kode', req.kode_opname)
+            }).fetch()
+        ).toJSON()
+
+        for (const val of itemsApps) {
+            const updItemsApps = await LogistikStokOpnameItemApps.query().where('id', val.id).last()
+            updItemsApps.merge({aktif: 'N'})
+            try {
+                await updItemsApps.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save update Items Mobile Apps...'
+                }
+            }
+        }
+
+        /**
+         * INSERT ITEMS DESKTOP
+         * **/ 
         for (const obj of req.items) {
             const barang = (await Barang.query().where('id', obj.barang_id).last()).toJSON()
             const opnameItems = new OpnameItems()
