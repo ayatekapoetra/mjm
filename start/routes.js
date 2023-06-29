@@ -562,6 +562,10 @@ Route.group(() => {
 
     Route.post('/signin', 'ApiAuthController.signin')
 
+    /** PROFILE USER **/ 
+    Route.get('/profile', 'ApiProfileController.myprofile')
+    Route.get('/change-workspace/:cabang_id', 'ApiProfileController.changeWorkSpace')
+
     /** BARANG **/
     Route.get('/barang', 'ApiBarangController.index')
     Route.get('/barang/:id/show', 'ApiBarangController.show')
@@ -629,6 +633,12 @@ Route.group(() => {
 
     /** CHART MOBILE **/
     Route.get('/chart-sales', 'ApiOpnameMobileController.monthlySales')
+
+    /** LAPORAN MOBILE **/
+    Route.get('/laba-rugi', 'ApiLaporanController.labarugi')
+    Route.get('/sales-harian', 'ApiLaporanController.salesharian')
+    Route.get('/top-barang', 'ApiLaporanController.topbarang')
+    Route.get('/minimum-stok', 'ApiLaporanController.minimumstock')
 
 }).prefix('api-v1').namespace('api')
 
