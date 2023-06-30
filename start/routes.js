@@ -632,7 +632,7 @@ Route.group(() => {
     Route.get('/mobile-opname/user-scan', 'ApiOpnameMobileController.userScan')
 
     /** CHART MOBILE **/
-    Route.get('/chart-sales', 'ApiOpnameMobileController.monthlySales')
+    Route.get('/chart-sales', 'ApiChartController.monthlySales')
 
     /** LAPORAN MOBILE **/
     Route.get('/laba-rugi', 'ApiLaporanController.labarugi')

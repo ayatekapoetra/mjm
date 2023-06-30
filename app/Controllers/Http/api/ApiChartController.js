@@ -25,8 +25,8 @@ class ApiChartController {
             })
         }
 
-        var startDate = moment(req.date_start);
-        var endDate = moment(req.date_end);
+        var startDate = moment(req.startDate);
+        var endDate = moment(req.endDate);
         var arrBulan = [];
 
         if (startDate < endDate){
@@ -38,6 +38,8 @@ class ApiChartController {
             }
         }
 
+        console.log(arrBulan.map( v => moment(v).format('MMMYY')));
+
         let dataTotal = []
         try {
             for (const obj of arrBulan) {
@@ -46,15 +48,10 @@ class ApiChartController {
                     w.where('aktif', 'Y')
                     w.where('date', '>=', moment(obj).startOf('M').format('YYYY-MM-DD'))
                     w.where('date', '<=', moment(obj).endOf('M').format('YYYY-MM-DD'))
-                    if (req.cabang_id) {
-                        w.where('cabang_id', req.cabang_id)
-                    }
+                    w.where('cabang_id', user.cabang_id)
                 }).getSum('grandtot_trx') || 0
                 
-                dataTotal.push({
-                    periode: obj,
-                    total: data,
-                })
+                dataTotal.push(data)
             }
         } catch (error) {
             console.log(error);
@@ -77,9 +74,11 @@ class ApiChartController {
                 error: false
             },
             data: {
-                labels: arrBulan,
+                labels: arrBulan.map( v => moment(v).format('MMM')),
                 legend: ['Sales/Month'],
-                datasets: dataTotal
+                datasets: {
+                    data: dataTotal
+                }
             }
         })
     }

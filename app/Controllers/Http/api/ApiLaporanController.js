@@ -2,8 +2,8 @@
 
 const _ = require("underscore")
 const moment = require("moment")
-const VUser = use("App/Models/VUser")
-const UsrProfile = use("App/Models/UsrProfile")
+const Barang = use("App/Models/master/Barang")
+const VBarangStok = use("App/Models/VBarangStok")
 const Cabang = use("App/Models/master/Cabang")
 const UsrCabang = use("App/Models/UsrCabang")
 const AccCoa = use("App/Models/akunting/AccCoa")
@@ -305,6 +305,70 @@ class ApiLaporanController {
             }
         })
 
+        durasi = await initFunc.durasi(t0)
+        return response.status(200).json({
+            diagnostic: {
+                ver: version,
+                times: durasi, 
+                error: false,
+            },
+            data: data
+        })
+    }
+
+    async minimumstock ( { auth, request, response } ) {
+        let durasi
+        let req = request.all()
+        var t0 = performance.now()
+        const user = await userValidate(auth)
+        if(!user){
+            return response.status(403).json({
+                diagnostic: {
+                    ver: version,
+                    error: true,
+                    message: 'not authorized...'
+                }
+            })
+        }
+
+        const barang = (
+            await Barang.query().where( w => {
+                w.where('aktif', 'Y')
+                if(req.keyword){
+                    w.where('kode', 'like', `%${req.keyword}%`)
+                    w.orWhere('nama', 'like', `%${req.keyword}%`)
+                    w.orWhere('num_part', 'like', `%${req.keyword}%`)
+                }
+            }).fetch()
+        ).toJSON()
+
+        let data = []
+        for (const val of barang) {
+            const stok = await VBarangStok.query().where( w => {
+                w.where('id', val.id)
+                w.where('cabang_id', user.cabang_id)
+                if(req.gudang_id){
+                    w.where('gudang_id', req.gudang_id)
+                }
+            }).last()
+
+            // console.log();
+            var currStok = stok?.brg_hand || 0
+
+            data.push({
+                kode: val.kode,
+                part: val.num_part,
+                nama: val.nama,
+                stn: val.satuan,
+                min: val.min_stok,
+                stok: currStok,
+                isMinim: val.min_stok >= currStok ? 'Y':'N',
+                variences: currStok - val.min_stok
+            })
+        }
+
+        data = data.filter( v => v.isMinim === 'Y')
+        data = data.sort((a, b) => { return a.variences - b.variences })
         durasi = await initFunc.durasi(t0)
         return response.status(200).json({
             diagnostic: {
