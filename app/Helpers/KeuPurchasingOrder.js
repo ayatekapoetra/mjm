@@ -191,7 +191,7 @@ class PurchaseReq {
         
         const trxOrderBeli = await KeuPurchasingRequest.query().where('id', params.id).last()
         trxOrderBeli.merge({
-            status: 'reject',
+            status: 'rejected',
             approvedby: user.id,
             approved_at: new Date()
         })

@@ -633,12 +633,18 @@ Route.group(() => {
 
     /** CHART MOBILE **/
     Route.get('/chart-sales', 'ApiChartController.monthlySales')
+    Route.get('/income-outcome', 'ApiChartController.incomeOutcome')
 
     /** LAPORAN MOBILE **/
     Route.get('/laba-rugi', 'ApiLaporanController.labarugi')
     Route.get('/sales-harian', 'ApiLaporanController.salesharian')
     Route.get('/top-barang', 'ApiLaporanController.topbarang')
     Route.get('/minimum-stok', 'ApiLaporanController.minimumstock')
+
+    /** NOTIFICATIONS **/
+    Route.get('/notification', 'ApiNotificationController.index')
+    Route.get('/notification/count', 'ApiNotificationController.count')
+    Route.post('/notification/:id/remove', 'ApiNotificationController.delete')
 
 }).prefix('api-v1').namespace('api')
 

@@ -183,11 +183,11 @@ class pembayaran {
             const trxBank = new TrxBank()
 
             if(req.is_delay){
-                var saldo_net = 0
-                var tarik_tunda = req.subtotal
-            }else{
                 var saldo_net = req.subtotal
                 var tarik_tunda = 0
+            }else{
+                var saldo_net = 0
+                var tarik_tunda = req.subtotal
             }
             
             trxBank.fill({
@@ -322,7 +322,7 @@ class pembayaran {
                         kas_id: req.kas_id || null,
                         trx_jual: obj.trx_jual || null,
                         fakturbeli_id: obj.trx_beli || null,
-                        keubayar_id: params.id,
+                        keubayar_id: trxPembayaran.id,
                         keubayaritem_id: trxPembayaranItem.id,
                         coa_id: 30003,
                         reff: req.reff,

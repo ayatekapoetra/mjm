@@ -30,13 +30,14 @@
                     </div>
                     <div class="row">
                         <div class="col-md-3">
-                            <label for="">Status</label>
-                            <div class="form-group" style="margin-top: 10px">
-                                <div class="material-switch">
-                                    <input id="is_delay" name="is_delay" type="checkbox" value="{{data.is_delay}}"/>
-                                    <label for="is_delay" class="label-default"></label>
-                                    <span id="txt-checkbox" class="m-l-10">{{data.is_delay === 'Y' ? 'Transaksi Tunda':'Transaksi Sesuai'}}</span>
-                                </div>
+                            <label for="isDelay">Delay Transaksi</label>
+                            <div class="checkbox checkbox-danger">
+                                <input class="item-data" id="isDelay" name="is_delay" type="checkbox" value="{{data.is_delay}}" {{data.is_delay ? 'checked':''}}>
+                                @if(data.is_delay === 'N')
+                                    <label for="isDelay"><span id="txt-checkbox">Transaksi Tanggal Sesuai</span></label>
+                                @else
+                                    <label for="isDelay"><span id="txt-checkbox">Transaksi Tanggal Tunda</span></label>
+                                @endif
                             </div>
                         </div>
                         <div id="delay-date">
@@ -138,16 +139,39 @@
         ITEM_DETAILS()
         GET_DATA_PURCASING_ORDER()
 
+        // $('input[name="is_delay"]').on('click, change', function(){
+        //     var txt = body.find('span#txt-checkbox')
+        //     $(this).is(':checked') ? (
+        //         $(this).val('N'),
+        //         // txt.html('Transaksi Sesuai'),
+        //         body.find('div#delay-date').html(''),
+        //         body.find('div#container-cabang').removeClass('col-md-6').addClass('col-md-3')
+        //     ):(
+        //         $(this).val('Y'),
+        //         // txt.html('Transaksi Tunda'),
+        //         body.find('div#container-cabang').removeClass('col-md-3').addClass('col-md-6'),
+        //         body.find('div#delay-date').html(
+        //             '<div class="col-md-3">'+
+        //             '    <div class="form-group">'+
+        //             '        <label class="control-label">Jatuh Tempo <span class="text-danger">*</span></label>'+
+        //             '        <input type="date" name="due_date" class="form-control item-data initDate" required>'+
+        //             '    </div>'+
+        //             '</div>')
+        //     )
+        // })
+
         $('input[name="is_delay"]').on('click, change', function(){
             var txt = body.find('span#txt-checkbox')
             $(this).is(':checked') ? (
                 $(this).val('N'),
-                txt.html('Transaksi Sesuai'),
+                $(this).attr('checked', 'checked'),
+                txt.html('Transaksi Tanggal Sesuai'),
                 body.find('div#delay-date').html(''),
                 body.find('div#container-cabang').removeClass('col-md-6').addClass('col-md-3')
-            ):(
+                ):(
                 $(this).val('Y'),
-                txt.html('Transaksi Tunda'),
+                $(this).removeAttr('checked'),
+                txt.html('Transaksi Tanggal Sesuai'),
                 body.find('div#container-cabang').removeClass('col-md-3').addClass('col-md-6'),
                 body.find('div#delay-date').html(
                     '<div class="col-md-3">'+

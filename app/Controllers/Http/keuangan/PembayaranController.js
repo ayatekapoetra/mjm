@@ -66,6 +66,7 @@ class PembayaranController {
             return view.render('401')
         }
         const data = await KeuPembayaranHelpers.SHOW(params)
+        console.log(data);
 
         return view.render('keuangan.pembayaran.show', {data: data})
     }
@@ -436,6 +437,7 @@ class PembayaranController {
          * Validation Request Input
          * **/
 
+
         if(!req.trx_date){
             return {
                 success: false,
@@ -502,6 +504,8 @@ class PembayaranController {
 
         const bank = await Bank.query().where('id', req.coa_kredit).last()
         const kas = await Kas.query().where('id', req.coa_kredit).last()
+
+        req.is_delay = req.is_delay ? 'N' : 'Y'
 
         if(req.is_delay === 'Y' && !req.due_date){
             return {

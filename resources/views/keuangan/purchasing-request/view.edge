@@ -28,7 +28,13 @@
                     </div>
                     <div class="col-md-3">
                         <h3 class="m-b-0">
-                            Approved 
+                            @if(data.status === 'rejected')
+                                <span class="text-capitalize text-danger">{{data.status}} </span>
+                            @elseif(data.status === 'approved')
+                                <span class="text-capitalize text-success">{{data.status}} </span>
+                            @else
+                                <span class="text-capitalize">{{data.status}} </span>
+                            @endif
                             @if(data.approvedby)
                                 <small class="dateFormatDef" data-elm="" data-patten="DD MMM YYYY HH:mm" data-tgl="{{data.approved_at}}"></small>
                             @endif
