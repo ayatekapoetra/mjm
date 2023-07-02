@@ -53,6 +53,8 @@ class UserCabangController {
             }).orderBy('created_at', 'desc').
             paginate(halaman, limit)
         ).toJSON()
+
+        console.log(data);
         
         return view.render('setting.user-cabang.list', { list: data })
     }
@@ -98,6 +100,19 @@ class UserCabangController {
             return view.render('401')
         }
 
+        if (!req.user_id) {
+            return {
+                success: false,
+                message: "User masih kosong..."
+            }
+        }
+        if (!req.cabang_id) {
+            return {
+                success: false,
+                message: "Cabang masih kosong..."
+            }
+        }
+
         let usrCabang = await UsrCabang.query().where( w => {
             w.where('user_id', req.user_id)
             w.where('cabang_id', req.cabang_id)
@@ -139,53 +154,100 @@ class UserCabangController {
         if(!user){
             return view.render('401')
         }
+
+        if (!req.user_id) {
+            return {
+                success: false,
+                message: "User masih kosong..."
+            }
+        }
+        if (!req.cabang_id) {
+            return {
+                success: false,
+                message: "Cabang masih kosong..."
+            }
+        }
+
         
-        const notif = await Notification.query().where('id', params.id).last()
-        notif.merge({
-            status: req.status === 'unread' ? 'read':'unread'
+        let usrCabang = await UsrCabang.query().where( w => {
+            w.where('user_id', req.user_id)
+            w.where('cabang_id', req.cabang_id)
+        }).last()
+
+        if(usrCabang){
+            return {
+                success: false,
+                message: "User dengan cabang yg anda pilih sudah ada..."
+            }
+        }
+
+        let updCabang = await UsrCabang.query().where('id', params.id).last()
+        updCabang.merge({
+            user_id: req.user_id,
+            cabang_id: req.cabang_id,
+            aktif: updCabang.aktif
         })
 
         try {
-            await notif.save()
+            await updCabang.save()
             return {
                 success: true,
-                message: 'Success update notification...'
+                message: 'Success update user cabang...'
             }
         } catch (error) {
             console.log(error);
             return {
                 success: false,
-                message: 'Failed update notification...\n'+error
+                message: 'Failed update user cabang...\n'+error
             }
         }
     }
 
-    async delete ( { auth, params, request, view } ) {
+    async destroy ( { auth, params, request, view } ) {
         const req = request.all()
         console.log(params);
         const user = await userValidate(auth)
         if(!user){
             return view.render('401')
         }
-        
-        const notif = await Notification.query().where('id', params.id).last()
-        notif.merge({
-            status: 'removed',
-            deleted_at: new Date()
-        })
 
+        const usrCabang = await UsrCabang.query().where('id', params.id).last()
+        
         try {
-            await notif.save()
-            return {
-                success: true,
-                message: 'Success remove notification...'
-            }
+            await usrCabang.delete()
         } catch (error) {
             console.log(error);
             return {
                 success: false,
-                message: 'Failed remove notification...\n'+error
+                message: 'Failed remove user cabang...\n'+error
             }
+        }
+
+
+        if(usrCabang.aktif === 'Y'){
+            const newExsist = await UsrCabang.query().where( w => {
+                w.where('user_id',  usrCabang.user_id)
+            }).first()
+
+
+            if(newExsist){
+                try {
+                    newExsist.merge({aktif: 'Y'})
+                    await newExsist.save()
+                } catch (error) {
+                    console.log(error);
+                    return {
+                        success: false,
+                        message: 'Failed aktif user cabang...\n'+error
+                    }
+                }
+            }
+        }
+        
+
+        return {
+            success: true,
+            message: 'Success remove user cabang...'
         }
     }
 }

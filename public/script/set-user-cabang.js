@@ -69,7 +69,7 @@ $(function(){
                 console.log(result);
                 if(result.success){
                     swal('Okey', result.message, 'success')
-                    initCreate()
+                    initDefault()
                 }else{
                     swal('Opps', result.message, 'warning')
                 }

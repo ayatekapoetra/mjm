@@ -7,9 +7,9 @@
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">No</th>
                             <th width="50" class="bg-inverse b-all">ACT</th>
-                            <th width="*" class="bg-inverse b-all">Nama</th>
-                            <th width="*" class="bg-inverse b-all">Cabang</th>
-                            <th width="*" class="bg-inverse b-all">Aktif</th>
+                            <th width="*" class="bg-inverse b-all">Nama User</th>
+                            <th width="*" class="bg-inverse b-all">Nama Cabang</th>
+                            <th width="*" class="bg-inverse b-all">WorkSpace</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -28,7 +28,11 @@
                                     <small>{{item.cabang.alamat}}</small>
                                 </td>
                                 <td>
-                                    {{item.aktif}}
+                                    @if(item.aktif === 'Y')
+                                      <small class="text-success">active here...</small>
+                                    @else
+                                        <small class="text-mute">inactive</small>
+                                    @endif
                                 </td>
                             </tr>
                         @endeach
