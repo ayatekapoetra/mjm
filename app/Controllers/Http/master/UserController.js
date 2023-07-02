@@ -3,6 +3,7 @@
 const initFunc = use("App/Helpers/initFunc")
 const initMenu = use("App/Helpers/_sidebar")
 const UsersHelpers = use("App/Helpers/Users")
+const Karyawan = use("App/Models/master/Karyawan")
 
 class UserController {
     async index ( { auth, view } ) {
@@ -51,6 +52,16 @@ class UserController {
             size: '10mb',
             extnames: ['png', 'gif', 'jpg', 'jpeg', 'pdf']
         }
+
+        const karyawan = await Karyawan.query().where('id', req.karyawan_id).last()
+        if(!karyawan){
+            return {
+                success: false,
+                message: 'Karyawan blum terdaftar... '
+            }
+        }
+        
+        req.cabang_id = karyawan.cabang_id
         const attchment = request.file('photo', validateFile)
         const data = await UsersHelpers.POST(req, user, attchment)
         return data

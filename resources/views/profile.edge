@@ -167,7 +167,11 @@
                                                     <div class="input-group-addon">
                                                         <i class="ti-check-box"></i>
                                                     </div>
-                                                    <select class="form-control SelectCabang" name="cabang_id" data-user="{{auth.user.id}}" data-values="{{auth.user.cabang_id}}" required></select>
+                                                    <select class="form-control" name="cabang_id" data-user="{{auth.user.id}}" required>
+                                                        @each(item in arrCabang)
+                                                            <option value="{{item.cabang_id}}" {{item.selected}}>[ {{item.kd_cabang}} ] {{item.nm_cabang}}</option>
+                                                        @endeach
+                                                    </select>
                                                 </div>
                                                 <span>
                                                     <small>Pilih workspace cabang tempat anda aktif bekerja...</small>

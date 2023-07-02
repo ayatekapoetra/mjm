@@ -11,6 +11,10 @@ class UsrCabang extends Model {
     cabang(){
         return this.belongsTo("App/Models/master/Cabang", "cabang_id", "id")
     }
+
+    user(){
+        return this.belongsTo("App/Models/VUser", "user_id", "id")
+    }
 }
 
 module.exports = UsrCabang

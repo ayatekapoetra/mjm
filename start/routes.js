@@ -532,6 +532,15 @@ Route.group(() => {
     Route.post('/users-menu/:id/update', 'UserMenuController.update').as('set.users-menu.update').middleware('U')
     Route.delete('/users-menu/:id/destroy', 'UserMenuController.destroy').as('set.users-menu.destroy').middleware('D')
 
+    /** SETTING USER CABANG **/
+    Route.get('/user-cabang', 'UserCabangController.index').as('set.user-cabang').middleware('R')
+    Route.post('/user-cabang', 'UserCabangController.store').as('set.user-cabang.store').middleware('C')
+    Route.get('/user-cabang/list', 'UserCabangController.list').as('set.user-cabang.list').middleware('R')
+    Route.get('/user-cabang/create', 'UserCabangController.create').as('set.user-cabang.create').middleware('C')
+    Route.get('/user-cabang/:id/show', 'UserCabangController.show').as('set.user-cabang.show').middleware('U')
+    Route.post('/user-cabang/:id/update', 'UserCabangController.update').as('set.user-cabang.update').middleware('U')
+    Route.delete('/user-cabang/:id/destroy', 'UserCabangController.destroy').as('set.penempatan-barang.destroy').middleware('D')
+
     /** SETTING OPTIONS **/
     Route.get('/options', 'OptionController.index').as('set.options').middleware('R')
     Route.post('/options', 'OptionController.store').as('set.options.store').middleware('C')

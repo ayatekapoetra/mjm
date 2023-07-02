@@ -7,7 +7,9 @@ const moment = require('moment')
 const User = use("App/Models/User")
 const VUser = use("App/Models/VUser")
 const initFunc = use("App/Helpers/initFunc")
+const UsrCabang = use("App/Models/UsrCabang")
 const UsrProfile = use("App/Models/UsrProfile")
+
 const UsrWorkspace = use("App/Models/UsrWorkspace")
 const UsrBisnisUnit = use("App/Models/UsrBisnisUnit")
 
@@ -59,7 +61,7 @@ class masterUsers {
         return data
     }
 
-    async POST (req, filex) {
+    async POST (req, user, filex) {
         const trx = await DB.beginTransaction()
 
         if(!req.username){
@@ -146,6 +148,31 @@ class masterUsers {
             }
         }
 
+        const usrCabang = await UsrCabang.query().where( w => {
+            w.where('user_id', newuser.id)
+            w.where('cabang_id', req.cabang_id)
+        }).last()
+
+        if(!usrCabang){
+            const userCabang = new UsrCabang()
+            userCabang.fill({
+                user_id: newuser.id,
+                cabang_id: req.cabang_id,
+                aktif: 'Y'
+            })
+            try {
+                await userCabang.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save user '+ JSON.stringify(error)
+                }
+            }
+        }
+
+
         await trx.commit()
         return {
             success: true,
@@ -212,7 +239,7 @@ class masterUsers {
         newuser.merge({
             username: req.username,
             email: req.email,
-            password: 'mrt123',
+            password: 'mjm123',
             usertype: req.usertype
         })
 

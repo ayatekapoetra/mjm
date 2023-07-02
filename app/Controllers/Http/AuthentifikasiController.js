@@ -4,6 +4,7 @@ const Hash = use('Hash')
 const User = use("App/Models/User")
 const Token = use("App/Models/Token")
 const initMenu = use("App/Helpers/_sidebar")
+const Cabang = use("App/Models/master/Cabang")
 const UsrCabang = use("App/Models/UsrCabang")
 
 class AuthentifikasiController {
@@ -30,8 +31,28 @@ class AuthentifikasiController {
         }
 
         const sideMenu = await initMenu.SIDEBAR(user.id)
+        let usrCabang = (
+            await UsrCabang.query()
+            .where( w => {
+                w.where('user_id', user.id)
+            }).fetch()
+        ).toJSON()
+
+        let arrCabang = []
+        for (const obj of usrCabang) {
+            const cabang = await Cabang.query().where('id', obj.cabang_id).last()
+            arrCabang.push({
+                ...obj,
+                nm_cabang: cabang.nama,
+                kd_cabang: cabang.kode,
+                selected: obj.aktif === 'Y' ? 'selected':''
+            })
+        }
+        console.log(arrCabang);
+
         return view.render('profile', {
-            menu: sideMenu
+            menu: sideMenu,
+            arrCabang: arrCabang
         })
     }
 
