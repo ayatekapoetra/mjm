@@ -27,6 +27,15 @@ class persediaanBarang {
                     if(!['administrator', 'developer', 'keuangan'].includes(user.usertype)){
                         w.where('cabang_id', ws.cabang_id)
                     }
+                    if(req.kode){
+                        w.where('kd_barang', 'like', `%${req.kode}%`)
+                    }
+                    if(req.cabang_id){
+                        w.where('cabang_id', req.cabang_id)
+                    }
+                    if(req.gudang_id){
+                        w.where('gudang_id', req.gudang_id)
+                    }
                 })
                 .orderBy([
                     {column: 'cabang_id', order: 'asc'}, 

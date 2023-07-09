@@ -49,10 +49,29 @@ $(function(){
         e.preventDefault()
         var elm = $(this)
         var value = elm.val()
+        console.log(elm.parents);
         elm.parents('tr.item-rows').find('select[name="gudang_id"]').val('').trigger('change')
         if(value){
             optionGudang(elm)
         }
+    })
+
+    $('body').on('keyup', 'input[name="debit"]', function(){
+        var arrDebit = []
+        $('input[name="debit"]').each(function(){
+            arrDebit.push(parseFloat($(this).val()) || 0)
+        })
+        var total = formatRupiah(arrDebit.reduce((a, b) => { return a + b }, 0))
+        body.find('input[name="tot-debit"]').val(total)
+    })
+
+    $('body').on('keyup', 'input[name="kredit"]', function(){
+        var arrDebit = []
+        $('input[name="kredit"]').each(function(){
+            arrDebit.push(parseFloat($(this).val()) || 0)
+        })
+        var total = formatRupiah(arrDebit.reduce((a, b) => { return a + b }, 0))
+        body.find('input[name="tot-kredit"]').val(total)
     })
 
     $('body').on('change', 'select[name="pemasok_id"]', function(e){
@@ -310,7 +329,6 @@ $(function(){
             dataType: 'html',
             contentType: false,
             success: function(result){
-                // console.log(result);
                 body.find('tbody#item-akun').append(result)
                 setUrut()
             },
@@ -422,7 +440,6 @@ $(function(){
             dataType: 'json',
             contentType: false,
             beforeSend: function(){
-                console.log('beforeSend...', elm.parents('tr.item-rows').find('select[name="gudang_id"]'));
                 elm.parents('tr.item-rows').find('select[name="gudang_id"]').val('').trigger('change')
             },
             success: function(result){
@@ -465,5 +482,18 @@ $(function(){
                 console.log(err)
             }
         })
+    }
+
+    function formatRupiah (bilangan) {
+        var	number_string = bilangan.toString(),
+            sisa 	= number_string.length % 3,
+            rupiah 	= number_string.substr(0, sisa),
+            ribuan 	= number_string.substr(sisa).match(/\d{3}/g);
+                
+        if (ribuan) {
+            separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+        return rupiah
     }
 })

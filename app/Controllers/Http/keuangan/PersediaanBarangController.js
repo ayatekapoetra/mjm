@@ -4,6 +4,8 @@ const DB = use('Database')
 const initMenu = use("App/Helpers/_sidebar")
 const initFunc = use("App/Helpers/initFunc")
 const moment = require('moment')
+const Cabang = use("App/Models/master/Cabang")
+const Gudang = use("App/Models/master/Gudang")
 const PersediaanBarangHelpers = use("App/Helpers/PersediaanBarang")
 
 class PersediaanBarangController {
@@ -12,8 +14,12 @@ class PersediaanBarangController {
         try {
             usr = await auth.getUser()
             const sideMenu = await initMenu.SIDEBAR(usr.id)
+            const arrCabang = (await Cabang.query().where('aktif', 'Y').fetch()).toJSON()
+            const arrGudang = (await Gudang.query().where('aktif', 'Y').fetch()).toJSON()
             return view.render('keuangan.persediaan-barang.index', {
-                menu: sideMenu
+                menu: sideMenu,
+                cabang: arrCabang,
+                gudang: arrGudang
             })
         } catch (error) {
             console.log(error);

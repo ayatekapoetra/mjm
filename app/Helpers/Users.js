@@ -85,7 +85,7 @@ class masterUsers {
             if (!filex.moved()) {
                 return {
                     success: false,
-                    message: 'Failed upload photo image...'+ profilePic.error()
+                    message: 'Failed upload photo image...'+ filex.error()
                 }
             }
         }
@@ -193,7 +193,7 @@ class masterUsers {
     }
 
     async UPDATE (params, req, user, filex) {
-        const ws = await initFunc.GET_WORKSPACE(user.id)
+        // const ws = await initFunc.GET_WORKSPACE(user.id)
         const trx = await DB.beginTransaction()
 
         /** JIKA PHOTO DITEMUKAN **/
@@ -210,7 +210,7 @@ class masterUsers {
             if (!filex.moved()) {
                 return {
                     success: false,
-                    message: 'Failed upload photo image...'+ profilePic.error()
+                    message: 'Failed upload photo image...'+ filex.error()
                 }
             }
         }

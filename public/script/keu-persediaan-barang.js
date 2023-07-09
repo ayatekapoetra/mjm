@@ -11,6 +11,19 @@ $(function(){
         initDefault()
     })
 
+    $('body').on('click', 'button#apply-filter', function(e){
+        e.preventDefault()
+        initDefault()
+    })
+
+    $('body').on('click', 'button#reset-filter', function(e){
+        e.preventDefault()
+        $('input[name="kode_search"]').val('')
+        $('select[name="cabang_search"]').val('')
+        $('select[name="gudang_search"]').val('')
+        initDefault()
+    })
+
     $('body').on('click', 'div#bt-add-rows', function(){
         var tambahRows = body.find('input#row-number').val() || 1
         addItems(tambahRows)
@@ -175,13 +188,19 @@ $(function(){
     })
 
     function initDefault(limit, page){
+        var kode = $('input[name="kode_search"]').val()
+        var cabang_id = $('select[name="cabang_search"]').val()
+        var gudang_id = $('select[name="gudang_search"]').val()
         $.ajax({
             async: true,
             url: 'persediaan-barang/list',
             method: 'GET',
             data: {
                 limit: limit || 100,
-                page: page || 1
+                page: page || 1,
+                kode: kode,
+                cabang_id: cabang_id,
+                gudang_id: gudang_id
             },
             dataType: 'html',
             contentType: false,

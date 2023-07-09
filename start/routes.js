@@ -655,5 +655,8 @@ Route.group(() => {
     Route.get('/notification/count', 'ApiNotificationController.count')
     Route.post('/notification/:id/remove', 'ApiNotificationController.delete')
 
+    /** API UTILITY DEVELOPMENT **/
+    Route.get('/insert-barang', '_ApiUtilityDevelopmentController.batchBarang')
+
 }).prefix('api-v1').namespace('api')
 

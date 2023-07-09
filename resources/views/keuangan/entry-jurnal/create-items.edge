@@ -47,7 +47,12 @@
             <div class="col-md-6 entri-details visible-entri-jurnal-pemasok" style="display:none;">
                 <div class="input-group m-b-10">
                     <span class="input-group-addon" id="basic-addon2">Pemasok</span>
-                    <select class="form-control entri-items selectPemasok item-data-details" name="pemasok_id"></select>
+                    <select class="form-control entri-items selectPemasok item-data-details" name="pemasok_id">
+                        <option value="">[x] Pilih</option>
+                        @each(item in arrPemasok)
+                        <option value="{{item.id}}">[ {{item.kode}} ] - {{item.nama}}</option>
+                        @endeach
+                    </select>
                 </div>
             </div>
             <div class="col-md-6 entri-details visible-entri-jurnal-pemasok" style="display:none;">
@@ -59,7 +64,12 @@
             <div class="col-md-6 entri-details visible-entri-jurnal-pelanggan" style="display:none;">
                 <div class="input-group m-b-10">
                     <span class="input-group-addon" id="basic-addon2">Pelanggan</span>
-                    <select class="form-control entri-items selectPelanggan item-data-details" name="pelanggan_id"></select>
+                    <select class="form-control entri-items selectPelanggan item-data-details" name="pelanggan_id">
+                        <option value="">[x] Pilih</option>
+                        @each(item in arrPelanggan)
+                        <option value="{{item.id}}">[ {{item.kode}} ] - {{item.nama}}</option>
+                        @endeach
+                    </select>
                 </div>
             </div>
             <div class="col-md-6 entri-details visible-entri-jurnal-pelanggan" style="display:none;">
@@ -71,13 +81,23 @@
             <div class="col-md-6 entri-details visible-entri-jurnal-persediaan" style="display:none;">
                 <div class="input-group m-b-10">
                     <span class="input-group-addon" id="basic-addon2">Barang</span>
-                    <select class="form-control entri-items selectBarang item-data-details" name="barang_id"></select>
+                    <select class="form-control entri-items selectBarang item-data-details" name="barang_id">
+                        <option value="">[x] Pilih</option>
+                        @each(item in arrBarang)
+                        <option value="{{item.id}}">[ {{item.kode}} ] - {{item.nama}}</option>
+                        @endeach
+                    </select>
                 </div>
             </div>
             <div class="col-md-6 entri-details visible-entri-jurnal-persediaan" style="display:none;">
                 <div class="input-group m-b-10">
                     <span class="input-group-addon" id="basic-addon2">Gudang</span>
-                    <select class="form-control entri-items selectGudang item-data-details" name="gudang_id" data-values=""></select>
+                    <select class="form-control entri-items selectGudang item-data-details" name="gudang_id" data-values="">
+                        <option value="">[x] Pilih</option>
+                        @each(item in arrGudang)
+                        <option value="{{item.id}}">[ {{item.kode}} ] - {{item.nama}}</option>
+                        @endeach
+                    </select>
                 </div>
             </div>
             <div class="col-md-3 col-md-offset-6 entri-details visible-entri-jurnal-persediaan" style="display:none;">
@@ -104,10 +124,6 @@
         </button>
     </td>
 </tr>
-{{ script('ajax/opt-pelanggan') }}
-{{ script('ajax/opt-pemasok') }}
-{{ script('ajax/opt-gudang') }}
-{{ script('ajax/opt-barang') }}
 {{ script('ajax/opt-kas') }}
 {{ script('ajax/opt-bank') }}
 <script>

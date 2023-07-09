@@ -1,6 +1,3 @@
-{{ script('ajax/opt-options') }}
-{{ script('ajax/opt-cabang') }}
-{{ script('ajax/opt-gudang') }}
 <div class="modal fade" id="filtermodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -12,42 +9,29 @@
                     <div class="col-md-12">
                         <label for="">Kode</label>
                         <div class="form-group">
-                            <input type="text" class="form-control inp-filter input-sm" name="kode">
+                            <input type="text" class="form-control inp-filter" name="kode_search">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <label for="">Cabang</label>
                         <div class="form-group">
-                            <select class="form-control selectCabang input-sm" name="cabang_id"></select>
+                            <select class="form-control selectCabang" name="cabang_search">
+                                <option value="">[x] Pilih</option>
+                                @each(v in cabang)
+                                <option value="{{v.id}}">{{v.nama}}</option>
+                                @endeach
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <label for="">Gudang</label>
                         <div class="form-group">
-                            <select class="form-control selectGudang input-sm" name="gudang_id"></select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="">Status</label>
-                        <div class="form-group">
-                            <select class="form-control input-sm" name="status">
+                            <select class="form-control selectGudang" name="gudang_search">
                                 <option value="">[x] Pilih</option>
-                                <option value="created">New Created</option>
-                                <option value="approved">Approved</option>
-                                <option value="finish">Finish</option>
+                                @each(v in gudang)
+                                <option value="{{v.id}}">{{v.nama}}</option>
+                                @endeach
                             </select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="">Date Start</label>
-                        <div class="form-group">
-                            <input type="date" class="form-control inp-filter input-sm" name="date_begin">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="">Date End</label>
-                        <div class="form-group">
-                            <input type="date" class="form-control inp-filter input-sm" name="date_end">
                         </div>
                     </div>
                 </div>

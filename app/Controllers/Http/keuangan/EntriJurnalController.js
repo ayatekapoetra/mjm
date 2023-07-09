@@ -549,7 +549,30 @@ class EntriJurnalController {
                 items: data[key]
             }
         })
-        return view.render('keuangan.entry-jurnal.create-items', {akun : data})
+
+        const barang = (await Barang.query().where('aktif', 'Y').fetch()).toJSON()
+        const gudang = (await Gudang.query().where('aktif', 'Y').fetch()).toJSON()
+        const pemasok = (await Pemasok.query().where('aktif', 'Y').fetch()).toJSON()
+        const pelanggan = (await Pelanggan.query().where('aktif', 'Y').fetch()).toJSON()
+        const keuFakturPembelian = (await KeuFakturPembelian.query().where( w => {
+            w.where('aktif', 'Y')
+            w.where('sts_paid', 'bersisa')
+        }).fetch()).toJSON()
+
+        const opsPelangganOrder = (await OpsPelangganOrder.query().where( w => {
+            w.where('aktif', 'Y')
+            w.whereIn('status', ['dp', 'ready'])
+        }).fetch()).toJSON()
+        
+        return view.render('keuangan.entry-jurnal.create-items', {
+            akun : data,
+            arrBarang: barang,
+            arrGudang: gudang,
+            arrPemasok: pemasok,
+            arrPelanggan: pelanggan,
+            arrFakturBeli: keuFakturPembelian,
+            arrFakturJual: opsPelangganOrder
+        })
     }
 
     async selectRelation ( { params } ) {
