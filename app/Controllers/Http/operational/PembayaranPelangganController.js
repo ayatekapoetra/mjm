@@ -221,7 +221,6 @@ class PembayaranPelangganController {
             pageSize: 'A4',
             pageMargins: [ 20, 30, 20, 45 ],
             watermark: { 
-                angle: 0,
                 fontSize: 50,
                 text: 'INVOICE',
                 color: 'red',
@@ -236,46 +235,16 @@ class PembayaranPelangganController {
                 subject: 'Makassar Jaya Marine Personal license',
                 keywords: 'invoice MJM',
             },
-            // footer: { text: 'Right part', alignment: 'left', margin: [10, 20, 15, 10], fontSize: 20, color: 'red' },
             footer: function (currentPage, pageCount) {
                 return { text: 'Page  of ', fontSize: 20, color: 'red', alignment: 'center', margin: [10, 20, 15, 10] }
             },
-            // footer: function(currentPage, pageCount) { return currentPage.toString() + ' of ' + pageCount; },
-            // header: function(currentPage, pageCount, pageSize) {
-            //     console.log('HEADER :::', currentPage, pageSize);
-            //     return [
-            //     { text: 'simple text', alignment: (currentPage % 2) ? 'left' : 'right' },
-            //     { canvas: [ { type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 40 } ] }
-            //     ]
-            // },
             content: [
                 {
                     alignment: 'justify',
                     columns: [
                         {
-                            width: 120,
-                            style: 'tableExample',
-                            table: {
-                                body: [
-                                    [
-                                        {
-                                            width: 100,
-                                            image: `${logoAsBase64}`,
-                                        }
-                                    ],
-                                    [
-                                        {
-                                            text: 'Jln.Banda No.87\nMakassar, Sulawesi-Selatan\nIndonesia 90173\n0411 3630014\n0813 1196 799',
-                                            fontSize: 8
-                                        }
-                                    ]
-                                ]
-                            },
-                            layout: 'noBorders'
-                        },
-                        {
                             width: '*',
-                            margin: [5, 15, 5, 5],
+                            margin: [5, 5],
                             style: 'tableExample',
                             table: {
                                 widths: [80, '*'],
@@ -298,12 +267,34 @@ class PembayaranPelangganController {
                                     ],
                                     [
                                         {text: 'Alamat Tagih', bold: true, fontSize: 10},
-                                        {text: ':  ' + data.pelanggan.alamat_tagih, fontSize: 10}
+                                        {text: ':  ' + data?.pelanggan?.alamat_tagih || '-', fontSize: 10}
                                     ],
                                 ]
                             },
                             layout: 'noBorders'
-                        }
+                        },
+                        {
+                            width: 120,
+                            style: 'tableExample',
+                            table: {
+                                body: [
+                                    [
+                                        {
+                                            width: 100,
+                                            image: `${logoAsBase64}`,
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            text: 'Jln.Banda No.87 Makassar Sul-Sel Indonesia 90173\n0411 3630014\n0813 1196 799',
+                                            fontSize: 8,
+                                            alignment: 'left'
+                                        }
+                                    ]
+                                ]
+                            },
+                            layout: 'noBorders'
+                        },
                     ]
                 },
                 {text: '\n'},
@@ -348,126 +339,161 @@ class PembayaranPelangganController {
             return view.render('401')
         }
 
-        const logoAsBase64 = await Image64Helpers.GEN_BASE64(logoPath)
+        // const logoAsBase64 = await Image64Helpers.GEN_BASE64(logoPath)
         let data = await BayarPelangganHelpers.KWITANSI(params)
         console.log(data);
         var dd = {
-            pageSize: 'A5',
-            pageMargins: [ 20, 20 ],
-            pageOrientation: 'landscape',
-            watermark: { 
-                angle: 0,
-                fontSize: 40,
-                text: ``, 
-                color: 'blue', 
-                opacity: 0.3, 
-                bold: true, 
-                italics: false 
-            },
+            // pageSize: 'A5',
+            pageMargins: [ 5, 20 ],
+            pageOrientation: 'portrait',
             content: [
                 {
                     alignment: 'justify',
                     columns: [
                         {
-                            width: '*',
+                            text: '',
+                            width: 30,
+                        },
+                        {
                             style: 'tableExample',
+                            width: 'auto',
                             table: {
                                 body: [
                                     [
                                         {
-                                            width: 100,
-                                            image: `${logoAsBase64}`,
+                                            width: '*',
+                                            style: 'tableExample',
+                                            table: {
+                                                body: [
+                                                    
+                                                    [
+                                                        {
+                                                            text: 'MAKASSAR JAYA MARINE',
+                                                            bold: true,
+                                                            color: "red",
+                                                            fontSize: 18,
+                                                            margin: [10, 0]
+                                                        }
+                                                    ],
+                                                    [
+                                                        {
+                                                            text: 'Jln.Banda No.87\nMakassar, Sulawesi-Selatan\nIndonesia 90173',
+                                                            fontSize: 12,
+                                                            margin: [10, 0]
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            layout: 'noBorders'
+                                        },
+                                    ],
+                                    [
+                                        {text: 'BUKTI BAYAR', alignment: 'left', bold: true, fontSize: 16, color: "red", margin: [10, 0]},
+                                    ],
+                                    [
+                                        {
+                                            width: 'auto',
+                                            // margin: [5, 15, 5, 5],
+                                            style: 'tableExample',
+                                            table: {
+                                                widths: [120, '*'],
+                                                body: [
+                                                    [
+                                                        {text: 'Tanggal', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ': ' + moment(data.date_paid).format('DD MMMM YYYY HH:mm'), fontSize: 14}
+                                                    ],
+                                                    [
+                                                        {text: 'Invoice', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ': ' + data.no_invoice, fontSize: 14}
+                                                    ],
+                                                    [
+                                                        {text: 'Kwitansi', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ': ' + data.no_kwitansi, fontSize: 14}
+                                                    ],
+                                                    
+                                                ]
+                                            },
+                                            layout: 'noBorders'
+                                        },
+                                    ],
+                                    [
+                                        {canvas: [ { type: 'line', x1: 0, y1: 0, x2: 500, y2: 0, lineWidth: 1 } ]},
+                                    ],
+                                    [
+                                        {
+                                            style: 'tableExample',
+                                            table: {
+                                                widths: [120, 10, '*'],
+                                                body: [
+                                                    [
+                                                        {text: 'Terima dari', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ':'},
+                                                        {text: data.order.pelanggan.nama, italics: true, fontSize: 14},
+                                                    ],
+                                                    [
+                                                        {text: 'Alamat', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ':'},
+                                                        {text: data?.order?.pelanggan?.alamat_tagih || '-', italics: true, fontSize: 14},
+                                                    ],
+                                                    [
+                                                        {text: 'Phone', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ':'},
+                                                        {text: data?.order?.pelanggan?.phone, italics: true, fontSize: 14},
+                                                    ],
+                                                    [
+                                                        {text: 'Sebesar', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ':'},
+                                                        {text: (data.paid_trx).toLocaleString('ID'), italics: true, bold: true, fontSize: 14},
+                                                    ],
+                                                    [
+                                                        {text: 'Terbilang', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ':'},
+                                                        {text: await Image64Helpers.pembilang(data.paid_trx) + ' Rupiah', italics: true, fontSize: 14},
+                                                    ],
+                                                    [
+                                                        {text: 'Untuk Pembayaran', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ':'},
+                                                        {text: 'Invoice dengan nomor ' + data.no_invoice, italics: true, color: "red", fontSize: 14},
+                                                    ],
+                                                    [
+                                                        {text: 'Metode Pembayaran', bold: true, fontSize: 14, margin: [10, 0]},
+                                                        {text: ':'},
+                                                        {text: data.metode_paid, italics: true, fontSize: 14},
+                                                    ],
+                                                ]
+                                            },
+                                            layout: 'noBorders'
+                                        },
+                                    ],
+                                    [
+                                        {
+                                            alignment: 'right',
+                                            columns: [
+                                                
+                                                {
+                                                    width: 'auto',
+                                                    text: 'Makassar, ' + moment().format('DD MMMM YYYY') +'\n\n\n\n( '+ data.author.nama_lengkap +' )', 
+                                                    alignment: 'right',
+                                                    margin: [300, 0, 0, 0]
+                                                }
+                                            ]
                                         }
                                     ],
                                     [
                                         {
-                                            text: 'Jln.Banda No.87\nMakassar, Sulawesi-Selatan\nIndonesia 90173',
-                                            fontSize: 8
+                                            text: '\n\nPembayaran dengan cek/giro dianggap sah bila telah dapat dicairkan / dikliringkan.',
+                                            fontSize: 12,
+                                            italics: true, 
+                                            margin: [10, 0]
                                         }
                                     ]
                                 ]
                             },
                             layout: 'noBorders'
                         },
-                        {
-                            width: 'auto',
-                            margin: [5, 15, 5, 5],
-                            style: 'tableExample',
-                            table: {
-                                widths: [80, '*'],
-                                body: [
-                                    [
-                                        {text: 'Tanggal', bold: true, fontSize: 10},
-                                        {text: ': ' + moment(data.date_paid).format('DD MMMM YYYY HH:mm'), fontSize: 10}
-                                    ],
-                                    [
-                                        {text: 'Invoice', bold: true, fontSize: 10},
-                                        {text: ': ' + data.no_invoice, fontSize: 10}
-                                    ],
-                                    [
-                                        {text: 'Kwitansi', bold: true, fontSize: 10},
-                                        {text: ': ' + data.no_kwitansi, fontSize: 10}
-                                    ],
-                                ]
-                            },
-                            layout: 'noBorders'
-                        }
                     ]
                 },
-                {canvas: [ { type: 'line', x1: 0, y1: 0, x2: 555, y2: 0, lineWidth: 1 } ]},
-                {text: '\n'},
-                {text: 'Kwitansi', alignment: 'center', bold: true, fontSize: 25},
-                {text: '\n'},
-                {
-                    style: 'tableExample',
-                    table: {
-                        widths: ['auto', 20, '*'],
-                        body: [
-                            [
-                                {text: 'Terima dari', bold: true},
-                                {text: ':'},
-                                {text: data.order.pelanggan.nama, italics: true},
-                            ],
-                            [
-                                {text: 'Sebesar', bold: true},
-                                {text: ':'},
-                                {text: (data.paid_trx).toLocaleString('ID'), italics: true, bold: true},
-                            ],
-                            [
-                                {text: 'Terbilang', bold: true},
-                                {text: ':'},
-                                {text: await Image64Helpers.pembilang(data.paid_trx) + ' Rupiah', italics: true},
-                            ],
-                            [
-                                {text: 'Untuk Pembayaran', bold: true},
-                                {text: ':'},
-                                {text: 'Invoice dengan nomor: ' + data.no_invoice, italics: true},
-                            ],
-                            [
-                                {text: 'Metode Pembayaran', bold: true},
-                                {text: ':'},
-                                {text: data.metode_paid, italics: true},
-                            ],
-                        ]
-                    },
-                    layout: 'noBorders'
-                },
-                {text: '\n'},
-                {
-                    alignment: 'justify',
-                    columns: [
-                        {
-                            width: 'auto',
-                            text: '\n\nPembayaran dengan cek/giro dianggap sah bila telah dapat dicairkan / dikliringkan.',
-                            fontSize: 10,
-                            italics: true
-                        },
-                        {
-                            width: 200,
-                            text: 'Makassar, ' + moment().format('DD MMMM YYYY') +'\n\n\n\n( '+ data.author.nama_lengkap +' )', alignment: 'center'
-                        }
-                    ]
-                },
+                
             ]
             
         }
@@ -643,3 +669,127 @@ async function userValidate(auth){
     }
 }
 
+
+
+// {
+//     width: '*',
+//     style: 'tableExample',
+//     table: {
+//         body: [
+            
+//             [
+//                 {
+//                     text: 'MAKASSAR JAYA MARINE',
+//                     bold: true,
+//                     color: "red",
+//                     fontSize: 18,
+//                     margin: [10, 0]
+//                 }
+//             ],
+//             [
+//                 {
+//                     text: 'Jln.Banda No.87\nMakassar, Sulawesi-Selatan\nIndonesia 90173',
+//                     fontSize: 12,
+//                     margin: [10, 0]
+//                 }
+//             ]
+//         ]
+//     },
+//     layout: 'noBorders'
+// },
+
+// {text: '\n'},
+// {text: 'BUKTI BAYAR', alignment: 'left', bold: true, fontSize: 16, color: "red", margin: [10, 0]},
+// {
+//     width: 'auto',
+//     // margin: [5, 15, 5, 5],
+//     style: 'tableExample',
+//     table: {
+//         widths: [120, '*'],
+//         body: [
+//             [
+//                 {text: 'Tanggal', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ': ' + moment(data.date_paid).format('DD MMMM YYYY HH:mm'), fontSize: 14}
+//             ],
+//             [
+//                 {text: 'Invoice', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ': ' + data.no_invoice, fontSize: 14}
+//             ],
+//             [
+//                 {text: 'Kwitansi', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ': ' + data.no_kwitansi, fontSize: 14}
+//             ],
+            
+//         ]
+//     },
+//     layout: 'noBorders'
+// },
+// {text: '\n'},
+// {canvas: [ { type: 'line', x1: 0, y1: 0, x2: 380, y2: 0, lineWidth: 1 } ]},
+// {text: '\n'},
+
+// {
+//     style: 'tableExample',
+//     table: {
+//         widths: [120, 10, '*'],
+//         body: [
+//             [
+//                 {text: 'Terima dari', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ':'},
+//                 {text: data.order.pelanggan.nama, italics: true, fontSize: 14},
+//             ],
+//             [
+//                 {text: 'Alamat', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ':'},
+//                 {text: data?.order?.pelanggan?.alamat_tagih || '-', italics: true, fontSize: 14},
+//             ],
+//             [
+//                 {text: 'Phone', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ':'},
+//                 {text: data?.order?.pelanggan?.phone, italics: true, fontSize: 14},
+//             ],
+//             [
+//                 {text: 'Sebesar', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ':'},
+//                 {text: (data.paid_trx).toLocaleString('ID'), italics: true, bold: true, fontSize: 14},
+//             ],
+//             [
+//                 {text: 'Terbilang', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ':'},
+//                 {text: await Image64Helpers.pembilang(data.paid_trx) + ' Rupiah', italics: true, fontSize: 14},
+//             ],
+//             [
+//                 {text: 'Untuk Pembayaran', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ':'},
+//                 {text: 'Invoice dengan nomor ' + data.no_invoice, italics: true, color: "red", fontSize: 14},
+//             ],
+//             [
+//                 {text: 'Metode Pembayaran', bold: true, fontSize: 14, margin: [10, 0]},
+//                 {text: ':'},
+//                 {text: data.metode_paid, italics: true, fontSize: 14},
+//             ],
+//         ]
+//     },
+//     layout: 'noBorders'
+// },
+
+
+// {text: '\n'},
+// {
+//     alignment: 'justify',
+//     columns: [
+        
+//         {
+//             width: 'auto',
+//             text: 'Makassar, ' + moment().format('DD MMMM YYYY') +'\n\n\n\n( '+ data.author.nama_lengkap +' )', 
+//             alignment: 'center',
+//             margin: [10, 0]
+//         }
+//     ]
+// },
+// {
+//     text: '\n\nPembayaran dengan cek/giro dianggap sah bila telah dapat dicairkan / dikliringkan.',
+//     fontSize: 12,
+//     italics: true, 
+//     margin: [10, 0]
+// }

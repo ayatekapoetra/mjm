@@ -151,6 +151,7 @@ class bayarPelanggan {
         console.log(checkPembayaran);
 
         if(checkPembayaran.length > 0){
+            await trx.rollback()
             return {
                 success: false,
                 message: 'Data gagal untuk rollback, ditemukan '+checkPembayaran.length+' data pembayaran pelanggan yang sah...'

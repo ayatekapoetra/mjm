@@ -29,6 +29,9 @@ class ReadResource {
         w.where('user_id', usr.id)
       }).first()
 
+
+      console.log(akses?.toJSON());
+
       if(akses){
         await next()
       }else{
