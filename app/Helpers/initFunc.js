@@ -549,9 +549,26 @@ class initFunc {
     async GEN_KODE_BARANG (req, method) {
         const sett = (await BarangConfig.query().last()).toJSON()
         const kategori = await BarangCategories.query().where('id', req.kategori_id).last()
+        if(!kategori){
+            console.log('kategori tdk ditemukan');
+            throw new Error('11111')
+        }
         const subkategori = await BarangSubCategories.query().where('id', req.subkategori_id).last()
+        if(!subkategori){
+            console.log('subkategori tdk ditemukan');
+            throw new Error('2222')
+        }
         const brand = await BarangBrand.query().where('id', req.brand_id).last()
+        if(!brand){
+            console.log('brand tdk ditemukan');
+            throw new Error('3333')
+        }
         const qualitas = await BarangQualities.query().where('id', req.qualitas_id).last()
+        if(!qualitas){
+            console.log('qualitas tdk ditemukan');
+            throw new Error('44444')
+        }
+        
         let nomor = await Barang.query().last() || null
         
         
@@ -574,6 +591,7 @@ class initFunc {
             var patten = `${sett.alfa_prefix}${kategori.kode || '00'}${subkategori.kode || '00'}${brand.kode || '00'}${qualitas.kode}${sett.separator}${strPrefix}${lastNumber}`
         }
         
+        console.log("PATTEN : ", patten);
 
         return patten
     }

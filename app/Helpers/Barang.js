@@ -39,7 +39,7 @@ class masterBarang {
                         w.where('satuan', req.satuan)
                     }
                 })
-                .orderBy('created_at', 'desc')
+                // .orderBy('kode', 'asc')
                 .paginate(halaman, limit)
             ).toJSON()
         }else{
@@ -53,7 +53,7 @@ class masterBarang {
                 .where( w => {
                     w.where('aktif', 'Y')
                 })
-                .orderBy('created_at', 'desc')
+                // .orderBy('kode', 'asc')
                 .paginate(halaman, limit)
             ).toJSON()
         }
