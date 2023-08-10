@@ -50,7 +50,7 @@ class pembayaran {
     }
 
     async POST (req, user, attach) {
-        console.log(req);
+        console.log("REQUEST-POST-KEU-PEMBAYARAN", req);
         const trx = await DB.beginTransaction()
         
         /** INSERT TRXPEMBAYARAN **/
@@ -168,6 +168,7 @@ class pembayaran {
                 is_delay: req.is_delay,
                 dk: 'k'
             })
+            console.log("SAVE-JURNAL-KREDIT", jurnalKredit?.toJSON());
             await jurnalKredit.save(trx)
         } catch (error) {
             console.log(error);
@@ -200,6 +201,7 @@ class pembayaran {
                 desc: `[ ${req.reff} ] ${req.narasi || 'Pembayaran pada Bank'}`,
             })
 
+            console.log("SAVE-TRX-BANK", trxBank?.toJSON());
             try {
                 await trxBank.save(trx)
             } catch (error) {
@@ -223,6 +225,7 @@ class pembayaran {
                 desc: `[ ${req.reff} ] ${req.narasi || 'Pembayaran pada Kas'}`,
             })
 
+            console.log("SAVE-TRX-KAS", trxKas?.toJSON());
             try {
                 await trxKas.save(trx)
             } catch (error) {
@@ -256,6 +259,8 @@ class pembayaran {
                 }
 
                 trxPembayaranItem.fill(data)
+
+                console.log("SAVE-PEMBAYARAN-ITEMS", trxPembayaranItem?.toJSON());
                 await trxPembayaranItem.save(trx)
             } catch (error) {
                 console.log(error);
@@ -271,11 +276,13 @@ class pembayaran {
             const coaDebit = await AccCoa.query().where('id', obj.coa_debit).last()
             if(obj.trx_jual){
                 const reffJual = await OrderPelanggan.query().where('id', req.trx_jual).last()
+                console.log("SAVE-PEMBAYARAN-ITEMS-REFF-JUAL", reffJual?.toJSON());
                 var reff_kode = reffJual.kdpesanan
             }
 
             if(obj.trx_beli){
                 const reffBeli = await TrxFakturBeli.query().where('id', req.trx_beli).last()
+                console.log("SAVE-PEMBAYARAN-ITEMS-REFF-BELI", reffBeli?.toJSON());
                 var reff_kode = reffBeli.kode
                 /**
                  * JIKA HUTANG DAGANG MEMILIKI PAJAK PPN
@@ -303,6 +310,7 @@ class pembayaran {
                     dk: 'd'
                 })
                 await jurnalDebit.save(trx)
+                console.log("SAVE-PEMBAYARAN-ITEMS-DEBIT", jurnalDebit?.toJSON());
             } catch (error) {
                 console.log(error);
                 await trx.rollback()
@@ -334,7 +342,7 @@ class pembayaran {
                         dk: 'd'
                     })
                     await jurnalDebitEquiptas.save(trx)
-                    console.log('jurnalDebitEquiptas.save(trx)');
+                    console.log("SAVE-PEMBAYARAN-ITEMS-EQUITAS", jurnalDebitEquiptas?.toJSON());
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -390,6 +398,7 @@ class pembayaran {
 
                 try {
                     await pelangganBayar.save(trx)
+                    console.log("SAVE-PEMBAYARAN-ITEMS-BAYAR-PELANGGAN", pelangganBayar?.toJSON());
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
@@ -408,6 +417,7 @@ class pembayaran {
 
                 try {
                     await orderData.save(trx)
+                    console.log("SAVE-PEMBAYARAN-ITEMS-DATA-ORDER", orderData?.toJSON());
                 } catch (error) {
                     console.log(error);
                     await trx.rollback()
