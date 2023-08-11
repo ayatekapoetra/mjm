@@ -12,7 +12,7 @@
                             <th width="70" class="bg-inverse b-all">Lampiran<br/>Files</th>
                             <th width="120"class="bg-inverse b-all">Date Faktur<br>Due Date</th>
                             <th width="150"class="bg-inverse b-all">No.Pesanan<br/>No.Faktur</th>
-                            <th width="*" class="bg-inverse b-all">Cabang<br/>Gudang</th>
+                            <th width="*" class="bg-inverse b-all">Gudang<br/>Pemasok</th>
                             <th width="*" class="bg-inverse b-all text-right">PPn<br/><small>PPn (Rp.)</small></th>
                             <th width="*" class="bg-inverse b-all text-right">Total Faktur<br/><small>Sisa Faktur</small></th>
                         </tr>
@@ -54,8 +54,9 @@
                                         
                                     </td>
                                     <td class="v-middle">
-                                        <h3 class="m-b-0">{{item.cabang.kode}} - {{item.cabang.nama}}</h3>
-                                        <small>[{{item.gudang.kode}}] - {{item.gudang.nama}}</small>
+                                        <!--<h3 class="m-b-0">{{item.cabang.kode}} - {{item.cabang.nama}}</h3>-->
+                                        <h3 class="m-b-0">[{{item.gudang.kode}}] - {{item.gudang.nama}}</h3>
+                                        <small>[{{item.pemasok.kode}}] - {{item.pemasok.nama}}</small>
                                     </td>
                                     <td class="text-right v-middle">
                                         <small>{{item.ppn}}%</small><br>
