@@ -151,6 +151,7 @@ class pembayaran {
 
         /** INSERT TRX JURNAL KREDIT **/
         const coaKredit = await AccCoa.query().where('id', req.coa_kredit).last()
+        console.log("<COA-KREDIT-DITEMUKAN>", coaKredit.coa_name);
         try {
             const jurnalKredit = new TrxJurnal()
             jurnalKredit.fill({
@@ -274,6 +275,8 @@ class pembayaran {
             /* INSERT ITEMS JURNAL PEMBAYARAN */
             var nilaiBayar = parseFloat(obj.qty) * parseFloat(obj.harga_stn)
             const coaDebit = await AccCoa.query().where('id', obj.coa_debit).last()
+            console.log("<COA-DEBIT-DITEMUKAN>", coaDebit.coa_name);
+            
             if(obj.trx_jual){
                 const reffJual = await OrderPelanggan.query().where('id', req.trx_jual).last()
                 console.log("SAVE-PEMBAYARAN-ITEMS-REFF-JUAL", reffJual?.toJSON());
