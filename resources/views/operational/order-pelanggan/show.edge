@@ -18,7 +18,11 @@
                                     <span class="input-group-addon">
                                         <i class="ti-calendar"></i>
                                     </span>
+                                    @if(['developer', 'administrator'].includes(auth.user.usertype))
+                                    <input type="datetime-local" name="date" class="form-control text-right setDateTime field-form" data-tgl="{{data.date}}" required>
+                                    @else
                                     <input type="datetime-local" name="date" class="form-control text-right setDateTime field-form" data-tgl="{{data.date}}" required readonly>
+                                    @endif
                                 </div>
                             </div>
                         </div>
