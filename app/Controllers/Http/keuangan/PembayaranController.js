@@ -556,6 +556,7 @@ class PembayaranController {
         const data = await KeuPembayaranHelpers.PRINT(params)
         const logoAsBase64 = await Image64Helpers.GEN_BASE64(logoPath)
         const result = await GEN_PEMBAYARAN_PDF(data, logoAsBase64)
+        console.log(data);
         console.log(data.items);
         return result
     }
@@ -589,29 +590,48 @@ async function GEN_PEMBAYARAN_PDF(data, logo){
             body.push(
                 [
                     {text: `${i + 1}`},
-                    {text: `${val.coaDebit.coa_name} - ${val.barang?.nama}`},
+                    {text: [
+                        {text: `${val.coaDebit.coa_name}\n`},
+                        {text: `${val.barang?.nama}`, fontSize: 9},
+                    ]},
                     {text: `${val.qty}`, alignment: 'right'},
                     {text: `Rp. ${(val.harga_stn)?.toLocaleString('ID')}`, alignment: 'right'},
                     {text: `Rp. ${(val.harga_total)?.toLocaleString('ID')}`, alignment: 'right'},
                 ]
             )
-        }
+        } else
         if(val.trx_beli){
             body.push(
                 [
                     {text: `${i + 1}`},
-                    {text: `${val.coaDebit.coa_name} - ${val.trxPembelian?.kode}`},
+                    {text: [
+                        {text: `${val.coaDebit.coa_name}\n`},
+                        {text:  `${val.trxPembelian?.kode} - ${val.narasi || 'tanpa keterangan'}`, fontSize: 9}
+                    ]},
                     {text: `${val.qty}`, alignment: 'right'},
                     {text: `Rp. ${(val.harga_stn)?.toLocaleString('ID')}`, alignment: 'right'},
                     {text: `Rp. ${(val.harga_total)?.toLocaleString('ID')}`, alignment: 'right'},
                 ]
             )
-        }
+        } else
         if(val.trx_jual){
             body.push(
                 [
                     {text: `${i + 1}`},
-                    {text: `${val.coaDebit.coa_name} - ${val.trxPenjualan?.kdpesanan}`},
+                    {text: [
+                        {text: `${val.coaDebit.coa_name}\n`},
+                        {text: `${val.trxPenjualan?.kdpesanan} - ${val.narasi || 'tanpa keterangan'}`, fontSize: 9},
+                    ]},
+                    {text: `${val.qty}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_stn)?.toLocaleString('ID')}`, alignment: 'right'},
+                    {text: `Rp. ${(val.harga_total)?.toLocaleString('ID')}`, alignment: 'right'},
+                ]
+            )
+        } else {
+            body.push(
+                [
+                    {text: `${i + 1}`},
+                    {text: `${val.coaDebit.coa_name} - ${val.narasi || 'tanpa keterangan'}`},
                     {text: `${val.qty}`, alignment: 'right'},
                     {text: `Rp. ${(val.harga_stn)?.toLocaleString('ID')}`, alignment: 'right'},
                     {text: `Rp. ${(val.harga_total)?.toLocaleString('ID')}`, alignment: 'right'},
@@ -619,6 +639,17 @@ async function GEN_PEMBAYARAN_PDF(data, logo){
             )
         }
     }
+
+    body.push(
+        [
+            {text: `Total`, bold: true, colSpan: 4, fillColor: '#ddd', alignment: 'right'},
+            {},
+            {},
+            {},
+            {text: `Rp. ${(data.total)?.toLocaleString('ID')}`, alignment: 'right', fillColor: '#ddd'},
+        ]
+    )
+
     var dd = {
         pageSize: 'A4',
         pageMargins: [ 20, 30, 20, 45 ],
@@ -680,7 +711,7 @@ async function GEN_PEMBAYARAN_PDF(data, logo){
                                 ],
                                 [
                                     {text: 'Jatuh Tempo', bold: true, fontSize: 10},
-                                    {text: ':  ' + moment(data.delay_trx).format('DD MMMM YYYY'), fontSize: 10}
+                                    {text: ':  ' + `${data.delay_trx ? moment(data.delay_trx).format('DD MMMM YYYY') : '-'}`, fontSize: 10}
                                 ],
                                 [
                                     {text: 'Cabang', bold: true, fontSize: 10},
@@ -689,6 +720,10 @@ async function GEN_PEMBAYARAN_PDF(data, logo){
                                 [
                                     {text: 'Pembayaran dari', bold: true, fontSize: 10},
                                     {text: ':  ' + data.coaKredit.coa_name, fontSize: 10}
+                                ],
+                                [
+                                    {text: 'Keterangan', bold: true, fontSize: 10},
+                                    {text: ':  ' + data.narasi}
                                 ],
                                 [
                                     {text: ''},
@@ -705,7 +740,7 @@ async function GEN_PEMBAYARAN_PDF(data, logo){
             {
                 style: 'tableExample',
                 table: {
-                    widths: [20, '*', 30, 'auto', 80],
+                    widths: [20, '*', 30, 'auto', 'auto'],
                     body: body
                 },
                 // layout: 'noBorders'

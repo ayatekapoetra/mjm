@@ -1,0 +1,69 @@
+{{ script('ajax/initDate') }}
+{{ script('ajax/initNumber') }}
+<div class="panel-wrapper collapse in">
+    <div class="panel-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover manage-u-table">
+                    <thead>
+                        <tr>
+                            <th width="70" class="text-center bg-inverse b-all">No</th>
+                            <th width="150" class="bg-inverse b-all">Action</th>
+                            <th width="120"class="bg-inverse b-all">Date Invoices<br>Due Date</th>
+                            <th width="150"class="bg-inverse b-all">No.Pesanan<br/>No.Faktur</th>
+                            <th width="*" class="bg-inverse b-all">Pelanggan<br/>Gudang</th>
+                            <th width="*" class="bg-inverse b-all text-right">Jumlah<br/>Tagihan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(list.data.length > 0)
+                            @each(item in list.data)
+                                <tr>
+                                    <td class="text-center v-middle">{{$loop.index + 1}}</td>
+                                    <td class="v-middle">
+                                        <button class="btn btn-outline btn-inverse btn-xs bt-print" data-id="{{item.id}}">print</button> 
+                                        <button class="btn btn-outline btn-warning btn-xs bt-show" data-id="{{item.id}}">edit</button>
+                                        <button class="btn btn-outline btn-danger btn-xs bt-delete" data-id="{{item.id}}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                    <td class="v-middle">
+                                        <span class="dateFormatDef" data-elm="span" data-patten="YYYY-MM-DD" data-tgl="{{item.trx_date}}">
+                                            <span class="text-white" style="font-weight: 600;"></span>
+                                        </span> <br>
+                                        @if(item.sisa === 0)
+                                            <small class="dateFormatDef text-success" data-patten="YYYY-MM-DD" data-tgl="{{item.due_date}}"></small>
+                                        @else
+                                            <small class="remaining-time text-danger" data-tgl="{{item.due_date}}"></small>
+                                        @endif
+                                    </td>
+                                    <td class="v-middle">
+                                        <strong class="text-white">{{item.kode ? item.kode : '-'}}</strong><br>
+                                        <small class="text-white">{{item.author.profile.nama_lengkap}}</small>
+                                        
+                                    </td>
+                                    <td class="v-middle">
+                                        <h3 class="m-b-0">[{{item.pelanggan.kode}}] - {{item.pelanggan.nama}}</h3>
+                                        <small>[{{item.gudang.kode}}] - {{item.gudang.nama}}</small>
+                                    </td>
+                                    <td class="text-right v-middle text-warning">
+                                        <strong class="formatRp" data-number="{{item.nilai_bayar}}" data-elm="p">
+                                            <p>{{item.nilai_bayar}}</p>
+                                        </strong>
+                                    </td>
+                                </tr>
+                            @endeach
+                        @else
+                            <tr>
+                                <td colspan="10">Data tdk ditemukan...</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer"> 
+        @include('components.pagination')
+    </div>
+</div>

@@ -40,7 +40,10 @@ class OrderPelangganController {
 
         const cabang = await initFunc.WORKSPACE(user)
         const kodeINV = await initFunc.GEN_KODE_INVOICES(user)
-        return view.render('operational.order-pelanggan.create', { ws: cabang.cabang_id, kode: kodeINV })
+        return view.render('operational.order-pelanggan.create', { 
+            ws: cabang.cabang_id, 
+            kode: kodeINV 
+        })
     }
 
     async createItems ( { auth, request, view } ) {

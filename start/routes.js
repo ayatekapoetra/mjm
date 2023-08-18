@@ -326,16 +326,17 @@ Route.group(() => {
     Route.get('/faktur-pembelian/create/add-item', 'FakturPembelianController.addItem').as('acc.faktur-pembelian.addItem')
 
     /* FAKTUR JUAL */
-    Route.get('/faktur-jual', 'FakturJualController.index').as('acc.faktur-jual').middleware('R')
-    Route.post('/faktur-jual', 'FakturJualController.store').as('acc.faktur-jual.store').middleware('C')
-    Route.get('/faktur-jual/list', 'FakturJualController.list').as('acc.faktur-jual.list').middleware('R')
-    Route.get('/faktur-jual/create', 'FakturJualController.create').as('acc.faktur-jual.create').middleware('C')
-    Route.get('/faktur-jual/:id/view', 'FakturJualController.view').as('acc.faktur-jual.view').middleware('R')
-    Route.get('/faktur-jual/:id/print', 'FakturJualController.print').as('acc.faktur-jual.print').middleware('R')
-    Route.get('/faktur-jual/:id/show', 'FakturJualController.show').as('acc.faktur-jual.show').middleware('U')
-    Route.post('/faktur-jual/:id/update', 'FakturJualController.update').as('acc.faktur-jual.update').middleware('U')
-    Route.delete('/faktur-jual/:id/destroy', 'FakturJualController.destroy').as('acc.faktur-jual.destroy').middleware('D')
-    Route.get('/faktur-jual/create/add-item', 'FakturJualController.addItem').as('acc.faktur-jual.addItem')
+    Route.get('/faktur-penjualan', 'FakturPenjualanController.index').as('acc.faktur-penjualan').middleware('R')
+    Route.post('/faktur-penjualan', 'FakturPenjualanController.store').as('acc.faktur-penjualan.store').middleware('C')
+    Route.get('/faktur-penjualan/list', 'FakturPenjualanController.list').as('acc.faktur-penjualan.list').middleware('R')
+    Route.get('/faktur-penjualan/create', 'FakturPenjualanController.create').as('acc.faktur-penjualan.create').middleware('C')
+    Route.get('/faktur-penjualan/:id/view', 'FakturPenjualanController.view').as('acc.faktur-penjualan.view').middleware('R')
+    Route.get('/faktur-penjualan/:id/print', 'FakturPenjualanController.print').as('acc.faktur-penjualan.print').middleware('R')
+    Route.get('/faktur-penjualan/:id/show', 'FakturPenjualanController.show').as('acc.faktur-penjualan.show').middleware('U')
+    Route.post('/faktur-penjualan/:id/update', 'FakturPenjualanController.update').as('acc.faktur-penjualan.update').middleware('U')
+    Route.post('/faktur-penjualan/:id/destroy', 'FakturPenjualanController.destroy').as('acc.faktur-penjualan.destroy').middleware('D')
+    Route.get('/faktur-penjualan/reff-invoices/:reff/list', 'FakturPenjualanController.searchTotalInv').as('acc.faktur-penjualan.searchTotalInv')
+    Route.get('/faktur-penjualan/cabang/:cabang/pelanggan/:pelanggan', 'FakturPenjualanController.searchInvoices').as('acc.faktur-penjualan.searchInvoices')
 
     /* PERSEDIAAN BARANG */
     Route.get('/persediaan-barang', 'PersediaanBarangController.index').as('acc.persediaan-barang').middleware('R')

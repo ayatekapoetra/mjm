@@ -1,0 +1,43 @@
+@layout('_layouts.main')
+@section('content')
+{{ script('ajax/index') }}
+{{ script('script/keu-faktur-jual') }}
+{{ script('plugins/bower_components/pdfmake/build/pdfmake.min') }}
+{{ script('plugins/bower_components/pdfmake/build/vfs_fonts') }}
+<div class="container-fluid">
+    <div class="row bg-title">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+            <h4 class="page-title">Faktur Penjualan</h4> 
+        </div>
+        <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 text-right">
+            <input type="number" id="workdir" class="hidden" value="{{workdir.bisnis_id}}">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <button class="btn btn-info" id="bt-create-form">
+                        <i class="ti-plus"></i>
+                        Add Faktur Penjualan
+                    </button>
+                    <button class="btn btn-default bt-back" id="bt-back" style="display:none;">
+                        <i class="ti-arrow-left"></i>
+                        Back
+                    </button>
+                    <button class="btn btn-primary pull-right" id="filter" data-toggle="modal" data-target="#filterForm">
+                        <i class="ti-filter"></i>
+                        Filter
+                    </button>
+                </div>
+                <div id="filter-form">
+                    @include('keuangan.faktur-penjualan.filter')
+                </div>
+                <div id="content-list" style="display:none;"></div>
+                <div id="content-form" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="init-form"></div>
+@endsection

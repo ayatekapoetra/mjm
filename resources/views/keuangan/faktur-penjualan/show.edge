@@ -1,0 +1,228 @@
+{{ script('ajax/index') }}
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-pemasok') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-update" data-id="{{data.id}}">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">No.Faktur <span class="text-danger">*</span></label>
+                            <input type="text" name="kode" class="form-control item-data" value="{{data.kode}}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Tanggal <span class="text-danger">*</span></label>
+                            <input type="date" name="date_faktur" class="form-control item-data setDate" data-tgl="{{data.date_faktur}}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Jatuh Tempo <span class="text-danger">*</span></label>
+                            <input type="date" name="due_date" class="form-control item-data setDate" data-tgl="{{data.due_date}}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Cabang <span class="text-danger">*</span></label>
+                            <select type="text" name="cabang_id" class="form-control item-data selectCabang" data-values="{{data.cabang_id}}" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">No.Pesanan</label>
+                            <select type="text" name="reff_order" class="form-control item-data" data-values="{{data.reff_order}}"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Gudang <span class="text-danger">*</span></label>
+                            <select type="text" name="gudang_id" class="form-control item-data selectGudang" data-values="{{data.gudang_id}}" required></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Pemasok <span class="text-danger">*</span></label>
+                            <select type="text" name="pemasok_id" class="form-control item-data selectPemasok" data-values="{{data.pemasok_id}}" required></select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 pull-right">
+                        <div class="form-group has-warning">
+                            <label class="control-label">Grand Total <span class="text-danger">*</span></label>
+                            <input type="text" name="grandtot" class="form-control item-data" value="{{data.grandtot}}" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="isPPn">Pajak (PPn)</label>
+                        <div class="form-group" style="margin-top: 10px">
+                            <div class="material-switch">
+                                <input id="isPPn" name="isPPn" type="checkbox" value="Y"/>
+                                <label for="isPPn" class="label-default"></label>
+                                <span id="txt-checkbox" class="m-l-10">Tambahkan PPn</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="ppn-values">
+                        <div class="col-md-3">
+                            <label for="">PPn</label>                
+                            <div class="input-group">
+                                <input type="number" step="any" name="ppn" class="form-control text-right item-data" value="11">
+                                <span class="input-group-addon">Persen</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <th class="bg-extralight" width="50">No</th>
+                                        <th class="bg-inverse">Item Details</th>
+                                    </thead>
+                                    <tbody id="item-details">
+                                        @!each(item in data.items, include = 'components.items.faktur-beli.item-update')
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="row">
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group">
+                                                            <input class="form-control item-data" type="file" id="lampiran" name="lampiran" multiple>
+                                                            <span><small>Support Multiple Files</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="input-group text-right">
+                                                            <input class="form-control" type="number" id="row-number" name="row-number" value="1">
+                                                            <div class="input-group-addon" id="bt-add-rows"><i class="ti-plus"></i> ADD</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer text-right">
+                    <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                    <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        var body = $('body')
+        GET_DATA_PURCASING_ORDER()
+        $('input[name="isPPn"]').on('click, change', function(){
+            var txt = body.find('span#txt-checkbox')
+            $(this).is(':checked') ? (
+                $(this).val('N'),
+                txt.html('Tanpa PPn'),
+                body.find('div#ppn-values').html('')
+            ):(
+                $(this).val('Y'),
+                txt.html('Tambahkan PPn'),
+                body.find('div#ppn-values').html(
+                '<div class="col-md-3">'+
+                '    <label for="">PPn</label>'+
+                '    <div class="input-group">'+
+                '        <input type="number" step="any" name="ppn" class="form-control text-right item-data" value="11">'+
+                '        <span class="input-group-addon">Persen</span>'+
+                '    </div>'+
+                '</div>')
+            )
+        })
+
+        function GET_DATA_PURCASING_ORDER(){
+            console.log('...');
+            var elm = $('select[name="reff_order"]')
+            var values = elm.data('values') || ''
+            $.ajax({
+                async: true,
+                url: '/ajax/options/purchasing-order-list',
+                method: 'GET',
+                data: {
+                    purchasing_id: values || null
+                },
+                dataType: 'json',
+                contentType: false,
+                success: function(result){
+                    // console.log(result);
+                    elm.select2()
+                    if(result.length > 0){
+                        elm.html(result.map( v => '<option value="'+v.id+'" '+v.selected+'>'+v.name+'</option>'))
+                        elm.trigger('change');
+                    }else{
+                        elm.html('<option value="" selected>Blum ada data...</option>')
+                    }
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+    })
+</script>
+<style>
+    .text-bold {
+        font-weight: bold
+    }
+    .material-switch > input[type="checkbox"] {
+        display: none;   
+    }
+    
+    .material-switch > label {
+        cursor: pointer;
+        height: 0px;
+        position: relative; 
+        width: 40px;  
+    }
+    
+    .material-switch > label::before {
+        background: rgb(0, 0, 0);
+        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        content: '';
+        height: 16px;
+        margin-top: -8px;
+        position:absolute;
+        opacity: 0.3;
+        transition: all 0.4s ease-in-out;
+        width: 40px;
+    }
+    .material-switch > label::after {
+        background: rgb(83 230 157);
+        border-radius: 16px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        content: '';
+        height: 24px;
+        left: -4px;
+        margin-top: -8px;
+        position: absolute;
+        top: -4px;
+        transition: all 0.3s ease-in-out;
+        width: 24px;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::before {
+        background: inherit;
+        opacity: 0.5;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::after {
+        background: inherit;
+        left: 20px;
+    }
+</style>

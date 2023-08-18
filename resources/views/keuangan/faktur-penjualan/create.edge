@@ -1,0 +1,204 @@
+{{ script('ajax/index') }}
+{{ script('ajax/initDate') }}
+{{ script('ajax/opt-pelanggan') }}
+{{ script('ajax/opt-cabang') }}
+{{ script('ajax/opt-gudang') }}
+<div class="panel-wrapper collapse in" aria-expanded="true">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <form id="form-create">
+                {{ csrfField() }}
+                <div class="panel-body">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Tanggal <span class="text-danger">*</span></label>
+                            <input type="date" name="trx_date" class="form-control item-data initDate" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Jatuh Tempo <span class="text-danger">*</span></label>
+                            <input type="date" name="due_date" class="form-control item-data initDate" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Cabang <span class="text-danger">*</span></label>
+                            <select type="text" name="cabang_id" class="form-control item-data selectCabang" data-values="{{usr_cabang}}"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Gudang <span class="text-danger">*</span></label>
+                            <select type="text" name="gudang_id" class="form-control item-data selectGudang"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Pelanggan <span class="text-danger">*</span></label>
+                            <select type="text" name="pelanggan_id" class="form-control item-data selectPelanggan"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">No.Invoices</label>
+                            <select type="text" name="reff_inv" class="form-control item-data"></select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">Total Tagihan <span class="text-danger">*</span></label>
+                            <input type="text" name="totbayar" class="form-control text-right" value="0.00" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group has-warning">
+                            <label class="control-label">Nilai Bayar <span class="text-danger">*</span></label>
+                            <input type="text" name="nilai_bayar" class="form-control text-right item-data" value="0.00">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <th class="bg-extralight" width="50">No</th>
+                                        <th class="bg-inverse">No.Invoices</th>
+                                        <th class="bg-inverse">No.Kwitansi</th>
+                                        <th class="bg-inverse">Tanggal Bayar</th>
+                                        <th class="bg-inverse">Narasi</th>
+                                        <th class="bg-inverse text-center">User</th>
+                                        <th class="bg-inverse text-right">Jumlah Bayar</th>
+                                    </thead>
+                                    <tbody id="item-details"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel-footer text-right">
+                    <button type="submit" class="btn btn-success waves-effect waves-light m-r-10">Submit</button>
+                    <button type="reset" class="btn btn-default waves-effect waves-light m-r-10" id="bt-back">cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(function(){
+        var body = $('body')
+
+        $('select[name="cabang_id"], select[name="pelanggan_id"]').on('change', function(){
+            var cabang_id = $('select[name="cabang_id"]').val()
+            var pelanggan_id = $('select[name="pelanggan_id"]').val()
+
+
+            if(cabang_id && pelanggan_id){
+                $.ajax({
+                    async: true,
+                    url: '/acc/faktur-penjualan/cabang/'+cabang_id+'/pelanggan/'+pelanggan_id,
+                    method: 'GET',
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    beforeSend: function(){
+                        body.find('tbody[id="item-details"]').html('')
+                    },
+                    success: function(result){
+                        // console.log(result);
+                        body.find('select[name="reff_inv"]').html(result?.map( v => v))
+                    },
+                    error: function(err){
+                        console.log(err)
+                    },
+                    complete: function(){
+                        body.find('select[name="reff_inv"]').select2()
+                    }
+                })
+            }
+        })
+
+        $('select[name="reff_inv"]').on('change', function(){
+            var id = $(this).val()
+            if (id) {
+                $.ajax({
+                    async: true,
+                    url: '/acc/faktur-penjualan/reff-invoices/'+id+'/list',
+                    method: 'GET',
+                    dataType: 'json',
+                    processData: false,
+                    mimeType: "multipart/form-data",
+                    contentType: false,
+                    beforeSend: function(){
+                        body.find('tbody[id="item-details"]').html('')
+                    },
+                    success: function(result){
+                        console.log(result);
+                        body.find('input[name="totbayar"]').val((result.sisa_trx)?.toLocaleString('ID'))
+                        body.find('input[name="nilai_bayar"]').val(result.sisa_trx)
+                        body.find('small[id="sm-terbilang"]').html(result.terbilang)
+                        body.find('tbody[id="item-details"]').html(result.riwayat.map( v => v))
+                    },
+                    error: function(err){
+                        console.log(err)
+                    }
+                })
+            }
+            body.find('tbody[id="item-details"]').html('')
+        })
+    })
+</script>
+<style>
+    .text-bold {
+        font-weight: bold
+    }
+    .material-switch > input[type="checkbox"] {
+        display: none;   
+    }
+    
+    .material-switch > label {
+        cursor: pointer;
+        height: 0px;
+        position: relative; 
+        width: 40px;  
+    }
+    
+    .material-switch > label::before {
+        background: rgb(0, 0, 0);
+        box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        content: '';
+        height: 16px;
+        margin-top: -8px;
+        position:absolute;
+        opacity: 0.3;
+        transition: all 0.4s ease-in-out;
+        width: 40px;
+    }
+    .material-switch > label::after {
+        background: rgb(83 230 157);
+        border-radius: 16px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+        content: '';
+        height: 24px;
+        left: -4px;
+        margin-top: -8px;
+        position: absolute;
+        top: -4px;
+        transition: all 0.3s ease-in-out;
+        width: 24px;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::before {
+        background: inherit;
+        opacity: 0.5;
+    }
+    .material-switch > input[type="checkbox"]:checked + label::after {
+        background: inherit;
+        left: 20px;
+    }
+</style>
