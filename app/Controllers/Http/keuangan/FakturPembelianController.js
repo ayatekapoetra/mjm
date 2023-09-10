@@ -251,7 +251,7 @@ async function GEN_FAKTUR_BELI_PDF(data, logo){
         body.push([
             {text: i+1, fontSize: 9},
             {text: obj.coa.coa_name, fontSize: 9},
-            {text: obj.barang.nama, fontSize: 9},
+            {text: obj.barang?.nama||'-', fontSize: 9},
             {text: obj.qty, fontSize: 9},
             {text: `Rp. ${(obj.harga_stn).toLocaleString('ID')},-`, alignment: 'right', fontSize: 9},
             {text: `${(obj.discount).toLocaleString('ID')},-`, alignment: 'right', fontSize: 9},

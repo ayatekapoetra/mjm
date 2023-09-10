@@ -1,0 +1,123 @@
+@layout('_layouts.main')
+@section('content')
+{{ script('ajax/index') }}
+{{ script('plugins/bower_components/pdfmake/build/pdfmake.min') }}
+{{ script('plugins/bower_components/pdfmake/build/vfs_fonts') }}
+<div class="container-fluid">
+    <div class="row bg-title">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+            <h4 class="page-title">Faktur Pembelian</h4> 
+        </div>
+        <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 text-right">
+            <input type="number" id="workdir" class="hidden" value="{{workdir.bisnis_id}}">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-md-5">            
+                            <div class="form-group">                
+                                <label for="">Akun</label>                
+                                <select class="form-control" name="coa_id">
+                                    <option value="">Pilih...</option>
+                                    @each(item in akun)
+                                        <optgroup label="{{item.tipe}}" style="color:white">
+                                            @each(coa in item.items)
+                                                <option value="{{coa.id}}">
+                                                    @if(coa.coa_grp_nm)
+                                                        {{coa.coa_grp_nm}} --> 
+                                                    @endif
+                                                    @if(coa.coa_subgrp_nm)
+                                                        {{coa.coa_subgrp_nm}} --> 
+                                                    @endif
+                                                    {{coa.coa_name}}
+                                                </option>
+                                            @endeach
+                                        </optgroup>
+                                    @endeach
+                                </select>
+                            </div>        
+                        </div>
+                        <div class="col-md-3">
+                            <label class="control-label">Mulai Tanggal</label>
+                            <div class="input-group">
+                                <div class="input-group-addon"><i class="ti-calendar"></i></div>
+                                <input type="date" class="form-control" name="beginDate"> 
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="control-label">Hingga Tanggal</label>
+                            <div class="input-group">
+                                <div class="input-group-addon"><i class="ti-calendar"></i></div>
+                                <input type="date" class="form-control" name="finishDate"> 
+                            </div>
+                        </div>
+                        <div class="col-md-1 p-t-30">
+                            <button class="btn btn-info waves-effect waves-light" id="bt-search">
+                                <i class="fa fa-search m-l-5"></i>
+                                <span>Search</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="content-list" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="init-form"></div>
+<script>
+    $(function(){
+        $('select[name="coa_id"]').select2()
+
+        $('button#bt-search').on('click', function(e){
+            e.preventDefault()
+            var coa_id = $('select[name="coa_id"]').val()
+            var beginDate = $('input[name="beginDate"]').val()
+            var finishDate = $('input[name="finishDate"]').val()
+
+            if (!coa_id) {
+                alert('Akun belum ditentukan...')
+                return
+            }
+            if (!beginDate) {
+                alert('Tanggal awal belum ditentukan...')
+                return
+            }
+            if (!finishDate) {
+                alert('Tanggal akhir belum ditentukan...')
+                return
+            }
+
+            console.log(coa_id);
+            console.log(beginDate);
+            console.log(finishDate);
+
+            $.ajax({
+                async: true,
+                url: '/report/buku-besar/list',
+                data: {
+                    coa_id,
+                    beginDate,
+                    finishDate
+                },
+                method: 'GET',
+                dataType: 'html',
+                contentType: false,
+                success: function(result){
+                    console.log(result);
+                    $('div#content-list').html(result).css('display', 'inline')
+                },
+                error: function(err){
+                    console.log(err)
+                },
+                complete: function() {
+                    console.log('...');
+                }
+            })
+        })
+    })
+</script>
+@endsection

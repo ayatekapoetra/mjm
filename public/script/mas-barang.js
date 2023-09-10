@@ -19,11 +19,10 @@ $(function(){
     $('body').on('click', '#apply-filter', function(){
         var limit = $('input[name="limit"]').val()
         var kode = $('input[name="kode"]').val() && '&kode=' + $('input[name="kode"]').val()
-        var serial = $('input[name="serial"]').val() && '&serial=' + $('input[name="serial"]').val()
         var num_part = $('input[name="num_part"]').val() && '&num_part=' + $('input[name="num_part"]').val()
         var nama = $('input[name="nama"]').val() && '&nama=' + $('input[name="nama').val()
         var satuan = $('select[name="satuan"]').val()  && '&satuan=' + $('select[name="satuan"]').val()
-        var url = `barang/list?keyword=true&limit=${limit}${kode}${serial}${num_part}${nama}${satuan}`
+        var url = `barang/list?keyword=true&limit=${limit}${kode}${num_part}${nama}${satuan}`
         $.ajax({
             async: true,
             url: url,

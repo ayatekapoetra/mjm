@@ -497,6 +497,16 @@ Route.group(() => {
 }).prefix('operational').namespace('operational')
 
 /*
+*   ROUTING REPORT
+*/
+Route.group(() => {
+    Route.get('/buku-besar', 'BukuBesarController.index').as('rep.buku-besar').middleware('R')
+    Route.get('/buku-besar/list', 'BukuBesarController.list').as('rep.buku-besar.list').middleware('R')
+    Route.get('/buku-besar/create', 'BukuBesarController.create').as('rep.buku-besar.create').middleware('C')
+
+}).prefix('report').namespace('report')
+
+/*
 *   ROUTING SETTING
 */
 Route.group(() => {

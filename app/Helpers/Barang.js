@@ -26,9 +26,6 @@ class masterBarang {
                     if(req.kode){
                         w.where('kode', 'like', `%${req.kode}%`)
                     }
-                    if(req.serial){
-                        w.where('serial', 'like', `%${req.serial}%`)
-                    }
                     if(req.num_part){
                         w.where('num_part', 'like', `%${req.num_part}%`)
                     }
