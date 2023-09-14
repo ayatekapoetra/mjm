@@ -1,0 +1,69 @@
+{{ script('ajax/opt-options') }}
+<div class="modal fade" id="filter-pemabayaran" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Filter Data</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="">Diterima Oleh</label>
+                        <div class="form-group">
+                            <select class="form-control" name="paidby_fil">
+                                <option value="">Pilih</option>
+                                <option value="other">Other</option>
+                                <option value="pelanggan">Pelanggan</option>
+                                <option value="pemasok">Pemasok</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Kode Pembayaran</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control inp-filter" name="reff_fil">
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="mulai_tanggal">Penerima</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control inp-filter" name="penerima_fil">
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="mulai_tanggal">Keterangan</label>
+                        <div class="form-group">
+                            <input type="text" class="form-control inp-filter" name="narasi_fil">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Mulai Tanggal</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control inp-filter" name="beginDate_fil">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mulai_tanggal">Hingga Tanggal</label>
+                        <div class="form-group">
+                            <input type="date" class="form-control inp-filter" name="endDate_fil">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="reset-filter" class="btn btn-default" data-dismiss="modal">Reset Filter</button>
+                <button type="button" id="apply-filter" class="btn btn-info" data-dismiss="modal">Apply Filter</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .select2-container {
+        height: auto;
+    }
+</style>
+<script>
+    $(function(){
+        $('select.select2x').select2()
+    })
+</script>

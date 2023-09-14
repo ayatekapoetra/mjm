@@ -12,6 +12,7 @@
                             <th width="70" class="bg-inverse b-all">Lampiran</th>
                             <th width="120"class="bg-inverse b-all">Tanggal</th>
                             <th width="*"class="bg-inverse b-all">Dibayarkan Dari</th>
+                            <th width="*"class="bg-inverse b-all">Keterangan</th>
                             <th width="100" class="bg-inverse b-all">Jumlah</th>
                         </tr>
                     </thead>
@@ -47,7 +48,10 @@
                                     <td class="v-middle">
                                         <span>{{item.coaKredit.coa_name}}</span><br>
                                         <small class="text-white">{{item.createdby.nama_lengkap}}</small>
-                                        
+                                    </td>
+                                    <td>
+                                        <span>{{item.narasi || '-'}}</span> <br>
+                                        <code>{{item.penerima}}</code>
                                     </td>
                                     <td class="v-middle text-right">
                                         <h3 class="m-b-0 formatRp" data-number="{{item.total}}">{{item.total}}</h3>

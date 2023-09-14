@@ -23,9 +23,9 @@
                                 <td>{{v.coa_id}}</td>
                                 <td>{{v.tanggal}}</td>
                                 <td>{{v.narasi}}</td>
-                                <td class="text-right">{{v.dk === 'k' ? v.nilai : '-'}}</td>
-                                <td class="text-right">{{v.dk === 'd' ? v.nilai : '-'}}</td>
-                                <td></td>
+                                <td class="text-right">{{v.dk === 'k' ? v.nilai_rp : '0'}}</td>
+                                <td class="text-right">{{v.dk === 'd' ? v.nilai_rp : '0'}}</td>
+                                <td class="text-right">{{v.saldo_rp}}</td>
                             </tr>
                         @endeach
                     </tbody>

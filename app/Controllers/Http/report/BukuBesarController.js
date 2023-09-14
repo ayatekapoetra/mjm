@@ -48,10 +48,15 @@ class BukuBesarController {
                 w.where('coa_id', req.coa_id)
                 w.where('trx_date', '>=', req.beginDate)
                 w.where('trx_date', '<=', req.finishDate)
-            }).fetch()
+            }).orderBy('trx_date', 'asc').fetch()
         ).toJSON()
 
-        data = data.map( v => ({...v, tanggal: moment(v.trx_date).format('dddd, DD MMMM YYYY')}))
+        data = data.map( v => ({
+            ...v, 
+            tanggal: moment(v.trx_date).format('dddd, DD MMMM YYYY'),
+            nilai_rp: (v.nilai)?.toLocaleString('ID'),
+            saldo_rp: (v.saldo).toLocaleString('ID')
+        }))
 
         console.log(data);
 

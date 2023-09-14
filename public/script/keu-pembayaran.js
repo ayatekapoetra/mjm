@@ -23,20 +23,21 @@ $(function(){
         setUrut()
     })
 
+    
     $('body').on('focus, click', 'input[type="number"]', function(){
         $(this).select()
     })
-
+    
     $('body').on('keyup', 'input[name="qty"]', function(){
         var elm = $(this).parents('tr')
         var qty = $(this).val()
         var harga = elm.find('input[name="harga_stn"]').val() || 0
         // var discount = elm.find('input[name="discount"]').val() || 0
         // var type = elm.find('input[name="type-discount"]').val()
-
+        
         hitungTotalHarga(elm, qty, harga)
     })
-
+    
     $('body').on('keyup', 'input[name="harga_stn"]', function(){
         var elm = $(this).parents('tr')
         var harga = $(this).val()
@@ -44,6 +45,63 @@ $(function(){
         // var discount = elm.find('input[name="discount"]').val() || 0
         // var type = elm.find('input[name="type-discount"]').val()
         hitungTotalHarga(elm, qty, harga)
+    })
+    
+    $('body').on('click', 'button#apply-filter', function(e){
+        e.preventDefault()
+        var paidby = body.find('select[name="paidby_fil"]').val()
+        var reff = body.find('input[name="reff_fil"]').val()
+        var penerima = body.find('input[name="penerima_fil"]').val()
+        var narasi = body.find('input[name="narasi_fil"]').val()
+        var beginDate = body.find('input[name="beginDate_fil"]').val()
+        var endDate = body.find('input[name="endDate_fil"]').val()
+
+        $.ajax({
+            async: true,
+            url: 'keu-pembayaran/list',
+            method: 'GET',
+            data: {
+                paidby,
+                reff,
+                penerima,
+                narasi,
+                beginDate,
+                endDate
+            },
+            dataType: 'html',
+            contentType: false,
+            beforeSend: function(){
+                body.find('div#content-list').html(
+                '<strong class="text-center" style="margin: 10px 25px;">Please wait,,,,</strong>'+
+                '<p style="margin: 10px 25px;">System sedang melakukan loading data......</p>'
+                )
+            },
+            success: function(result){
+                body.find('div#content-list').html(result)
+                body.find('div#content-form').html('')
+            },
+            error: function(err){
+                console.log(err)
+            },
+            complete: function() {
+                body.find('button#bt-create-form').css('display', 'inline')
+                body.find('div#div-filter-limit').css('display', 'inline')
+                body.find('button.bt-back').css('display', 'none')
+                body.find('div#content-list').css('display', 'block')
+                body.find('div#content-form').css('display', 'none')
+            }
+        })
+    })
+
+    $('body').on('click', 'button#reset-filter', function(e){
+        e.preventDefault()
+        body.find('select[name="paidby_fil"]').val('')
+        body.find('input[name="reff_fil"]').val('')
+        body.find('input[name="penerima_fil"]').val('')
+        body.find('input[name="narasi_fil"]').val('')
+        body.find('input[name="beginDate_fil"]').val('')
+        body.find('input[name="endDate_fil"]').val('')
+        initDefault()
     })
 
     $('body').on('change', 'select[name="barang_id"]', function(){
@@ -260,6 +318,7 @@ $(function(){
             },
             complete: function() {
                 body.find('button#bt-create-form').css('display', 'none')
+                body.find('div#div-filter-limit').css('display', 'none')
                 body.find('button.bt-back').css('display', 'inline')
                 body.find('div#content-list').css('display', 'none')
                 body.find('div#content-form').css('display', 'inline')
@@ -397,6 +456,7 @@ $(function(){
             },
             complete: function() {
                 body.find('button#bt-create-form').css('display', 'inline')
+                body.find('div#div-filter-limit').css('display', 'inline')
                 body.find('button.bt-back').css('display', 'none')
                 body.find('div#content-list').css('display', 'block')
                 body.find('div#content-form').css('display', 'none')
@@ -419,6 +479,7 @@ $(function(){
                 console.log(err)
             },
             complete: function() {
+                body.find('div#div-filter-limit').css('display', 'none')
                 body.find('button#bt-create-form').css('display', 'none')
                 body.find('button.bt-back').css('display', 'inline')
                 body.find('div#content-form').css('display', 'block')

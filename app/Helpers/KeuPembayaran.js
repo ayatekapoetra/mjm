@@ -25,6 +25,7 @@ const KeuPembayaranItem = use("App/Models/transaksi/KeuPembayaranItem")
 
 class pembayaran {
     async LIST (req) {
+        // console.log('LIST', req);
         const limit = req.limit || 25;
         const halaman = req.page === undefined ? 1 : parseInt(req.page);
         const data = (
@@ -41,6 +42,19 @@ class pembayaran {
                     }
                     if(req.narasi){
                         w.where('narasi', 'like', `%${req.narasi}%`)
+                    }
+                    if(req.reff){
+                        w.where('reff', 'like', `%${req.reff}%`)
+                    }
+                    if(req.penerima){
+                        w.where('penerima', 'like', `%${req.penerima}%`)
+                    }
+                    if(req.paidby){
+                        w.where('paidby', req.paidby)
+                    }
+                    if(req.beginDate && req.endDate){
+                        w.where('trx_date', '>=', req.beginDate)
+                        w.where('trx_date', '<=', req.endDate)
                     }
                 }
             ).orderBy('trx_date', 'desc').paginate(halaman, limit)
