@@ -7,7 +7,8 @@ class TrxJurnal extends Model {
     static boot () {
         super.boot()
         // this.addHook('beforeCreate', 'SaldoAwalHook.hitungSaldo')
-        this.addHook('beforeCreate', 'TrxJurnalHook.setUrut')
+        this.addHook('beforeCreate', 'TrxJurnalUrutHook.setUrut')
+        this.addHook('beforeUpdate', 'TrxJurnalSaldoHook.setSaldo')
     }
 
     bisnis () {

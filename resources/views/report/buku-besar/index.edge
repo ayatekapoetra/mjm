@@ -3,6 +3,7 @@
 {{ script('ajax/index') }}
 {{ script('plugins/bower_components/pdfmake/build/pdfmake.min') }}
 {{ script('plugins/bower_components/pdfmake/build/vfs_fonts') }}
+{{ script('plugins/bower_components/table-to-excel/dist/tableToExcel') }}
 <div class="container-fluid">
     <div class="row bg-title">
         <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
@@ -91,10 +92,6 @@
                 return
             }
 
-            console.log(coa_id);
-            console.log(beginDate);
-            console.log(finishDate);
-
             $.ajax({
                 async: true,
                 url: '/report/buku-besar/list',
@@ -106,6 +103,9 @@
                 method: 'GET',
                 dataType: 'html',
                 contentType: false,
+                beforeSend: function(){
+                    $('div#content-list').html('System collecting data, please wait...').css('display', 'inline')
+                },
                 success: function(result){
                     console.log(result);
                     $('div#content-list').html(result).css('display', 'inline')
@@ -115,6 +115,58 @@
                 },
                 complete: function() {
                     console.log('...');
+                }
+            })
+        })
+
+        $('body').on('click', 'button#bt-print-pdf', function(e){
+            e.preventDefault()
+            var coa_id = $('select[name="coa_id"]').val()
+            var beginDate = $('input[name="beginDate"]').val()
+            var finishDate = $('input[name="finishDate"]').val()
+            $.ajax({
+                async: true,
+                url: '/report/buku-besar/print-pdf',
+                method: 'GET',
+                data: {
+                    coa_id,
+                    beginDate,
+                    finishDate
+                },
+                dataType: 'json',
+                contentType: false,
+                success: function(result){
+                    console.log(result);
+                    pdfMake.createPdf(result).print();
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        })
+
+        $('body').on('click', 'button#bt-print-xls', function(e){
+            e.preventDefault()
+            var coa_id = $('select[name="coa_id"]').val()
+            var beginDate = $('input[name="beginDate"]').val()
+            var finishDate = $('input[name="finishDate"]').val()
+            $.ajax({
+                async: true,
+                url: '/report/buku-besar/print-xls',
+                method: 'GET',
+                data: {
+                    coa_id,
+                    beginDate,
+                    finishDate
+                },
+                dataType: 'html',
+                contentType: false,
+                success: function(result){
+                    console.log(result);
+                    window.location.href = 'http://' + result
+                },
+                error: function(err){
+                    console.log(err)
                 }
             })
         })

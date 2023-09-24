@@ -1,16 +1,30 @@
+
 <div class="panel-wrapper collapse in">
+    <div class="panel-heading"> 
+        <div class="row">
+            <button class="btn btn-inverse waves-effect waves-light" type="button" id="bt-print-pdf">
+                <span class="btn-label"><i class="fa fa-print"></i></span>
+                Print PDF
+            </button>
+            <button class="btn btn-inverse waves-effect waves-light" type="button" id="bt-print-xls">
+                <span class="btn-label"><i class="fa fa-print"></i></span>
+                Print Excel
+            </button>
+        </div>
+    </div>
     <div class="panel-body">
         <div class="row">
             <div class="table-responsive">
-                <table class="table table-hover manage-u-table">
+                <table id="simpleTable1" class="table table-hover manage-u-table">
                     <thead>
                         <tr>
                             <th width="70" class="text-center bg-inverse b-all">No</th>
                             <th width="70" class="bg-inverse b-all">Kode</th>
                             <th width="150"class="bg-inverse b-all">Tanggal</th>
+                            <th width="150"class="bg-inverse b-all">reff</th>
                             <th width="*"class="bg-inverse b-all">Keterangan</th>
-                            <th width="200" class="text-right bg-inverse b-all">Kredit</th>
                             <th width="200" class="text-right bg-inverse b-all">Debit</th>
+                            <th width="200" class="text-right bg-inverse b-all">Kredit</th>
                             <th width="250" class="text-right bg-inverse b-all">Saldo</th>
                         </tr>
                     </thead>
@@ -22,10 +36,11 @@
                                 </td>
                                 <td>{{v.coa_id}}</td>
                                 <td>{{v.tanggal}}</td>
+                                <td>{{v.reff}}</td>
                                 <td>{{v.narasi}}</td>
-                                <td class="text-right">{{v.dk === 'k' ? v.nilai_rp : '0'}}</td>
                                 <td class="text-right">{{v.dk === 'd' ? v.nilai_rp : '0'}}</td>
-                                <td class="text-right">{{v.saldo_rp}}</td>
+                                <td class="text-right">{{v.dk === 'k' ? v.nilai_rp : '0'}}</td>
+                                <td class="text-right">{{v.saldo_rp}},-</td>
                             </tr>
                         @endeach
                     </tbody>
@@ -34,6 +49,13 @@
         </div>
     </div>
     <div class="panel-footer"> 
-        xxx
+        <button class="btn btn-inverse waves-effect waves-light" type="button" id="bt-print-pdf">
+            <span class="btn-label"><i class="fa fa-print"></i></span>
+            Print PDF
+        </button>
+        <button class="btn btn-inverse waves-effect waves-light" type="button" id="bt-print-xls">
+            <span class="btn-label"><i class="fa fa-print"></i></span>
+            Print Excel
+        </button>
     </div>
 </div>
