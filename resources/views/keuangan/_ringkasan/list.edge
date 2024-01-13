@@ -197,11 +197,15 @@
             <div class="panel-body" style="padding: 10px 5px;">
                 <div class="row">
                     <div class="col-sm-12">
-                        <div class="panel" id="PnL">
-                            <div class="panel-heading bg-inverse" style="color: #2f323e">
-                                LABA 
-                                <span class="pull-right">
-                                    <i class="fa fa-spin fa-spinner fa-2x"></i>
+                        <div class="panel">
+                            <div class="panel-heading bg-inverse text-white">
+                                @if(totLabarugi >= 0)
+                                  LABA 
+                                @else
+                                  RUGI
+                                @endif
+                                <span class="pull-right text-white">
+                                    {{totLabarugi_rp}}
                                 </span>
                             </div>
                         </div>

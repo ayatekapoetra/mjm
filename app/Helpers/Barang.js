@@ -113,8 +113,8 @@ class masterBarang {
             min_stok: req.min_stok,
             user_id: user.id,
             photo: photoBarang || null,
-            coa_in: req.coa_in || null,
-            coa_out: req.coa_out || null
+            coa_in: req.coa_in || 11001,
+            coa_out: req.coa_out || 40001
         })
 
         try {

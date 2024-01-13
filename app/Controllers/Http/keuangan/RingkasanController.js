@@ -35,10 +35,10 @@ class RingkasanController {
         }
         req.rangeAkhir = req.rangeAkhir  || moment().format("YYYY-MM-DD")
 
-        console.log("REQ-RINGKASAN------------", req);
         
         
         let data = await initFunc.RINGKASAN(user)
+        console.log("REQ-RINGKASAN------------", data);
 
         for (let nrc of data.neraca) {
             var firstCode = parseInt(nrc.kode)
@@ -77,12 +77,12 @@ class RingkasanController {
             }).getSum('nilai') || 0
 
             if(nrc.dk === 'd'){
+                nrc.total_rp = sumDebit - sumKredit
                 nrc.total = (sumDebit - sumKredit).toLocaleString('id')
             }else{
+                nrc.total_rp = sumKredit - sumDebit
                 nrc.total = (sumKredit - sumDebit).toLocaleString('id')
             }
-
-            // console.log("DATA-RINGKASAN------------", nrc.name, nrc.total);
 
             // LOOPING AKUN GROUP
             if(nrc.group.length > 0){
@@ -116,8 +116,10 @@ class RingkasanController {
                     }).getSum('nilai') || 0
         
                     if(nrc.dk === 'd'){
+                        grp.total_rp = sumDebitGrp - sumKreditGrp
                         grp.total = (sumDebitGrp - sumKreditGrp).toLocaleString('id')
                     }else{
+                        grp.total_rp = sumKreditGrp - sumDebitGrp
                         grp.total = (sumKreditGrp - sumDebitGrp).toLocaleString('id')
                     }
 
@@ -154,8 +156,10 @@ class RingkasanController {
                             }).getSum('nilai') || 0
                 
                             if(nrc.dk === 'd'){
+                                akun.total_rp = sumDebitGrpAkun - sumKreditGrpAkun
                                 akun.total = (sumDebitGrpAkun - sumKreditGrpAkun).toLocaleString('id')
                             }else{
+                                akun.total_rp = sumKreditGrpAkun - sumDebitGrpAkun
                                 akun.total = (sumKreditGrpAkun - sumDebitGrpAkun).toLocaleString('id')
                             }
                             
@@ -193,8 +197,10 @@ class RingkasanController {
                         }).getSum('nilai') || 0
             
                         if(nrc.dk === 'd'){
+                            sub.total_rp = sumDebitSubGrp - sumKreditSubGrp
                             sub.total = (sumDebitSubGrp - sumKreditSubGrp).toLocaleString('id')
                         }else{
+                            sub.total_rp = sumKreditSubGrp - sumDebitSubGrp
                             sub.total = (sumKreditSubGrp - sumDebitSubGrp).toLocaleString('id')
                         }
 
@@ -231,8 +237,10 @@ class RingkasanController {
                                 }).getSum('nilai') || 0
                     
                                 if(nrc.dk === 'd'){
+                                    akun.total_rp = sumDebitSubGrpAkun - sumKreditSubGrpAkun
                                     akun.total = (sumDebitSubGrpAkun - sumKreditSubGrpAkun).toLocaleString('id')
                                 }else{
+                                    akun.total_rp = sumKreditSubGrpAkun - sumDebitSubGrpAkun
                                     akun.total = (sumKreditSubGrpAkun - sumDebitSubGrpAkun).toLocaleString('id')
                                 }
                             }
@@ -320,8 +328,10 @@ class RingkasanController {
             }).getSum('nilai')
 
             if(lbr.dk === 'd'){
+                lbr.total_rp = sumDebit - sumKredit
                 lbr.total = (sumDebit - sumKredit).toLocaleString('id')
             }else{
+                lbr.total_rp = sumKredit - sumDebit
                 lbr.total = (sumKredit - sumDebit).toLocaleString('id')
             }
 
@@ -359,8 +369,10 @@ class RingkasanController {
                     }).getSum('nilai')
         
                     if(lbr.dk === 'd'){
+                        grp.total_rp = sumDebitGrp - sumKreditGrp
                         grp.total = (sumDebitGrp - sumKreditGrp).toLocaleString('id')
                     }else{
+                        grp.total_rp = sumKreditGrp - sumDebitGrp
                         grp.total = (sumKreditGrp - sumDebitGrp).toLocaleString('id')
                     }
     
@@ -395,8 +407,10 @@ class RingkasanController {
                         }).getSum('nilai')
             
                         if(lbr.dk === 'd'){
+                            sub.total_rp = sumDebitSubGrp - sumKreditSubGrp
                             sub.total = (sumDebitSubGrp - sumKreditSubGrp).toLocaleString('id')
                         }else{
+                            sub.total_rp = sumKreditSubGrp - sumDebitSubGrp
                             sub.total = (sumKreditSubGrp - sumDebitSubGrp).toLocaleString('id')
                         }
 
@@ -434,8 +448,10 @@ class RingkasanController {
                             }).getSum('nilai') || 0
                 
                             if(akun.dk === 'd'){
+                                akun.total_rp = sumDebitGrpAkun - sumKreditGrpAkun
                                 akun.total = (sumDebitGrpAkun - sumKreditGrpAkun).toLocaleString('id')
                             }else{
+                                akun.total_rp = sumKreditGrpAkun - sumDebitGrpAkun
                                 akun.total = (sumKreditGrpAkun - sumDebitGrpAkun).toLocaleString('id')
                             }
                         }
@@ -473,15 +489,29 @@ class RingkasanController {
                     }).getSum('nilai') || 0
         
                     if(coa.dk === 'd'){
+                        coa.total_rp = sumDebitAkun - sumKreditAkun
                         coa.total = (sumDebitAkun - sumKreditAkun).toLocaleString('id')
                     }else{
+                        coa.total_rp = sumKreditAkun - sumDebitAkun
                         coa.total = (sumKreditAkun - sumDebitAkun).toLocaleString('id')
                     }
                 }
             }
         }
 
-        return view.render('keuangan._ringkasan.list', data)
+        // console.log("DATA -*", data);
+        var totLabarugi = parseFloat(data.labarugi[0].total_rp) - parseFloat(data.labarugi[1].total_rp)
+        // console.log(parseFloat(totLabarugi.toFixed(2)));
+        // console.log({
+        //     ...data,
+        //     totLabarugi: parseFloat(totLabarugi.toFixed(2)),
+        //     totLabarugi_rp: parseFloat(totLabarugi.toFixed(2)).toLocaleString('id'),
+        // });
+        return view.render('keuangan._ringkasan.list', {
+            ...data,
+            totLabarugi: parseFloat(totLabarugi.toFixed(2)),
+            totLabarugi_rp: Math.abs(parseFloat(totLabarugi.toFixed(2))).toLocaleString('id'),
+        })
     }
 
     async sumValues ( { request } ) {

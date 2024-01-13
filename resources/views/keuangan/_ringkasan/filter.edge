@@ -50,7 +50,15 @@
     $(function(){
         $('select.select2x').select2()
 
-        $('input[name="rangeAwal"]').val(moment().startOf('year').format('YYYY-MM-DD'))
-        $('input[name="rangeAkhir"]').val(moment().format('YYYY-MM-DD'))
+        var local = localStorage.getItem("@filter")
+        local = JSON.parse(local)
+
+        console.log(local);
+
+        $('input[name="rangeAwal"]').val(local.rangeAwal)
+        $('input[name="rangeAkhir"]').val(local.rangeAkhir)
+
+        // $('input[name="rangeAwal"]').val(moment().startOf('year').format('YYYY-MM-DD'))
+        // $('input[name="rangeAkhir"]').val(moment().format('YYYY-MM-DD'))
     })
 </script>

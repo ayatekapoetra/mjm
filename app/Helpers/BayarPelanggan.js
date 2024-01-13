@@ -95,6 +95,7 @@ class bayarPelanggan {
         console.log("<LIST-ORDER>", data);
         return data
     }
+
     async PENDING_PAYMENT (params){
         const data = (await OpsPelangganOrder.query().where( w => {
             w.where('pelanggan_id', params.id)
@@ -586,6 +587,8 @@ class bayarPelanggan {
                     .where('order_id', params.id)
                     .fetch()
                 )?.toJSON()
+        
+                console.log(orderItemTrx);
                 
         /** LOOPING ITEMS **/
         for (const brg of orderItemTrx) {
@@ -603,64 +606,123 @@ class bayarPelanggan {
                 }
             }
 
-            const arrHppCoa = (await DefCoa.query().where({group: 'invoicing-hpp'}).fetch()).toJSON()
-            
-            for (const akun of arrHppCoa) {
-                console.log('HPP :::: ', barang.nama);
-                const hargaBeli = await HargaBeli.query().where('barang_id', brg.barang_id).getAvg('harga_beli') || 0
+            const hargaBeli = await HargaBeli.query().where('barang_id', brg.barang_id).getAvg('harga_beli') || 0
     
-                const trxJurnalHppDebit = new TrxJurnal()
-                trxJurnalHppDebit.fill({
-                    cabang_id: ws.cabang_id,
-                    trx_jual: params.id,
-                    coa_id: akun.coa_id,
-                    barang_id: barang.id,
-                    reff: orderTrx.kdpesanan,
-                    narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description + ' ' + barang.nama,
-                    trx_date: req.date,
-                    nilai: hargaBeli * brg.qty,
-                    dk: akun.tipe,
-                    createdby: user.id
-                })
-                try {
-                    await trxJurnalHppDebit.save(trx)
-                    console.log('await trxJurnalHppDebit.save(trx)');
-                } catch (error) {
-                    console.log(error);
-                    await trx.rollback()
-                    return {
-                        success: false,
-                        message: 'Failed jurnal Hpp & Persediaan Barang \n'+ JSON.stringify(error)
-                    }
-                }
-
-                // INSERT LABA DITAHAN
-                const trxJurnalHppDebitLabaDitahan = new TrxJurnal()
-                trxJurnalHppDebitLabaDitahan.fill({
-                    cabang_id: ws.cabang_id,
-                    trx_jual: params.id,
-                    coa_id: akun.coa_id,
-                    barang_id: barang.id,
-                    reff: orderTrx.kdpesanan,
-                    narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description + ' ' + barang.nama,
-                    trx_date: req.date,
-                    nilai: hargaBeli * brg.qty,
-                    dk: akun.tipe,
-                    createdby: user.id
-                })
-                try {
-                    await trxJurnalHppDebitLabaDitahan.save(trx)
-                    console.log('await trxJurnalHppDebitLabaDitahan.save(trx)');
-                } catch (error) {
-                    console.log(error);
-                    await trx.rollback()
-                    return {
-                        success: false,
-                        message: 'Failed jurnal Hpp & Persediaan Barang \n'+ JSON.stringify(error)
-                    }
+            /* START INSERT JURNAL HPP BARANG PADA BIAYA */
+            const ztrxJurnalHppDebit = new TrxJurnal()
+            ztrxJurnalHppDebit.fill({
+                cabang_id: ws.cabang_id,
+                trx_jual: params.id,
+                coa_id: 51001,
+                barang_id: barang.id,
+                reff: orderTrx.kdpesanan,
+                narasi: '[ '+orderTrx.kdpesanan+' ]  Biaya HPP ' + barang.nama,
+                trx_date: req.date,
+                nilai: hargaBeli * brg.qty,
+                dk: 'd',
+                createdby: user.id
+            })
+            
+            try {
+                await ztrxJurnalHppDebit.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed jurnal Hpp & Persediaan Barang \n'+ JSON.stringify(error)
                 }
             }
 
+            /* START INSERT JURNAL KREDIT BARANG PADA PERSEDIAAN UTK MENGURANGI TOTAL RUPIAH PERSEDIAAN */
+            const trxKreditPersediaan = new TrxJurnal()
+                trxKreditPersediaan.fill({
+                    cabang_id: ws.cabang_id,
+                    trx_jual: params.id,
+                    coa_id: 11001,
+                    barang_id: barang.id,
+                    reff: orderTrx.kdpesanan,
+                    narasi: '[ '+orderTrx.kdpesanan+' ] Persedian Barang ' + barang.nama,
+                    trx_date: req.date,
+                    nilai: hargaBeli * brg.qty,
+                    dk: 'k',
+                    createdby: user.id
+                })
+                try {
+                    await trxKreditPersediaan.save(trx)
+                } catch (error) {
+                    console.log(error);
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'Failed jurnal Hpp & Persediaan Barang \n'+ JSON.stringify(error)
+                    }
+                }
+            
+            /* START INSERT JURNAL HPP BARANG */
+            // const arrHppCoa = (await DefCoa.query().where({group: 'invoicing-hpp'}).fetch()).toJSON()
+            // for (const [i, akun] of (arrHppCoa).entries()) {
+            //     console.log('HPP :::: ', barang.nama);
+            //     console.log('AKUN :::: ', akun.coa_id);
+            //     const hargaBeli = await HargaBeli.query().where('barang_id', brg.barang_id).getAvg('harga_beli') || 0
+    
+            //     const ztrxJurnalHppDebit = new TrxJurnal()
+            //     ztrxJurnalHppDebit.fill({
+            //         cabang_id: ws.cabang_id,
+            //         trx_jual: params.id,
+            //         coa_id: akun.coa_id,
+            //         barang_id: barang.id,
+            //         reff: orderTrx.kdpesanan,
+            //         narasi: i + ' [ '+orderTrx.kdpesanan+' ] ' + akun.description + ' ' + barang.nama,
+            //         trx_date: req.date,
+            //         nilai: hargaBeli * brg.qty,
+            //         dk: akun.tipe,
+            //         createdby: user.id
+            //     })
+
+            //     try {
+            //         await ztrxJurnalHppDebit.save(trx)
+            //         // console.log('await trxJurnalHppDebit.save(trx)');
+            //     } catch (error) {
+            //         console.log(error);
+            //         await trx.rollback()
+            //         return {
+            //             success: false,
+            //             message: 'Failed jurnal Hpp & Persediaan Barang \n'+ JSON.stringify(error)
+            //         }
+            //     }
+
+
+            //     // INSERT LABA DITAHAN
+            //     const xtrxJurnalHppDebitLabaDitahan = new TrxJurnal()
+            //     xtrxJurnalHppDebitLabaDitahan.fill({
+            //         cabang_id: ws.cabang_id,
+            //         trx_jual: params.id,
+            //         coa_id: akun.coa_id,
+            //         barang_id: barang.id,
+            //         reff: orderTrx.kdpesanan,
+            //         narasi: '[ '+orderTrx.kdpesanan+' ] ' + akun.description + ' ' + barang.nama,
+            //         trx_date: req.date,
+            //         nilai: hargaBeli * brg.qty,
+            //         dk: akun.tipe,
+            //         createdby: user.id
+            //     })
+            //     try {
+            //         await xtrxJurnalHppDebitLabaDitahan.save(trx)
+            //         // console.log('await trxJurnalHppDebitLabaDitahan.save(trx)');
+            //     } catch (error) {
+            //         console.log(error);
+            //         await trx.rollback()
+            //         return {
+            //             success: false,
+            //             message: 'Failed jurnal Hpp & Persediaan Barang \n'+ JSON.stringify(error)
+            //         }
+            //     }
+            // }
+
+            // console.log("<brg>", brg);
+            // await trx.rollback()
+            // return
             const barangLokasi = new BarangLokasi()
             barangLokasi.fill({
                 trx_inv: brg.id,
@@ -687,17 +749,17 @@ class bayarPelanggan {
         /* END INSERT JURNAL HPP BARANG */
 
         /* SEND NOTIFICATION */
-        let arrUserTipe = ['administrator', 'developer', 'keuangan']
-        await initFunc.SEND_NOTIFICATION(
-            user, 
-            arrUserTipe, 
-            {
-                header: "Invoicing",
-                title: orderTrx.kdpesanan,
-                link: '/operational/entry-pembayaran',
-                content: user.nama_lengkap + " telah membuat invoice dengan kode "+orderTrx.kdpesanan,
-            }
-        )
+        // let arrUserTipe = ['administrator', 'developer', 'keuangan']
+        // await initFunc.SEND_NOTIFICATION(
+        //     user, 
+        //     arrUserTipe, 
+        //     {
+        //         header: "Invoicing",
+        //         title: orderTrx.kdpesanan,
+        //         link: '/operational/entry-pembayaran',
+        //         content: user.nama_lengkap + " telah membuat invoice dengan kode "+orderTrx.kdpesanan,
+        //     }
+        // )
 
         await trx.commit()
         return {
