@@ -165,32 +165,34 @@ class pembayaran {
 
         /** INSERT TRX JURNAL KREDIT **/
         const coaKredit = await AccCoa.query().where('id', req.coa_kredit).last()
-        console.log("<COA-KREDIT-DITEMUKAN>", coaKredit.coa_name);
-        try {
-            const jurnalKredit = new TrxJurnal()
-            jurnalKredit.fill({
-                createdby: user.id,
-                cabang_id: req.cabang_id,
-                bank_id: req.bank_id || null,
-                kas_id: req.kas_id || null,
-                keubayar_id: trxPembayaran.id,
-                coa_id: req.coa_kredit,
-                reff: req.reff,
-                narasi: `[ ${req.reff} ] ${req.narasi || coaKredit.coa_name}`,
-                trx_date: req.trx_date,
-                delay_date: req.due_date,
-                nilai: req.subtotal,
-                is_delay: req.is_delay,
-                dk: 'k'
-            })
-            console.log("SAVE-JURNAL-KREDIT", jurnalKredit?.toJSON());
-            await jurnalKredit.save(trx)
-        } catch (error) {
-            console.log(error);
-            await trx.rollback()
-            return {
-                success: false,
-                message: 'Failed save trx jurnal kredit '+ JSON.stringify(error)
+        if(coaKredit){
+            console.log("<COA-KREDIT-DITEMUKAN>", coaKredit.coa_name);
+            try {
+                const jurnalKredit = new TrxJurnal()
+                jurnalKredit.fill({
+                    createdby: user.id,
+                    cabang_id: req.cabang_id,
+                    bank_id: req.bank_id || null,
+                    kas_id: req.kas_id || null,
+                    keubayar_id: trxPembayaran.id,
+                    coa_id: req.coa_kredit,
+                    reff: req.reff,
+                    narasi: `[ ${req.reff} ] ${req.narasi || coaKredit.coa_name}`,
+                    trx_date: req.trx_date,
+                    delay_date: req.due_date,
+                    nilai: req.subtotal,
+                    is_delay: req.is_delay,
+                    dk: 'k'
+                })
+                console.log("SAVE-JURNAL-KREDIT", jurnalKredit?.toJSON());
+                await jurnalKredit.save(trx)
+            } catch (error) {
+                console.log(error);
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'Failed save trx jurnal kredit '+ JSON.stringify(error)
+                }
             }
         }
 
@@ -257,25 +259,24 @@ class pembayaran {
         for (const obj of req.items) {
             /* INSERT ITEMS PEMBAYARAN */
             const trxPembayaranItem = new KeuPembayaranItem()
+            const data = {
+                keubayar_id: trxPembayaran.id,
+                cabang_id: req.cabang_id,
+                trx_beli: obj.trx_beli || null,
+                trx_jual: obj.trx_jual || null,
+                barang_id: obj.barang_id || null,
+                gudang_id: obj.gudang_id || null,
+                pemasok_id: obj.pemasok_id || null,
+                pelanggan_id: obj.pelanggan_id || null,
+                coa_debit: obj.coa_debit,
+                qty: obj.qty,
+                harga_stn: obj.harga_stn,
+                harga_total: parseFloat(obj.qty) * parseFloat(obj.harga_stn)
+            }
+
             try {
-                const data = {
-                    keubayar_id: trxPembayaran.id,
-                    cabang_id: req.cabang_id,
-                    trx_beli: obj.trx_beli || null,
-                    trx_jual: obj.trx_jual || null,
-                    barang_id: obj.barang_id || null,
-                    gudang_id: obj.gudang_id || null,
-                    pemasok_id: obj.pemasok_id || null,
-                    pelanggan_id: obj.pelanggan_id || null,
-                    coa_debit: obj.coa_debit,
-                    qty: obj.qty,
-                    harga_stn: obj.harga_stn,
-                    harga_total: parseFloat(obj.qty) * parseFloat(obj.harga_stn)
-                }
-
                 trxPembayaranItem.fill(data)
-
-                console.log("SAVE-PEMBAYARAN-ITEMS", trxPembayaranItem?.toJSON());
+                // console.log("SAVE-PEMBAYARAN-ITEMS", trxPembayaranItem?.toJSON());
                 await trxPembayaranItem.save(trx)
             } catch (error) {
                 console.log(error);
@@ -290,15 +291,23 @@ class pembayaran {
             var nilaiBayar = parseFloat(obj.qty) * parseFloat(obj.harga_stn)
             const coaDebit = await AccCoa.query().where('id', obj.coa_debit).last()
             console.log("<COA-DEBIT-DITEMUKAN>", coaDebit.coa_name);
+
+            if(!coaDebit){
+                await trx.rollback()
+                return {
+                    success: false,
+                    message: 'coaDebit tidak ditemukan... '
+                }
+            }
             
             if(obj.trx_jual){
-                const reffJual = await OrderPelanggan.query().where('id', req.trx_jual).last()
+                const reffJual = await OrderPelanggan.query().where('id', obj.trx_jual).last()
                 console.log("SAVE-PEMBAYARAN-ITEMS-REFF-JUAL", reffJual?.toJSON());
                 var reff_kode = reffJual.kdpesanan
             }
 
             if(obj.trx_beli){
-                const reffBeli = await TrxFakturBeli.query().where('id', req.trx_beli).last()
+                const reffBeli = await TrxFakturBeli.query().where('id', obj.trx_beli).last()
                 console.log("SAVE-PEMBAYARAN-ITEMS-REFF-BELI", reffBeli?.toJSON());
                 var reff_kode = reffBeli.kode
                 /**
@@ -307,25 +316,25 @@ class pembayaran {
             }
             
             const jurnalDebit = new TrxJurnal()
+            jurnalDebit.fill({
+                createdby: user.id,
+                cabang_id: req.cabang_id,
+                bank_id: req.bank_id || null,
+                kas_id: req.kas_id || null,
+                trx_jual: obj.trx_jual || null,
+                fakturbeli_id: obj.trx_beli || null,
+                keubayar_id: trxPembayaran.id,
+                keubayaritem_id: trxPembayaranItem.id,
+                coa_id: obj.coa_debit,
+                reff: req.reff,
+                narasi: `[ ${reff_kode || req.reff} ] ${coaDebit.coa_name}`,
+                trx_date: req.trx_date,
+                delay_date: req.due_date,
+                is_delay: req.is_delay,
+                nilai: nilaiBayar,
+                dk: 'd'
+            })
             try {
-                jurnalDebit.fill({
-                    createdby: user.id,
-                    cabang_id: req.cabang_id,
-                    bank_id: req.bank_id || null,
-                    kas_id: req.kas_id || null,
-                    trx_jual: obj.trx_jual || null,
-                    fakturbeli_id: obj.trx_beli || null,
-                    keubayar_id: trxPembayaran.id,
-                    keubayaritem_id: trxPembayaranItem.id,
-                    coa_id: obj.coa_debit,
-                    reff: req.reff,
-                    narasi: `[ ${reff_kode || req.reff} ] ${coaDebit.coa_name}`,
-                    trx_date: req.trx_date,
-                    delay_date: req.due_date,
-                    is_delay: req.is_delay,
-                    nilai: nilaiBayar,
-                    dk: 'd'
-                })
                 await jurnalDebit.save(trx)
                 console.log("SAVE-PEMBAYARAN-ITEMS-DEBIT", jurnalDebit?.toJSON());
             } catch (error) {
@@ -339,25 +348,25 @@ class pembayaran {
 
             if(parseInt(obj.coa_debit) > 40000){
                 const jurnalDebitEquiptas = new TrxJurnal()
+                jurnalDebitEquiptas.fill({
+                    createdby: user.id,
+                    cabang_id: req.cabang_id,
+                    bank_id: req.bank_id || null,
+                    kas_id: req.kas_id || null,
+                    trx_jual: obj.trx_jual || null,
+                    fakturbeli_id: obj.trx_beli || null,
+                    keubayar_id: trxPembayaran.id,
+                    keubayaritem_id: trxPembayaranItem.id,
+                    coa_id: 30003,
+                    reff: req.reff,
+                    narasi: `[ ${reff_kode || req.reff} ] ${coaDebit.coa_name}`,
+                    trx_date: req.trx_date,
+                    delay_date: req.due_date,
+                    is_delay: req.is_delay,
+                    nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
+                    dk: 'd'
+                })
                 try {
-                    jurnalDebitEquiptas.fill({
-                        createdby: user.id,
-                        cabang_id: req.cabang_id,
-                        bank_id: req.bank_id || null,
-                        kas_id: req.kas_id || null,
-                        trx_jual: obj.trx_jual || null,
-                        fakturbeli_id: obj.trx_beli || null,
-                        keubayar_id: trxPembayaran.id,
-                        keubayaritem_id: trxPembayaranItem.id,
-                        coa_id: 30003,
-                        reff: req.reff,
-                        narasi: `[ ${reff_kode || req.reff} ] ${coaDebit.coa_name}`,
-                        trx_date: req.trx_date,
-                        delay_date: req.due_date,
-                        is_delay: req.is_delay,
-                        nilai: parseFloat(obj.qty) * parseFloat(obj.harga_stn),
-                        dk: 'd'
-                    })
                     await jurnalDebitEquiptas.save(trx)
                     console.log("SAVE-PEMBAYARAN-ITEMS-EQUITAS", jurnalDebitEquiptas?.toJSON());
                 } catch (error) {
@@ -375,7 +384,7 @@ class pembayaran {
             if(obj.trx_beli){
                 /** UPDATE SISA PEMBAYARAN FAKTUR PEMBELIAN **/
                 let trxFakturBeli = await TrxFakturBeli.query().where('id', obj.trx_beli).last()
-                let totalPembelian = parseFloat(trxFakturBeli.sisa) - (parseFloat(obj.qty) * parseFloat(obj.harga_stn))
+                let totalPembelian = (parseFloat(trxFakturBeli.sisa) - parseFloat(obj.qty)) * parseFloat(obj.harga_stn)
                 try {
                     trxFakturBeli.merge({
                         sisa: totalPembelian,
@@ -426,6 +435,14 @@ class pembayaran {
                 }
 
                 const orderData = await OrderPelanggan.query().where('id', obj.trx_jual).last()
+                if(!orderData){
+                    await trx.rollback()
+                    return {
+                        success: false,
+                        message: 'orderData tidak ditemukan... '
+                    }
+                }
+
                 orderData.merge({
                     sisa_trx: order.sisa_trx - (parseFloat(obj.qty) * parseFloat(obj.harga_stn)),
                     paid_trx: orderData.paid_trx + (parseFloat(obj.qty) * parseFloat(obj.harga_stn)),
@@ -483,7 +500,7 @@ class pembayaran {
         }
 
         /** UPDATE TRX JURNAL **/
-        await DB.table('trx_jurnals').where('keubayar_id', params.id).update('aktif', 'N')
+        await DB.table('trx_jurnals').where('keubayar_id', params.id).update({aktif: 'N'})
 
         /** INSERT TRX JURNAL KREDIT **/
         const coaKredit = await AccCoa.query().where('id', req.coa_kredit).last()
@@ -709,11 +726,11 @@ class pembayaran {
             /* INSERT ITEMS JURNAL PEMBAYARAN */
             const coaDebit = await AccCoa.query().where('id', obj.coa_debit).last()
             if(obj.trx_jual){
-                const reffJual = await OrderPelanggan.query().where('id', req.trx_jual).last()
+                const reffJual = await OrderPelanggan.query().where('id', obj.trx_jual).last()
                 var reff_kode = reffJual.kdpesanan
             }
             if(obj.trx_beli){
-                const reffBeli = await TrxFakturBeli.query().where('id', req.trx_beli).last()
+                const reffBeli = await TrxFakturBeli.query().where('id', obj.trx_beli).last()
                 var reff_kode = reffBeli.kode
             }
 
